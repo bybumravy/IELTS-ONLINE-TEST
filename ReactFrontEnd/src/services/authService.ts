@@ -1,5 +1,5 @@
 export const login = async (email: string, password: string) => {
-    const res = await fetch("/api/login", {
+    const res = await fetch("http://localhost:8080/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -10,14 +10,14 @@ export const login = async (email: string, password: string) => {
 }
 
 export const logout = async () => {
-    await fetch("/api/logout", {
+    await fetch("http://localhost:8080/api/logout", {
         method: "POST",
         credentials: "include",
     })
 }
 
 export const getMe = async () => {
-    const res = await fetch("/api/me", { credentials: "include" })
+    const res = await fetch("http://localhost:8080/api/user-info", { credentials: "include" })
     if (!res.ok) throw new Error("Failed to fetch user")
     return res.json()
 }

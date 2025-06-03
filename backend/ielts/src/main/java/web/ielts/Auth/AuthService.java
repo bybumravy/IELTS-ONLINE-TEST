@@ -1,55 +1,82 @@
 package web.ielts.Auth;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.http.HttpHeaders;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import web.ielts.User.User;
 
-import java.util.HashMap;
-import java.util.Map;
 @Component
 public class AuthService {
+
     @Autowired
-    private AuthRepository.LoginRepository loginRepository;
+    private AuthRepository loginRepository;  // inject interface LoginRepository
 
     public ResponseEntity<Map<String, Object>> login(String email, String password) {
         Map<String, Object> response = new HashMap<>();
 
-        // Tìm user theo email hoặc account
-        System.err.println(email);
-        System.err.println(password);
         User user = loginRepository.findByEmail(email);
-
+        System.err.println(user.toString());
         if (user != null && user.getPassword().equals(password)) {
-            // Tạo JWT token
-
             String token = JwtToken.generateToken(user.getEmail(), user.getRole());
 
-            // Tạo cookie lưu token
             ResponseCookie cookie = ResponseCookie.from("jwt_token", token)
-                    .httpOnly(true)       // cookie chỉ cho HTTP, không cho JS truy cập
-                    .secure(false)        // đặt true nếu dùng HTTPS
-                    .path("/")            // cookie áp dụng cho toàn bộ site
-                    .maxAge(24 * 60 * 60) // thời gian sống cookie 1 ngày (giây)
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(24 * 60 * 60)
                     .sameSite("Lax")
                     .build();
 
             response.put("status", "success");
             response.put("message", "Login successful");
-
-
-            // Trả về response kèm header Set-Cookie để trình duyệt lưu cookie
+            System.err.println(response);
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
                     .body(response);
-
         } else {
             response.put("status", "fail");
             response.put("message", "Invalid email/account or password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-
     }
+
+    public String getUsernameFromToken(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("Missing token");
+        }
+
+        return JwtToken.extractUsername(token);
+    }
+
+   public List<ResponseCookie> logout(HttpServletRequest request) {
+    // Xoá session
+   
+
+    // Xoá jwt_token
+    ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", "")
+            .httpOnly(true)
+            .secure(false)
+            .path("/")
+            .maxAge(0)
+            .sameSite("Lax")
+            .build();
+
+    // Xoá JSESSIONID
+    ResponseCookie jsessionidCookie = ResponseCookie.from("JSESSIONID", "")
+            .path("/")
+            .maxAge(0)
+            .build();
+
+    return List.of(jwtCookie, jsessionidCookie);
+}
 }

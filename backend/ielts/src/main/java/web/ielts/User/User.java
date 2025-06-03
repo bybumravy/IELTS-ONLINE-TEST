@@ -1,4 +1,4 @@
-package web.ielts.Auth;
+package web.ielts.User;
 
 
 import org.springframework.data.mongodb.core.mapping.Document;
