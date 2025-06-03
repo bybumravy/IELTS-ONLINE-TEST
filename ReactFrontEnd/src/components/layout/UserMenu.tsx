@@ -10,9 +10,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {UserMenuProps} from "@/types/apiTypes";
 
-
+interface UserMenuProps {
+    onLogout: () => void
+}
 
 export function UserMenu({ onLogout }: UserMenuProps) {
     return (

@@ -37,6 +37,3 @@ export interface AuthContextType {
     register: (email: string, password: string, role?: string) => Promise<void>
 }
 
-export interface UserMenuProps {
-    onLogout: () => void
-}
