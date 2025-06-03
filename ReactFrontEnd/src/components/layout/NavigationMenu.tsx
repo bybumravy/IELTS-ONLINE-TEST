@@ -4,7 +4,6 @@ import { BookOpen, Headphones, PenTool, Mic } from "lucide-react"
 export function NavigationMenu() {
     return (
         <>
-            {/* IELTS Tests Dropdown */}
             <div className="relative group">
                 <button className="text-gray-700 px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-600 rounded-md transition-colors">
                     IELTS TESTS
@@ -50,7 +49,6 @@ export function NavigationMenu() {
                 </div>
             </div>
 
-            {/* IELTS Tips Dropdown */}
             <div className="relative group">
                 <button className="text-gray-700 px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-600 rounded-md transition-colors">
                     IELTS TIPS

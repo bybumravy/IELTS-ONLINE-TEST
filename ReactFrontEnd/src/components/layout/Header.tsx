@@ -1,5 +1,3 @@
-"use client"
-
 import { Link } from "react-router-dom"
 import { BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -32,10 +30,12 @@ export function Header() {
                             <UserMenu onLogout={logout} />
                         ) : (
                             <div className="flex items-center space-x-2">
-                                <Button variant="ghost" onClick={() => login("me@gmail.com", "123456")}>
-                                    Login
-                                </Button>
-                                <Button className="bg-emerald-600 hover:bg-emerald-700">Register</Button>
+                                <Link to="/login">
+                                    <Button variant="ghost">Login</Button>
+                                </Link>
+                                <Link to="/register">
+                                    <Button className="bg-emerald-600 hover:bg-emerald-700">Register</Button>
+                                </Link>
                             </div>
                         )}
                     </div>

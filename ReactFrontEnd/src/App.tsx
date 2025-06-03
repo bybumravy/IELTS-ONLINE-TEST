@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
 import { HomePage } from "@/pages/HomePage"
 import {AuthProvider} from "@/contexts/AuthContext";
+import Login from "@/components/sections/Login";
 
 
 export default function App() {
@@ -17,7 +18,7 @@ export default function App() {
           <Header/>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            {/*<Route path="/dashboard" element={<Dashboard />} />*/}
+            <Route path="/login" element={<Login />} />
             {/*<Route path="/tests/listening" element={<ListeningTests />} />*/}
             {/*<Route path="/tests/reading" element={<ReadingTests />} />*/}
             {/*<Route path="/tests/writing" element={<WritingTests />} />*/}
