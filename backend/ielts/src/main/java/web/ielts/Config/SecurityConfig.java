@@ -1,33 +1,4 @@
-<<<<<<< HEAD
-//package web.ielts.Config;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.web.SecurityFilterChain;
-//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-//import org.springframework.security.config.http.SessionCreationPolicy;
-//
-//@Configuration
-//@EnableWebSecurity
-//public class SecurityConfig {
-//
-//
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/login").permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//
-//        return http.build();
-//    }
-//
-//}
-=======
+
 package web.ielts.Config;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +8,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.Customizer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import web.ielts.Auth.CustomOAuth2SuccessHandler;
 
@@ -52,17 +32,26 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/login", "/api/user-info", "/api/logout", "/oauth2/**").permitAll() // cho phép các đường dẫn oauth2
+                .requestMatchers(
+                    "/api/login",
+                    "/api/user-info",
+                    "/api/logout",
+                    "/oauth2/**",
+                    "/api/readings/2"
+                ).permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
-                .successHandler(customOAuth2SuccessHandler)  // xử lý login thành công
+                .loginPage("/api/login") // có thể là một endpoint tuỳ chỉnh hoặc dùng mặc định
+                .successHandler(customOAuth2SuccessHandler)
             )
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // tạo session khi cần thiết
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             );
 
         return http.build();
     }
 }
->>>>>>> 1c618f771c725eff356d15eb2edf462ef54426f6
+
+
+

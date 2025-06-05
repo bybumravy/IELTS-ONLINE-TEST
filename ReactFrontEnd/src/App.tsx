@@ -7,7 +7,7 @@ import { Footer } from "@/components/layout/Footer"
 import { HomePage } from "@/pages/HomePage"
 import {AuthProvider} from "@/contexts/AuthContext";
 import Login from "@/components/sections/Login";
-
+import IELTSTest from "./pages/IELTSTest"
 
 export default function App() {
 
@@ -19,6 +19,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/reading" element={<IELTSTest />} />
             {/*<Route path="/tests/listening" element={<ListeningTests />} />*/}
             {/*<Route path="/tests/reading" element={<ReadingTests />} />*/}
             {/*<Route path="/tests/writing" element={<WritingTests />} />*/}

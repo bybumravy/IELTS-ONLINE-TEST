@@ -8,7 +8,7 @@ import {useEffect, useState} from "react";
 export function HomePage() {
     const [tests, setTests] = useState([])
     useEffect(() => {
-        fetch("http://localhost:8080/api/tests")
+        fetch("http://localhost:8080/api/3-tests")
             .then(res => res.json())
             .then(data => setTests(data))
 

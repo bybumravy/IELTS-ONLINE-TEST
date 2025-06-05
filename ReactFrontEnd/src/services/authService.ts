@@ -16,19 +16,11 @@ export const logout = async () => {
     })
 }
 
-<<<<<<< HEAD
-// export const getMe = async () => {
-//     const res = await fetch("http://localhost:8080/api/me", { credentials: "include" })
-//     if (!res.ok) throw new Error("Failed to fetch user")
-//     return res.json()
-// }
-=======
 export const getMe = async () => {
     const res = await fetch("http://localhost:8080/api/user-info", { credentials: "include" })
     if (!res.ok) throw new Error("Failed to fetch user")
     return res.json()
 }
->>>>>>> 1c618f771c725eff356d15eb2edf462ef54426f6
 
 export const register = async (email: string, password: string, role = "student") => {
     const res = await fetch("http://localhost:8080/api/register", {
