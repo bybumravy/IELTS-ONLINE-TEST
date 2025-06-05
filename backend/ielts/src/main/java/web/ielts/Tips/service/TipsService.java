@@ -5,8 +5,12 @@ import org.springframework.stereotype.Service;
 import web.ielts.Tips.dto.TipDTO;
 import web.ielts.Tips.model.ListeningTips;
 import web.ielts.Tips.model.ReadingTips;
+import web.ielts.Tips.model.SpeakingTips;
+import web.ielts.Tips.model.WritingTips;
 import web.ielts.Tips.repository.ListeningTipRepository;
 import web.ielts.Tips.repository.ReadingTipRepository;
+import web.ielts.Tips.repository.SpeakingTipRepository;
+import web.ielts.Tips.repository.WritingTipRepository;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,24 +20,25 @@ import java.util.Map;
 public class TipsService {
     @Autowired
     private ListeningTipRepository listeningTipRepo;
-//    @Autowired
-//    private SpeakingTipRepository speakingTipRepo;
+    @Autowired
+    private SpeakingTipRepository speakingTipRepo;
     @Autowired
     private ReadingTipRepository readingTipRepo;
-//    @Autowired
-//    private WritingTipRepository writingTipRepo;
+    @Autowired
+    private WritingTipRepository writingTipRepo;
+
     private TipDTO mapToDTO(ListeningTips tip) {
     return new TipDTO(tip.getId(), tip.getSkill(), tip.getType(), tip.getDescription());
 }
-//    private TipDTO mapToDTO(SpeakingTip tip) {
-//        return new TipDTO(tip.getId(), tip.getSkill(), tip.getTitle(), tip.getDescription());
-//    }
+    private TipDTO mapToDTO(SpeakingTips tip) {
+        return new TipDTO(tip.getId(), tip.getSkill(), tip.getTitle(), tip.getDescription());
+    }
     private TipDTO mapToDTO(ReadingTips tip) {
         return new TipDTO(tip.getId(), tip.getSkill(), tip.getType(), tip.getDescription());
     }
-//    private TipDTO mapToDTO(WritingTip tip) {
-//        return new TipDTO(tip.getId(), tip.getSkill(), tip.getTitle(), tip.getDescription());
-//    }
+    private TipDTO mapToDTO(WritingTips tip) {
+        return new TipDTO(tip.getId(), tip.getSkill(), tip.getTitle(), tip.getDescription());
+    }
 
 public List<ReadingTips> getAllReadingTips() {
     return readingTipRepo.findAll();
@@ -44,14 +49,14 @@ public List<ReadingTips> getAllReadingTips() {
         listeningTipRepo.findTopByOrderByIdDesc()
                 .ifPresent(tip -> tips.put("listeningTip", mapToDTO(tip)));
 
-//        speakingTipRepo.findTopByOrderByCreatedAtDesc()
-//                .ifPresent(tip -> tips.put("speakingTip", mapToDTO(tip)));
+        speakingTipRepo.findTopByOrderByCreatedAtDesc()
+                .ifPresent(tip -> tips.put("speakingTip", mapToDTO(tip)));
 
         readingTipRepo.findTopByOrderByIdDesc()
                 .ifPresent(tip -> tips.put("readingTip", mapToDTO(tip)));
 
-//        writingTipRepo.findTopByOrderByCreatedAtDesc()
-//                .ifPresent(tip -> tips.put("writingTip", mapToDTO(tip)));
+        writingTipRepo.findTopByOrderByCreatedAtDesc()
+                .ifPresent(tip -> tips.put("writingTip", mapToDTO(tip)));
 
         return tips;
     }

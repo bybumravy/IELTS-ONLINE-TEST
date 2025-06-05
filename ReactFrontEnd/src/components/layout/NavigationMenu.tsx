@@ -56,28 +56,28 @@ export function NavigationMenu() {
                 <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <div className="py-2">
                         <Link
-                            to="/tips/listening"
+                            to="/student/listAllTips"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <Headphones className="w-4 h-4 mr-3" />
                             Listening Tips
                         </Link>
                         <Link
-                            to="/tips/reading"
+                            to="/student/listAllTips"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <BookOpen className="w-4 h-4 mr-3" />
                             Reading Tips
                         </Link>
                         <Link
-                            to="/tips/writing"
+                            to="/student/listAllTips"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <PenTool className="w-4 h-4 mr-3" />
                             Writing Tips
                         </Link>
                         <Link
-                            to="/tips/speaking"
+                            to="/student/listAllTips"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <Mic className="w-4 h-4 mr-3" />

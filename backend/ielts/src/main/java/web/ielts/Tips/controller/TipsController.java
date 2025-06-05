@@ -2,13 +2,12 @@ package web.ielts.Tips.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import web.ielts.Tips.dto.TipDTO;
+import web.ielts.Tips.model.ListeningTips;
 import web.ielts.Tips.model.ReadingTips;
-import web.ielts.Tips.repository.ReadingTipRepository;
+import web.ielts.Tips.model.SpeakingTips;
+import web.ielts.Tips.model.WritingTips;
 import web.ielts.Tips.service.TipsService;
 
 import java.util.List;
@@ -24,18 +23,52 @@ public class TipsController {
     private TipsService tipsService;
 
 
-    @GetMapping("/reading-tips")
-    public ResponseEntity<List<ReadingTips>> getAllTips() {
-        System.out.println("Endpoint /reading-tips called");
-        List<ReadingTips> tips = tipsService.getAllReadingTips();
-        System.out.println("Tips found: " + tips.size());
-        return ResponseEntity.ok(tips);
-    }
 
 
-    @GetMapping("/tips-summary")
+    @GetMapping("all/tips-summary")
     public ResponseEntity<Map<String, TipDTO>> getTipsSummary() {
         Map<String, TipDTO> tips = tipsService.getOneTipEachSkill();
         return ResponseEntity.ok(tips);
+    }
+
+    @GetMapping("/student/Reading")
+    public List<ReadingTips> getAllReading() {
+        return tipsService.getAllTipsReading();
+    }
+
+    @GetMapping("/student/Listening")
+    public List<ListeningTips> getAllListening() {
+        return tipsService.getAllTipsListening();
+    }
+
+    @GetMapping("/student/Writing")
+    public List<WritingTips> getAllWriting() {
+        return tipsService.getAllTipsWriting();
+    }
+
+    @GetMapping("/student/Speaking")
+    public List<SpeakingTips> getAllSpeaking() {
+        return tipsService.getAllTipsSpeaking();
+    }
+
+
+    @GetMapping("/read/{id}")
+    public ReadingTips getTipByIdRead(@PathVariable String id) {
+        return tipService.getTipByIdReading(id);
+    }
+
+    @GetMapping("/lis/{id}")
+    public ListeningTips getTipByIdLis(@PathVariable String id) {
+        return tipService.getTipByListening(id);
+    }
+
+    @GetMapping("/write/{id}")
+    public WritingTips getTipByIdWrite(@PathVariable String id) {
+        return tipService.getTipByWriting(id);
+    }
+
+    @GetMapping("/speak/{id}")
+    public SpeakingTips getTipByIdSpeak(@PathVariable String id) {
+        return tipService.getTipBySpeaking(id);
     }
 }
