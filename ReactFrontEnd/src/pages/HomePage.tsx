@@ -6,7 +6,7 @@ import {useEffect, useState} from "react";
 interface Tip {
     id: number
     skill: string
-    title: string
+    type: string
     description: string
 }
 

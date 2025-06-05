@@ -1,15 +1,15 @@
 export interface IELTSTest {
-    id: string          // vì Java dùng String cho id
-    testTitle: string   // trùng với testTitle bên Java
-    tags: string[]      // danh sách tag, kiểu List<String> bên Java
-    createdAt: string   // ngày giờ trả về dạng chuỗi ISO (backend trả Date, frontend nhận string)
+    id: string
+    testTitle: string
+    tags: string[]
+    createdAt: string
 }
 
 
 export interface Tip {
     id: number
     skill: string
-    title: string
+    type: string
     description: string
 }
 

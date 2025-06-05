@@ -12,12 +12,12 @@ public class Test {
     private String id;
     private String testTitle;
     private List<String> tags;
-    private Date createdAt;
+    private String createdAt;
 
     public Test() {
     }
 
-    public Test(String id, String testTitle, List<String> tags, Date createdAt) {
+    public Test(String id, String testTitle, List<String> tags, String createdAt) {
         this.id = id;
         this.testTitle = testTitle;
         this.tags = tags;
@@ -48,11 +48,11 @@ public class Test {
         this.tags = tags;
     }
 
-    public Date getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 }

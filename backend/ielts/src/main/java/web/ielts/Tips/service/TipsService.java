@@ -9,6 +9,7 @@ import web.ielts.Tips.repository.ListeningTipRepository;
 import web.ielts.Tips.repository.ReadingTipRepository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -33,11 +34,15 @@ public class TipsService {
 //    private TipDTO mapToDTO(WritingTip tip) {
 //        return new TipDTO(tip.getId(), tip.getSkill(), tip.getTitle(), tip.getDescription());
 //    }
+
+public List<ReadingTips> getAllReadingTips() {
+    return readingTipRepo.findAll();
+}
     public Map<String, TipDTO> getOneTipEachSkill() {
         Map<String, TipDTO> tips = new HashMap<>();
 
-//        listeningTipRepo.findTopByOrderByIdDesc()
-//                .ifPresent(tip -> tips.put("listeningTip", mapToDTO(tip)));
+        listeningTipRepo.findTopByOrderByIdDesc()
+                .ifPresent(tip -> tips.put("listeningTip", mapToDTO(tip)));
 
 //        speakingTipRepo.findTopByOrderByCreatedAtDesc()
 //                .ifPresent(tip -> tips.put("speakingTip", mapToDTO(tip)));
