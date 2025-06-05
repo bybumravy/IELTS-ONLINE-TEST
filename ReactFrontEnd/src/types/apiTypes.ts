@@ -1,14 +1,10 @@
 export interface IELTSTest {
-    id: number
-    title: string
-    type: string
-    duration: string
-    sections: string[]
-    difficulty: string
-    participants: number
-    rating: number
-    isNew: boolean
+    id: string          // vì Java dùng String cho id
+    testTitle: string   // trùng với testTitle bên Java
+    tags: string[]      // danh sách tag, kiểu List<String> bên Java
+    createdAt: string   // ngày giờ trả về dạng chuỗi ISO (backend trả Date, frontend nhận string)
 }
+
 
 export interface Tip {
     id: number

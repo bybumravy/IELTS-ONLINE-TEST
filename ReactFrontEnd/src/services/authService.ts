@@ -1,5 +1,5 @@
 export const login = async (email: string, password: string) => {
-    const res = await fetch("/api/login", {
+    const res = await fetch("http://localhost:8080/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -10,20 +10,20 @@ export const login = async (email: string, password: string) => {
 }
 
 export const logout = async () => {
-    await fetch("/api/logout", {
+    await fetch("http://localhost:8080/api/logout", {
         method: "POST",
         credentials: "include",
     })
 }
 
-export const getMe = async () => {
-    const res = await fetch("/api/me", { credentials: "include" })
-    if (!res.ok) throw new Error("Failed to fetch user")
-    return res.json()
-}
+// export const getMe = async () => {
+//     const res = await fetch("http://localhost:8080/api/me", { credentials: "include" })
+//     if (!res.ok) throw new Error("Failed to fetch user")
+//     return res.json()
+// }
 
 export const register = async (email: string, password: string, role = "student") => {
-    const res = await fetch("/api/register", {
+    const res = await fetch("http://localhost:8080/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, role }),

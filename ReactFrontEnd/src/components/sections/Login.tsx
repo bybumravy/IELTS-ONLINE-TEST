@@ -12,8 +12,8 @@ const LoginPage = ({ setUser }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await login(email, password);
-            navigate("/header");
+            // await login(email, password);
+            navigate("/");
         } catch (error) {
             alert('Login failed');
             console.error(error);

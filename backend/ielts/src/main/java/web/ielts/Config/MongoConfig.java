@@ -1,4 +1,4 @@
-package web.ielts.Config;
-
-public class MongoConfig {
-}
+//package web.ielts.Config;
+//
+//public class MongoConfig {
+//}
