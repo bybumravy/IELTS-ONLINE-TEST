@@ -2,21 +2,25 @@ package web.ielts.Tips.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import web.ielts.Test.model.Test;
-import web.ielts.Test.repository.TestRepository;
-import web.ielts.Tips.repository.TipsRepository;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import web.ielts.Tips.dto.TipDTO;
+import web.ielts.Tips.service.TipsService;
 
-import java.util.List;
-
+import java.util.Map;
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RestController
+@RequestMapping("/api")
 public class TipsController {
     @Autowired
-    private TipsRepository tipsRepository;
+    private TipsService tipsService;
 
-
-    @GetMapping("/3-tests")
-    public List<Test> getThreeTests() {
-        return tipsRepository.findAll(PageRequest.of(0, 2)).getContent();
+    @GetMapping("/tips-summary")
+    public ResponseEntity<Map<String, TipDTO>> getTipsSummary() {
+        Map<String, TipDTO> tips = tipsService.getOneTipEachSkill();
+        return ResponseEntity.ok(tips);
     }
 }

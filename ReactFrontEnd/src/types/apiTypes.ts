@@ -11,9 +11,6 @@ export interface Tip {
     skill: string
     title: string
     description: string
-    readTime: string
-    icon: any
-    color: string
 }
 
 export interface FAQ {

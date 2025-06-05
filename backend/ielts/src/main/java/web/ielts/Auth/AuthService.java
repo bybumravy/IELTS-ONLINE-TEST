@@ -25,7 +25,8 @@ public class AuthService {
         Map<String, Object> response = new HashMap<>();
 
         User user = loginRepository.findByEmail(email);
-        System.err.println(user.toString());
+
+
         if (user != null && user.getPassword().equals(password)) {
             String token = JwtToken.generateToken(user.getEmail(), user.getRole());
 

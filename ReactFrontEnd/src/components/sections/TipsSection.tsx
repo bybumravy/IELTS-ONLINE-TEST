@@ -1,13 +1,21 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import type { Tip } from "@/types/apiTypes"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import type { Tip } from "@/types/Tip";
 
+ interface Tip {
+    id: number
+    skill: string
+    type: string
+    description: string
+}
 interface TipsSectionProps {
-    tips: Tip[]
+    tips: { [key: string]: Tip | undefined };
 }
 
 export function TipsSection({ tips }: TipsSectionProps) {
+    const tipsArray = Object.values(tips).filter((tip): tip is Tip => tip !== undefined);
+
     return (
         <section className="py-16 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,21 +25,17 @@ export function TipsSection({ tips }: TipsSectionProps) {
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {tips.map((tip) => (
+                    {tipsArray.map((tip) => (
                         <Card key={tip.id} className="hover:shadow-lg transition-shadow cursor-pointer">
                             <CardHeader>
-                                <div className={`w-12 h-12 ${tip.color} rounded-lg flex items-center justify-center mb-4`}>
-                                    <tip.icon className="w-6 h-6 text-white" />
-                                </div>
                                 <Badge variant="outline" className="w-fit mb-2">
                                     {tip.skill}
                                 </Badge>
-                                <CardTitle className="text-lg leading-tight">{tip.title}</CardTitle>
+                                <CardTitle className="text-lg leading-tight">{tip.type}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <p className="text-gray-600 text-sm mb-4">{tip.description}</p>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs text-gray-500">{tip.readTime}</span>
                                     <Button variant="ghost" size="sm" className="text-emerald-600 hover:text-emerald-700">
                                         Read More
                                     </Button>
@@ -42,5 +46,5 @@ export function TipsSection({ tips }: TipsSectionProps) {
                 </div>
             </div>
         </section>
-    )
+    );
 }

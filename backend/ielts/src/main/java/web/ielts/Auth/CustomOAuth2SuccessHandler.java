@@ -25,20 +25,22 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
         String googleId = oAuth2User.getAttribute("sub");
-       
-       
+
+
+
 
         User user = loginRepository.findByEmail(email);
         if (user == null) {
-            User newUser = new User();
-            newUser.setEmail(email);
-            newUser.setPassword(null);
-            newUser.setGoogleID(googleId);
-            loginRepository.save(newUser);
+            user = new User();
+            user.setEmail(email);
+            user.setPassword(null);
+            user.setGoogleID(googleId);
+            loginRepository.save(user);
         }
-        
-        // Tạo JWT
+
+// Tạo JWT với role user vừa lấy (hoặc mới tạo)
         String token = JwtToken.generateToken(email, user.getRole());
+
 
         // Tạo Cookie
         ResponseCookie cookie = ResponseCookie.from("jwt_token", token)
@@ -53,7 +55,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         response.addHeader("Set-Cookie", cookie.toString());
 
         // Redirect về frontend (không cần token trên URL nữa)
-        response.sendRedirect("http://localhost:5173");
+        response.sendRedirect("http://localhost:5174");
     }
 
 }
