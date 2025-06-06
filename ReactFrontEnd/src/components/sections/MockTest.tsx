@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -30,7 +30,7 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
                 const endpoint =
                     selectedSkill === 'All Skills'
                         ? 'http://localhost:8080/api/test/all-skill'
-                        : `http://localhost:8080/api/test/${selectedSkill.toLowerCase()}`;
+                        : `http://localhost:8080/api/test/${selectedSkill?.toLowerCase}`;
 
                 const response = await fetch(endpoint);
                 const data: TestsByYear = await response.json();
@@ -57,7 +57,7 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
     };
 
     const handleStartTest = (testId: string): void => {
-        const skill = selectedSkill === 'All Skills' ? 'full' : selectedSkill.toLowerCase();
+        const skill = selectedSkill === 'All Skills' ? 'full' : selectedSkill?.toLowerCase;
         navigate(`/test/${testId}/${skill}`);
     };
 
@@ -77,7 +77,7 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
         <div className="w-full max-w-7xl mx-auto p-6">
             <div className="space-y-8">
                 {Object.entries(testsByYear)
-                    .sort(([yearA], [yearB]) => parseInt(yearB) - parseInt(yearA))
+                    .sort((a, b) => Number(b[0]) - Number(a[0]))
                     .map(([year, tests]) => (
                         <section key={year} className="bg-white rounded-xl p-6 shadow-lg">
                             <h2 className="text-2xl font-bold text-[#374151] border-b-2 border-[#34D399] pb-2 mb-6">

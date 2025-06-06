@@ -3,6 +3,8 @@ package web.ielts.Test.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Document(collection = "Test")
@@ -53,5 +55,17 @@ public class Test {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+    public LocalDate getCreatedAtDate() {
+        try {
+            return LocalDate.parse(createdAt, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public Integer getCreatedAtYear() {
+        LocalDate date = getCreatedAtDate();
+        return date != null ? date.getYear() : null;
     }
 }
