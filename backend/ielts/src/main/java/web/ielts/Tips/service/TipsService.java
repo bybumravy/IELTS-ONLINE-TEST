@@ -31,13 +31,13 @@ public class TipsService {
     return new TipDTO(tip.getId(), tip.getSkill(), tip.getType(), tip.getDescription());
 }
     private TipDTO mapToDTO(SpeakingTips tip) {
-        return new TipDTO(tip.getId(), tip.getSkill(), tip.getTask(), tip.getDescription());
+        return new TipDTO(tip.getId(), tip.getSkill(), tip.getType(), tip.getDescription());
     }
     private TipDTO mapToDTO(ReadingTips tip) {
         return new TipDTO(tip.getId(), tip.getSkill(), tip.getType(), tip.getDescription());
     }
     private TipDTO mapToDTO(WritingTips tip) {
-        return new TipDTO(tip.getId(), tip.getSkill(), tip.getTask(), tip.getDescription());
+        return new TipDTO(tip.getId(), tip.getSkill(), tip.getType(), tip.getDescription());
     }
     public List<ReadingTips> getAllTipsReading() {
         return readingTipRepo.findAll();

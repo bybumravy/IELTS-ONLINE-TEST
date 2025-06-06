@@ -26,7 +26,7 @@ public class AuthService {
 
         User user = loginRepository.findByEmail(email);
 
-
+        System.out.println(user);
         if (user != null && user.getPassword().equals(password)) {
             String token = JwtToken.generateToken(user.getEmail(), user.getRole());
 

@@ -9,7 +9,7 @@ import java.util.List;
 public class SpeakingTips {
     private String id;
 
-    private String task;
+    private String type;
     private String skill;
 
     public String getSkill() {
@@ -57,12 +57,12 @@ public class SpeakingTips {
         this.id = id;
     }
 
-    public String getTask() {
-        return task;
+    public String getType() {
+        return type;
     }
 
-    public void setTask(String task) {
-        this.task = task;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getDescription() {

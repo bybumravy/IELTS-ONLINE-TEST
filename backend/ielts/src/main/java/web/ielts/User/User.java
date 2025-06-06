@@ -3,7 +3,7 @@ package web.ielts.User;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "users")
+@Document(collection = "user")
 public class User {
     private String firstName;
     private String lastName;

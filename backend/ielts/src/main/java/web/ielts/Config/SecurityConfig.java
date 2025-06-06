@@ -37,13 +37,11 @@ public class SecurityConfig {
                     "/api/user-info",
                     "/api/logout",
                     "/oauth2/**",
-                    "/api/readings/2","/api/all/tips-summary",
-                        "/api/3-tests", "/api/tips-summary", "/api/reading-tips"
+                        "/api/*", "/api/tips-summary", "/api/*/*"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
-                .loginPage("/api/login") // có thể là một endpoint tuỳ chỉnh hoặc dùng mặc định
                 .successHandler(customOAuth2SuccessHandler)
             )
             .sessionManagement(session -> session

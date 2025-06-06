@@ -5,18 +5,18 @@ import * as authService from "@/services/authService"
 export function useAuthState(): AuthContextType {
     const [user, setUser] = useState<User | null>(null)
 
-    // useEffect(() => {
-    //     const fetchUser = async () => {
-    //         try {
-    //             const data = await authService.getMe()
-    //             setUser({ username: data.username, role: data.role })
-    //         } catch {
-    //             setUser(null)
-    //         }
-    //     }
-    //
-    //     fetchUser()
-    // }, [])
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const data = await authService.getMe()
+                setUser({ username: data.username, role: data.role })
+            } catch {
+                setUser(null)
+            }
+        }
+
+        fetchUser()
+    }, [])
 
     const login = async (email: string, password: string) => {
         await authService.login(email, password)

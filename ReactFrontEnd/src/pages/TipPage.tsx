@@ -23,16 +23,16 @@ function TipPage() {
     };
 
     type skill = "Listening" | "Reading" | "Writing" | "Speaking";
-    useEffect(() => {
-        fetch("http://localhost:8080/api/read/${id}")
-            .then((res) => res.json())
-            .then((data: Tip[]) => {
-                console.log("Fetched data:", data);
-                console.log("JSON:", JSON.stringify(data, null, 2));
-                setTips(data);
-            })
-            .catch((err) => console.error(err));
-    }, []);
+    // useEffect(() => {
+    //     fetch("http://localhost:8080/api/read/${id}")
+    //         .then((res) => res.json())
+    //         .then((data: Tip[]) => {
+    //             console.log("Fetched data:", data);
+    //             console.log("JSON:", JSON.stringify(data, null, 2));
+    //             setTips(data);
+    //         })
+    //         .catch((err) => console.error(err));
+    // }, []);
     useEffect(() => {
         fetch(`http://localhost:8080/api/student/${skill}`)
             .then((res) => res.json())
