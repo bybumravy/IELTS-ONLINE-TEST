@@ -55,7 +55,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         response.addHeader("Set-Cookie", cookie.toString());
 
         // Redirect về frontend (không cần token trên URL nữa)
-        response.sendRedirect("http://localhost:5174");
+        response.sendRedirect("http://localhost:5173");
     }
 
 }
