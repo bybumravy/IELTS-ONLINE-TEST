@@ -37,8 +37,8 @@ public class SecurityConfig {
                     "/api/user-info",
                     "/api/logout",
                     "/oauth2/**",
-                    "/api/readings/2",
-                        "/api/3-tests", "/api/tips-summary", "/api/reading-tips", "/api/*/*"
+                    "/api/readings/2","/api/all/tips-summary",
+                        "/api/3-tests", "/api/tips-summary", "/api/reading-tips"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

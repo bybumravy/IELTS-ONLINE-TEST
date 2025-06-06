@@ -24,7 +24,7 @@ public class TipsController {
 
 
 
-    @GetMapping("all/tips-summary")
+    @GetMapping("/all/tips-summary")
     public ResponseEntity<Map<String, TipDTO>> getTipsSummary() {
         Map<String, TipDTO> tips = tipsService.getOneTipEachSkill();
         return ResponseEntity.ok(tips);

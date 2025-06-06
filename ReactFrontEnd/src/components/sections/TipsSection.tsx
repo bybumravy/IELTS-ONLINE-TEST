@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Tip } from "@/types/Tip";
 
  interface Tip {
-    id: number
+    id: string
     skill: string
     type: string
     description: string
