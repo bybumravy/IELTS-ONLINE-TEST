@@ -24,7 +24,6 @@ public class TipsController {
 
 
 
-
     @GetMapping("all/tips-summary")
     public ResponseEntity<Map<String, TipDTO>> getTipsSummary() {
         Map<String, TipDTO> tips = tipsService.getOneTipEachSkill();
@@ -54,21 +53,21 @@ public class TipsController {
 
     @GetMapping("/read/{id}")
     public ReadingTips getTipByIdRead(@PathVariable String id) {
-        return tipService.getTipByIdReading(id);
+        return tipsService.getTipByIdReading(id);
     }
 
     @GetMapping("/lis/{id}")
     public ListeningTips getTipByIdLis(@PathVariable String id) {
-        return tipService.getTipByListening(id);
+        return tipsService.getTipByListening(id);
     }
 
     @GetMapping("/write/{id}")
     public WritingTips getTipByIdWrite(@PathVariable String id) {
-        return tipService.getTipByWriting(id);
+        return tipsService.getTipByWriting(id);
     }
 
     @GetMapping("/speak/{id}")
     public SpeakingTips getTipByIdSpeak(@PathVariable String id) {
-        return tipService.getTipBySpeaking(id);
+        return tipsService.getTipBySpeaking(id);
     }
 }

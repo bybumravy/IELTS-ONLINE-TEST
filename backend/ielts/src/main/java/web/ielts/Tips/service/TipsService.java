@@ -31,15 +31,61 @@ public class TipsService {
     return new TipDTO(tip.getId(), tip.getSkill(), tip.getType(), tip.getDescription());
 }
     private TipDTO mapToDTO(SpeakingTips tip) {
-        return new TipDTO(tip.getId(), tip.getSkill(), tip.getTitle(), tip.getDescription());
+        return new TipDTO(tip.getId(), tip.getSkill(), tip.getTask(), tip.getDescription());
     }
     private TipDTO mapToDTO(ReadingTips tip) {
         return new TipDTO(tip.getId(), tip.getSkill(), tip.getType(), tip.getDescription());
     }
     private TipDTO mapToDTO(WritingTips tip) {
-        return new TipDTO(tip.getId(), tip.getSkill(), tip.getTitle(), tip.getDescription());
+        return new TipDTO(tip.getId(), tip.getSkill(), tip.getTask(), tip.getDescription());
+    }
+    public List<ReadingTips> getAllTipsReading() {
+        return readingTipRepo.findAll();
     }
 
+    public List<ListeningTips> getAllTipsListening() {
+        return listeningTipRepo.findAll();
+    }
+
+    public List<WritingTips> getAllTipsWriting() {
+        return writingTipRepo.findAll();
+    }
+
+    public List<SpeakingTips> getAllTipsSpeaking() {
+        return speakingTipRepo.findAll();
+    }
+
+    public List<ReadingTips> getTipsByReadingSkill(String skill) {
+        return readingTipRepo.findBySkill(skill);
+    }
+    public List<ListeningTips> getTipsByListeningSkill(String skill) {
+        return listeningTipRepo.findBySkill(skill);
+    }
+
+    public List<WritingTips> getTipsByWritingSkill(String skill) {
+        return writingTipRepo.findBySkill(skill);
+    }
+
+    public List<SpeakingTips> getTipsBySpeakingSkill(String skill) {
+        return speakingTipRepo.findBySkill(skill);
+    }
+
+
+    public ReadingTips getTipByIdReading(String id) {
+        return readingTipRepo.findById(id).orElse(null);
+    }
+
+    public ListeningTips getTipByListening(String id) {
+        return listeningTipRepo.findById(id).orElse(null);
+    }
+
+    public WritingTips getTipByWriting(String id) {
+        return writingTipRepo.findById(id).orElse(null);
+    }
+
+    public SpeakingTips getTipBySpeaking(String id) {
+        return speakingTipRepo.findById(id).orElse(null);
+    }
 public List<ReadingTips> getAllReadingTips() {
     return readingTipRepo.findAll();
 }
@@ -49,13 +95,13 @@ public List<ReadingTips> getAllReadingTips() {
         listeningTipRepo.findTopByOrderByIdDesc()
                 .ifPresent(tip -> tips.put("listeningTip", mapToDTO(tip)));
 
-        speakingTipRepo.findTopByOrderByCreatedAtDesc()
+        speakingTipRepo.findTopByOrderByIdDesc()
                 .ifPresent(tip -> tips.put("speakingTip", mapToDTO(tip)));
 
         readingTipRepo.findTopByOrderByIdDesc()
                 .ifPresent(tip -> tips.put("readingTip", mapToDTO(tip)));
 
-        writingTipRepo.findTopByOrderByCreatedAtDesc()
+        writingTipRepo.findTopByOrderByIdDesc()
                 .ifPresent(tip -> tips.put("writingTip", mapToDTO(tip)));
 
         return tips;
