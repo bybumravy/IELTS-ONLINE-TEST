@@ -12,7 +12,7 @@ import web.ielts.Test.repository.WritingRepository;
 public class DoTestController {
     @Autowired
     private WritingRepository writingRepository;
-    @GetMapping("/{testId}")
+    @GetMapping("writing/{testId}")
     public ResponseEntity<Writing> getWritingByTestId(@PathVariable String testId) {
         Writing writing = writingRepository.findByTestId(testId);
         if (writing != null) {

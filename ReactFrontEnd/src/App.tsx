@@ -8,8 +8,7 @@ import { MainLayout } from "@/components/layout/MainLayout"
 import TipPage from "@/pages/TipPage";
 import RegisterPage from "@/components/sections/Register";
 import TipDetail from "@/pages/TipDetail";
-
-
+import ListTestPage from "@/pages/ListTestPage";
 
 export default function App() {
     return (
@@ -24,6 +23,8 @@ export default function App() {
                     <Route path="/DoTest/writing" element={<IELTSWritingPractice />} />
                     <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout> as React.ReactNode} />
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout> as React.ReactNode} />
+                    <Route path="/test" element={<MainLayout><ListTestPage /></MainLayout>} />
+                    <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout>} />
                 </Routes>
             </Router>
         </AuthProvider>

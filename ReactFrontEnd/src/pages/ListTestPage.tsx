@@ -9,6 +9,7 @@ const ListTestPage: React.FC = () => {
     const { skill } = useParams<{ skill?: string }>();
     const navigate = useNavigate();
     const [selectedSkill, setSelectedSkill] = useState<SkillType>('All Skills');
+    const [sortBy, setSortBy] = useState<string>('Newest');
 
     useEffect(() => {
         if (skill) {
@@ -28,11 +29,19 @@ const ListTestPage: React.FC = () => {
         }
     };
 
+    const handleSortChange = (option: string) => {
+        setSortBy(option);
+    };
+
     return (
-        <>
-            <CateSkill onSkillChange={handleSkillChange} initialSkill={selectedSkill} />
+        <div className="min-h-screen bg-gray-50">
+            <CateSkill
+                onSkillChange={handleSkillChange}
+                initialSkill={selectedSkill}
+                onSortChange={handleSortChange}
+            />
             <MockTest selectedSkill={selectedSkill} />
-        </>
+        </div>
     );
 };
 

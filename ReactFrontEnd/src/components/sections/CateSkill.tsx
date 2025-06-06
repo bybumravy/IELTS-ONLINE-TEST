@@ -10,9 +10,9 @@ interface Skill {
 }
 
 interface CateSkillProps {
-    onSkillChange: (skillName: SkillName) => void;
+    onSkillChange: (skill: SkillName) => void;
     initialSkill?: SkillName;
-    onSortChange?: (sortBy: string) => void; // thêm nếu cần
+    onSortChange?: (sortOption: string) => void;
 }
 
 const CateSkill: React.FC<CateSkillProps> = ({ onSkillChange, initialSkill = 'All Skills', onSortChange }) => {
@@ -63,7 +63,7 @@ const CateSkill: React.FC<CateSkillProps> = ({ onSkillChange, initialSkill = 'Al
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleSkillChange(skill.name)}
                             className={`flex flex-col items-center justify-center gap-2 py-3 rounded-lg cursor-pointer select-none
-                ${
+                                ${
                                 selectedSkill === skill.name
                                     ? 'bg-[#34D399] text-white shadow-md'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-[#34D399]'
@@ -75,31 +75,37 @@ const CateSkill: React.FC<CateSkillProps> = ({ onSkillChange, initialSkill = 'Al
                     ))}
                 </div>
 
-                <div className="relative">
-                    <button
-                        onClick={() => setShowSort(!showSort)}
-                        className="flex items-center gap-2 bg-[#34D399] text-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md"
-                    >
-                        <SlidersHorizontal size={16} />
-                        <span>Sort: {sortBy}</span>
-                    </button>
+                {onSortChange && (
+                    <div className="relative flex justify-end">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setShowSort(!showSort)}
+                            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-[#34D399]"
+                        >
+                            <SlidersHorizontal size={20} />
+                            <span>Sort by: {sortBy}</span>
+                        </motion.button>
 
-                    {showSort && (
-                        <div className="absolute right-0 mt-2 bg-white border rounded-lg shadow-lg w-40 z-20">
-                            {['Newest', 'Oldest', 'Difficulty'].map((option) => (
-                                <button
-                                    key={option}
-                                    onClick={() => handleSortChange(option)}
-                                    className={`block w-full px-4 py-2 text-left text-sm hover:bg-[#34D399] hover:text-white ${
-                                        sortBy === option ? 'font-bold bg-[#D1FAE5]' : ''
-                                    }`}
-                                >
-                                    {option}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                        {showSort && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="absolute top-full right-0 mt-2 bg-white shadow-lg rounded-lg py-2 z-10"
+                            >
+                                {['Newest', 'Oldest', 'Most Popular'].map((option) => (
+                                    <button
+                                        key={option}
+                                        onClick={() => handleSortChange(option)}
+                                        className="w-full px-4 py-2 text-left hover:bg-gray-100"
+                                    >
+                                        {option}
+                                    </button>
+                                ))}
+                            </motion.div>
+                        )}
+                    </div>
+                )}
             </motion.div>
         </div>
     );

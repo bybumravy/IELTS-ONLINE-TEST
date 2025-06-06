@@ -77,7 +77,7 @@ export function NavigationMenu() {
                             Writing Tips
                         </Link>
                         <Link
-                            to="s/tips/Speaking"
+                            to="/tips/Speaking"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <Mic className="w-4 h-4 mr-3" />

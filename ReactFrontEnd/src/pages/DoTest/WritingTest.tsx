@@ -2,15 +2,23 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ChevronRight } from "lucide-react"
-import {DoTestHeader} from "@/components/layout/doTest/DoTestHeader";
+import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader"
+
+interface WritingTask {
+    prompt: string
+}
+
+interface WritingData {
+    task1: WritingTask
+    task2: WritingTask
+}
 
 export default function IELTSWritingPractice() {
     const [currentTask, setCurrentTask] = useState(1)
     const [essayText, setEssayText] = useState("")
     const [wordCount, setWordCount] = useState(0)
-    const [writingData, setWritingData] = useState(null)
+    const [writingData, setWritingData] = useState<WritingData | null>(null)
     const [timeRemaining, setTimeRemaining] = useState(10 * 60) // 10 minutes in seconds
-
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -26,30 +34,34 @@ export default function IELTSWritingPractice() {
         return () => clearInterval(timer)
     }, [])
 
+    // Fetch writing data
     useEffect(() => {
-        fetch("http://localhost:8080/api/writing/1")
+        let isMounted = true
+
+        fetch("http://localhost:8080/api/writing/t1")
             .then((response) => response.json())
-            .then((data) => setWritingData(data))
+            .then((data) => {
+                if (isMounted) setWritingData(data)
+            })
             .catch((error) => console.error("Error fetching writing data:", error))
+
+        return () => {
+            isMounted = false
+        }
     }, [])
 
 
     useEffect(() => {
-        const words = essayText
-            .trim()
-            .split(/\s+/)
-            .filter((word) => word.length > 0)
+        const words = essayText.trim().split(/\s+/).filter((word) => word.length > 0)
         setWordCount(words.length)
     }, [essayText])
 
-
-
     return (
         <div className="min-h-screen bg-gray-50">
-            <DoTestHeader/>
-            {/* Main Content */}
+            <DoTestHeader />
+
             <div className="flex h-[calc(100vh-80px)]">
-                {/* Left Panel - Task Content */}
+                {/* Left Panel */}
                 <div className="w-1/2 bg-white p-6 overflow-y-auto border-r border-gray-200">
                     {currentTask === 1 ? (
                         <div>
@@ -57,11 +69,9 @@ export default function IELTSWritingPractice() {
                             <p className="text-sm text-gray-600 mb-4">
                                 You should spend about <strong>20 minutes</strong> on this task.
                             </p>
-
                             <p className="text-sm text-gray-700 mb-4">
                                 {writingData?.task1?.prompt || "Loading..."}
                             </p>
-
                             <p className="text-sm text-gray-700 mb-6">
                                 You should write <strong>at least 150 words</strong>.
                             </p>
@@ -72,11 +82,9 @@ export default function IELTSWritingPractice() {
                             <p className="text-sm text-gray-600 mb-4">
                                 You should spend about <strong>40 minutes</strong> on this task.
                             </p>
-
                             <p className="text-sm text-gray-700 mb-4">
                                 {writingData?.task2?.prompt || "Loading..."}
                             </p>
-
                             <p className="text-sm text-gray-700 mb-6">
                                 Write <strong>at least 250 words</strong>.
                             </p>
@@ -84,7 +92,7 @@ export default function IELTSWritingPractice() {
                     )}
                 </div>
 
-                {/* Right Panel - Writing Area */}
+                {/* Right Panel */}
                 <div className="w-1/2 bg-gray-50 p-6 flex flex-col">
                     <Textarea
                         placeholder="Type your essay here..."
@@ -123,8 +131,6 @@ export default function IELTSWritingPractice() {
                     </Button>
                 </div>
             </div>
-
         </div>
     )
 }
-

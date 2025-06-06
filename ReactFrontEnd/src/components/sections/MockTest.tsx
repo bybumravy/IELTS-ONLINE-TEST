@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
 
 interface ListTest {
     id: string;
@@ -15,31 +14,55 @@ interface TestsByYear {
 }
 
 interface MockTestProps {
-    selectedSkill?: 'Listening' | 'Reading' | 'Writing' | 'Speaking' | 'All Skills';
+    selectedSkill: 'Listening' | 'Reading' | 'Writing' | 'Speaking' | 'All Skills';
 }
 
 const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => {
     const [testsByYear, setTestsByYear] = useState<TestsByYear>({});
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTests = async () => {
             try {
                 setLoading(true);
+                setError(null);
                 const endpoint =
                     selectedSkill === 'All Skills'
                         ? 'http://localhost:8080/api/test/all-skill'
-                        : `http://localhost:8080/api/test/${selectedSkill?.toLowerCase}`;
+                        : `http://localhost:8080/api/test/${selectedSkill.toLowerCase()}`;
 
                 const response = await fetch(endpoint);
-                const data: TestsByYear = await response.json();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
 
-                // Backend trả về dữ liệu dạng { "2024": [{id,title,year}, ...], ... }
-                // Chuyển key sang đúng format (nếu cần)
-                setTestsByYear(data);
+                // Validate and transform data if needed
+                const transformedData: TestsByYear = {};
+                if (Array.isArray(data)) {
+                    // If data is an array of tests, group by year
+                    data.forEach((test: ListTest) => {
+                        const year = test.year.toString();
+                        if (!transformedData[year]) {
+                            transformedData[year] = [];
+                        }
+                        transformedData[year].push(test);
+                    });
+                } else if (typeof data === 'object') {
+                    // If data is already grouped by year
+                    Object.entries(data).forEach(([year, tests]) => {
+                        if (Array.isArray(tests)) {
+                            transformedData[year] = tests;
+                        }
+                    });
+                }
+
+                setTestsByYear(transformedData);
             } catch (err) {
                 console.error('Failed to fetch tests:', err);
+                setError(err instanceof Error ? err.message : 'Failed to fetch tests');
                 setTestsByYear({});
             } finally {
                 setLoading(false);
@@ -57,11 +80,9 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
     };
 
     const handleStartTest = (testId: string): void => {
-        const skill = selectedSkill === 'All Skills' ? 'full' : selectedSkill?.toLowerCase;
+        const skill = selectedSkill === 'All Skills' ? 'full' : selectedSkill.toLowerCase();
         navigate(`/test/${testId}/${skill}`);
     };
-
-    // Format ngày không có vì backend chỉ trả year, title, id
 
     if (loading) {
         return (
@@ -73,29 +94,35 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
         );
     }
 
+    if (error) {
+        return (
+            <div className="w-full max-w-7xl mx-auto p-6">
+                <div className="flex items-center justify-center h-64">
+                    <div className="text-red-500">Error: {error}</div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full max-w-7xl mx-auto p-6">
             <div className="space-y-8">
                 {Object.entries(testsByYear)
-                    .sort((a, b) => Number(b[0]) - Number(a[0]))
+                    .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
                     .map(([year, tests]) => (
-                        <section key={year} className="bg-white rounded-xl p-6 shadow-lg">
-                            <h2 className="text-2xl font-bold text-[#374151] border-b-2 border-[#34D399] pb-2 mb-6">
-                                {getTestTitle(year)}
-                            </h2>
-                            <div className="grid gap-4">
-                                {tests.map((test, index) => (
-                                    <motion.div
-                                        key={test.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
-                                    >
+                        <motion.div
+                            key={year}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white rounded-xl shadow-lg p-6"
+                        >
+                            <h2 className="text-2xl font-bold text-[#374151] mb-6">{getTestTitle(year)}</h2>
+                            <div className="grid gap-6">
+                                {tests.map((test) => (
+                                    <div key={test.id} className="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
                                         <div className="flex flex-col gap-4">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
-                                                    {/* Vì backend không trả isNew, tags, difficulty nên tạm ẩn Badge */}
                                                     <h3 className="text-lg font-semibold text-[#374151]">{test.title}</h3>
                                                 </div>
                                                 <span className="text-sm text-gray-500">{year}</span>
@@ -103,7 +130,6 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
 
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                    {/* Có thể bổ sung nếu có dữ liệu thêm */}
                                                 </div>
 
                                                 <motion.button
@@ -117,10 +143,10 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
                                                 </motion.button>
                                             </div>
                                         </div>
-                                    </motion.div>
+                                    </div>
                                 ))}
                             </div>
-                        </section>
+                        </motion.div>
                     ))}
             </div>
         </div>

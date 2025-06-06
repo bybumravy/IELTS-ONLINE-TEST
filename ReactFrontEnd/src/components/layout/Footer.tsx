@@ -44,22 +44,22 @@ export function Footer() {
                         <h3 className="font-semibold mb-4">Tips</h3>
                         <ul className="space-y-2 text-gray-400">
                             <li>
-                                <Link to="/student/listAllTips" className="hover:text-white">
+                                <Link to="/tips/Listening" className="hover:text-white">
                                     Listening Tips
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/student/listAllTips" className="hover:text-white">
+                                <Link to="/tips/Reading" className="hover:text-white">
                                     Reading Tips
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/student/listAllTips" className="hover:text-white">
+                                <Link to="/tips/Writing" className="hover:text-white">
                                     Writing Tips
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/student/listAllTips" className="hover:text-white">
+                                <Link to="/tips/Speaking" className="hover:text-white">
                                     Speaking Tips
                                 </Link>
                             </li>
