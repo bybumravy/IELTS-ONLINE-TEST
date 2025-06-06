@@ -51,22 +51,23 @@ public class TipsController {
     }
 
 
-    @GetMapping("/read/{id}")
+
+    @GetMapping("/Reading/{id}")
     public ReadingTips getTipByIdRead(@PathVariable String id) {
         return tipsService.getTipByIdReading(id);
     }
 
-    @GetMapping("/lis/{id}")
+    @GetMapping("/Listening/{id}")
     public ListeningTips getTipByIdLis(@PathVariable String id) {
         return tipsService.getTipByListening(id);
     }
 
-    @GetMapping("/write/{id}")
+    @GetMapping("/Writing/{id}")
     public WritingTips getTipByIdWrite(@PathVariable String id) {
         return tipsService.getTipByWriting(id);
     }
 
-    @GetMapping("/speak/{id}")
+    @GetMapping("/Speaking/{id}")
     public SpeakingTips getTipByIdSpeak(@PathVariable String id) {
         return tipsService.getTipBySpeaking(id);
     }

@@ -7,6 +7,7 @@ import IELTSTest from "./pages/IELTSTest"
 import { MainLayout } from "@/components/layout/MainLayout"
 import TipPage from "@/pages/TipPage";
 import RegisterPage from "@/components/sections/Register";
+import TipDetail from "@/pages/TipDetail";
 
 
 
@@ -21,6 +22,8 @@ export default function App() {
                     <Route path="/register" element={<RegisterPage />}/>
                     <Route path="/reading" element={<MainLayout><IELTSTest /></MainLayout>}/>
                     <Route path="/DoTest/writing" element={<IELTSWritingPractice />} />
+                    <Route path="/:skill/:id" element={<TipDetail /> as React.ReactNode} />
+                    <Route path="/tips/:skill" element={<TipPage/> as React.ReactNode} />
                 </Routes>
             </Router>
         </AuthProvider>
