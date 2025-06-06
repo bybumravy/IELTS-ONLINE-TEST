@@ -11,28 +11,28 @@ export function NavigationMenu() {
                 <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <div className="py-2">
                         <Link
-                            to="/tests/listening"
+                            to="/test/listening"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <Headphones className="w-4 h-4 mr-3" />
                             Listening Tests
                         </Link>
                         <Link
-                            to="/tests/reading"
+                            to="/test/reading"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <BookOpen className="w-4 h-4 mr-3" />
                             Reading Tests
                         </Link>
                         <Link
-                            to="/tests/writing"
+                            to="/test/writing"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <PenTool className="w-4 h-4 mr-3" />
                             Writing Tests
                         </Link>
                         <Link
-                            to="/tests/speaking"
+                            to="/test/speaking"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <Mic className="w-4 h-4 mr-3" />
@@ -40,7 +40,7 @@ export function NavigationMenu() {
                         </Link>
                         <div className="border-t my-1"></div>
                         <Link
-                            to="/tests/all"
+                            to="/test"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 font-medium"
                         >
                             All Tests
@@ -56,28 +56,28 @@ export function NavigationMenu() {
                 <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <div className="py-2">
                         <Link
-                            to="/student/tips/listening"
+                            to="/tips/Listening"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <Headphones className="w-4 h-4 mr-3" />
                             Listening Tips
                         </Link>
                         <Link
-                            to="/student/tips/reading"
+                            to="/tips/Reading"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <BookOpen className="w-4 h-4 mr-3" />
                             Reading Tips
                         </Link>
                         <Link
-                            to="/student/tips/writing"
+                            to="/tips/Writing"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <PenTool className="w-4 h-4 mr-3" />
                             Writing Tips
                         </Link>
                         <Link
-                            to="/student/tips/speaking"
+                            to="s/tips/Speaking"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <Mic className="w-4 h-4 mr-3" />

@@ -22,8 +22,8 @@ export default function App() {
                     <Route path="/register" element={<RegisterPage />}/>
                     <Route path="/reading" element={<MainLayout><IELTSTest /></MainLayout>}/>
                     <Route path="/DoTest/writing" element={<IELTSWritingPractice />} />
-                    <Route path="/:skill/:id" element={<TipDetail /> as React.ReactNode} />
-                    <Route path="/tips/:skill" element={<TipPage/> as React.ReactNode} />
+                    <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout> as React.ReactNode} />
+                    <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout> as React.ReactNode} />
                 </Routes>
             </Router>
         </AuthProvider>
