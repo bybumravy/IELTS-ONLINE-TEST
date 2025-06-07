@@ -5,11 +5,17 @@ import {BookOpen, Headphones, PenLine, Mic, CheckCircle, BrainCircuit, Lightbulb
 import {Card, CardContent, CardHeader, CardTitle,} from "@/components/ui/card"
 import {Button} from "@/components/ui/button.tsx";
 
-export interface Exercises {
+export interface Section{
     question: string;
-    options?: string[];
-    answer: string | string[];
+    option: string[];
+    correctAnswer: string | string[];
     explanation: string;
+}
+export interface Exercises {
+    passage: string;
+    instruction?: string;
+    image?: string;
+    section: Section[];
 }
 
 export interface TipDetail {
@@ -18,10 +24,13 @@ export interface TipDetail {
     skill: string;
     description: string;
     strategy?: string[];
-    tip?: string[];
+    tips?: string[];
     exercises: Exercises[];
 }
 function TipDetail() {
+    const passage = "Safaricom is the <h1>mobile phone company in Kenya. An M-Pesa account needs to be credited by <h1>. <h1> companies are particularly interested in using M-Pesa.";
+
+    const [answers, setAnswers] = useState<{ [key: number]: string }>({});
 
     const [detail, setDetail] = useState<TipDetail | null>(null);
 
@@ -48,7 +57,23 @@ function TipDetail() {
         );
     }
 
+  //   const replaced = passage.split("<h1>").map((part, idx) => (
+  //       <span key={idx}>
+  //   {part}
+  //           {idx !== passage.split("<h1>").length - 1 && (
+  //               <input
+  //                   type="text"
+  //                   className="mx-1 border rounded px-2 py-1"
+  //                   value={answers[idx] || ""}
+  //                   onChange={(e) =>
+  //                       setAnswers({ ...answers, [idx]: e.target.value })
+  //                   }
+  //               />
+  //           )}
+  // </span>
+  //   ));
     return(
+
         <div className="min-h-screen bg-white">
             <section className="py-16 bg-gray-50">
                 <div className="container mx-auto px-4">
@@ -107,11 +132,8 @@ function TipDetail() {
                                                 <span className="font-bold text-emerald-700">{idx + 1}</span>
                                             </div>
                                             <div>
-                                                <h3 className="font-semibold text-lg text-left">Skim First, Read Later</h3>
-                                                {/*<span className="font-bold text-emerald-700">*/}
-                                                {/*     {idx + 1}*/}
-                                                {/*</span>*/}
-                                                <p className="text-gray-600 text-left">{s}</p>
+                                                <h3 className="font-semibold text-lg text-left">{s}</h3>
+                                                {/*<p className="text-gray-600 text-left">{s}</p>*/}
                                             </div>
                                         </div>
                                     ))}
@@ -119,7 +141,6 @@ function TipDetail() {
                             </CardContent>
                         </Card>
                         {/* Tips Section */}
-                        {detail.tip?.length > 0 && (
                             <Card className="border shadow-sm mb-10">
                                 <CardHeader className="bg-gray-50 border-b">
                                     <div className="flex items-center gap-2">
@@ -129,11 +150,11 @@ function TipDetail() {
                                 </CardHeader>
                                 <CardContent className="p-6">
                                     <div className="grid gap-4">
-                                        {detail.tip?.map((t, idx) => (
+                                        {detail.tips?.map((t, idx) => (
                                             <div key={idx} className="flex items-start gap-3">
                                                 <CheckCircle className="h-5 w-5 text-emerald-500 mt-1" />
                                                 <div>
-                                                    <p className="font-medium text-left">{t}</p>
+                                                    <h3 className="font-medium text-left">{t}</h3>
                                                     {/*<p className="text-sm text-gray-600 text-left">*/}
                                                 </div>
                                             </div>
@@ -141,45 +162,64 @@ function TipDetail() {
                                     </div>
                                 </CardContent>
                             </Card>
-                        )}
                         {/* Practice Exercise */}
                         <Card className="border shadow-sm mb-10">
                             <CardHeader className="bg-gray-50 border-b text-left">
                                 <CardTitle>Practice Exercise</CardTitle>
                             </CardHeader>
                             <CardContent className="p-6 text-left">
-                                {detail.exercises.map((ex, idx) => (
-                                    <div className="prose max-w-none">
-                                        <div key={idx} className="bg-gray-50 p-4 rounded-lg my-4 border">
-                                            <p className="font-medium">
-                                                {idx + 1}. {ex.question}
-                                            </p>
-                                        </div>
+                                <>
+                                    {/* Passage */}
+                                    {/*<div className="flex items-start gap-3 mb-4">*/}
+                                    {/*    <h3 className="font-medium text-center">{detail.passage[0]}</h3>*/}
+                                    {/*</div>*/}
 
-                                        <h4>Questions:</h4>
-                                        {/* Multiple-choice nếu có options */}
-                                        {ex.options && (
-                                            <ul className="list-disc ml-6 space-y-1">
-                                                {ex.options.map((opt) => (
-                                                    <li key={opt}>{opt}</li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                        {/* Ẩn/hiện đáp án */}
-                                        <details className="border-l-4 border-emerald-600 pl-3 mt-2">
-                                            <summary className="cursor-pointer text-emerald-700">
-                                                Answer & Explanation
-                                            </summary>
-                                            <p className="mt-1">
-                                                <strong>Answer:</strong>{" "}
-                                                {Array.isArray(ex.answer)
-                                                    ? ex.answer.join(", ")
-                                                    : ex.answer}
-                                            </p>
-                                            <p className="text-sm text-gray-600">{ex.explanation}</p>
-                                        </details>
-                                    </div>
-                                ))}
+                                    {detail.exercises.map((p, idx) => (
+                                        <div key={idx} className="flex items-start gap-3">
+                                            <div>
+                                                <p className="text-left">{p.passage}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                     {/*Question*/}
+                                    {/*{detail.exercises?.map((ex, idx) => (*/}
+                                    {/*    <p key={idx} className="text-left">*/}
+                                    {/*        <div className="bg-gray-50 p-4 rounded-lg my-4 border">*/}
+                                                {/*<p className="font-medium">*/}
+                                                    {/*{ex.question}*/}
+                                                    {/*<p className="text-left text-lg leading-7">*/}
+                                                    {/*    {replaced}*/}
+                                                    {/*</p>*/}
+                                    {/*            </p>*/}
+                                    {/*        </div>*/}
+                                    {/*    </p>*/}
+                                    {/*))}*/}
+                                    {/*{detail.exercises?.map((ex, idx) => (*/}
+                                    {/*    <div key={idx} className="prose max-w-none">*/}
+                                    {/*        /!*<h4>Questions {idx + 1}:</h4>*!/*/}
+                                    {/*        {ex.options && (*/}
+                                    {/*            <ul className="list-disc ml-6 space-y-1">*/}
+                                    {/*                {ex.options.map((opt) => (*/}
+                                    {/*                    <li key={opt}>{opt}</li>*/}
+                                    {/*                ))}*/}
+                                    {/*            </ul>*/}
+                                    {/*        )}*/}
+                                             {/*Ẩn/hiện đáp án*/}
+                                            {/*<details className="border-l-4 border-emerald-600 pl-3 mt-2">*/}
+                                            {/*    <summary className="cursor-pointer text-emerald-700">*/}
+                                            {/*        Answer & Explanation*/}
+                                            {/*    </summary>*/}
+                                            {/*    <p className="mt-1">*/}
+                                            {/*        <strong>Answer:</strong>{" "}*/}
+                                            {/*        {Array.isArray(ex.correctAnswer)*/}
+                                            {/*            ? ex.correctAnswer.join(", ")*/}
+                                            {/*            : ex.correctAnswer}*/}
+                                            {/*    </p>*/}
+                                            {/*    <p className="text-sm text-gray-600">{ex.explanation}</p>*/}
+                                            {/*</details>*/}
+                                        {/*</div>*/}
+                                    {/*))}*/}
+                                </>
                             </CardContent>
                         </Card>
                         {/* Optional back button */}
