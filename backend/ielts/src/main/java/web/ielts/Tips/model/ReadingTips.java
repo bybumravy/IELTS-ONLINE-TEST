@@ -7,61 +7,89 @@ import java.util.List;
 @Document(collection = "ReadingTips")
 public class ReadingTips {
     private String id;
-
     private String type;
-
     private String description;
     private String skill;
-
-    public String getSkill() {
-        return skill;
-    }
-
-    public void setSkill(String skill) {
-        this.skill = skill;
-    }
-
     private List<String> strategy;
 
     private List<String> tips;
 
     private List<Exercise> exercises;
     public static class Exercise {
-        private String question;
-        private List<String> options;
-        private String answer;
-        private String explanation;
+        private String passage;
+        private String instruction;
+        private String imageUrl;
+        private List<Section> section;
 
-        public String getQuestion() {
-            return question;
+        public static class Section {
+            private String question;
+            private List<String> options;
+            private String correctAnswer;
+            private String explanation;
+
+            public String getQuestion() {
+                return question;
+            }
+
+            public void setQuestion(String question) {
+                this.question = question;
+            }
+
+            public List<String> getOptions() {
+                return options;
+            }
+
+            public void setOptions(List<String> options) {
+                this.options = options;
+            }
+
+            public String getCorrectAnswer() {
+                return correctAnswer;
+            }
+
+            public void setCorrectAnswer(String correctAnswer) {
+                this.correctAnswer = correctAnswer;
+            }
+
+            public String getExplanation() {
+                return explanation;
+            }
+
+            public void setExplanation(String explanation) {
+                this.explanation = explanation;
+            }
         }
 
-        public void setQuestion(String question) {
-            this.question = question;
+        public String getPassage() {
+            return passage;
         }
 
-        public List<String> getOptions() {
-            return options;
+        public void setPassage(String passage) {
+            this.passage = passage;
         }
 
-        public void setOptions(List<String> options) {
-            this.options = options;
+        public String getInstruction() {
+            return instruction;
         }
 
-        public String getAnswer() {
-            return answer;
+        public void setInstruction(String instruction) {
+            this.instruction = instruction;
         }
 
-        public void setAnswer(String answer) {
-            this.answer = answer;
+        public String getImageUrl() {
+            return imageUrl;
         }
 
-        public String getExplanation() {
-            return explanation;
+        public void setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
         }
 
-        public void setExplanation(String explanation) {
-            this.explanation = explanation;
+        public List<Section> getSection() {
+            return section;
+        }
+
+        public void setSection(List<Section> section) {
+            this.section = section;
         }
     }
 
@@ -87,6 +115,14 @@ public class ReadingTips {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getSkill() {
+        return skill;
+    }
+
+    public void setSkill(String skill) {
+        this.skill = skill;
     }
 
     public List<String> getStrategy() {

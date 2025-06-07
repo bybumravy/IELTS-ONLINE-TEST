@@ -27,7 +27,7 @@ public class SpeakingTips {
     private List<String> tips;
 
     private List<Exercise> exercises;
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+//    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     public static class Exercise {
         private String question;
         private String sample_answer;

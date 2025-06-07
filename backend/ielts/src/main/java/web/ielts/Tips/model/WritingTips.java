@@ -6,19 +6,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.List;
 
 @Document(collection = "WritingTips")
-public class WritingTips {
+public class  WritingTips {
     private String id;
-
     private String type;
     private String skill;
-
-    public String getSkill() {
-        return skill;
-    }
-
-    public void setSkill(String skill) {
-        this.skill = skill;
-    }
 
     private String description;
 
@@ -27,7 +18,7 @@ public class WritingTips {
     private List<String> tips;
 
     private List<Exercise> exercises;
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+//    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     public static class Exercise {
         private String prompt;
         private String modelAnswer;
@@ -72,6 +63,14 @@ public class WritingTips {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getSkill() {
+        return skill;
+    }
+
+    public void setSkill(String skill) {
+        this.skill = skill;
     }
 
     public String getDescription() {
