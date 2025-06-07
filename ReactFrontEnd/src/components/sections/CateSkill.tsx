@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Headphones, Book, PenLine, Mic, Target, SlidersHorizontal } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type SkillName = 'Listening' | 'Reading' | 'Writing' | 'Speaking' | 'All Skills';
 
 interface Skill {
     name: SkillName;
-    icon: string;
+    icon: React.ReactNode;
+    description: string;
 }
 
 interface CateSkillProps {
@@ -25,11 +27,31 @@ const CateSkill: React.FC<CateSkillProps> = ({ onSkillChange, initialSkill = 'Al
     }, [initialSkill]);
 
     const skills: Skill[] = [
-        { name: 'All Skills', icon: '🎯' },
-        { name: 'Listening', icon: '🎧' },
-        { name: 'Reading', icon: '📚' },
-        { name: 'Writing', icon: '✍️' },
-        { name: 'Speaking', icon: '🎤' },
+        { 
+            name: 'All Skills', 
+            icon: <Target className="h-6 w-6" />,
+            description: 'Practice all IELTS skills'
+        },
+        { 
+            name: 'Listening', 
+            icon: <Headphones className="h-6 w-6" />,
+            description: 'Improve your listening comprehension'
+        },
+        { 
+            name: 'Reading', 
+            icon: <Book className="h-6 w-6" />,
+            description: 'Enhance your reading skills'
+        },
+        { 
+            name: 'Writing', 
+            icon: <PenLine className="h-6 w-6" />,
+            description: 'Perfect your writing abilities'
+        },
+        { 
+            name: 'Speaking', 
+            icon: <Mic className="h-6 w-6" />,
+            description: 'Develop your speaking proficiency'
+        },
     ];
 
     const handleSkillChange = (skillName: SkillName) => {
@@ -44,69 +66,77 @@ const CateSkill: React.FC<CateSkillProps> = ({ onSkillChange, initialSkill = 'Al
     };
 
     return (
-        <div className="w-full max-w-7xl mx-auto p-6">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white shadow-lg rounded-2xl p-6 space-y-6"
-            >
-                <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-[#374151] mb-2">IELTS Practice Tests</h2>
-                    <p className="text-gray-600">Choose your skill and start practicing</p>
-                </div>
+        <div>
+            <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">IELTS Practice Tests</h2>
+                <p className="text-gray-600">Choose your skill and start practicing</p>
+            </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                    {skills.map((skill) => (
-                        <motion.button
-                            key={skill.name}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => handleSkillChange(skill.name)}
-                            className={`flex flex-col items-center justify-center gap-2 py-3 rounded-lg cursor-pointer select-none
-                                ${
-                                selectedSkill === skill.name
-                                    ? 'bg-[#34D399] text-white shadow-md'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-[#34D399]'
-                            } transition-all duration-300`}
-                        >
-                            <span className="text-2xl">{skill.icon}</span>
-                            <span className="text-sm font-semibold">{skill.name}</span>
-                        </motion.button>
-                    ))}
-                </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {skills.map((skill) => (
+                    <motion.div
+                        key={skill.name}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => handleSkillChange(skill.name)}
+                        className="cursor-pointer"
+                    >
+                        <Card className={`h-full transition-colors duration-300 ${
+                            selectedSkill === skill.name
+                                ? 'bg-emerald-600 text-white border-emerald-600'
+                                : 'bg-white hover:border-emerald-600 hover:text-emerald-600'
+                        }`}>
+                            <CardContent className="flex flex-col items-center justify-center p-6 text-center h-full">
+                                <div className={`mb-3 transition-colors ${
+                                    selectedSkill === skill.name
+                                        ? 'text-white'
+                                        : 'text-emerald-600'
+                                }`}>
+                                    {skill.icon}
+                                </div>
+                                <h3 className="font-semibold mb-1">{skill.name}</h3>
+                                <p className={`text-xs ${
+                                    selectedSkill === skill.name
+                                        ? 'text-white/80'
+                                        : 'text-gray-500'
+                                }`}>
+                                    {skill.description}
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                ))}
+            </div>
 
-                {onSortChange && (
-                    <div className="relative flex justify-end">
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setShowSort(!showSort)}
-                            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-[#34D399]"
-                        >
-                            <SlidersHorizontal size={20} />
-                            <span>Sort by: {sortBy}</span>
-                        </motion.button>
+            <div className="relative flex justify-end mt-6">
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowSort(!showSort)}
+                    className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-emerald-600"
+                >
+                    <SlidersHorizontal size={20} />
+                    <span>Sort by: {sortBy}</span>
+                </motion.button>
 
-                        {showSort && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="absolute top-full right-0 mt-2 bg-white shadow-lg rounded-lg py-2 z-10"
+                {showSort && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute top-full right-0 mt-2 bg-white shadow-lg rounded-lg py-2 z-10 min-w-[160px]"
+                    >
+                        {['Newest', 'Oldest', 'Most Popular'].map((option) => (
+                            <button
+                                key={option}
+                                onClick={() => handleSortChange(option)}
+                                className="w-full px-4 py-2 text-left hover:bg-gray-50 hover:text-emerald-600 transition-colors"
                             >
-                                {['Newest', 'Oldest', 'Most Popular'].map((option) => (
-                                    <button
-                                        key={option}
-                                        onClick={() => handleSortChange(option)}
-                                        className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                                    >
-                                        {option}
-                                    </button>
-                                ))}
-                            </motion.div>
-                        )}
-                    </div>
+                                {option}
+                            </button>
+                        ))}
+                    </motion.div>
                 )}
-            </motion.div>
+            </div>
         </div>
     );
 };

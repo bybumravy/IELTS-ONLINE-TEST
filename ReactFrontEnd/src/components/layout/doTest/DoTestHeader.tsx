@@ -18,7 +18,7 @@ export function DoTestHeader() {
                     <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
                         <BookOpen className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-xl font-bold text-gray-900">IELTS Master</span>
+                    <span className="text-xl font-bold text-gray-900">LANGUAGES</span>
                 </Link>
             </div>
 

@@ -11,30 +11,30 @@ export function Footer() {
                             <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
                                 <BookOpen className="w-5 h-5 text-white" />
                             </div>
-                            <span className="text-xl font-bold">IELTS Master</span>
+                            <span className="text-xl font-bold">LANGUAGES</span>
                         </div>
-                        <p className="text-gray-400">Your comprehensive platform for IELTS test preparation and practice.</p>
+                        <p className="text-gray-400">Your comprehensive platform for language test preparation and practice.</p>
                     </div>
                     <div>
                         <h3 className="font-semibold mb-4">Tests</h3>
                         <ul className="space-y-2 text-gray-400">
                             <li>
-                                <Link to="/tests/listening" className="hover:text-white">
+                                <Link to="/test/listening" className="hover:text-white">
                                     Listening
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/tests/reading" className="hover:text-white">
+                                <Link to="/test/reading" className="hover:text-white">
                                     Reading
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/tests/writing" className="hover:text-white">
+                                <Link to="/test/writing" className="hover:text-white">
                                     Writing
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/tests/speaking" className="hover:text-white">
+                                <Link to="/test/speaking" className="hover:text-white">
                                     Speaking
                                 </Link>
                             </li>
@@ -92,7 +92,7 @@ export function Footer() {
                     </div>
                 </div>
                 <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                    <p>&copy; 2024 IELTS Master. All rights reserved.</p>
+                    <p>&copy; 2024 LANGUAGES. All rights reserved.</p>
                 </div>
             </div>
         </footer>
