@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ListTest {
     id: string;
@@ -17,7 +19,8 @@ interface MockTestProps {
     selectedSkill: 'Listening' | 'Reading' | 'Writing' | 'Speaking' | 'All Skills';
 }
 
-const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => {
+// Sử dụng function component bình thường
+function MockTest({ selectedSkill = 'All Skills' }: MockTestProps) {
     const [testsByYear, setTestsByYear] = useState<TestsByYear>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -39,10 +42,8 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
                 }
                 const data = await response.json();
 
-                // Validate and transform data if needed
                 const transformedData: TestsByYear = {};
                 if (Array.isArray(data)) {
-                    // If data is an array of tests, group by year
                     data.forEach((test: ListTest) => {
                         const year = test.year.toString();
                         if (!transformedData[year]) {
@@ -51,7 +52,6 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
                         transformedData[year].push(test);
                     });
                 } else if (typeof data === 'object') {
-                    // If data is already grouped by year
                     Object.entries(data).forEach(([year, tests]) => {
                         if (Array.isArray(tests)) {
                             transformedData[year] = tests;
@@ -73,10 +73,9 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
     }, [selectedSkill]);
 
     const getTestTitle = (year: string): string => {
-        if (selectedSkill === 'All Skills') {
-            return `IELTS Mock Tests ${year}`;
-        }
-        return `IELTS ${selectedSkill} Practice Tests ${year}`;
+        return selectedSkill === 'All Skills'
+            ? `IELTS Mock Tests ${year}`
+            : `IELTS ${selectedSkill} Practice Tests ${year}`;
     };
 
     const handleStartTest = (testId: string): void => {
@@ -86,71 +85,70 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
 
     if (loading) {
         return (
-            <div className="w-full max-w-7xl mx-auto p-6">
-                <div className="flex items-center justify-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
-                </div>
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="w-full max-w-7xl mx-auto p-6">
-                <div className="flex items-center justify-center h-64">
-                    <div className="text-red-500">Error: {error}</div>
-                </div>
+            <div className="flex items-center justify-center h-64">
+                <div className="text-red-500">Error: {error}</div>
             </div>
         );
     }
 
     return (
-        <div className="w-full max-w-7xl mx-auto p-6">
-            <div className="space-y-8">
-                {Object.entries(testsByYear)
-                    .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
-                    .map(([year, tests]) => (
-                        <motion.div
-                            key={year}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-white rounded-xl shadow-lg p-6"
-                        >
-                            <h2 className="text-2xl font-bold text-[#374151] mb-6">{getTestTitle(year)}</h2>
-                            <div className="grid gap-6">
-                                {tests.map((test) => (
-                                    <div key={test.id} className="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
-                                        <div className="flex flex-col gap-4">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <h3 className="text-lg font-semibold text-[#374151]">{test.title}</h3>
-                                                </div>
-                                                <span className="text-sm text-gray-500">{year}</span>
+        <div className="space-y-8">
+            {Object.entries(testsByYear)
+                .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
+                .map(([year, tests]) => (
+                    <motion.div
+                        key={year}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        <div className="mb-6">
+                            <Badge className="bg-gray-100 text-emerald-800 font-normal mb-3">
+                                <BookOpen className="h-3 w-3 mr-1" />
+                                {year}
+                            </Badge>
+                            <h2 className="text-3xl font-bold text-[#374151]">{getTestTitle(year)}</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {tests.map((test) => (
+                                <Card key={test.id} className="border shadow-sm">
+                                    <CardHeader className="bg-gray-50 border-b">
+                                        <CardTitle className="text-lg font-semibold text-[#374151]">
+                                            {test.title}
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                <Badge variant="secondary">
+                                                    {selectedSkill === 'All Skills' ? 'Full Test' : selectedSkill}
+                                                </Badge>
                                             </div>
-
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                </div>
-
-                                                <motion.button
-                                                    whileHover={{ scale: 1.05 }}
-                                                    whileTap={{ scale: 0.95 }}
-                                                    onClick={() => handleStartTest(test.id)}
-                                                    className="flex items-center gap-2 bg-[#34D399] text-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md hover:bg-[#FAFAF9] hover:text-[#374151] transition-all duration-300"
-                                                >
-                                                    <span>Start</span>
-                                                    <ArrowRight size={16} />
-                                                </motion.button>
-                                            </div>
+                                            <motion.button
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                onClick={() => handleStartTest(test.id)}
+                                                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow-sm transition-all duration-300"
+                                            >
+                                                <span>Start Test</span>
+                                                <ArrowRight size={16} />
+                                            </motion.button>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </motion.div>
-                    ))}
-            </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </motion.div>
+                ))}
         </div>
     );
-};
+}
 
 export default MockTest;

@@ -1,32 +1,23 @@
 package web.ielts.Test.model;
-
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-
+import java.util.List;
 @Document(collection = "Writing")
 public class Writing {
     @Id
-    private String id;
+    private ObjectId id;
     private String testId;
-    private WritingTask task1;
-    private WritingTask task2;
+    private List<Task> tasks;
 
-    public Writing() {
-    }
+    // Getter & Setter
 
-    public Writing(String id, String testId, WritingTask task1, WritingTask task2) {
-        this.id = id;
-        this.testId = testId;
-        this.task1 = task1;
-        this.task2 = task2;
-    }
-
-    public String getId() {
+    public ObjectId getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(ObjectId id) {
         this.id = id;
     }
 
@@ -38,48 +29,54 @@ public class Writing {
         this.testId = testId;
     }
 
-    public WritingTask getTask1() {
-        return task1;
+    public List<Task> getTasks() {
+        return tasks;
     }
 
-    public void setTask1(WritingTask task1) {
-        this.task1 = task1;
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
     }
 
-    public WritingTask getTask2() {
-        return task2;
-    }
+    // Inner class cho Task
+    public static class Task {
 
-    public void setTask2(WritingTask task2) {
-        this.task2 = task2;
-    }
+        private int taskNumber;
+        private String type;
+        private String question;
+        private String sampleAnswer;
 
-    public static class WritingTask {
-        private String prompt;
-        private String imageUrl;
+        // Getter & Setter
 
-        public WritingTask() {
+        public int getTaskNumber() {
+            return taskNumber;
         }
 
-        public WritingTask(String prompt, String imageUrl) {
-            this.prompt = prompt;
-            this.imageUrl = imageUrl;
+        public void setTaskNumber(int taskNumber) {
+            this.taskNumber = taskNumber;
         }
 
-        public String getPrompt() {
-            return prompt;
+        public String getType() {
+            return type;
         }
 
-        public void setPrompt(String prompt) {
-            this.prompt = prompt;
+        public void setType(String type) {
+            this.type = type;
         }
 
-        public String getImageUrl() {
-            return imageUrl;
+        public String getQuestion() {
+            return question;
         }
 
-        public void setImageUrl(String imageUrl) {
-            this.imageUrl = imageUrl;
+        public void setQuestion(String question) {
+            this.question = question;
+        }
+
+        public String getSampleAnswer() {
+            return sampleAnswer;
+        }
+
+        public void setSampleAnswer(String sampleAnswer) {
+            this.sampleAnswer = sampleAnswer;
         }
     }
 }

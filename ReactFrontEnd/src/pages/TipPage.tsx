@@ -1,125 +1,177 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search } from "lucide-react"
+import { Search, Headphones, Book, PenLine, Mic } from "lucide-react"
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
 
 type Skill = "Listening" | "Reading" | "Writing" | "Speaking";
 
 interface Tip {
-    id: string | number;
-    type: string;
-    skill: string;
+    id: string
+    skill: string
+    type: string
+    description: string
+}
+
+interface SkillInfo {
+    name: Skill;
+    icon: React.ReactNode;
     description: string;
 }
+
 function TipPage() {
-    // useParams() là hook dùng để lấy các tham số được khai báo trong URL Route.
-    // Nếu URL là /tips/Listening → useParams() sẽ trả về { skill: "Listening" }
-    const { skill: urlSkill } = useParams<{ skill?: Skill }>();
+    const { skill } = useParams();
     const navigate = useNavigate();
+    const [currentSkill, setCurrentSkill] = useState<Skill>(skill as Skill || "Listening");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [tips, setTips] = useState<Tip[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // mặc định Reading
-    const currentSkill: Skill = urlSkill ?? "Listening";
+    const skills: SkillInfo[] = [
+        {
+            name: "Listening",
+            icon: <Headphones className="h-6 w-6" />,
+            description: "Improve your listening comprehension"
+        },
+        {
+            name: "Reading",
+            icon: <Book className="h-6 w-6" />,
+            description: "Enhance your reading skills"
+        },
+        {
+            name: "Writing",
+            icon: <PenLine className="h-6 w-6" />,
+            description: "Perfect your writing abilities"
+        },
+        {
+            name: "Speaking",
+            icon: <Mic className="h-6 w-6" />,
+            description: "Develop your speaking proficiency"
+        }
+    ];
 
-    const [tips, setTips]     = useState<Tip[]>([]);
-    const [search, setSearch] = useState("");
-
-    const handleNavigate = (path: string): void => {
-        navigate(path);
-    };
-
-
-    // Gọi API khi khởi động (chỉ giữ nếu dùng dữ liệu thật)
     useEffect(() => {
-        fetch(`http://localhost:8080/api/student/${currentSkill}`)
-            .then((res) => res.json())
-            .then((data: Tip[]) => {
+        if (skill) {
+            setCurrentSkill(skill as Skill);
+        }
+    }, [skill]);
+
+    useEffect(() => {
+        const fetchTips = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await fetch(`http://localhost:8080/api/student/${currentSkill}`);
+                if (!response.ok) throw new Error('Failed to fetch tips');
+                const data = await response.json();
                 setTips(data);
-            })
-            .catch((err) => console.error(err));
+            } catch (error) {
+                console.error('Error fetching tips:', error);
+                setError('Failed to load tips. Please try again later.');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTips();
     }, [currentSkill]);
 
-    const filtered  = useMemo(() => {
-        return tips.filter(
-            (t) =>
-                t.skill === currentSkill &&
-                t.type.toLowerCase().includes(search.trim().toLowerCase()),
+    const filtered = useMemo(() => {
+        return tips.filter(tip =>
+            tip.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            tip.description.toLowerCase().includes(searchQuery.toLowerCase())
         );
-    }, [tips, currentSkill, search]);
+    }, [tips, searchQuery]);
+
+    const handleSkillChange = (newSkill: Skill) => {
+        setCurrentSkill(newSkill);
+        navigate(`/tips/${newSkill}`);
+    };
+
     return (
-        <div className="min-h-screen bg-background">
-            <header className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-primary-foreground py-8">
-                <div className="container mx-auto px-4 ">
-                    <h1 className="text-4xl md:text-5xl font-bold text-center">IELTS Tips</h1>
-                    <p className="text-center mt-3 text-primary-foreground/90 text-lg">IELTS Test Strategies and Tips</p>
-                </div>
-            </header>
-
+        <div className="min-h-screen bg-gray-50">
             <div className="container mx-auto px-4 py-8">
-                <div className="flex flex-col md:flex-row gap-4 mb-8 place-items-center grid">
-                    <div className="flex relative w-full md:w-96">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search IELTS tips sections..."
-                            className="pl-8 w-full"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
+                <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Study Tips</h2>
+                    <p className="text-gray-600">Choose a skill to explore study tips and techniques</p>
                 </div>
 
-                {/*ShadCN/ui Tabs thiết kế với onValueChange: (value: string) => void nhưng setSkill nhận Skill thay vì string*/}
-                <Tabs value={currentSkill}
-                      onValueChange={(v) => navigate(`/tips/${v}`)} className="w-full grid place-items-center">
-                    <TabsList className="grid grid-cols-4 mb-8 bg-white/10 border place-items-center w-full">
-                        <>{["Listening", "Reading", "Writing", "Speaking"].map((s) => (
-                            <TabsTrigger
-                                key={s}
-                                value={s}
-                                className="data-[state=active]:bg-gradient-to-r from-emerald-600 to-emerald-700 data-[state=active]:text-primary-foreground w-full">
-                                {s}
-                            </TabsTrigger>
-                        ))}</>
-                    </TabsList>
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    {skills.map((skillInfo) => (
+                        <motion.div
+                            key={skillInfo.name}
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={() => handleSkillChange(skillInfo.name)}
+                            className="cursor-pointer"
+                        >
+                            <Card className={`h-full transition-colors duration-300 ${
+                                currentSkill === skillInfo.name
+                                    ? 'bg-emerald-600 text-white border-emerald-600'
+                                    : 'bg-white hover:border-emerald-600 hover:text-emerald-600'
+                            }`}>
+                                <CardContent className="flex flex-col items-center justify-center p-6 text-center h-full">
+                                    <div className={`mb-3 transition-colors ${
+                                        currentSkill === skillInfo.name
+                                            ? 'text-white'
+                                            : 'text-emerald-600'
+                                    }`}>
+                                        {skillInfo.icon}
+                                    </div>
+                                    <h3 className="font-semibold mb-1">{skillInfo.name}</h3>
+                                    <p className={`text-xs ${
+                                        currentSkill === skillInfo.name
+                                            ? 'text-white/80'
+                                            : 'text-gray-500'
+                                    }`}>
+                                        {skillInfo.description}
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    ))}
+                </div>
 
+                <div className="relative mb-6">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <input
+                        type="text"
+                        placeholder="Search tips..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                </div>
 
-                    <TabsContent value={currentSkill} className="space-y-6">
-                        <h2 className="text-2xl font-bold mb-6 text-primary text-center">IELTS {currentSkill}</h2>
-                        <>{filtered.length === 0 ? (
-                            <p className="text-muted-foreground">Not found tip.</p>
-                        ):(
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {filtered.map((t) => (
-                                    <QuestionTypeCard key={t.id} title={t.type} description={t.description}
-                                                      onClick={() => navigate(`/${currentSkill}/${t.id}`)}/>
-                                ))}
-                            </div>
-                        )}</>
-                    </TabsContent>
-                </Tabs>
+                {loading ? (
+                    <div className="flex justify-center items-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+                    </div>
+                ) : error ? (
+                    <div className="text-red-500 text-center py-12">{error}</div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filtered.length === 0 ? (
+                            <p className="text-gray-500 col-span-full text-center">No tips found.</p>
+                        ) : (
+                            filtered.map((tip) => (
+                                <Card
+                                    key={tip.id}
+                                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                                    onClick={() => navigate(`/${currentSkill}/${tip.id}`)}
+                                >
+                                    <CardHeader>
+                                        <CardTitle>{tip.type}</CardTitle>
+                                        <CardDescription className="line-clamp-2">{tip.description}</CardDescription>
+                                    </CardHeader>
+                                </Card>
+                            ))
+                        )}
+                    </div>
+                )}
             </div>
         </div>
-    )
-}
-interface QuestionTypeCardProps {
-    title: string
-    description: string
-    onClick?: () => void;
+    );
 }
 
-function QuestionTypeCard({ title, description, onClick }: QuestionTypeCardProps) {
-    return (
-        <Card onClick={onClick}
-              className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-primary">
-            <CardHeader>
-                <CardTitle className="text-primary">{title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <CardDescription className="text-base leading-relaxed">{description}</CardDescription>
-            </CardContent>
-        </Card>
-    )
-}
 export default TipPage;

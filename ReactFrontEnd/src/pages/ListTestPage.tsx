@@ -3,9 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CateSkill from "@/components/sections/CateSkill";
 import MockTest from "@/components/sections/MockTest";
 
+// Định nghĩa type kỹ năng
 type SkillType = 'Listening' | 'Reading' | 'Writing' | 'Speaking' | 'All Skills';
 
-const ListTestPage: React.FC = () => {
+// Không có props nên không cần interface, nhưng nếu có thể viết như sau:
+// interface ListTestPageProps {
+//     // có thể thêm props nếu cần
+// }
+
+const ListTestPage = () => {
     const { skill } = useParams<{ skill?: string }>();
     const navigate = useNavigate();
     const [selectedSkill, setSelectedSkill] = useState<SkillType>('All Skills');
@@ -34,13 +40,21 @@ const ListTestPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <CateSkill
-                onSkillChange={handleSkillChange}
-                initialSkill={selectedSkill}
-                onSortChange={handleSortChange}
-            />
-            <MockTest selectedSkill={selectedSkill} />
+        <div className="min-h-screen bg-white">
+            <section className="py-8 bg-gray-50">
+                <div className="container mx-auto">
+                    <CateSkill
+                        onSkillChange={handleSkillChange}
+                        initialSkill={selectedSkill}
+                        onSortChange={handleSortChange}
+                    />
+                </div>
+            </section>
+            <section className="py-8">
+                <div className="container mx-auto">
+                    <MockTest selectedSkill={selectedSkill} />
+                </div>
+            </section>
         </div>
     );
 };
