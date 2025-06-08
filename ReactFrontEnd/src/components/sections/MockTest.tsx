@@ -19,7 +19,8 @@ interface MockTestProps {
     selectedSkill: 'Listening' | 'Reading' | 'Writing' | 'Speaking' | 'All Skills';
 }
 
-const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => {
+// Sử dụng function component bình thường
+function MockTest({ selectedSkill = 'All Skills' }: MockTestProps) {
     const [testsByYear, setTestsByYear] = useState<TestsByYear>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -72,10 +73,9 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
     }, [selectedSkill]);
 
     const getTestTitle = (year: string): string => {
-        if (selectedSkill === 'All Skills') {
-            return `IELTS Mock Tests ${year}`;
-        }
-        return `IELTS ${selectedSkill} Practice Tests ${year}`;
+        return selectedSkill === 'All Skills'
+            ? `IELTS Mock Tests ${year}`
+            : `IELTS ${selectedSkill} Practice Tests ${year}`;
     };
 
     const handleStartTest = (testId: string): void => {
@@ -149,6 +149,6 @@ const MockTest: React.FC<MockTestProps> = ({ selectedSkill = 'All Skills' }) => 
                 ))}
         </div>
     );
-};
+}
 
 export default MockTest;

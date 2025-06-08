@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Headphones, Book, PenLine, Mic, Target, SlidersHorizontal } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 type SkillName = 'Listening' | 'Reading' | 'Writing' | 'Speaking' | 'All Skills';
 
@@ -17,7 +17,7 @@ interface CateSkillProps {
     onSortChange?: (sortOption: string) => void;
 }
 
-const CateSkill: React.FC<CateSkillProps> = ({ onSkillChange, initialSkill = 'All Skills', onSortChange }) => {
+function CateSkill({ onSkillChange, initialSkill = 'All Skills', onSortChange }: CateSkillProps) {
     const [selectedSkill, setSelectedSkill] = useState<SkillName>(initialSkill);
     const [showSort, setShowSort] = useState<boolean>(false);
     const [sortBy, setSortBy] = useState<string>('Newest');
@@ -27,28 +27,28 @@ const CateSkill: React.FC<CateSkillProps> = ({ onSkillChange, initialSkill = 'Al
     }, [initialSkill]);
 
     const skills: Skill[] = [
-        { 
-            name: 'All Skills', 
+        {
+            name: 'All Skills',
             icon: <Target className="h-6 w-6" />,
             description: 'Practice all IELTS skills'
         },
-        { 
-            name: 'Listening', 
+        {
+            name: 'Listening',
             icon: <Headphones className="h-6 w-6" />,
             description: 'Improve your listening comprehension'
         },
-        { 
-            name: 'Reading', 
+        {
+            name: 'Reading',
             icon: <Book className="h-6 w-6" />,
             description: 'Enhance your reading skills'
         },
-        { 
-            name: 'Writing', 
+        {
+            name: 'Writing',
             icon: <PenLine className="h-6 w-6" />,
             description: 'Perfect your writing abilities'
         },
-        { 
-            name: 'Speaking', 
+        {
+            name: 'Speaking',
             icon: <Mic className="h-6 w-6" />,
             description: 'Develop your speaking proficiency'
         },
@@ -139,6 +139,6 @@ const CateSkill: React.FC<CateSkillProps> = ({ onSkillChange, initialSkill = 'Al
             </div>
         </div>
     );
-};
+}
 
 export default CateSkill;
