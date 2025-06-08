@@ -9,12 +9,12 @@ export interface Section{
     question: string;
     options?: string[];
     answer: string | string[];
-    explanation: string;
+    explanation: string | string[];
 }
 export interface Exercises {
     paragraph: string;
     instruction: string;
-    image?: string;
+    imageUrl?: string;
     section: Section[];
 }
 
@@ -167,6 +167,16 @@ function TipDetail() {
                                 <>
                                     {detail.exercises.map((exercise, idx) => (
                                         <div key={idx} className="mb-12">
+                                            {/* Hiển thị hình ảnh */}
+                                            {exercise.imageUrl && (
+                                                <div className="mb-4">
+                                                    <img
+                                                        src={exercise.imageUrl}
+                                                        alt="Diagram"
+                                                        className="w-full h-auto border rounded-lg"
+                                                    />
+                                                </div>
+                                            )}
                                             {/* Hiển thị đoạn paragraph với html */}
                                             <div className="mb-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: exercise.paragraph }} />
 
@@ -177,22 +187,67 @@ function TipDetail() {
                                             {exercise.section.map((q, qIdx) => (
                                                 <div key={qIdx} className="mb-6 p-4 border rounded-lg bg-gray-50">
                                                     <div className="flex items-center gap-2">
-                                                        <label className="block mb-1 font-semibold" htmlFor={`select-${idx}`}>
-                                                            {qIdx + 1}.
-                                                        </label>
-                                                        <p className="font-medium">{q.question}</p>
-                                                        <select
-                                                            id={`select-${idx}`}
-                                                            className="border rounded px-2 py-1 mb-2"
-                                                            defaultValue=""  // mặc định chưa chọn option nào
-                                                        >
-                                                            <option value="" disabled></option>
-                                                            {q.options?.map((opt, i) => (
-                                                                <option key={i} value={opt}>
-                                                                    {opt}
-                                                                </option>
-                                                            ))}
-                                                        </select>
+                                                        {(() => {
+                                                            // Multiple Choice (True/False/Not Given)
+                                                            if (q.options && q.options.length > 0 && q.options.includes("True")) {
+                                                                return (
+                                                                    <div className="ml-2 inline-block">
+                                                                        <label className="inline-block mb-1 font-semibold" htmlFor={`input-${idx}-${qIdx}`}>
+                                                                            {qIdx + 1}.
+                                                                        </label>
+                                                                        <p className="font-medium inline-block px-2">{q.question}</p>
+                                                                        <select
+                                                                            id={`input-${idx}-${qIdx}`}
+                                                                            className="border rounded px-2 py-1 mt-1 inline-block"
+                                                                            defaultValue=""
+                                                                        >
+                                                                            <option value="" disabled></option>
+                                                                            {q.options.map((opt, i) => (
+                                                                                <option key={i} value={opt}>
+                                                                                    {opt}
+                                                                                </option>
+                                                                            ))}
+                                                                        </select>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            // Sentence Completion (nhiều <h1> trong question)
+                                                            else if ((q.question.match(/<h1>/g) || []).length > 1) {
+                                                                const parts = q.question.split("<h1>");
+                                                                return (
+                                                                    <div className="ml-2">
+                                                                        {parts.map((part, pIdx) => (
+                                                                            <span key={pIdx} className="inline-flex items-center">
+                                                                            <p className="font-medium">{part}</p>
+                                                                                {pIdx < parts.length - 1 && (
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        className="border rounded px-1 py-1 mx-1"
+                                                                                        placeholder=""
+                                                                                    />
+                                                                                )}
+                                                                        </span>
+                                                                        ))}
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            // Diagram Completion (một <h1> trong question)
+                                                            else if ((q.question.match(/<h1>/g) || []).length === 1) {
+                                                                const parts = q.question.split("<h1>");
+                                                                return (
+                                                                    <div className="ml-2 inline-block">
+                                                                        <p className="font-medium inline-block">{parts[0]}</p>
+                                                                        <input
+                                                                            type="text"
+                                                                            id={`input-${idx}-${qIdx}`}
+                                                                            className="border rounded px-2 py-1 ml-2 inline-block"
+                                                                            placeholder=""
+                                                                        />
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            return null; // Trường hợp không xác định
+                                                        })()}
                                                     </div>
                                                     {/* Đáp án đúng */}
                                                     <details className="border-l-4 border-emerald-600 pl-3 mt-2">
@@ -200,7 +255,7 @@ function TipDetail() {
                                                             Answer & Explanation
                                                         </summary>
                                                         <p className="mt-1">
-                                                            <strong>Answer:</strong> {Array.isArray(q.answer) ? q.answer.join(", ") : q.answer}
+                                                            <strong>Answer:</strong> {Array.isArray(q.answer) ? q.answer : q.answer}
 
                                                     </p>
                                                         <p className="text-sm text-gray-600">{q.explanation}</p>
@@ -210,44 +265,6 @@ function TipDetail() {
                                             ))}
                                         </div>
                                     ))}
-                                     {/*Question*/}
-                                    {/*{detail.exercises?.map((ex, idx) => (*/}
-                                    {/*    <p key={idx} className="text-left">*/}
-                                    {/*        <div className="bg-gray-50 p-4 rounded-lg my-4 border">*/}
-                                                {/*<p className="font-medium">*/}
-                                                    {/*{ex.question}*/}
-                                                    {/*<p className="text-left text-lg leading-7">*/}
-                                                    {/*    {replaced}*/}
-                                                    {/*</p>*/}
-                                    {/*            </p>*/}
-                                    {/*        </div>*/}
-                                    {/*    </p>*/}
-                                    {/*))}*/}
-                                    {/*{detail.exercises?.map((ex, idx) => (*/}
-                                    {/*    <div key={idx} className="prose max-w-none">*/}
-                                    {/*        /!*<h4>Questions {idx + 1}:</h4>*!/*/}
-                                    {/*        {ex.options && (*/}
-                                    {/*            <ul className="list-disc ml-6 space-y-1">*/}
-                                    {/*                {ex.options.map((opt) => (*/}
-                                    {/*                    <li key={opt}>{opt}</li>*/}
-                                    {/*                ))}*/}
-                                    {/*            </ul>*/}
-                                    {/*        )}*/}
-                                             {/*Ẩn/hiện đáp án*/}
-                                            {/*<details className="border-l-4 border-emerald-600 pl-3 mt-2">*/}
-                                            {/*    <summary className="cursor-pointer text-emerald-700">*/}
-                                            {/*        Answer & Explanation*/}
-                                            {/*    </summary>*/}
-                                            {/*    <p className="mt-1">*/}
-                                            {/*        <strong>Answer:</strong>{" "}*/}
-                                            {/*        {Array.isArray(ex.correctAnswer)*/}
-                                            {/*            ? ex.correctAnswer.join(", ")*/}
-                                            {/*            : ex.correctAnswer}*/}
-                                            {/*    </p>*/}
-                                            {/*    <p className="text-sm text-gray-600">{ex.explanation}</p>*/}
-                                            {/*</details>*/}
-                                        {/*</div>*/}
-                                    {/*))}*/}
                                 </>
                             </CardContent>
                         </Card>
