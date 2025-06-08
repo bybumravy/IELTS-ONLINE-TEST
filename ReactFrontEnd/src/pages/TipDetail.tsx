@@ -7,13 +7,13 @@ import {Button} from "@/components/ui/button.tsx";
 
 export interface Section{
     question: string;
-    option: string[];
-    correctAnswer: string | string[];
+    options?: string[];
+    answer: string | string[];
     explanation: string;
 }
 export interface Exercises {
-    passage: string;
-    instruction?: string;
+    paragraph: string;
+    instruction: string;
     image?: string;
     section: Section[];
 }
@@ -28,10 +28,6 @@ export interface TipDetail {
     exercises: Exercises[];
 }
 function TipDetail() {
-    const passage = "Safaricom is the <h1>mobile phone company in Kenya. An M-Pesa account needs to be credited by <h1>. <h1> companies are particularly interested in using M-Pesa.";
-
-    const [answers, setAnswers] = useState<{ [key: number]: string }>({});
-
     const [detail, setDetail] = useState<TipDetail | null>(null);
 
     const { skill, id } = useParams<{ skill: string; id: string }>();
@@ -169,16 +165,49 @@ function TipDetail() {
                             </CardHeader>
                             <CardContent className="p-6 text-left">
                                 <>
-                                    {/* Passage */}
-                                    {/*<div className="flex items-start gap-3 mb-4">*/}
-                                    {/*    <h3 className="font-medium text-center">{detail.passage[0]}</h3>*/}
-                                    {/*</div>*/}
+                                    {detail.exercises.map((exercise, idx) => (
+                                        <div key={idx} className="mb-12">
+                                            {/* Hiển thị đoạn paragraph với html */}
+                                            <div className="mb-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: exercise.paragraph }} />
 
-                                    {detail.exercises.map((p, idx) => (
-                                        <div key={idx} className="flex items-start gap-3">
-                                            <div>
-                                                <p className="text-left">{p.passage}</p>
-                                            </div>
+                                            {/* Hiển thị instruction */}
+                                            <p className="mb-6 font-semibold italic" dangerouslySetInnerHTML={{ __html: exercise.instruction}}/>
+
+                                            {/* Hiển thị từng câu hỏi */}
+                                            {exercise.section.map((q, qIdx) => (
+                                                <div key={qIdx} className="mb-6 p-4 border rounded-lg bg-gray-50">
+                                                    <div className="flex items-center gap-2">
+                                                        <label className="block mb-1 font-semibold" htmlFor={`select-${idx}`}>
+                                                            {qIdx + 1}.
+                                                        </label>
+                                                        <p className="font-medium">{q.question}</p>
+                                                        <select
+                                                            id={`select-${idx}`}
+                                                            className="border rounded px-2 py-1 mb-2"
+                                                            defaultValue=""  // mặc định chưa chọn option nào
+                                                        >
+                                                            <option value="" disabled></option>
+                                                            {q.options?.map((opt, i) => (
+                                                                <option key={i} value={opt}>
+                                                                    {opt}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    {/* Đáp án đúng */}
+                                                    <details className="border-l-4 border-emerald-600 pl-3 mt-2">
+                                                        <summary className="cursor-pointer text-emerald-700">
+                                                            Answer & Explanation
+                                                        </summary>
+                                                        <p className="mt-1">
+                                                            <strong>Answer:</strong> {Array.isArray(q.answer) ? q.answer.join(", ") : q.answer}
+
+                                                    </p>
+                                                        <p className="text-sm text-gray-600">{q.explanation}</p>
+                                                    </details>
+
+                                                </div>
+                                            ))}
                                         </div>
                                     ))}
                                      {/*Question*/}

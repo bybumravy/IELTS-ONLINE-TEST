@@ -16,7 +16,7 @@ public class ReadingTips {
 
     private List<Exercise> exercises;
     public static class Exercise {
-        private String passage;
+        private String paragraph;
         private String instruction;
         private String imageUrl;
         private List<Section> section;
@@ -24,7 +24,7 @@ public class ReadingTips {
         public static class Section {
             private String question;
             private List<String> options;
-            private String correctAnswer;
+            private String answer;
             private String explanation;
 
             public String getQuestion() {
@@ -43,12 +43,12 @@ public class ReadingTips {
                 this.options = options;
             }
 
-            public String getCorrectAnswer() {
-                return correctAnswer;
+            public String getAnswer() {
+                return answer;
             }
 
-            public void setCorrectAnswer(String correctAnswer) {
-                this.correctAnswer = correctAnswer;
+            public void setAnswer(String correctAnswer) {
+                this.answer = correctAnswer;
             }
 
             public String getExplanation() {
@@ -60,12 +60,12 @@ public class ReadingTips {
             }
         }
 
-        public String getPassage() {
-            return passage;
+        public String getParagraph() {
+            return paragraph;
         }
 
-        public void setPassage(String passage) {
-            this.passage = passage;
+        public void setParagraph(String passage) {
+            this.paragraph = passage;
         }
 
         public String getInstruction() {

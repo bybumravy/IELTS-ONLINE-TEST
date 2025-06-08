@@ -15,16 +15,16 @@ export default function App() {
         <AuthProvider>
             <Router>
                 <Routes>
-                    <Route path="/" element={<MainLayout><HomePage /></MainLayout>}/>
-                    <Route path="/login" element={<Login />}/>
-                    <Route path="/student/listAllTips" element={<MainLayout><TipPage /></MainLayout>}/>
-                    <Route path="/register" element={<RegisterPage />}/>
-                    <Route path="/reading" element={<MainLayout><IELTSTest /></MainLayout>}/>
-                    <Route path="/DoTest/writing" element={<IELTSWritingPractice />} />
+                    <Route path="/" element={<MainLayout><HomePage /></MainLayout> as React.ReactNode}/>
+                    <Route path="/login" element={<Login /> as React.ReactNode}/>
+                    <Route path="/student/listAllTips" element={<MainLayout><TipPage /></MainLayout> as React.ReactNode}/>
+                    <Route path="/register" element={<RegisterPage /> as React.ReactNode}/>
+                    <Route path="/reading" element={<MainLayout><IELTSTest /></MainLayout> as React.ReactNode}/>
+                    <Route path="/DoTest/writing" element={<IELTSWritingPractice /> as React.ReactNode} />
                     <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout> as React.ReactNode} />
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout> as React.ReactNode} />
-                    <Route path="/test" element={<MainLayout><ListTestPage /></MainLayout>} />
-                    <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout>} />
+                    <Route path="/test" element={<MainLayout><ListTestPage /></MainLayout> as React.ReactNode} />
+                    <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout> as React.ReactNode} />
                 </Routes>
             </Router>
         </AuthProvider>
