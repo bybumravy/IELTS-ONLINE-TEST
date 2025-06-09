@@ -22,16 +22,16 @@ public class ReadingTips {
         private List<Section> section;
 
         public static class Section {
-            private String question;
+            private List<String> question;
             private List<String> options;
             private String answer;
             private String explanation;
 
-            public String getQuestion() {
+            public List<String> getQuestion() {
                 return question;
             }
 
-            public void setQuestion(String question) {
+            public void setQuestion(List<String> question) {
                 this.question = question;
             }
 

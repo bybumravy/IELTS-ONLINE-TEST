@@ -1,3 +1,26 @@
+export interface Section{
+    question: string | string[];
+    options?: string[];
+    answer: string | string[];
+    explanation: string | string[];
+}
+export interface Exercises {
+    paragraph?: string;
+    audioUrl?: string;
+    instruction: string;
+    imageUrl?: string;
+    section: Section[];
+}
+
+export interface TipDetail {
+    id: string | number;
+    type: string;
+    skill: string;
+    description: string;
+    strategy?: string[];
+    tips?: string[];
+    exercises: Exercises[];
+}
 export interface IELTSTest {
     id: string
     testTitle: string

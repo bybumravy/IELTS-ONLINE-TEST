@@ -5,7 +5,7 @@ import MockTest from "@/components/sections/MockTest";
 
 type SkillType = 'Listening' | 'Reading' | 'Writing' | 'Speaking' | 'All Skills';
 
-const ListTestPage: React.FC = () => {
+const ListTestPage = () => {
     const { skill } = useParams<{ skill?: string }>();
     const navigate = useNavigate();
     const [selectedSkill, setSelectedSkill] = useState<SkillType>('All Skills');
