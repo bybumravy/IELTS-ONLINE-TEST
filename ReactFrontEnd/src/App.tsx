@@ -9,6 +9,10 @@ import RegisterPage from "@/components/sections/Register";
 import TipDetail from "@/pages/TipDetail";
 import ListTestPage from "@/pages/ListTestPage";
 import ListeningTestPage from "@/pages/DoTest/ListeningTest";
+import { StaffPage } from "./pages/StaffPage"
+import { StaffLayout } from "./components/layout/Staff/StaffLayout"
+import AddTest from "./pages/AddTest"
+import StaffLogin from "./components/sections/StaffLogin"
 
 export default function App() {
     return (
@@ -17,6 +21,9 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={<MainLayout><HomePage /></MainLayout>}/>
                     <Route path="/login" element={<Login />}/>
+                    <Route path="/staff-login" element={<StaffLogin />}/>
+                    <Route path="/staff-page" element={<StaffLayout><StaffPage /></StaffLayout>}/>
+                    <Route path="/add-test" element={<StaffLayout><AddTest /></StaffLayout>}/>
                     <Route path="/student/listAllTips" element={<MainLayout><TipPage /></MainLayout>}/>
                     <Route path="/register" element={<RegisterPage />}/>
                     <Route path="/doTest/writing" element={<IELTSWritingPractice />} />

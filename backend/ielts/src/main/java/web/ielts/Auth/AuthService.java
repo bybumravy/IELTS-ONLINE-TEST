@@ -50,7 +50,13 @@ public class AuthService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
+    public String getRoleFromToken(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("Missing token");
+        }
 
+        return JwtToken.extractRole(token);
+    }
     public String getUsernameFromToken(String token) {
         if (token == null || token.isEmpty()) {
             throw new RuntimeException("Missing token");
