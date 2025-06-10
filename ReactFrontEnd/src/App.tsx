@@ -3,12 +3,12 @@ import { HomePage } from "@/pages/HomePage"
 import IELTSWritingPractice from "@/pages/DoTest/WritingTest"
 import { AuthProvider } from "@/contexts/AuthContext"
 import Login from "@/components/sections/Login"
-import IELTSTest from "./pages/IELTSTest"
 import { MainLayout } from "@/components/layout/MainLayout"
 import TipPage from "@/pages/TipPage";
 import RegisterPage from "@/components/sections/Register";
 import TipDetail from "@/pages/TipDetail";
 import ListTestPage from "@/pages/ListTestPage";
+import ListeningTestPage from "@/pages/DoTest/ListeningTest";
 
 export default function App() {
     return (
@@ -19,8 +19,8 @@ export default function App() {
                     <Route path="/login" element={<Login />}/>
                     <Route path="/student/listAllTips" element={<MainLayout><TipPage /></MainLayout>}/>
                     <Route path="/register" element={<RegisterPage />}/>
-                    <Route path="/reading" element={<MainLayout><IELTSTest /></MainLayout>}/>
-                    <Route path="/DoTest/writing" element={<IELTSWritingPractice />} />
+                    <Route path="/doTest/writing" element={<IELTSWritingPractice />} />
+                    <Route path="/doTest/listening"  element={<ListeningTestPage />} />
                     <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout> as React.ReactNode} />
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout> as React.ReactNode} />
                     <Route path="/test" element={<MainLayout><ListTestPage /></MainLayout>} />

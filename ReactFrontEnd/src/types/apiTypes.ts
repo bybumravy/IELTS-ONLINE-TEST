@@ -30,3 +30,29 @@ export interface AuthContextType {
     register: (email: string, password: string, role?: string) => Promise<void>
 }
 
+export interface ListeningQuestion {
+    id: number;
+    questionNumber: number;
+    question: string;
+    type: 'text' | 'multiple-choice' | 'matching';
+    options?: string[];
+    correctAnswer: string;
+}
+
+export interface ListeningPart {
+    id: number;
+    partNumber: number;
+    title: string;
+    instructions: string;
+    description: string;
+    questions: ListeningQuestion[];
+}
+
+export interface ListeningTest {
+    id: number;
+    title: string;
+    description: string;
+    audioUrl: string;
+    duration: number;
+    parts: ListeningPart[];
+}

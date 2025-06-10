@@ -1,3 +1,4 @@
+
 export const login = async (email: string, password: string) => {
     const res = await fetch("http://localhost:8080/api/login", {
         method: "POST",
@@ -31,3 +32,23 @@ export const register = async (email: string, password: string, role = "student"
 
     if (!res.ok) throw new Error("Register failed")
 }
+
+export const listeningTestService = {
+    async getAllTests(): Promise<ListeningTest[]> {
+        const response = await fetch(`http://localhost:8080/api/tests`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch tests');
+        }
+        const data = await response.json();
+        return data;
+    },
+
+    async getTestById(id: number): Promise<ListeningTest> {
+        const response = await fetch(`http://localhost:8080/api/${id}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch test with id ${id}`);
+        }
+        const data = await response.json();
+        return data;
+    }
+};
