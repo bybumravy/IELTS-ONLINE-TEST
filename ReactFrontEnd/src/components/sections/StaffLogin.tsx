@@ -1,31 +1,24 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Mail, Lock, ArrowRight } from "lucide-react";
 
-const LoginPage = () => {
+function StaffLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      await login(email, password);
-      navigate("/");
-    } catch (error) {
-      alert("Login failed");
-      console.error(error);
-    }
+    navigate('/staff-page'); // Simulate successful login
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8080/oauth2/authorization/google";
+    // Handle Google login for staff
+    navigate('/staff-page');
   };
 
   return (
@@ -39,9 +32,9 @@ const LoginPage = () => {
 
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Staff Login</CardTitle>
           <CardDescription className="text-center">
-            Enter your email and password to access your account
+            Enter your credentials to access staff portal
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -53,7 +46,7 @@ const LoginPage = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="staff@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-9"
@@ -62,12 +55,7 @@ const LoginPage = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="text-sm text-emerald-600 hover:text-emerald-700">
-                  Forgot password?
-                </Link>
-              </div>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -103,17 +91,10 @@ const LoginPage = () => {
               Google
             </Button>
           </form>
-
-          <div className="mt-6 text-center text-sm">
-            <span className="text-gray-500">Don't have an account?</span>{" "}
-            <Link to="/register" className="text-emerald-600 hover:text-emerald-700 font-semibold">
-              Sign up
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>
   );
-};
+}
 
-export default LoginPage;
+export default StaffLogin;

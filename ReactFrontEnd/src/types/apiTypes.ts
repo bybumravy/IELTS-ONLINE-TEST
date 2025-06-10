@@ -30,3 +30,25 @@ export interface AuthContextType {
     register: (email: string, password: string, role?: string) => Promise<void>
 }
 
+export interface Question {
+    questionNumber: number;
+    question: string;
+    answer: string;
+    explanation: string;
+    options: string[];
+  }
+  
+  export interface Section {
+    sectionNumber: number;
+    questions: Question[];
+    method: string;
+  }
+  
+  export interface SkillColors {
+    [key: string]: {
+      bg: string;
+      button: string;
+      buttonHover: string;
+      section: string;
+    };
+  }

@@ -94,22 +94,78 @@ public class Reading {
         }
     }
 
+    public static class Question{
+        private String question;
+        private String answer;
+        private String explanation;
+        private List<String> options;
+
+
+        public Question() {
+        }
+
+        public Question(String question, String answer, String explanation,List<String> options) {
+            this.question = question;
+            this.options = options;
+            this.answer = answer;
+            this.explanation = explanation;
+        }
+
+        public String getQuestion() {
+            return question;
+        }
+
+        public List<String> getOptions() {
+            return options;
+        }
+
+        public void setOptions(List<String> options) {
+            this.options = options;
+        }
+
+        public void setQuestion(String question) {
+            this.question = question;
+        }
+
+        public String getExplanation() {
+            return explanation;
+        }
+
+        public void setExplanation(String explanation) {
+            this.explanation = explanation;
+        }
+
+        public String getAnswer() {
+            return answer;
+        }
+
+        public void setAnswer(String answer) {
+            this.answer = answer;
+        }
+    }
+
     public static class ReadingSection {
         private int sectionNumber;
-        private List<String> questions;
-        private List<String> answers;
-        private List<String> explanations;
+        private String introduction;
+        private List<Question> questions;
         private String method;
 
         public ReadingSection() {
         }
 
-        public ReadingSection(int sectionNumber, List<String> questions, List<String> answers, List<String> explanations, String method) {
+        public ReadingSection(int sectionNumber, String method, List<Question> questions, String introduction) {
             this.sectionNumber = sectionNumber;
-            this.questions = questions;
-            this.answers = answers;
-            this.explanations = explanations;
             this.method = method;
+            this.introduction = introduction;
+            this.questions = questions;
+        }
+
+        public String getIntroduction() {
+            return introduction;
+        }
+
+        public void setIntroduction(String introduction) {
+            this.introduction = introduction;
         }
 
         public int getSectionNumber() {
@@ -120,28 +176,12 @@ public class Reading {
             this.sectionNumber = sectionNumber;
         }
 
-        public List<String> getQuestions() {
+        public List<Question> getQuestions() {
             return questions;
         }
 
-        public void setQuestions(List<String> questions) {
+        public void setQuestions(List<Question> questions) {
             this.questions = questions;
-        }
-
-        public List<String> getAnswers() {
-            return answers;
-        }
-
-        public void setAnswers(List<String> answers) {
-            this.answers = answers;
-        }
-
-        public List<String> getExplanations() {
-            return explanations;
-        }
-
-        public void setExplanations(List<String> explanations) {
-            this.explanations = explanations;
         }
 
         public String getMethod() {
