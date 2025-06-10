@@ -40,7 +40,11 @@ public class AuthController {
     public ResponseEntity<?> getUserInfo(@CookieValue(value = "jwt_token", required = false) String token) {
         try {
             String username = loginService.getUsernameFromToken(token);
-            return ResponseEntity.ok(Map.of("username", username));
+            String role = loginService.getRoleFromToken(token);
+            return ResponseEntity.ok(Map.of(
+                    "username", username,
+                    "role", role
+            ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
         }

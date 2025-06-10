@@ -1,6 +1,6 @@
 import { User, LogOut, Settings, Crown, History } from "lucide-react"
 import { Button } from "@/components/ui/button"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,11 +21,16 @@ export function UserMenu({ onLogout }: UserMenuProps) {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    {/*<AvatarImage src={defaultAvatarUrl} alt={user?.username || 'User'} />*/}
-                    {/*<AvatarFallback className="bg-emerald-600 text-white">*/}
-                    {/*    {user?.username?.substring(0, 2).toUpperCase() || 'U'}*/}
-                    {/*</AvatarFallback>*/}
+                    <Avatar>
+                        <AvatarImage src={defaultAvatarUrl} alt={user?.username || 'User'} />
+                        <AvatarFallback className="bg-emerald-600 text-white">
+                        </AvatarFallback>
+                    </Avatar>
+
+                    {/*{user?.username?.substring(0, 2).toUpperCase() || 'U'}*/}
+
                 </Button>
+
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuItem>

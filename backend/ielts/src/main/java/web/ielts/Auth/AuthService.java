@@ -58,6 +58,13 @@ public class AuthService {
 
         return JwtToken.extractUsername(token);
     }
+    public String getRoleFromToken(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("Missing token");
+        }
+
+        return JwtToken.extractRole(token);
+    }
 
    public List<ResponseCookie> logout(HttpServletRequest request) {
     // Xoá session

@@ -36,13 +36,15 @@ type ListeningTest = {
 export default function IeltsListeningTest() {
     const [currentPart, setCurrentPart] = useState(1)
     const [isPlaying, setIsPlaying] = useState(false)
-    const [currentTime, setCurrentTime] = useState("-21:45")
+    const [currentTime, setCurrentTime] = useState(0)
     const [volume, setVolume] = useState(75)
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const [listeningTest, setListeningTest] = useState<ListeningTest | null>(null)
     const [sections, setSections] = useState<Section[]>([])
     const [tasks, setTasks] = useState<TaskListening[]>([])
-
+    const [duration, setDuration] = useState(0)
+    const [progress, setProgress] = useState(0);
+    const currentTask = tasks?.find((task) => task.taskNumber === Number(currentPart)) || null;
 
     useEffect(() => {
         fetch("http://localhost:8080/api/listening/t01")
@@ -57,36 +59,80 @@ export default function IeltsListeningTest() {
             })
             .catch((err) => console.error("Failed to load listening test:", err))
     }, [])
-    const currentTask = tasks?.find((task) => task.taskNumber === Number(currentPart)) || null;
 
-    // const currentSection = currentTask?.sections?.[0];
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (audio) {
+            const handleTimeUpdate = () => {
+                setCurrentTime(audio.currentTime);
+                setProgress((audio.currentTime / audio.duration) * 100);
+            };
+
+            const handleLoadedMetadata = () => {
+                setDuration(audio.duration);
+            };
+
+            audio.addEventListener("timeupdate", handleTimeUpdate);
+            audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+
+            return () => {
+                audio.removeEventListener("timeupdate", handleTimeUpdate);
+                audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+            };
+        }
+    },  [currentTask, listeningTest]);
+
+
     const togglePlayPause = () => {
-        if (audioRef.current) {
-            if (isPlaying) {
-                audioRef.current.pause()
-            } else {
-                audioRef.current.play()
-            }
-            setIsPlaying(!isPlaying)
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        if (isPlaying) {
+            audio.pause();
+        } else {
+            audio.play();
         }
-    }
+        setIsPlaying(!isPlaying);
+    };
 
-
-
-    const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newVolume = Number.parseInt(e.target.value)
-        setVolume(newVolume)
-        if (audioRef.current) {
-            audioRef.current.volume = newVolume / 100
-        }
-    }
 
     const resetAudio = () => {
-        if (audioRef.current) {
-            audioRef.current.currentTime = 0
-            setCurrentTime("-21:45")
+        const audio = audioRef.current;
+        if (audio) {
+            audio.currentTime = 0;
+            setProgress(0);
+            setCurrentTime(0);
         }
-    }
+    };
+
+    const handleSeek = (e) => {
+        const audio = audioRef.current;
+        const value = e.target.value;
+        if (audio && duration) {
+            audio.currentTime = (value / 100) * duration;
+            setProgress(value);
+        }
+    };
+
+    const handleVolumeChange = (e) => {
+        const audio = audioRef.current;
+        const value = e.target.value;
+        setVolume(value);
+        if (audio) {
+            audio.volume = value / 100;
+        }
+    };
+
+    const formatTime = (time) => {
+        const minutes = Math.floor(time / 60)
+            .toString()
+            .padStart(2, "0");
+        const seconds = Math.floor(time % 60)
+            .toString()
+            .padStart(2, "0");
+        return `${minutes}:${seconds}`;
+    };
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -121,11 +167,17 @@ export default function IeltsListeningTest() {
                             type="range"
                             min="0"
                             max="100"
+                            value={progress}
+                            onChange={handleSeek}
                             className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                         />
+                        <span className="text-sm text-gray-600">
+                             {formatTime(currentTime)} / {formatTime(duration)}
+                        </span>
                     </div>
 
                     <div className="flex items-center gap-2">
+
                         <Volume2 className="w-5 h-5 text-gray-500" />
                         <input
                             type="range"
@@ -134,15 +186,13 @@ export default function IeltsListeningTest() {
                             value={volume}
                             onChange={handleVolumeChange}
                             className="w-24 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+
                         />
-                        <div className="flex items-center gap-1 text-gray-700 border border-gray-300 rounded px-2 py-1">
-                            <span>Source 1</span>
-                            <ChevronDown className="w-4 h-4" />
-                        </div>
+
                     </div>
                 </div>
             </div>
-            {/* Main Content */}
+            {/* Content chính */}
             <div className="flex-1 p-6 max-w-7xl mx-auto w-full">
                 {currentTask ? (
                     <>
@@ -168,36 +218,55 @@ export default function IeltsListeningTest() {
                                     />
                                 )}
 
-                                {/* Hiển thị danh sách câu hỏi của section */}
+                                {/*Hiển thị câu hỏi */}
                                 {section.questions.map((question, qIdx) => (
                                     <div key={qIdx} className="mb-6">
-                                        <p className="text-gray-800 font-medium mb-3">
-                                            {qIdx + 1}. {question.question}
-                                        </p>
-
-                                        {/* Hiển thị options nếu có */}
-                                        {question.options?.length > 0 ? (
-                                            <div className="space-y-2 mb-3">
-                                                {question.options.map((option, optIdx) => (
-                                                    <div key={optIdx} className="flex items-center">
-                                                        <input
-                                                            type="radio"
-                                                            id={`sec${sectionIdx}-q${qIdx}-opt${optIdx}`}
-                                                            name={`sec${sectionIdx}-question-${qIdx}`}
-                                                            className="mr-2"
-                                                        />
-                                                        <label htmlFor={`sec${sectionIdx}-q${qIdx}-opt${optIdx}`}>
+                                       {/*Nếu là true false thì seo ne*/}
+                                        {section.type === 'True/False/Not Given' || section.type === 'Yes/No/Not Given' ? (
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <p className="text-gray-800 font-medium">
+                                                    {qIdx + 1}. {question.question}
+                                                </p>
+                                                <select className="border border-gray-300 rounded p-2 min-w-[150px]">
+                                                    <option value="">Select</option>
+                                                    {question.options.map((option, optIdx) => (
+                                                        <option key={optIdx} value={option}>
                                                             {option}
-                                                        </label>
-                                                    </div>
-                                                ))}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </div>
                                         ) : (
-                                            <input
-                                                type="text"
-                                                placeholder="Your answer"
-                                                className="w-full border border-gray-300 rounded p-2"
-                                            />
+                                            <>
+                                                {/*Nếu có options thì seo no*/}
+                                                <p className="text-gray-800 font-medium mb-3">
+                                                    {qIdx + 1}. {question.question}
+                                                </p>
+                                                {question.options?.length > 0 ? (
+                                                    <div className="space-y-2 mb-3">
+                                                        {question.options.map((option, optIdx) => (
+                                                            <div key={optIdx} className="flex items-center">
+                                                                <input
+                                                                    type="radio"
+                                                                    id={`sec${sectionIdx}-q${qIdx}-opt${optIdx}`}
+                                                                    name={`sec${sectionIdx}-question-${qIdx}`}
+                                                                    className="mr-2"
+                                                                />
+                                                                <label htmlFor={`sec${sectionIdx}-q${qIdx}-opt${optIdx}`}>
+                                                                    {option}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    // Các trường hợp còn lại
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Your answer"
+                                                        className="w-full border border-gray-300 rounded p-2"
+                                                    />
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 ))}
@@ -210,7 +279,7 @@ export default function IeltsListeningTest() {
             </div>
 
 
-            {/* Progress Bar */}
+            {/* Thanh chuyển hướng */}
             {listeningTest && listeningTest.tasks && (
             <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
                 <div className="max-w-7xl mx-auto grid grid-cols-4 gap-4">
