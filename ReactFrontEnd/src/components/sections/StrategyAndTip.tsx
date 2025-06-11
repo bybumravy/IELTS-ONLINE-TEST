@@ -1,7 +1,7 @@
 import {Badge} from "@/components/ui/badge.tsx";
 import {BookOpen, BrainCircuit, CheckCircle, Lightbulb} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import type {Exercises, TipDetail} from "@/types/apiTypes"
+import type {Exercises, TipDetail} from "@/types/apiTypes.ts"
 
 interface StrategyAndTipProps {
     id: string | number;

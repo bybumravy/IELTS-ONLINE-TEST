@@ -9,43 +9,61 @@ import java.util.List;
 public class  WritingTips {
     private String id;
     private String type;
-    private String skill;
-
     private String description;
-
+    private String skill;
     private List<String> strategy;
-
     private List<String> tips;
 
     private List<Exercise> exercises;
-//    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     public static class Exercise {
-        private String prompt;
-        private String modelAnswer;
-        private String explanation;
+        private String instruction;
+        private String imageUrl;
 
-        public String getPrompt() {
-            return prompt;
+        private List<Section> section;
+
+        public static class Section {
+            private List<String> question;
+            private String answer;
+
+            public List<String> getQuestion() {
+                return question;
+            }
+
+            public void setQuestion(List<String> question) {
+                this.question = question;
+            }
+
+            public String getAnswer() {
+                return answer;
+            }
+
+            public void setAnswer(String answer) {
+                this.answer = answer;
+            }
         }
 
-        public void setPrompt(String prompt) {
-            this.prompt = prompt;
+        public String getInstruction() {
+            return instruction;
         }
 
-        public String getModelAnswer() {
-            return modelAnswer;
+        public void setInstruction(String instruction) {
+            this.instruction = instruction;
         }
 
-        public void setModelAnswer(String modelAnswer) {
-            this.modelAnswer = modelAnswer;
+        public String getImageUrl() {
+            return imageUrl;
         }
 
-        public String getExplanation() {
-            return explanation;
+        public void setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
         }
 
-        public void setExplanation(String explanation) {
-            this.explanation = explanation;
+        public List<Section> getSection() {
+            return section;
+        }
+
+        public void setSection(List<Section> section) {
+            this.section = section;
         }
     }
 
@@ -65,20 +83,20 @@ public class  WritingTips {
         this.type = type;
     }
 
-    public String getSkill() {
-        return skill;
-    }
-
-    public void setSkill(String skill) {
-        this.skill = skill;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getSkill() {
+        return skill;
+    }
+
+    public void setSkill(String skill) {
+        this.skill = skill;
     }
 
     public List<String> getStrategy() {

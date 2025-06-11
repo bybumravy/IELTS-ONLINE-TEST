@@ -1,13 +1,12 @@
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import { useParams } from "react-router-dom";
 import {Button} from "@/components/ui/button.tsx";
-import {PracticeExercise} from "@/pages/PracticeExcercise.tsx";
+import {PracticeExercise} from "@/components/sections/PracticeExcercise.tsx";
 import type { TipDetail } from "@/types/apiTypes"
-import {StrategyAndTip} from "@/pages/StrategyAndTip.tsx";
+import {StrategyAndTip} from "@/components/sections/StrategyAndTip.tsx";
 
 function TipDetail() {
     const [detail, setDetail] = useState<TipDetail | null>(null);
-
     const { skill, id } = useParams<{ skill: string; id: string }>();
     useEffect(() => {
         if (!id) return;
@@ -39,7 +38,7 @@ function TipDetail() {
                     <div className="max-w-4xl mx-auto">
                         <StrategyAndTip {...detail}/>
                         {/* Practice Exercise */}
-                        <PracticeExercise exercises={detail.exercises} />
+                        <PracticeExercise exercises={detail.exercises} skill={skill}/>
                         {/* Optional back button */}
                         <div className="px-6 pb-6">
                             <Button className="w-full bg-emerald-600 hover:bg-emerald-700"

@@ -1,10 +1,11 @@
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import type { Exercises } from "@/types/apiTypes"
+import type { Exercises } from "@/types/apiTypes.ts"
 
 interface PracticeExerciseProps {
+    skill?: string;
     exercises: Exercises[];
 }
-export function PracticeExercise({ exercises }: PracticeExerciseProps) {
+export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
     return(
         <Card className="border shadow-sm mb-10">
             <CardHeader className="bg-gray-50 border-b text-left">
@@ -12,7 +13,45 @@ export function PracticeExercise({ exercises }: PracticeExerciseProps) {
             </CardHeader>
             <CardContent className="p-6 text-left">
                 <>
-                    {exercises.map((exercise, idx) => (
+                    {/* Writing & Speaking*/}
+                    {(skill === "Writing" || skill === "Speaking") &&
+                        exercises.map((exercise, idx) => (
+                            <div key={idx} className="mb-12">
+                                {exercise.imageUrl && (
+                                    <div className="mb-4">
+                                        <img
+                                            src={exercise.imageUrl}
+                                            alt="Diagram"
+                                            className="w-full h-auto border rounded-lg"
+                                        />
+                                    </div>
+                                )}
+                                <p className="mb-6 font-semibold italic" dangerouslySetInnerHTML={{ __html: exercise.instruction}}/>
+                                {exercise.section.map((q, qIdx) => (
+                                    <div key={qIdx} className="mb-6 p-4 border rounded-lg bg-gray-50">
+                                        <div className="flex items-center gap-2">
+                                            <label className="inline-block mb-1 font-semibold" htmlFor={`input-${idx}-${qIdx}`}>
+                                                {qIdx + 1}.
+                                            </label>
+                                            <p className="font-medium inline-block px-2">{q.question}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <details className="border-l-4 border-emerald-600 pl-3 mt-2">
+                                                <summary className="cursor-pointer text-emerald-700">
+                                                    Sample Answer
+                                                </summary>
+                                                <p className="mt-1">
+                                                    <strong>Answer:</strong> {Array.isArray(q.answer) ? q.answer : q.answer}
+                                                </p>
+                                            </details>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+
+                    {(skill === "Listening" || skill === "Reading") &&
+                        exercises.map((exercise, idx) => (
                         <div key={idx} className="mb-12">
                             {/* Hiển thị hình ảnh */}
                             {exercise.imageUrl && (
@@ -29,6 +68,15 @@ export function PracticeExercise({ exercises }: PracticeExerciseProps) {
 
                             {/* Hiển thị instruction */}
                             <p className="mb-6 font-semibold italic" dangerouslySetInnerHTML={{ __html: exercise.instruction}}/>
+
+                            {exercise.audioUrl && (
+                                <div className="mb-6">
+                                    <audio controls className="w-full">
+                                        <source src={exercise.audioUrl} type="audio/mpeg" />
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                </div>
+                            )}
 
                             {/* Hiển thị từng câu hỏi */}
                             {exercise.section.map((q, qIdx) => (

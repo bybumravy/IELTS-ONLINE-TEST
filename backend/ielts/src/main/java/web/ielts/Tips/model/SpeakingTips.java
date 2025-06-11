@@ -8,44 +8,54 @@ import java.util.List;
 @Document(collection = "SpeakingTips")
 public class SpeakingTips {
     private String id;
-
     private String type;
-    private String skill;
-
-    public String getSkill() {
-        return skill;
-    }
-
-    public void setSkill(String skill) {
-        this.skill = skill;
-    }
-
     private String description;
-
+    private String skill;
     private List<String> strategy;
 
     private List<String> tips;
 
     private List<Exercise> exercises;
-//    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+
     public static class Exercise {
-        private String question;
-        private String sample_answer;
+        private String instruction;
+        private List<Section> section;
 
-        public String getQuestion() {
-            return question;
+        public static class Section {
+            private List<String> question;
+            private String answer;
+
+            public List<String> getQuestion() {
+                return question;
+            }
+
+            public void setQuestion(List<String> question) {
+                this.question = question;
+            }
+
+            public String getAnswer() {
+                return answer;
+            }
+
+            public void setAnswer(String answer) {
+                this.answer = answer;
+            }
         }
 
-        public void setQuestion(String question) {
-            this.question = question;
+        public String getInstruction() {
+            return instruction;
         }
 
-        public String getSample_answer() {
-            return sample_answer;
+        public void setInstruction(String instruction) {
+            this.instruction = instruction;
         }
 
-        public void setSample_answer(String sample_answer) {
-            this.sample_answer = sample_answer;
+        public List<Section> getSection() {
+            return section;
+        }
+
+        public void setSection(List<Section> section) {
+            this.section = section;
         }
     }
 
@@ -71,6 +81,14 @@ public class SpeakingTips {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getSkill() {
+        return skill;
+    }
+
+    public void setSkill(String skill) {
+        this.skill = skill;
     }
 
     public List<String> getStrategy() {
