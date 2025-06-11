@@ -7,7 +7,7 @@ export interface QuestionFormProps {
   onUpdate: (field: keyof Question, value: string | string[]) => void;
   onDelete: () => void; // 🆕 Thêm prop này
   skillType: keyof typeof skillColors;
-  method: string;
+  type: string;
 }
 
 export const QuestionForm: FC<QuestionFormProps> = ({
@@ -15,9 +15,9 @@ export const QuestionForm: FC<QuestionFormProps> = ({
   onUpdate,
   onDelete, // 🆕 Thêm destructure
   skillType,
-  method,
+  type,
 }) => {
-  const isSentenceCompletion = method === 'sentence-completion';
+  const isSentenceCompletion = type === 'sentence-completion';
   const MIN_OPTIONS = 3;
 
   const handleAddOption = () => {

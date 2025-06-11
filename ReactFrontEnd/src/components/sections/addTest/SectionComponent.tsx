@@ -8,7 +8,7 @@ export interface SectionComponentProps {
   section: Section;
   taskNum: number;
   skillType: keyof typeof skillColors;
-  onMethodChange: (method: string) => void;
+  onMethodChange: (type: string) => void;
   onAddQuestion: () => void;
   onUpdateQuestion: (questionIndex: number, field: keyof Question, value: QuestionValue) => void;
   onDeleteQuestion: (questionIndex: number) => void; // 🆕 thêm dòng này
@@ -57,7 +57,7 @@ export const SectionComponent: FC<SectionComponentProps> = ({
         </div>
 
         {/* Image upload */}
-        {skillType === 'listening' && section.method === 'map-labeling' && (
+        {(section.type === 'sentence-completion' || section.type === 'map-labeling') &&  (
           <div>
             <label className="block font-medium mb-2 font-sans">Image:</label>
             <input
@@ -74,12 +74,30 @@ export const SectionComponent: FC<SectionComponentProps> = ({
           <label className="block font-medium mb-2 font-sans">Method:</label>
           <select
             className="w-full rounded border px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
-            value={section.method}
+            value={section.type}
             onChange={(e) => onMethodChange(e.target.value)}
           >
             <option value="multiple-choice">Multiple Choice</option>
-            {/* Option rendering logic */}
-            {/* ... */}
+            {skillType === 'reading' && (
+              <>
+                <option value="sentence-completion">Sentence Completion</option>
+                <option value="dropdown">Matching Headings</option>
+                <option value="dropdown">Matching Feature</option>
+                <option value="dropdown">True/False/Not Given</option>
+                <option value="dropdown">Yes/No/Not Given</option>
+                <option value="sentence-completion" key={'dasd'}>Diagram Completion</option>
+                <option value="sentence-completion">Short-answer Question</option>
+              </>
+            )}
+            {skillType === 'listening' && (
+              <>
+                <option value="sentence-completion">Sentence Completion</option>
+                <option value="map-labeling">Map Labeling</option>
+                <option value="map-labeling">Completion table</option>
+                <option value="sentence-completion">Short-answer Question</option>
+                <option value="dropdown">Matching Information</option>
+              </>
+            )}
           </select>
         </div>
 
@@ -89,7 +107,7 @@ export const SectionComponent: FC<SectionComponentProps> = ({
             key={`question-${qIndex}`}
             question={question}
             skillType={skillType}
-            method={section.method}
+            type={section.type}
             onUpdate={(field, value) => onUpdateQuestion(qIndex, field, value)}
             onDelete={() => onDeleteQuestion(qIndex)} // 🆕 truyền vào đúng cách
           />

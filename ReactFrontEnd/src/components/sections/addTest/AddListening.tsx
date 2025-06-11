@@ -6,19 +6,14 @@ import { SectionComponent } from './SectionComponent';
 
 export const AddListening: FC = () => {
   const [sections, setSections] = useState<{ [key: number]: Section[] }>({
-    1: [{ sectionNumber: 1, introduction: '', questions: [], method: '' }],
-    2: [{ sectionNumber: 1, introduction: '', questions: [], method: '' }],
-    3: [{ sectionNumber: 1, introduction: '', questions: [], method: '' }],
-    4: [{ sectionNumber: 1, introduction: '', questions: [], method: '' }]
+    1: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+    2: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+    3: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+    4: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
   });
 
   const [questionCounter, setQuestionCounter] = useState(1);
-  const [audioFiles, setAudioFiles] = useState<{ [key: number]: File | null }>({
-    1: null,
-    2: null,
-    3: null,
-    4: null
-  });
+  const [audioFile, setAudioFile] = useState<File | null>(null);
 
   const handleAddSection = (taskNum: number) => {
     const currentSections = sections[taskNum];
@@ -27,8 +22,8 @@ export const AddListening: FC = () => {
       ...sections,
       [taskNum]: [
         ...currentSections,
-        { sectionNumber: newSectionNumber, introduction: '', questions: [], method: '' }
-      ]
+        { sectionNumber: newSectionNumber, introduction: '', questions: [], type: '' },
+      ],
     });
   };
 
@@ -39,25 +34,25 @@ export const AddListening: FC = () => {
       answer: '',
       explanation: '',
       options: ['', '', '', ''],
-      isRichText: false
+      isRichText: false,
     };
 
     const updatedSections = [...sections[taskNum]];
-    const sectionIndex = updatedSections.findIndex(s => s.sectionNumber === sectionNum);
+    const sectionIndex = updatedSections.findIndex((s) => s.sectionNumber === sectionNum);
     if (sectionIndex === -1) return;
 
     updatedSections[sectionIndex] = {
       ...updatedSections[sectionIndex],
-      questions: [...updatedSections[sectionIndex].questions, newQuestion]
+      questions: [...updatedSections[sectionIndex].questions, newQuestion],
     };
 
     setSections({ ...sections, [taskNum]: updatedSections });
-    setQuestionCounter(prev => prev + 1);
+    setQuestionCounter((prev) => prev + 1);
   };
 
   const handleDeleteQuestion = (taskNum: number, sectionNum: number, questionIndex: number) => {
     const updatedSections = [...sections[taskNum]];
-    const sectionIndex = updatedSections.findIndex(s => s.sectionNumber === sectionNum);
+    const sectionIndex = updatedSections.findIndex((s) => s.sectionNumber === sectionNum);
     if (sectionIndex === -1) return;
 
     const updatedQuestions = [...updatedSections[sectionIndex].questions];
@@ -66,22 +61,21 @@ export const AddListening: FC = () => {
 
     setSections({ ...sections, [taskNum]: updatedSections });
 
-    // Tính lại số câu hỏi để cập nhật questionCounter
     let totalQuestions = 0;
-    Object.values(sections).forEach(taskSections => {
-      taskSections.forEach(section => {
+    Object.values(sections).forEach((taskSections) => {
+      taskSections.forEach((section) => {
         totalQuestions += section.questions.length;
       });
     });
     setQuestionCounter(totalQuestions + 1);
   };
 
-  const handleMethodChange = (taskNum: number, sectionNum: number, method: string) => {
+  const handleMethodChange = (taskNum: number, sectionNum: number, type: string) => {
     const updatedSections = [...sections[taskNum]];
-    const sectionIndex = updatedSections.findIndex(s => s.sectionNumber === sectionNum);
+    const sectionIndex = updatedSections.findIndex((s) => s.sectionNumber === sectionNum);
     if (sectionIndex === -1) return;
 
-    updatedSections[sectionIndex] = { ...updatedSections[sectionIndex], method };
+    updatedSections[sectionIndex] = { ...updatedSections[sectionIndex], type };
     setSections({ ...sections, [taskNum]: updatedSections });
   };
 
@@ -93,13 +87,13 @@ export const AddListening: FC = () => {
     value: QuestionValue
   ) => {
     const updatedSections = [...sections[taskNum]];
-    const sectionIndex = updatedSections.findIndex(s => s.sectionNumber === sectionNum);
+    const sectionIndex = updatedSections.findIndex((s) => s.sectionNumber === sectionNum);
     if (sectionIndex === -1) return;
 
     const updatedQuestions = [...updatedSections[sectionIndex].questions];
     updatedQuestions[questionIndex] = {
       ...updatedQuestions[questionIndex],
-      [field]: value
+      [field]: value,
     };
 
     updatedSections[sectionIndex].questions = updatedQuestions;
@@ -108,7 +102,7 @@ export const AddListening: FC = () => {
 
   const handleUpdateIntroduction = (taskNum: number, sectionNum: number, introduction: string) => {
     const updatedSections = [...sections[taskNum]];
-    const sectionIndex = updatedSections.findIndex(s => s.sectionNumber === sectionNum);
+    const sectionIndex = updatedSections.findIndex((s) => s.sectionNumber === sectionNum);
     if (sectionIndex === -1) return;
 
     updatedSections[sectionIndex] = { ...updatedSections[sectionIndex], introduction };
@@ -116,13 +110,12 @@ export const AddListening: FC = () => {
   };
 
   const handleDeleteSection = (taskNum: number, sectionNum: number) => {
-    const updatedSections = sections[taskNum].filter(s => s.sectionNumber !== sectionNum);
+    const updatedSections = sections[taskNum].filter((s) => s.sectionNumber !== sectionNum);
     const newSections = { ...sections, [taskNum]: updatedSections };
 
-    // Tính lại tổng số câu hỏi
     let totalQuestions = 0;
-    Object.values(newSections).forEach(taskSections => {
-      taskSections.forEach(section => {
+    Object.values(newSections).forEach((taskSections) => {
+      taskSections.forEach((section) => {
         totalQuestions += section.questions.length;
       });
     });
@@ -131,8 +124,8 @@ export const AddListening: FC = () => {
     setQuestionCounter(totalQuestions + 1);
   };
 
-  const handleAudioChange = (taskNum: number, file: File | null) => {
-    setAudioFiles({ ...audioFiles, [taskNum]: file });
+  const handleAudioChange = (file: File | null) => {
+    setAudioFile(file);
   };
 
   return (
@@ -141,20 +134,20 @@ export const AddListening: FC = () => {
         Listening (Question {questionCounter - 1})
       </h2>
 
+      <div className="mb-6">
+        <label className="block font-medium mb-2">Shared Audio File:</label>
+        <input
+          type="file"
+          accept="audio/*"
+          className="w-full"
+          onChange={(e) => handleAudioChange(e.target.files?.[0] || null)}
+        />
+      </div>
+
       <div className="space-y-6">
         {[1, 2, 3, 4].map((taskNum) => (
           <div key={`listening-task-${taskNum}`} className="border rounded-lg p-4">
             <h3 className="font-semibold mb-4 font-sans">Task {taskNum}</h3>
-
-            <div className="mb-4">
-              <label className="block font-medium mb-2">Audio File:</label>
-              <input
-                type="file"
-                accept="audio/*"
-                className="w-full"
-                onChange={(e) => handleAudioChange(taskNum, e.target.files?.[0] || null)}
-              />
-            </div>
 
             {sections[taskNum]?.map((section) => (
               <SectionComponent
@@ -162,7 +155,7 @@ export const AddListening: FC = () => {
                 section={section}
                 taskNum={taskNum}
                 skillType="listening"
-                onMethodChange={(method: string) => handleMethodChange(taskNum, section.sectionNumber, method)}
+                onMethodChange={(type: string) => handleMethodChange(taskNum, section.sectionNumber, type)}
                 onAddQuestion={() => handleAddQuestion(taskNum, section.sectionNumber)}
                 onUpdateQuestion={(qIndex, field, value) =>
                   handleUpdateQuestion(taskNum, section.sectionNumber, qIndex, field, value)

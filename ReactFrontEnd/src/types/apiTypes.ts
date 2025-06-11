@@ -75,7 +75,7 @@ export interface QuestionUpdate {
 
 export interface Section {
   sectionNumber: number;
-  method: string;
+  type: string;
   introduction: string;
   questions: Question[];
   paragraphs?: string[];
@@ -112,6 +112,9 @@ export interface SkillColors {
     buttonHover: string;
     section: string;
   };
+}
+export interface TestDataState extends Test {
+  newTag: string;
 }
 
 export const skillColors: SkillColors = {

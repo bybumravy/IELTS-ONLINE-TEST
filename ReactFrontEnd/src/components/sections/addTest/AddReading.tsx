@@ -6,9 +6,9 @@ import { SectionComponent } from './SectionComponent';
 
 export const AddReading: FC = () => {
   const [sections, setSections] = useState<{ [key: number]: Section[] }>({
-    1: [{ sectionNumber: 1, introduction: '', questions: [], method: '' }],
-    2: [{ sectionNumber: 1, introduction: '', questions: [], method: '' }],
-    3: [{ sectionNumber: 1, introduction: '', questions: [], method: '' }]
+    1: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+    2: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+    3: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }]
   });
 
   const [paragraphs, setParagraphs] = useState<{ [key: number]: string }>({
@@ -26,7 +26,7 @@ export const AddReading: FC = () => {
       ...sections,
       [taskNum]: [
         ...currentSections,
-        { sectionNumber: newSectionNumber, introduction: '', questions: [], method: '' }
+        { sectionNumber: newSectionNumber, introduction: '', questions: [], type: '' }
       ]
     });
   };
@@ -93,10 +93,10 @@ export const AddReading: FC = () => {
     setQuestionCounter(totalQuestions + 1);
   };
 
-  const handleMethodChange = (taskNum: number, sectionNum: number, method: string) => {
+  const handleMethodChange = (taskNum: number, sectionNum: number, type: string) => {
     const updatedSections = [...sections[taskNum]];
     const sectionIndex = updatedSections.findIndex(s => s.sectionNumber === sectionNum);
-    updatedSections[sectionIndex] = { ...updatedSections[sectionIndex], method };
+    updatedSections[sectionIndex] = { ...updatedSections[sectionIndex], type };
     setSections({ ...sections, [taskNum]: updatedSections });
   };
 
@@ -163,7 +163,7 @@ export const AddReading: FC = () => {
                 section={section}
                 taskNum={taskNum}
                 skillType="reading"
-                onMethodChange={(method: string) => handleMethodChange(taskNum, section.sectionNumber, method)}
+                onMethodChange={(type: string) => handleMethodChange(taskNum, section.sectionNumber, type)}
                 onAddQuestion={() => handleAddQuestion(taskNum, section.sectionNumber)}
                 onUpdateQuestion={(qIndex: number, field: keyof Question, value: QuestionValue) =>
                   handleUpdateQuestion(taskNum, section.sectionNumber, qIndex, field, value)
