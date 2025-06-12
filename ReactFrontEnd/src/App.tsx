@@ -10,6 +10,7 @@ import RegisterPage from "@/components/sections/Register";
 import TipDetail from "@/pages/TipDetail";
 import ListTestPage from "@/pages/ListTestPage";
 import IeltsResult from "@/pages/IeltsResult";
+import MomoPayment from "@/pages/Payment/MomoPayment.tsx";
 
 export default function App() {
     return (
@@ -26,6 +27,7 @@ export default function App() {
                     <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout> as React.ReactNode} />
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout> as React.ReactNode} />
                     <Route path="/result" element={<MainLayout><IeltsResult/></MainLayout> as React.ReactNode} />
+                    <Route path="/api/payment/create" element={<MainLayout><MomoPayment/></MainLayout> as React.ReactNode} />
                     <Route path="/test" element={<MainLayout><ListTestPage /></MainLayout> as React.ReactNode} />
                     <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout> as React.ReactNode} />
                 </Routes>

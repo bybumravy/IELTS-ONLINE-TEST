@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { Button, message, Modal } from 'antd';
 import { WalletOutlined } from '@ant-design/icons';
@@ -32,7 +32,7 @@ const MomoPayment = ({ amount, orderInfo, onSuccess }) => {
     return (
         <Button
             type="primary"
-            icon={<WalletOutlined />}
+            icon={<WalletOutlined /> as React.ReactNode}
             loading={loading}
             onClick={handlePayment}
             style={{ backgroundColor: '#d82d8b' }}

@@ -50,9 +50,11 @@ export function NavigationMenu() {
             </div>
 
             <div className="relative group">
-                <button className="text-gray-700 px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-600 rounded-md transition-colors">
+                <Link
+                    to="/api/payment/create"
+                 className="text-gray-700 px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-600 rounded-md transition-colors">
                     IELTS TIPS
-                </button>
+                </Link>
                 <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <div className="py-2">
                         <Link

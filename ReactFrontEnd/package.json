@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.0.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
@@ -21,6 +22,8 @@
     "@radix-ui/react-tabs": "^1.1.12",
     "@shadcn/ui": "^0.0.4",
     "@tailwindcss/vite": "^4.1.8",
+    "antd": "^5.26.0",
+    "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.511.0",
@@ -33,7 +36,7 @@
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/node": "^22.15.29",
-    "@types/react": "^19.1.2",
+    "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
     "eslint": "^9.25.0",
