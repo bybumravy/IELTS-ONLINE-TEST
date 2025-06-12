@@ -9,6 +9,7 @@ import RegisterPage from "@/components/sections/Register";
 import TipDetail from "@/pages/TipDetail";
 import ListTestPage from "@/pages/ListTestPage";
 import ListeningTestPage from "@/pages/DoTest/ListeningTest";
+import IeltsReadingTest from "@/pages/DoTest/ReadingTest";
 
 export default function App() {
     return (
@@ -21,6 +22,8 @@ export default function App() {
                     <Route path="/register" element={<RegisterPage />}/>
                     <Route path="/doTest/writing" element={<IELTSWritingPractice />} />
                     <Route path="/doTest/listening"  element={<ListeningTestPage />} />
+                    <Route path="/doTest/reading"  element={<IeltsReadingTest />} />
+
                     <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout> as React.ReactNode} />
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout> as React.ReactNode} />
                     <Route path="/test" element={<MainLayout><ListTestPage /></MainLayout>} />
