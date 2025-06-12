@@ -1,19 +1,52 @@
 import type { FC } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Question, Section, QuestionValue } from '@/types/apiTypes';
 import { skillColors } from '@/types/apiTypes';
 import { SectionComponent } from './SectionComponent';
 
+const LISTENING_AUTOSAVE_KEY = 'test_autosave_listening';
+
 export const AddListening: FC = () => {
-  const [sections, setSections] = useState<{ [key: number]: Section[] }>({
-    1: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
-    2: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
-    3: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
-    4: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+  const [sections, setSections] = useState<{ [key: number]: Section[] }>(() => {
+    // Try to load saved listening data
+    const savedData = localStorage.getItem(LISTENING_AUTOSAVE_KEY);
+    if (savedData) {
+      try {
+        return JSON.parse(savedData);
+      } catch (e) {
+        console.error('Error loading autosaved listening data:', e);
+      }
+    }
+    // Return default state if no saved data
+    return {
+      1: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+      2: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+      3: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+      4: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+    };
   });
 
-  const [questionCounter, setQuestionCounter] = useState(1);
+  const [questionCounter, setQuestionCounter] = useState<number>(() => {
+    // Calculate initial question counter based on existing questions
+    let count = 1;
+    Object.values(sections).forEach((taskSections) => {
+      taskSections.forEach((section) => {
+        count += section.questions.length;
+      });
+    });
+    return count;
+  });
+  
   const [audioFile, setAudioFile] = useState<File | null>(null);
+
+  // Auto-save effect
+  useEffect(() => {
+    try {
+      localStorage.setItem(LISTENING_AUTOSAVE_KEY, JSON.stringify(sections));
+    } catch (e) {
+      console.error('Error auto-saving listening data:', e);
+    }
+  }, [sections]);
 
   const handleAddSection = (taskNum: number) => {
     const currentSections = sections[taskNum];

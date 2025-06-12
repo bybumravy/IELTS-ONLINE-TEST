@@ -1,23 +1,76 @@
 import type { FC } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Question, Section, QuestionValue } from '@/types/apiTypes';
 import { skillColors } from '@/types/apiTypes';
 import { SectionComponent } from './SectionComponent';
 
+const READING_AUTOSAVE_KEY = 'test_autosave_reading';
+
 export const AddReading: FC = () => {
-  const [sections, setSections] = useState<{ [key: number]: Section[] }>({
-    1: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
-    2: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
-    3: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }]
+  const [sections, setSections] = useState<{ [key: number]: Section[] }>(() => {
+    // Try to load saved reading data
+    const savedData = localStorage.getItem(READING_AUTOSAVE_KEY);
+    if (savedData) {
+      try {
+        return JSON.parse(savedData);
+      } catch (e) {
+        console.error('Error loading autosaved reading data:', e);
+      }
+    }
+    // Return default state if no saved data
+    return {
+      1: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+      2: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+      3: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }]
+    };
   });
 
-  const [paragraphs, setParagraphs] = useState<{ [key: number]: string }>({
-    1: '',
-    2: '',
-    3: ''
+  const [paragraphs, setParagraphs] = useState<{ [key: number]: string }>(() => {
+    // Try to load saved paragraphs data
+    const savedData = localStorage.getItem(READING_AUTOSAVE_KEY + '_paragraphs');
+    if (savedData) {
+      try {
+        return JSON.parse(savedData);
+      } catch (e) {
+        console.error('Error loading autosaved paragraphs data:', e);
+      }
+    }
+    // Return default state if no saved data
+    return {
+      1: '',
+      2: '',
+      3: ''
+    };
   });
 
-  const [questionCounter, setQuestionCounter] = useState(1);
+  const [questionCounter, setQuestionCounter] = useState<number>(() => {
+    // Calculate initial question counter based on existing questions
+    let count = 1;
+    Object.values(sections).forEach((taskSections) => {
+      taskSections.forEach((section) => {
+        count += section.questions.length;
+      });
+    });
+    return count;
+  });
+
+  // Auto-save effect for sections
+  useEffect(() => {
+    try {
+      localStorage.setItem(READING_AUTOSAVE_KEY, JSON.stringify(sections));
+    } catch (e) {
+      console.error('Error auto-saving reading data:', e);
+    }
+  }, [sections]);
+
+  // Auto-save effect for paragraphs
+  useEffect(() => {
+    try {
+      localStorage.setItem(READING_AUTOSAVE_KEY + '_paragraphs', JSON.stringify(paragraphs));
+    } catch (e) {
+      console.error('Error auto-saving paragraphs data:', e);
+    }
+  }, [paragraphs]);
 
   const handleAddSection = (taskNum: number) => {
     const currentSections = sections[taskNum];

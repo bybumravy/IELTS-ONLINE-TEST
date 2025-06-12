@@ -20,20 +20,22 @@ public class FileUploadService {
     @Value("${aws.s3.bucket}")
     private String bucketName;
 
-    public String uploadFile(MultipartFile file) throws IOException {
+    public String uploadFile(MultipartFile file, String folder) throws IOException {
         String fileName = generateUniqueFileName(file.getOriginalFilename());
+        String key = folder + "/" + fileName;
+        
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(file.getContentType());
         metadata.setContentLength(file.getSize());
 
         s3Client.putObject(new PutObjectRequest(
                 bucketName,
-                fileName,
+                key,
                 file.getInputStream(),
                 metadata
         ));
 
-        return s3Client.getUrl(bucketName, fileName).toString();
+        return s3Client.getUrl(bucketName, key).toString();
     }
 
     private String generateUniqueFileName(String originalFilename) {

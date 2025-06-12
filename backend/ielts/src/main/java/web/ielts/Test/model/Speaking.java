@@ -1,3 +1,4 @@
+
 package web.ielts.Test.model;
 
 import org.springframework.data.annotation.Id;
@@ -92,7 +93,6 @@ public class Speaking {
         private String title;
         private String question;
         private List<String> cueCards;
-        private String sampleAnswer;
 
         public int getPartNumber() {
             return partNumber;
@@ -126,19 +126,12 @@ public class Speaking {
             this.cueCards = cueCards;
         }
 
-        public String getSampleAnswer() {
-            return sampleAnswer;
-        }
-
-        public void setSampleAnswer(String sampleAnswer) {
-            this.sampleAnswer = sampleAnswer;
-        }
     }
 
     public static class Question {
         private Integer questionNumber; // nullable
         private String question;
-        private String sampleAnswer;
+
 
         public Integer getQuestionNumber() {
             return questionNumber;
@@ -154,14 +147,6 @@ public class Speaking {
 
         public void setQuestion(String question) {
             this.question = question;
-        }
-
-        public String getSampleAnswer() {
-            return sampleAnswer;
-        }
-
-        public void setSampleAnswer(String sampleAnswer) {
-            this.sampleAnswer = sampleAnswer;
         }
     }
 }

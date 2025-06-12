@@ -75,4 +75,3 @@ class Task {
         this.sections = sections;
     }
 }
-

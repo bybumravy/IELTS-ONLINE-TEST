@@ -13,6 +13,9 @@ interface TestDataState extends Test {
   newTag: string;
 }
 
+const AUTOSAVE_KEY = 'test_autosave_data';
+const AUTOSAVE_INTERVAL = 3000; // Auto save every 30 seconds
+
 const skillTabs = [
   { id: 'general', label: 'General Info' } as const,
   { id: 'listening', label: 'Listening' } as const,
@@ -24,33 +27,91 @@ const skillTabs = [
 type Skill = typeof skillTabs[number]['id'];
 
 const AddTest: FC = () => {
-  const [testData, setTestData] = useState<TestDataState>({
-    testId: '',
-    title: '',
-    description: '',
-    tags: [],
-    createdAt: '',
-    updatedAt: '',
-    listening: [],
-    reading: [],
-    writing: [],
-    speaking: [],
-    newTag: '',
+  const [testData, setTestData] = useState<TestDataState>(() => {
+    // Try to load saved data from localStorage
+    const savedData = localStorage.getItem(AUTOSAVE_KEY);
+    if (savedData) {
+      try {
+        return JSON.parse(savedData);
+      } catch (e) {
+        console.error('Error loading autosaved data:', e);
+      }
+    }
+    // Return default state if no saved data
+    return {
+      testId: '',
+      title: '',
+      description: '',
+      tags: [],
+      createdAt: '',
+      updatedAt: '',
+      listening: [],
+      reading: [],
+      writing: [],
+      speaking: [],
+      newTag: '',
+    };
   });
   const [activeTab, setActiveTab] = useState<Skill>('general');
 
+  // Auto-save effect
   useEffect(() => {
-    const generateTestId = async () => {
-      const testCount = 0; // Thay bằng API call nếu cần
+    const saveToLocalStorage = () => {
+      try {
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(testData));
+        console.log('Auto-saved test data');
+      } catch (e) {
+        console.error('Error auto-saving data:', e);
+      }
+    };
+
+    // Save immediately when data changes
+    saveToLocalStorage();
+
+    // Set up interval for periodic saving
+    const intervalId = setInterval(saveToLocalStorage, AUTOSAVE_INTERVAL);
+
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId);
+  }, [testData]);
+
+useEffect(() => {
+  const generateTestId = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/test/count');
+      if (!response.ok) throw new Error('Failed to fetch test count');
+
+      const countValue = await response.json(); // Vì API trả về số đơn giản
+
       setTestData((prev) => ({
         ...prev,
-        testId: `TEST${String(testCount + 1).padStart(4, '0')}`,
+        testId: `TEST${String(countValue + 1).padStart(4, '0')}`,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }));
-    };
-    generateTestId();
+    } catch (error) {
+      console.error('Error fetching test count:', error);
+    }
+  };
+    // Only generate new ID if there's no saved data
+    if (!testData.testId) {
+      generateTestId();
+    }
   }, []);
+
+  // Function to clear autosaved data
+  const clearAutosavedData = () => {
+    if (window.confirm('Are you sure you want to clear all saved data and start over?')) {
+      // Clear all autosaved data
+      localStorage.removeItem(AUTOSAVE_KEY);
+      localStorage.removeItem('test_autosave_listening');
+      localStorage.removeItem('test_autosave_reading');
+      localStorage.removeItem('test_autosave_reading_paragraphs');
+      localStorage.removeItem('test_autosave_writing');
+      localStorage.removeItem('test_autosave_speaking');
+      window.location.reload();
+    }
+  };
 
   const validateTest = () => {
     const skillCounts = { listening: 0, reading: 0, writing: 40, speaking: 40 };
@@ -180,6 +241,16 @@ const AddTest: FC = () => {
         <div className="border-b bg-gradient-to-r from-blue-600 to-blue-800 p-8">
           <h1 className="text-center text-4xl font-bold text-white mb-2">Create New Test</h1>
           <p className="text-center text-blue-100">Design your IELTS test with our intuitive interface</p>
+          {/* Add auto-save indicator */}
+          <p className="text-center text-blue-200 text-sm mt-2">
+            Auto-saving enabled - Your progress is automatically saved
+          </p>
+          <button
+            onClick={clearAutosavedData}
+            className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm mx-auto block"
+          >
+            Clear Test
+          </button>
         </div>
 
         <div className="p-8 bg-gray-50">
@@ -188,11 +259,10 @@ const AddTest: FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 px-6 py-4 font-medium rounded-lg transition-all ${
-                  activeTab === tab.id 
-                    ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                className={`flex-1 px-6 py-4 font-medium rounded-lg transition-all ${activeTab === tab.id
+                    ? 'bg-blue-50 text-blue-700 shadow-sm'
                     : 'text-gray-600 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -209,11 +279,10 @@ const AddTest: FC = () => {
                 const currentIndex = skillTabs.findIndex((tab) => tab.id === activeTab);
                 if (currentIndex > 0) setActiveTab(skillTabs[currentIndex - 1].id);
               }}
-              className={`px-8 py-3 rounded-lg transition-all font-medium ${
-                activeTab === 'general'
+              className={`px-8 py-3 rounded-lg transition-all font-medium ${activeTab === 'general'
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm'
-              }`}
+                }`}
               disabled={activeTab === 'general'}
             >
               ← Previous

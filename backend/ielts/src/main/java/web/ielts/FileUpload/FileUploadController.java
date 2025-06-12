@@ -9,25 +9,35 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController
-@RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RestController
+@RequestMapping("/api/upload")
 public class FileUploadController {
 
     @Autowired
     private FileUploadService fileUploadService;
 
-    @PostMapping("/upload")
-    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
+    @PostMapping("/audio")
+    public ResponseEntity<Map<String, String>> uploadAudio(@RequestParam("file") MultipartFile file) {
         try {
-            String fileUrl = fileUploadService.uploadFile(file);
+            String url = fileUploadService.uploadFile(file, "audio");
             Map<String, String> response = new HashMap<>();
-            response.put("url", fileUrl);
+            response.put("url", url);
             return ResponseEntity.ok(response);
         } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/image")
+    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            String url = fileUploadService.uploadFile(file, "image");
             Map<String, String> response = new HashMap<>();
-            response.put("error", "Failed to upload file: " + e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            response.put("url", url);
+            return ResponseEntity.ok(response);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 } 
