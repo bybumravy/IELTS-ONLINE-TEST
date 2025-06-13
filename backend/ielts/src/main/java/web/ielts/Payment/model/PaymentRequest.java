@@ -1,4 +1,4 @@
-package web.ielts.Payment.dto;
+package web.ielts.Payment.model;
 
 import lombok.*;
 

@@ -29,28 +29,30 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/login",
-                    "/api/user-info",
-                    "/api/logout",
-                    "/oauth2/**",
-                        "/api/*", "/api/tips-summary", "/api/*/*", "/api/3-tests", "/api/*/*/*"
-                ).permitAll()
-                .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .successHandler(customOAuth2SuccessHandler)
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-            );
-
-        return http.build();
+        return http
+                .csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults()) //
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/login",
+                                "/api/user-info",
+                                "/api/logout",
+                                "/oauth2/**",
+                                "/api/*",
+                                "/api/tips-summary",
+                                "/api/*/*",
+                                "/api/3-tests",
+                                "/api/*/*/*"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(customOAuth2SuccessHandler)
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
+                .build(); // ✅ Trả về cấu hình đã build
     }
+
 }
-
-
-

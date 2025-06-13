@@ -8,6 +8,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {Link} from "react-router-dom";
 
 interface UserMenuProps {
     onLogout: () => void
@@ -33,10 +34,13 @@ export function UserMenu({ onLogout }: UserMenuProps) {
                     <History className="mr-2 h-4 w-4" />
                     <span>Test History</span>
                 </DropdownMenuItem>
+                <Link
+                    to="/api/payment/create">
                 <DropdownMenuItem>
                     <Crown className="mr-2 h-4 w-4" />
                     <span>Premium</span>
                 </DropdownMenuItem>
+                </Link>
                 <DropdownMenuItem>
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>

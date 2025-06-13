@@ -1,8 +1,8 @@
 package web.ielts.Payment.service;
 
 import web.ielts.Config.MomoConfig;
-import web.ielts.Payment.dto.PaymentRequest;
-import web.ielts.Payment.dto.PaymentResponse;
+import web.ielts.Payment.model.PaymentRequest;
+import web.ielts.Payment.model.PaymentResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
