@@ -1,6 +1,7 @@
 package web.ielts.Payment.service;
 
 import web.ielts.Config.MomoConfig;
+import web.ielts.Payment.client.MomoApi;
 import web.ielts.Payment.model.PaymentRequest;
 import web.ielts.Payment.model.PaymentResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class MomoPaymentService {
@@ -26,6 +29,14 @@ public class MomoPaymentService {
 
     @Autowired
     private RestTemplate restTemplate;
+    private static final Logger log = LoggerFactory.getLogger(MomoPaymentService.class);
+
+    @Autowired
+    private MomoApi momoApi;
+
+    public Map<String, Object> createPayment(Map<String, Object> data) {
+        return momoApi.createPayment(data);
+    }
 
     public PaymentResponse createPayment(PaymentRequest request) {
         try {
@@ -35,22 +46,28 @@ public class MomoPaymentService {
             Long amount = request.getAmount();
             String returnUrl = momoConfig.getReturnUrl();
             String notifyUrl = momoConfig.getNotifyUrl();
-            String requestType = request.getRequestType();
+            String requestType = request.getRequestType() != null ? request.getRequestType() : momoConfig.getRequestType();
+
 
             // Create raw hash
-            String rawHash = "partnerCode=" + momoConfig.getPartnerCode() +
+            String rawHash =
                     "&accessKey=" + momoConfig.getAccessKey() +
-                    "&requestId=" + requestId +
                     "&amount=" + amount +
+                    "&extraData=" + request.getExtraData()+
+                    "&ipnUrl=" + notifyUrl +
                     "&orderId=" + orderId +
                     "&orderInfo=" + orderInfo +
+                    "partnerCode=" + momoConfig.getPartnerCode() +
                     "&returnUrl=" + returnUrl +
-                    "&ipnUrl=" + notifyUrl +
-                    "&extraData=" + request.getExtraData() +
+                    "&requestId=" + requestId +
                     "&requestType=" + requestType;
 
             // Create signature
             String signature = hmacSHA256(rawHash, momoConfig.getSecretKey());
+
+            // Log for debugging
+            log.debug("MoMo rawHash: {}", rawHash);
+            log.debug("MoMo signature: {}", signature);
 
             // Create request body
             Map<String, Object> requestBody = new HashMap<>();
@@ -83,7 +100,6 @@ public class MomoPaymentService {
             paymentResponse.setRequestId(requestId);
             paymentResponse.setOrderId(orderId);
             paymentResponse.setPayUrl((String) response.get("payUrl"));
-            paymentResponse.setSignature((String) response.get("signature"));
             paymentResponse.setResultCode((Integer) response.get("resultCode"));
             paymentResponse.setMessage((String) response.get("message"));
 
@@ -93,27 +109,36 @@ public class MomoPaymentService {
         }
     }
 
-    public boolean verifyCallback(String partnerCode, String orderId, String requestId,
-                                Long amount, String orderInfo, String orderType,
-                                String transId, Integer resultCode, String message,
-                                String payType, String signature) {
+    public boolean verifySignature(String rawHash, String signature) {
         try {
-            String rawHash = "partnerCode=" + partnerCode +
-                    "&orderId=" + orderId +
-                    "&requestId=" + requestId +
-                    "&amount=" + amount +
-                    "&orderInfo=" + orderInfo +
-                    "&orderType=" + orderType +
-                    "&transId=" + transId +
-                    "&resultCode=" + resultCode +
-                    "&message=" + message +
-                    "&payType=" + payType;
-
             String expectedSignature = hmacSHA256(rawHash, momoConfig.getSecretKey());
-            return signature.equals(expectedSignature);
+            if (!signature.equals(expectedSignature)) {
+                log.warn("MoMo signature mismatch: expected={}, actual={}", expectedSignature, signature);
+                return false;
+            }
+            return true;
         } catch (Exception e) {
+            log.error("Error verifying signature", e);
             return false;
         }
+    }
+
+    public boolean verifyCallback(String partnerCode, String orderId, String requestId,
+                                  Long amount, String orderInfo, String orderType,
+                                  String transId, Integer resultCode, String message,
+                                  String payType, String signature) {
+        String rawHash = "partnerCode=" + partnerCode +
+                "&orderId=" + orderId +
+                "&requestId=" + requestId +
+                "&amount=" + amount +
+                "&orderInfo=" + orderInfo +
+                "&orderType=" + orderType +
+                "&transId=" + transId +
+                "&resultCode=" + resultCode +
+                "&message=" + message +
+                "&payType=" + payType;
+
+        return verifySignature(rawHash, signature);
     }
 
     private String hmacSHA256(String data, String secret) throws Exception {

@@ -13,15 +13,20 @@ const PaymentCallback = () => {
             const orderId = searchParams.get('orderId');
             if (orderId) {
                 try {
-                    const response = await axios.get(`http://localhost:8080/api/payment/status/${orderId}`);
-                    if (response.data.resultCode === 0) {
+                    const response = await fetch(`http://localhost:8080/api/payment/status/${orderId}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    if (data.resultCode === 0) {
                         message.success('Payment successful!');
                         // Redirect to success page or home page after 3 seconds
                         setTimeout(() => {
                             navigate('/payment-success');
                         }, 3000);
                     } else {
-                        message.error('Payment failed: ' + response.data.message);
+                        message.error('Payment failed: ' + data.message);
                         // Redirect to error page or home page after 3 seconds
                         setTimeout(() => {
                             navigate('/payment-error');

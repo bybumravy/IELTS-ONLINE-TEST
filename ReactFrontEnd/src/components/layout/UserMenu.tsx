@@ -8,11 +8,44 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {Link} from "react-router-dom";
+
+import {message} from "antd";
 
 interface UserMenuProps {
     onLogout: () => void
 }
+const handlePremiumClick = async () => {
+    try {
+        const orderId = `ORDER_${Date.now()}`;
+        const response = await fetch(`http://localhost:8080/api/payment/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+            orderId,
+            amount: 399000, // hoặc tuỳ theo gói bạn định mặc định
+            orderInfo: 'Thanh toán nâng cấp Premium',
+            extraData: '',
+            returnUrl: `http://localhost:5173/payment-callback?orderId=${orderId}`,
+            notifyUrl: 'http://localhost:8080/api/payment/ipn'
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.resultCode === 0) {
+            window.location.href = data.payUrl;
+        } else {
+            message.error("Không thể khởi tạo thanh toán: " + data.message);
+        }
+    } catch (error: any) {
+        message.error("Lỗi khi thanh toán: " + error.message);
+    }
+};
 
 export function UserMenu({ onLogout }: UserMenuProps) {
     return (
@@ -34,13 +67,10 @@ export function UserMenu({ onLogout }: UserMenuProps) {
                     <History className="mr-2 h-4 w-4" />
                     <span>Test History</span>
                 </DropdownMenuItem>
-                <Link
-                    to="/api/payment/create">
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handlePremiumClick}>
                     <Crown className="mr-2 h-4 w-4" />
                     <span>Premium</span>
                 </DropdownMenuItem>
-                </Link>
                 <DropdownMenuItem>
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>

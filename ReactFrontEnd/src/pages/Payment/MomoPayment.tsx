@@ -5,22 +5,36 @@ import { WalletOutlined } from '@ant-design/icons';
 
 const MomoPayment = ({ amount, orderInfo, onSuccess }) => {
     const [loading, setLoading] = useState(false);
+    const orderId = `ORDER_${Date.now()}`;
 
     const handlePayment = async () => {
         try {
             setLoading(true);
-            const response = await axios.post('http://localhost:8080/api/payment/create', {
-                orderId: `ORDER_${Date.now()}`,
-                amount: amount,
-                orderInfo: orderInfo,
-                extraData: ''
+            const response = await fetch(`http://localhost:8080/api/payment/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    orderId,
+                    amount,
+                    orderInfo,
+                    extraData: '',
+                    returnUrl: `http://localhost:5173/payment-callback?orderId=${orderId}`,
+                    notifyUrl: `http://localhost:8080/api/payment/ipn`
+                })
             });
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
 
-            if (response.data.resultCode === 0) {
+            const data = await response.json();
+
+            if (data.resultCode === 0) {
                 // Redirect to MoMo payment page
-                window.location.href = response.data.payUrl;
+                window.location.href = data.payUrl;
             } else {
-                message.error('Failed to create payment: ' + response.data.message);
+                message.error('Failed to create payment: ' + data.message);
             }
         } catch (error) {
             message.error('Error creating payment: ' + error.message);

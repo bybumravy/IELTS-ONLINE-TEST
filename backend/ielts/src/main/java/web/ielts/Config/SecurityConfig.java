@@ -34,11 +34,15 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) //
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/api/payment/create",
+                                "/api/payment/ipn",
+                                "/api/payment/callback",
                                 "/api/login",
                                 "/api/user-info",
                                 "/api/logout",
                                 "/oauth2/**",
                                 "/api/*",
+                                "/api/payment/status/**",
                                 "/api/tips-summary",
                                 "/api/*/*",
                                 "/api/3-tests",

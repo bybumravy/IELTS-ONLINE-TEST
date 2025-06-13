@@ -11,23 +11,22 @@ const packages = [
 const PaymentPage = () => {
     const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
     const [paymentMethod, setPaymentMethod] = useState('momo');
+    const [showMomo, setShowMomo] = useState(false);
+
+    const selectedPkg = packages.find((pkg) => pkg.id === selectedPackage);
 
     const handlePayment = () => {
-        if (!selectedPackage) {
+        if (!selectedPkg) {
             message.warning('Vui lòng chọn gói học');
             return;
         }
 
         if (paymentMethod === 'momo') {
-            // Chuyển sang component MoMo thanh toán
-            document.getElementById('momo-button')?.click();
+            setShowMomo(true); // trigger MomoPayment
         } else if (paymentMethod === 'bank') {
             message.info('Vui lòng chuyển khoản ngân hàng tới STK 0123456789 - IELTS Center');
-            // Có thể hiển thị thêm mã đơn hàng, QR chuyển khoản v.v.
         }
     };
-
-    const selectedPkg = packages.find((pkg) => pkg.id === selectedPackage);
 
     return (
         <div style={{ maxWidth: 800, margin: '0 auto', padding: 20 }}>
@@ -37,13 +36,16 @@ const PaymentPage = () => {
                     <Card
                         key={pkg.id}
                         title={pkg.name}
-                        bordered
+                        variant="outlined"
                         style={{
                             width: 240,
                             border: selectedPackage === pkg.id ? '2px solid #1890ff' : undefined,
                             cursor: 'pointer'
                         }}
-                        onClick={() => setSelectedPackage(pkg.id)}
+                        onClick={() => {
+                            setSelectedPackage(pkg.id);
+                            setShowMomo(false); // reset MoMo mỗi khi đổi gói
+                        }}
                     >
                         <p>{pkg.description}</p>
                         <strong>{pkg.price.toLocaleString()} VNĐ</strong>
@@ -52,29 +54,33 @@ const PaymentPage = () => {
             </div>
 
             <h2 style={{ marginTop: 30 }}>Chọn phương thức thanh toán</h2>
-            <Radio.Group onChange={(e) => setPaymentMethod(e.target.value)} value={paymentMethod}>
+            <Radio.Group
+                onChange={(e) => {
+                    setPaymentMethod(e.target.value);
+                    setShowMomo(false); // reset khi đổi phương thức
+                }}
+                value={paymentMethod}
+            >
                 <Radio value="momo">Thanh toán bằng MoMo</Radio>
                 <Radio value="bank">Chuyển khoản ngân hàng</Radio>
             </Radio.Group>
 
             <div style={{ marginTop: 30 }}>
-                {paymentMethod === 'momo' && selectedPkg && (
-                    <MomoPayment
-                        amount={selectedPkg.price}
-                        orderInfo={`Thanh toán gói ${selectedPkg.name}`}
-                        onSuccess={() => message.success('Thanh toán thành công!')}
-                    />
-                )}
-
-                <Button
-                    id="momo-button"
-                    type="primary"
-                    onClick={handlePayment}
-                    style={{ marginLeft: 10 }}
-                >
+                <Button type="primary" onClick={handlePayment}>
                     Thanh toán
                 </Button>
             </div>
+
+            {paymentMethod === 'momo' && showMomo && selectedPkg && (
+                <MomoPayment
+                    amount={selectedPkg.price}
+                    orderInfo={`Thanh toán gói ${selectedPkg.name}`}
+                    onSuccess={() => {
+                        message.success('Thanh toán thành công!');
+                        setShowMomo(false);
+                    }}
+                />
+            )}
         </div>
     );
 };

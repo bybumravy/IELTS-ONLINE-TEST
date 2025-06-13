@@ -23,6 +23,9 @@ public class MomoConfig {
     @Value("${momo.notify-url}")
     private String notifyUrl;
 
+    @Value("${momo.request-type}")
+    private String requestType;
+
     // Getters
     public String getPartnerCode() {
         return partnerCode;
@@ -47,4 +50,8 @@ public class MomoConfig {
     public String getNotifyUrl() {
         return notifyUrl;
     }
-} 
+
+    public String getRequestType() {
+        return requestType;
+    }
+}
