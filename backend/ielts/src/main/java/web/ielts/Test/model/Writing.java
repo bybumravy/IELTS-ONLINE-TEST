@@ -7,20 +7,10 @@ import java.util.List;
 @Document(collection = "Writing")
 public class Writing {
     @Id
-    private ObjectId id;
     private String testId;
     private List<Task> tasks;
 
     // Getter & Setter
-
-    public ObjectId getId() {
-        return id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
-    }
-
     public String getTestId() {
         return testId;
     }
@@ -41,11 +31,18 @@ public class Writing {
     public static class Task {
 
         private int taskNumber;
-        private String type;
+        private String imageUrl;
         private String question;
-        private String sampleAnswer;
 
         // Getter & Setter
+
+        public String getImageUrl() {
+            return imageUrl;
+        }
+
+        public void setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
+        }
 
         public int getTaskNumber() {
             return taskNumber;
@@ -55,28 +52,12 @@ public class Writing {
             this.taskNumber = taskNumber;
         }
 
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
         public String getQuestion() {
             return question;
         }
 
         public void setQuestion(String question) {
             this.question = question;
-        }
-
-        public String getSampleAnswer() {
-            return sampleAnswer;
-        }
-
-        public void setSampleAnswer(String sampleAnswer) {
-            this.sampleAnswer = sampleAnswer;
         }
     }
 }
