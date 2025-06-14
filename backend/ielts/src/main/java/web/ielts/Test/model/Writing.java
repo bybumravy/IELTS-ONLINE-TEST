@@ -7,19 +7,11 @@ import java.util.List;
 @Document(collection = "Writing")
 public class Writing {
     @Id
-    private ObjectId id;
     private String testId;
-    private List<Task> tasks;
+    private Task task1;
+    private Task task2;
 
     // Getter & Setter
-
-    public ObjectId getId() {
-        return id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
-    }
 
     public String getTestId() {
         return testId;
@@ -29,30 +21,40 @@ public class Writing {
         this.testId = testId;
     }
 
-    public List<Task> getTasks() {
-        return tasks;
+    public Task getTask1() {
+        return task1;
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+    public void setTask1(Task task1) {
+        this.task1 = task1;
+    }
+
+    public Task getTask2() {
+        return task2;
+    }
+
+    public void setTask2(Task task2) {
+        this.task2 = task2;
     }
 
     // Inner class cho Task
     public static class Task {
 
-        private int taskNumber;
+
         private String type;
         private String question;
-        private String sampleAnswer;
+        private String imageUrl;
+
 
         // Getter & Setter
 
-        public int getTaskNumber() {
-            return taskNumber;
+
+        public String getImageUrl() {
+            return imageUrl;
         }
 
-        public void setTaskNumber(int taskNumber) {
-            this.taskNumber = taskNumber;
+        public void setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
         }
 
         public String getType() {
@@ -71,12 +73,6 @@ public class Writing {
             this.question = question;
         }
 
-        public String getSampleAnswer() {
-            return sampleAnswer;
-        }
 
-        public void setSampleAnswer(String sampleAnswer) {
-            this.sampleAnswer = sampleAnswer;
-        }
     }
 }
