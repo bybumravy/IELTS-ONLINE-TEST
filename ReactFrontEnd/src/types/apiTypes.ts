@@ -62,7 +62,6 @@ export interface Question {
   answer: string;
   explanation: string;
   options: string[];
-  isRichText: boolean;
 }
 
 export type QuestionField = keyof Question;
@@ -78,7 +77,7 @@ export interface Section {
   type: string;
   introduction: string;
   questions: Question[];
-  paragraphs?: string[];
+  imageUrl?: string;
 }
 
 export interface Task {
@@ -87,23 +86,23 @@ export interface Task {
   cueCard?: {
     topic: string;
     points: string[];
-    preparationTime: number;
-    speakingTime: number;
   };
 }
 
 export interface Test {
   testId: string;
   title: string;
-  description: string;
   tags: string[];
   createdAt: string;
-  updatedAt: string;
   listening: Task[];
   reading: Task[];
   writing: Task[];
   speaking: Task[];
 }
+export type WritingTask = {
+  imageUrl?: string;
+  prompt?: string;
+};
 
 export interface SkillColors {
   [key: string]: {

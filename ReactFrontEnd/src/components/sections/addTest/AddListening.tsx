@@ -3,26 +3,37 @@ import { useState, useEffect } from 'react';
 import type { Question, Section, QuestionValue } from '@/types/apiTypes';
 import { skillColors } from '@/types/apiTypes';
 import { SectionComponent } from './SectionComponent';
+import { uploadFile } from '../../../services/fileUploadService';
 
 const LISTENING_AUTOSAVE_KEY = 'test_autosave_listening';
 
-export const AddListening: FC = () => {
+interface AddListeningProps {
+  onDataChange: (data: { [key: number]: Section[] }) => void;
+}
+
+export const AddListening: FC<AddListeningProps> = ({ onDataChange }) => {
   const [sections, setSections] = useState<{ [key: number]: Section[] }>(() => {
     // Try to load saved listening data
     const savedData = localStorage.getItem(LISTENING_AUTOSAVE_KEY);
     if (savedData) {
       try {
-        return JSON.parse(savedData);
+        const parsedData = JSON.parse(savedData);
+        return parsedData.sections || {
+          1: [{ sectionNumber: 1, introduction: '', questions: [], type: '', imageUrl: '' }],
+          2: [{ sectionNumber: 1, introduction: '', questions: [], type: '', imageUrl: '' }],
+          3: [{ sectionNumber: 1, introduction: '', questions: [], type: '', imageUrl: '' }],
+          4: [{ sectionNumber: 1, introduction: '', questions: [], type: '', imageUrl: '' }],
+        };
       } catch (e) {
         console.error('Error loading autosaved listening data:', e);
       }
     }
     // Return default state if no saved data
     return {
-      1: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
-      2: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
-      3: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
-      4: [{ sectionNumber: 1, introduction: '', questions: [], type: '' }],
+      1: [{ sectionNumber: 1, introduction: '', questions: [], type: '', imageUrl: '' }],
+      2: [{ sectionNumber: 1, introduction: '', questions: [], type: '', imageUrl: '' }],
+      3: [{ sectionNumber: 1, introduction: '', questions: [], type: '', imageUrl: '' }],
+      4: [{ sectionNumber: 1, introduction: '', questions: [], type: '', imageUrl: '' }],
     };
   });
 
@@ -38,15 +49,44 @@ export const AddListening: FC = () => {
   });
   
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(() => {
+    // Try to load saved audio URL
+    const savedData = localStorage.getItem(LISTENING_AUTOSAVE_KEY);
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        return parsedData.audioUrl;
+      } catch (e) {
+        console.error('Error loading autosaved audio URL:', e);
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [showImageConfirmation, setShowImageConfirmation] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadImageError, setUploadImageError] = useState<string | null>(null);
+  const [currentSection, setCurrentSection] = useState<{ taskNum: number; sectionNum: number } | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Auto-save effect
   useEffect(() => {
     try {
-      localStorage.setItem(LISTENING_AUTOSAVE_KEY, JSON.stringify(sections));
+      const dataToSave = {
+        sections,
+        audioUrl
+      };
+      localStorage.setItem(LISTENING_AUTOSAVE_KEY, JSON.stringify(dataToSave));
+      onDataChange(sections);
     } catch (e) {
       console.error('Error auto-saving listening data:', e);
     }
-  }, [sections]);
+  }, [sections, audioUrl, onDataChange]);
 
   const handleAddSection = (taskNum: number) => {
     const currentSections = sections[taskNum];
@@ -55,7 +95,7 @@ export const AddListening: FC = () => {
       ...sections,
       [taskNum]: [
         ...currentSections,
-        { sectionNumber: newSectionNumber, introduction: '', questions: [], type: '' },
+        { sectionNumber: newSectionNumber, introduction: '', questions: [], type: '', imageUrl: '' },
       ],
     });
   };
@@ -66,8 +106,7 @@ export const AddListening: FC = () => {
       question: '',
       answer: '',
       explanation: '',
-      options: ['', '', '', ''],
-      isRichText: false,
+      options: ['', '', '', '']
     };
 
     const updatedSections = [...sections[taskNum]];
@@ -158,7 +197,98 @@ export const AddListening: FC = () => {
   };
 
   const handleAudioChange = (file: File | null) => {
-    setAudioFile(file);
+    if (file) {
+      setAudioFile(file);
+      setShowConfirmation(true);
+    } else {
+      setAudioFile(null);
+      setAudioUrl(null);
+    }
+  };
+
+  const handleConfirmUpload = async () => {
+    if (!audioFile) return;
+
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      const url = await uploadFile(audioFile, 'audio');
+      setAudioUrl(url);
+      // Update the autosave data with the new URL
+      const savedData = localStorage.getItem(LISTENING_AUTOSAVE_KEY);
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        parsedData.audioUrl = url;
+        localStorage.setItem(LISTENING_AUTOSAVE_KEY, JSON.stringify(parsedData));
+      }
+      console.log('Audio uploaded successfully:', url);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'Failed to upload audio');
+    } finally {
+      setIsUploading(false);
+      setShowConfirmation(false);
+    }
+  };
+
+  const handleCancelUpload = () => {
+    setShowConfirmation(false);
+    setAudioFile(null);
+  };
+
+  const handleImageChange = (taskNum: number, sectionNum: number, file: File | null) => {
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setUploadImageError('Image size should be less than 5MB');
+        return;
+      }
+      setImageFile(file);
+      setCurrentSection({ taskNum, sectionNum });
+      setSelectedImage(URL.createObjectURL(file));
+      setShowImageConfirmation(true);
+    }
+  };
+
+  const handleConfirmImageUpload = async () => {
+    if (!imageFile || !currentSection) return;
+
+    setIsUploadingImage(true);
+    setUploadImageError(null);
+
+    try {
+      const url = await uploadFile(imageFile, 'image');
+      const { taskNum, sectionNum } = currentSection;
+      
+      const updatedSections = [...(sections[taskNum] || [])];
+      const sectionIndex = updatedSections.findIndex(s => s.sectionNumber === sectionNum);
+      
+      if (sectionIndex >= 0) {
+        updatedSections[sectionIndex] = {
+          ...updatedSections[sectionIndex],
+          imageUrl: url
+        };
+        setSections({ ...sections, [taskNum]: updatedSections });
+        localStorage.setItem(LISTENING_AUTOSAVE_KEY, JSON.stringify({ ...sections, [taskNum]: updatedSections }));
+      }
+
+      console.log('Image uploaded successfully:', url);
+    } catch (error) {
+      setUploadImageError(error instanceof Error ? error.message : 'Failed to upload image');
+    } finally {
+      setIsUploadingImage(false);
+      setShowImageConfirmation(false);
+      setImageFile(null);
+      setCurrentSection(null);
+      setSelectedImage(null);
+    }
+  };
+
+  const handleCancelImageUpload = () => {
+    setShowImageConfirmation(false);
+    setImageFile(null);
+    setCurrentSection(null);
+    setSelectedImage(null);
+    setUploadImageError(null);
   };
 
   return (
@@ -175,7 +305,76 @@ export const AddListening: FC = () => {
           className="w-full"
           onChange={(e) => handleAudioChange(e.target.files?.[0] || null)}
         />
+        {audioUrl && (
+          <div className="mt-2 text-sm text-green-600">
+            Audio file uploaded successfully!
+          </div>
+        )}
+        {uploadError && (
+          <div className="mt-2 text-sm text-red-600">
+            Error: {uploadError}
+          </div>
+        )}
       </div>
+
+      {/* Audio Upload Confirmation Modal */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-4">Confirm Audio Upload</h3>
+            <p className="mb-4">Are you sure you want to upload this audio file?</p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => {
+                  setShowConfirmation(false);
+                  setAudioFile(null);
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmUpload}
+                disabled={isUploading}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isUploading ? 'Uploading...' : 'Upload'}
+              </button>
+            </div>
+            {uploadError && (
+              <p className="text-red-500 mt-2">{uploadError}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Image Upload Confirmation Modal */}
+      {showImageConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-4">Confirm Image Upload</h3>
+            <p className="mb-4">Are you sure you want to upload this image?</p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={handleCancelImageUpload}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmImageUpload}
+                disabled={isUploadingImage}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isUploadingImage ? 'Uploading...' : 'Upload'}
+              </button>
+            </div>
+            {uploadImageError && (
+              <p className="text-red-500 mt-2">{uploadImageError}</p>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-6">
         {[1, 2, 3, 4].map((taskNum) => (
@@ -194,6 +393,7 @@ export const AddListening: FC = () => {
                   handleUpdateQuestion(taskNum, section.sectionNumber, qIndex, field, value)
                 }
                 onUpdateIntroduction={(intro) => handleUpdateIntroduction(taskNum, section.sectionNumber, intro)}
+                onUpdateImage={(file) => handleImageChange(taskNum, section.sectionNumber, file)}
                 onDeleteSection={() => handleDeleteSection(taskNum, section.sectionNumber)}
                 onDeleteQuestion={(qIndex) =>
                   handleDeleteQuestion(taskNum, section.sectionNumber, qIndex)

@@ -8,19 +8,17 @@ class Section {
     private String type;
     private String imageUrl;
     private String introduction;
+    private List<Question> questions;
 
+    public int getSectionNumber() {
+        return sectionNumber;
+    }
     public String getImageUrl() {
         return imageUrl;
     }
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
-    }
-
-    private List<Question> questions;
-
-    public int getSectionNumber() {
-        return sectionNumber;
     }
 
     public void setSectionNumber(int sectionNumber) {

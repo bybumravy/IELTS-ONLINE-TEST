@@ -23,17 +23,11 @@ public class Listening {
 
 class TaskListening {
     private int taskNumber;
-    private String title;
-    private String audioIntroduction;
     private List<Section> sections;
 
-    // getters & setters
+
     public int getTaskNumber() { return taskNumber; }
     public void setTaskNumber(int taskNumber) { this.taskNumber = taskNumber; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public String getAudioIntroduction() { return audioIntroduction; }
-    public void setAudioIntroduction(String audioIntroduction) { this.audioIntroduction = audioIntroduction; }
     public List<Section> getSections() { return sections; }
     public void setSections(List<Section> sections) { this.sections = sections; }
 }

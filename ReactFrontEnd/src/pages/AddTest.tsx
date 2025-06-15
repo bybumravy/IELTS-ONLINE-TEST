@@ -1,6 +1,6 @@
 import type { FC } from 'react';
-import { useState, useEffect } from 'react';
-import type { Test, Task } from '@/types/apiTypes';
+import { useState, useEffect, useCallback } from 'react';
+import type { Test, WritingTask } from '@/types/apiTypes';
 import { MAX_QUESTIONS_PER_SKILL, MIN_OPTIONS } from '@/types/apiTypes';
 
 import { AddListening } from '@/components/sections/addTest/AddListening';
@@ -14,7 +14,7 @@ interface TestDataState extends Test {
 }
 
 const AUTOSAVE_KEY = 'test_autosave_data';
-const AUTOSAVE_INTERVAL = 3000; // Auto save every 30 seconds
+const AUTOSAVE_INTERVAL = 3000; // 30 giây
 
 const skillTabs = [
   { id: 'general', label: 'General Info' } as const,
@@ -28,7 +28,6 @@ type Skill = typeof skillTabs[number]['id'];
 
 const AddTest: FC = () => {
   const [testData, setTestData] = useState<TestDataState>(() => {
-    // Try to load saved data from localStorage
     const savedData = localStorage.getItem(AUTOSAVE_KEY);
     if (savedData) {
       try {
@@ -37,24 +36,22 @@ const AddTest: FC = () => {
         console.error('Error loading autosaved data:', e);
       }
     }
-    // Return default state if no saved data
     return {
       testId: '',
       title: '',
-      description: '',
       tags: [],
       createdAt: '',
-      updatedAt: '',
       listening: [],
       reading: [],
       writing: [],
       speaking: [],
-      newTag: '',
+      newTag: ''
     };
   });
+
   const [activeTab, setActiveTab] = useState<Skill>('general');
 
-  // Auto-save effect
+  // 🟡 Auto-save
   useEffect(() => {
     const saveToLocalStorage = () => {
       try {
@@ -64,45 +61,33 @@ const AddTest: FC = () => {
         console.error('Error auto-saving data:', e);
       }
     };
-
-    // Save immediately when data changes
     saveToLocalStorage();
-
-    // Set up interval for periodic saving
     const intervalId = setInterval(saveToLocalStorage, AUTOSAVE_INTERVAL);
-
-    // Clean up interval on unmount
     return () => clearInterval(intervalId);
   }, [testData]);
 
-useEffect(() => {
-  const generateTestId = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/api/test/count');
-      if (!response.ok) throw new Error('Failed to fetch test count');
-
-      const countValue = await response.json(); // Vì API trả về số đơn giản
-
-      setTestData((prev) => ({
-        ...prev,
-        testId: `TEST${String(countValue + 1).padStart(4, '0')}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }));
-    } catch (error) {
-      console.error('Error fetching test count:', error);
-    }
-  };
-    // Only generate new ID if there's no saved data
-    if (!testData.testId) {
-      generateTestId();
-    }
+  // 🟢 Fetch test count để tạo testId
+  useEffect(() => {
+    const generateTestId = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/test/count');
+        if (!response.ok) throw new Error('Failed to fetch test count');
+        const countValue = await response.json();
+        setTestData((prev) => ({
+          ...prev,
+          testId: `T${String(countValue + 1).padStart(3, '0')}`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
+      } catch (error) {
+        console.error('Error fetching test count:', error);
+      }
+    };
+    if (!testData.testId) generateTestId();
   }, []);
 
-  // Function to clear autosaved data
   const clearAutosavedData = () => {
     if (window.confirm('Are you sure you want to clear all saved data and start over?')) {
-      // Clear all autosaved data
       localStorage.removeItem(AUTOSAVE_KEY);
       localStorage.removeItem('test_autosave_listening');
       localStorage.removeItem('test_autosave_reading');
@@ -114,40 +99,49 @@ useEffect(() => {
   };
 
   const validateTest = () => {
-    const skillCounts = { listening: 0, reading: 0, writing: 40, speaking: 40 };
+    const skillCounts = { listening: 40, reading: 40 };
 
-    Object.entries(skillCounts).forEach(([skill, _]) => {
-      const tasks = testData[skill as keyof typeof skillCounts] as Task[];
-      tasks?.forEach((task) => {
-        task.sections?.forEach((section) => {
-          skillCounts[skill as keyof typeof skillCounts] += section.questions?.length || 0;
+    (['listening', 'reading'] as const).forEach((skill) => {
+      const tasks = testData[skill] as unknown;
+      if (Array.isArray(tasks)) {
+        tasks.forEach((task) => {
+          if (task?.sections && Array.isArray(task.sections)) {
+            task.sections.forEach((section: any) => {
+              if (section?.questions && Array.isArray(section.questions)) {
+                skillCounts[skill] += section.questions.length;
+              }
+            });
+          }
         });
-      });
+      }
     });
 
     const invalidSkills = Object.entries(skillCounts)
       .filter(([skill, count]) => skill !== 'writing' && skill !== 'speaking' && count !== MAX_QUESTIONS_PER_SKILL)
       .map(([skill, count]) => `${skill} (${count}/${MAX_QUESTIONS_PER_SKILL})`);
 
-    if (invalidSkills.length) {
+    if (invalidSkills.length > 0) {
       alert(`Listening and Reading must have exactly ${MAX_QUESTIONS_PER_SKILL} questions. Invalid: ${invalidSkills.join(', ')}`);
       return false;
     }
 
     let hasInvalidOptions = false;
-    const skillsToCheck: (keyof Test)[] = ['listening'];
-    skillsToCheck.forEach((skill) => {
-      const tasks = testData[skill] as Task[];
-      tasks?.forEach((task) => {
-        task.sections?.forEach((section) => {
-          section.questions?.forEach((question) => {
-            if (question.options?.length < MIN_OPTIONS) {
-              hasInvalidOptions = true;
+    const listening = testData.listening;
+    if (Array.isArray(listening)) {
+      listening.forEach((task) => {
+        if (task?.sections && Array.isArray(task.sections)) {
+          task.sections.forEach((section: any) => {
+            if (section?.questions && Array.isArray(section.questions)) {
+              section.questions.forEach((q: any) => {
+                if (!q.options || q.options.length < MIN_OPTIONS) {
+                  hasInvalidOptions = true;
+                }
+              });
             }
           });
-        });
+        }
       });
-    });
+    }
 
     if (hasInvalidOptions) {
       alert(`All questions must have at least ${MIN_OPTIONS} options.`);
@@ -156,39 +150,158 @@ useEffect(() => {
 
     return true;
   };
+const handleSave = async () => {
+  if (!validateTest()) return;
 
-  const handleSave = async () => {
-    if (!validateTest()) return;
+  try {
+    const listeningData = JSON.parse(localStorage.getItem('test_autosave_listening') || '[]');
+    const readingData = JSON.parse(localStorage.getItem('test_autosave_reading') || '[]');
+    const readingParagraphs = JSON.parse(localStorage.getItem('test_autosave_reading_paragraphs') || '{}');
+    const writingData = JSON.parse(localStorage.getItem('test_autosave_writing') || '[]');
+    const speakingData = JSON.parse(localStorage.getItem('test_autosave_speaking') || '[]');
 
-    try {
-      const updatedTestData = { ...testData, updatedAt: new Date().toISOString() };
-      const collections = {
-        test: updatedTestData,
-        listening: updatedTestData.listening,
-        reading: updatedTestData.reading,
-        writing: updatedTestData.writing,
-        speaking: updatedTestData.speaking,
-      };
+    const listeningCollection = {
+      testId: testData.testId,
+      audioUrl: listeningData.audioUrl || '',
+      tasks: Object.entries(listeningData.sections || {})
+        .filter(([key]) => !isNaN(Number(key)))
+        .map(([taskNumber, sections]) => ({
+          taskNumber: Number(taskNumber),
+          sections: (sections as any[]).map(section => ({
+            sectionNumber: section.sectionNumber,
+            type: section.type,
+            imageUrl: section.imageUrl || '',
+            introduction: section.introduction,
+            questions: section.questions.map((q: any) => ({
+              questionNumber: q.questionNumber,
+              question: q.question,
+              answer: q.answer,
+              explanation: q.explanation || '',
+              options: q.options || []
+            }))
+          }))
+        }))
+    };
 
-      Object.entries(collections).forEach(([name, data]) => {
-        const jsonData = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonData], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${updatedTestData.testId}_${name}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      });
+    const readingCollection = {
+      testId: testData.testId,
+      tasks: Object.entries(readingData)
+        .filter(([key]) => !isNaN(Number(key)))
+        .map(([taskNumber, passage]: [string, any]) => ({
+          taskNumber: Number(taskNumber),
+          paragraph: readingParagraphs[taskNumber] || '',
+          sections: Array.isArray(passage)
+            ? passage.map((section: any) => ({
+                sectionNumber: section.sectionNumber || 0,
+                type: section.type || '',
+                imageUrl: section.imageUrl || '',
+                introduction: section.introduction || '',
+                questions: Array.isArray(section.questions)
+                  ? section.questions.map((q: any) => ({
+                      questionNumber: q.questionNumber || 0,
+                      question: q.question || '',
+                      answer: q.answer || '',
+                      explanation: q.explanation || '',
+                      options: Array.isArray(q.options) ? q.options : []
+                    }))
+                  : []
+              }))
+            : []
+        }))
+    };
 
-      alert('Test saved successfully!');
-    } catch (error) {
-      console.error('Error saving test:', error);
-      alert('Error saving test.');
-    }
+    const writingCollection = {
+      testId: testData.testId,
+      tasks: Object.entries(writingData)
+        .filter(([key]) => !isNaN(Number(key)))
+        .map(([taskNumber, task]) => {
+          const t = task as WritingTask;
+          return {
+            taskNumber: parseInt(taskNumber) + 1,
+            imageUrl: t.imageUrl || '',
+            question: t.prompt || ''
+          };
+        })
+    };
+
+    const speakingCollection = {
+      testId: testData.testId,
+      part1: {
+        partNumber: 1,
+        title: 'Introduction and Interview',
+        questions: (speakingData?.[0]?.questions || []).map((question: string, index: number) => ({
+          questionNumber: index + 1,
+          question: question
+        }))
+      },
+      part2: {
+        partNumber: 2,
+        title: 'Long Turn',
+        question: speakingData?.[1]?.cueCard?.topic || '',
+        cueCards: speakingData?.[1]?.cueCard?.points || []
+      },
+      part3: {
+        partNumber: 3,
+        title: 'Discussion',
+        questions: (speakingData?.[2]?.questions || []).map((question: string, index: number) => ({
+          questionNumber: index + 1,
+          question: question
+        }))
+      }
+    };
+
+    const requestBody = {
+      test: {
+        testId: testData.testId,
+        testTitle: testData.title,
+        createAt: testData.createdAt,
+        tags: testData.tags
+      },
+      listening: listeningCollection,
+      reading: readingCollection,
+      writing: writingCollection,
+      speaking: speakingCollection
+    };
+
+    const response = await fetch('http://localhost:8080/api/test/save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) throw new Error('Failed to save test');
+
+    const result = await response.text();
+    alert(`Test saved successfully: ${result}`);
+  } catch (error) {
+    console.error('Error saving test:', error);
+    alert('Error saving test.');
+  }
+};
+
+
+  // ✅ Memoized skill handlers
+  const handleSkillDataChange = (skill: keyof Test, data: any) => {
+    setTestData((prev) => ({ ...prev, [skill]: data }));
   };
+
+  const handleListeningChange = useCallback((data: any) => {
+    handleSkillDataChange('listening', data);
+  }, []);
+
+  const handleReadingChange = useCallback((data: any) => {
+    handleSkillDataChange('reading', data);
+  }, []);
+
+  const handleWritingChange = useCallback((data: any) => {
+    handleSkillDataChange('writing', data);
+  }, []);
+
+  const handleSpeakingChange = useCallback((data: any) => {
+    handleSkillDataChange('speaking', data);
+  }, []);
 
   const addTag = () => {
     if (testData.newTag.trim()) {
@@ -214,22 +327,15 @@ useEffect(() => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'general':
-        return (
-          <General
-            testData={testData}
-            handleInputChange={handleInputChange}
-            addTag={addTag}
-            removeTag={removeTag}
-          />
-        );
+        return <General testData={testData} handleInputChange={handleInputChange} addTag={addTag} removeTag={removeTag} />;
       case 'listening':
-        return <AddListening />;
+        return <AddListening onDataChange={handleListeningChange} />;
       case 'reading':
-        return <AddReading />;
+        return <AddReading onDataChange={handleReadingChange} />;
       case 'writing':
-        return <AddWriting />;
+        return <AddWriting onDataChange={handleWritingChange} />;
       case 'speaking':
-        return <AddSpeaking />;
+        return <AddSpeaking onDataChange={handleSpeakingChange} />;
       default:
         return null;
     }
@@ -241,10 +347,7 @@ useEffect(() => {
         <div className="border-b bg-gradient-to-r from-blue-600 to-blue-800 p-8">
           <h1 className="text-center text-4xl font-bold text-white mb-2">Create New Test</h1>
           <p className="text-center text-blue-100">Design your IELTS test with our intuitive interface</p>
-          {/* Add auto-save indicator */}
-          <p className="text-center text-blue-200 text-sm mt-2">
-            Auto-saving enabled - Your progress is automatically saved
-          </p>
+          <p className="text-center text-blue-200 text-sm mt-2">Auto-saving enabled - Your progress is automatically saved</p>
           <button
             onClick={clearAutosavedData}
             className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm mx-auto block"
@@ -260,8 +363,8 @@ useEffect(() => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 px-6 py-4 font-medium rounded-lg transition-all ${activeTab === tab.id
-                    ? 'bg-blue-50 text-blue-700 shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-50'
                   }`}
               >
                 {tab.label}
@@ -269,9 +372,7 @@ useEffect(() => {
             ))}
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            {renderTabContent()}
-          </div>
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">{renderTabContent()}</div>
 
           <div className="flex justify-between mt-8">
             <button
@@ -280,8 +381,8 @@ useEffect(() => {
                 if (currentIndex > 0) setActiveTab(skillTabs[currentIndex - 1].id);
               }}
               className={`px-8 py-3 rounded-lg transition-all font-medium ${activeTab === 'general'
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm'
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm'
                 }`}
               disabled={activeTab === 'general'}
             >

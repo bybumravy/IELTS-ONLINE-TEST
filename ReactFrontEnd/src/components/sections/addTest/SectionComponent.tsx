@@ -57,9 +57,18 @@ export const SectionComponent: FC<SectionComponentProps> = ({
         </div>
 
         {/* Image upload */}
-        {(section.type === 'sentence-completion' || section.type === 'map-labeling') &&  (
+        {(section.type === 'sentence-completion' || section.type === 'map-labeling') && (
           <div>
             <label className="block font-medium mb-2 font-sans">Image:</label>
+            {section.imageUrl && (
+              <div className="mb-2">
+                <img 
+                  src={section.imageUrl} 
+                  alt="Section image" 
+                  className="max-w-full h-auto rounded-lg border border-gray-200"
+                />
+              </div>
+            )}
             <input
               type="file"
               accept="image/*"
@@ -77,9 +86,10 @@ export const SectionComponent: FC<SectionComponentProps> = ({
             value={section.type}
             onChange={(e) => onMethodChange(e.target.value)}
           >
-            <option value="multiple-choice">Multiple Choice</option>
+            <option>Choose type</option>
             {skillType === 'reading' && (
               <>
+                <option value="multiple-choice">Multiple Choice</option>
                 <option value="sentence-completion">Sentence Completion</option>
                 <option value="dropdown">Matching Headings</option>
                 <option value="dropdown">Matching Feature</option>
@@ -91,6 +101,7 @@ export const SectionComponent: FC<SectionComponentProps> = ({
             )}
             {skillType === 'listening' && (
               <>
+                <option value="multiple-choice">Multiple Choice</option>
                 <option value="sentence-completion">Sentence Completion</option>
                 <option value="map-labeling">Map Labeling</option>
                 <option value="map-labeling">Completion table</option>

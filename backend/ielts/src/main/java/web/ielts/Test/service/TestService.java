@@ -67,7 +67,7 @@ public class TestService {
 
     private <T> Map<Integer, List<ListTest>> getTestsBySkill(List<T> skills) {
         Map<String, Test> testMap = testRepository.findAll().stream()
-                .collect(Collectors.toMap(Test::getId, t -> t));
+                .collect(Collectors.toMap(Test::getTestId, t -> t));
 
         return skills.stream()
                 .map(skill -> {
@@ -89,7 +89,7 @@ public class TestService {
         if (test == null || test.getCreatedAt() == null || test.getCreatedAt().isEmpty()) return null;
         try {
             int year = LocalDate.parse(test.getCreatedAt()).getYear();
-            return new ListTest(test.getId(), test.getTestTitle(), year);
+            return new ListTest(test.getTestId(), test.getTestTitle(), year);
         } catch (DateTimeParseException e) {
             return null;
         }
@@ -101,7 +101,7 @@ public class TestService {
 
         // Create Test object
         Test test = new Test();
-        test.setId(root.get("testId").asText());
+        test.setTestId(root.get("testId").asText());
         test.setTestTitle(root.get("title").asText());
         test.setTags(mapper.convertValue(root.get("tags"), new TypeReference<List<String>>() {}));
         test.setCreatedAt(root.get("createdAt").asText());
@@ -112,25 +112,25 @@ public class TestService {
         // Process and save each skill
         if (root.has("listening")) {
             Listening listening = mapper.convertValue(root.get("listening"), Listening.class);
-            listening.setTestId(test.getId());
+            listening.setTestId(test.getTestId());
             listeningRepository.save(listening);
         }
 
         if (root.has("reading")) {
             Reading reading = mapper.convertValue(root.get("reading"), Reading.class);
-            reading.setTestId(test.getId());
+            reading.setTestId(test.getTestId());
             readingRepository.save(reading);
         }
 
         if (root.has("writing")) {
             Writing writing = mapper.convertValue(root.get("writing"), Writing.class);
-            writing.setTestId(test.getId());
+            writing.setTestId(test.getTestId());
             writingRepository.save(writing);
         }
 
         if (root.has("speaking")) {
             Speaking speaking = mapper.convertValue(root.get("speaking"), Speaking.class);
-            speaking.setTestId(test.getId());
+            speaking.setTestId(test.getTestId());
             speakingRepository.save(speaking);
         }
     }

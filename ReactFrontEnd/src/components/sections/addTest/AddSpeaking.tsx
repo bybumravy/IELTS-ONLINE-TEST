@@ -6,7 +6,11 @@ import { skillColors } from '@/types/apiTypes';
 type CueCardField = 'topic' | 'points';
 const SPEAKING_AUTOSAVE_KEY = 'test_autosave_speaking';
 
-export const AddSpeaking: FC = () => {
+interface AddSpeakingProps {
+  onDataChange: (data: SpeakingTask[]) => void;
+}
+
+export const AddSpeaking: FC<AddSpeakingProps> = ({ onDataChange }) => {
   const [tasks, setTasks] = useState<SpeakingTask[]>(() => {
     // Try to load saved speaking data
     const savedData = localStorage.getItem(SPEAKING_AUTOSAVE_KEY);
@@ -34,10 +38,11 @@ export const AddSpeaking: FC = () => {
   useEffect(() => {
     try {
       localStorage.setItem(SPEAKING_AUTOSAVE_KEY, JSON.stringify(tasks));
+      onDataChange(tasks);
     } catch (e) {
       console.error('Error auto-saving speaking data:', e);
     }
-  }, [tasks]);
+  }, [tasks, onDataChange]);
 
   const handleCueCardChange = (taskIndex: number, field: CueCardField, value: string | string[]) => {
     const updatedTasks = [...tasks];
