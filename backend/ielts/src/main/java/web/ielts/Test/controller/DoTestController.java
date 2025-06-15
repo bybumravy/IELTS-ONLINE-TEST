@@ -67,6 +67,7 @@ public class DoTestController {
 
     @PostMapping("/listening/submit")
     public ResponseEntity<ListeningAnswer> saveListeningAnswer(@RequestBody ListeningAnswer answer) {
+        System.out.println("hi");
         return ResponseEntity.ok(doTestService.saveListeningAnswer(answer));
     }
 
