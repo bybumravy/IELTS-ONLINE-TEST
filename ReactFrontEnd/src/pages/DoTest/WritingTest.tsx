@@ -44,7 +44,9 @@ export default function WritingTest() {
 
     // Fetch writing data
     useEffect(() => {
-        fetch(`http://localhost:8080/api/writing/${testId}`)
+        fetch(`http://localhost:8080/verify/writing/${testId}`, {
+            credentials: "include",
+        })
             .then((res) => res.json())
             .then((data) => setWritingData(data))
             .catch((err) => console.error("Error fetching writing data:", err));
@@ -98,8 +100,9 @@ export default function WritingTest() {
 
         setIsSubmitting(true);
         try {
-            const response = await fetch("http://localhost:8080/api/writing/submit", {
+            const response = await fetch("http://localhost:8080/verify/writing/submit", {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });

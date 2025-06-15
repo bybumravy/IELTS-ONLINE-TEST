@@ -49,7 +49,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         // Tạo Cookie
         ResponseCookie cookie = ResponseCookie.from("jwt_token", token)
                 .httpOnly(true)
-                .secure(false) // Đặt true nếu dùng HTTPS
+                .secure(false)
                 .path("/")
                 .maxAge(24 * 60 * 60)
                 .sameSite("Lax")

@@ -3,9 +3,16 @@ package web.ielts.User;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.Collections;
 
 @Document(collection = "user")
-public class User {
+public class User implements UserDetails {
+
     private String firstName;
     private String lastName;
     @Id
@@ -17,20 +24,27 @@ public class User {
 
     public User() {
     }
+
     @Override
     public String toString() {
-        return "User [firstName=" + firstName + ", lastName=" + lastName + ", email=" + email + ", password=" + password
-                + ", role=" + role + ", premium=" + premium + ", googleID=" + googleID + ", createdAt=" + createdAt
-                + ", getFirstName()=" + getFirstName() + ", getLastName()=" + getLastName() + ", getEmail()="
-                + getEmail() + ", getPassword()=" + getPassword() + ", getRole()=" + getRole() + ", isPremium()="
-                + isPremium() + ", getGoogleID()=" + getGoogleID() + ", getCreatedAt()=" + getCreatedAt()
-                + ", getClass()=" + getClass() + ", hashCode()=" + hashCode() + ", toString()=" + super.toString()
-                + "]";
+        return "User{" +
+
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", role='" + role + '\'' +
+                ", premium=" + premium +
+                ", googleID='" + googleID + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                '}';
     }
 
     public String getFirstName() {
         return firstName;
     }
+
+
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
@@ -104,5 +118,33 @@ public class User {
         this.premium = premium;
         this.role = role;
     }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(role));
+    }
 
+    @Override
+    public String getUsername() {
+        return email; // Bạn dùng email làm username
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // hoặc logic thực tế
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

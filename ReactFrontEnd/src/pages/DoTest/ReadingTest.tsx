@@ -45,7 +45,9 @@ export default function ReadingTest() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/api/reading/${testId}`);
+                const res = await fetch(`http://localhost:8080/verify/reading/${testId}`, {
+                    credentials: "include",
+                });
                 const data: ReadingTest = await res.json();
 
                 let questionId = 1;
@@ -102,8 +104,9 @@ export default function ReadingTest() {
 
         setIsSubmitted(true);
         try {
-            const response = await fetch("http://localhost:8080/api/reading/submit", {
+            const response = await fetch("http://localhost:8080/verify/reading/submit", {
                 method: "POST",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                 },

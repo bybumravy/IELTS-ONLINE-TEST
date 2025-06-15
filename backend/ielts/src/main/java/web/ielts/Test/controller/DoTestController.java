@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import web.ielts.Test.model.Listening;
 import web.ielts.Test.model.Reading;
+import web.ielts.Test.model.Speaking;
 import web.ielts.Test.model.Writing;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
@@ -15,7 +16,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/verify")
 public class DoTestController {
 
     @Autowired
@@ -28,10 +29,10 @@ public class DoTestController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/tests")
-    public ResponseEntity<List<Listening>> getAllTests() {
-        return ResponseEntity.ok(doTestService.getAllListeningTests());
-    }
+//    @GetMapping("/tests")
+//    public ResponseEntity<List<Listening>> getAllTests() {
+//        return ResponseEntity.ok(doTestService.getAllListeningTests());
+//    }
 
     @GetMapping("/listening/{testId}")
     public ResponseEntity<Listening> getListeningByTestId(@PathVariable String testId) {
@@ -43,6 +44,16 @@ public class DoTestController {
     public ResponseEntity<Reading> getReadingByTestId(@PathVariable String testId) {
         Reading reading = doTestService.getReadingByTestId(testId);
         return reading != null ? ResponseEntity.ok(reading) : ResponseEntity.notFound().build();
+    }
+    @GetMapping("speaking/{testId}")
+    public ResponseEntity<Speaking> getSpeakingByTestId(@PathVariable String testId) {
+        Speaking speaking = doTestService.getSpeakingByTestId(testId);
+        System.out.println("successs");
+        if (speaking != null) {
+            return ResponseEntity.ok(speaking);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/reading/submit")
@@ -59,5 +70,6 @@ public class DoTestController {
     public ResponseEntity<ListeningAnswer> saveListeningAnswer(@RequestBody ListeningAnswer answer) {
         return ResponseEntity.ok(doTestService.saveListeningAnswer(answer));
     }
+
 
 }

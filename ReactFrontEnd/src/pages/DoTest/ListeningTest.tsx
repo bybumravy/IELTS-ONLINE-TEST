@@ -1,7 +1,7 @@
 import {useState, useRef, useEffect} from "react"
 import { Button } from "@/components/ui/button"
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader"
-import { Play, Pause, RotateCcw, RefreshCw, ChevronLeft, ChevronRight, Volume2, ChevronDown } from "lucide-react"
+import { Play, Pause, RotateCcw, Volume2 } from "lucide-react"
 import {useParams} from "react-router-dom";
 
 type Question = {
@@ -73,8 +73,8 @@ export default function ListeningTest() {
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
-        fetch(`http://localhost:8080/api/listening/${testId}`, {
-            credentials: "include", // gửi cookie JWT
+        fetch(`http://localhost:8080/verify/listening/${testId}`, {
+            credentials: "include",
         })
             .then((res) => {
                 if (!res.ok) {
@@ -241,7 +241,7 @@ export default function ListeningTest() {
         console.log("Dữ liệu sadfu khi xử lý:", JSON.stringify(dataToSend, null, 2));
 
         try {
-            const res = await fetch("http://localhost:8080/api/listening/submit", {
+            const res = await fetch("http://localhost:8080/verify/listening/submit", {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -266,7 +266,7 @@ export default function ListeningTest() {
             )}
 
             <div className="sticky top-0 z-50 flex flex-col shadow-sm">
-                <DoTestHeader onSubmit={handleSubmit} />
+                <DoTestHeader initialTime={3600} onSubmit={handleSubmit} />
 
                 <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
                     <Button

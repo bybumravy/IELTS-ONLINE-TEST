@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import web.ielts.Test.model.Listening;
 import web.ielts.Test.model.Reading;
+import web.ielts.Test.model.Speaking;
 import web.ielts.Test.model.Writing;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
@@ -12,6 +13,7 @@ import web.ielts.Test.model.answer.writing.WritingAIResponse;
 import web.ielts.Test.model.answer.writing.WritingAnswer;
 import web.ielts.Test.repository.ListeningRepository;
 import web.ielts.Test.repository.ReadingRepository;
+import web.ielts.Test.repository.SpeakingRepository;
 import web.ielts.Test.repository.WritingRepository;
 import web.ielts.Test.repository.answer.ListeningAnswerRepository;
 import web.ielts.Test.repository.answer.ReadingAnswerRepository;
@@ -42,7 +44,12 @@ public class DoTestService {
 
     @Autowired
     private AIService aiService;
+    @Autowired
+    private SpeakingRepository speakingRepository;
 
+    public Speaking getSpeakingByTestId(String testId) {
+        return speakingRepository.findByTestId(testId);
+    }
     public Optional<Writing> getWritingByTestId(String testId) {
         return writingRepository.findById(testId);
     }

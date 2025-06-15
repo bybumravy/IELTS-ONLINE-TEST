@@ -12,6 +12,8 @@ import WritingResult from "@/pages/Result/WritingResult";
 import ListeningTest from "@/pages/DoTest/ListeningTest";
 import ReadingTest from "@/pages/DoTest/ReadingTest";
 import WritingTest from "@/pages/DoTest/WritingTest";
+import VoiceRecorder from "@/pages/DoTest/checkMic";
+import SpeakingTest from "@/pages/DoTest/SpeakingTest";
 
 export default function App() {
     return (
@@ -31,6 +33,8 @@ export default function App() {
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout>} />
                     <Route path="/test" element={<MainLayout><ListTestPage/></MainLayout>} />
                     <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout>} />
+                    <Route path="/test/speaking/:testId" element={<MainLayout><VoiceRecorder /></MainLayout>} />
+                    <Route path="/checkMic/:testId" element={<MainLayout><SpeakingTest/></MainLayout>} />
 
                 </Routes>
             </Router>

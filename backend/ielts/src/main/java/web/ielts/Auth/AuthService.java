@@ -19,12 +19,12 @@ import web.ielts.User.User;
 public class AuthService {
 
     @Autowired
-    private AuthRepository loginRepository;  // inject interface LoginRepository
+    private AuthRepository authRepository;
 
     public ResponseEntity<Map<String, Object>> login(String email, String password) {
         Map<String, Object> response = new HashMap<>();
 
-        User user = loginRepository.findByEmail(email);
+        User user = authRepository.findByEmail(email);
 
         System.out.println(user);
         if (user != null && user.getPassword().equals(password)) {
