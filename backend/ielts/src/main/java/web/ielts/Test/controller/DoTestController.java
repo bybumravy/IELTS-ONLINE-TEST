@@ -48,7 +48,6 @@ public class DoTestController {
     @GetMapping("speaking/{testId}")
     public ResponseEntity<Speaking> getSpeakingByTestId(@PathVariable String testId) {
         Speaking speaking = doTestService.getSpeakingByTestId(testId);
-        System.out.println("successs");
         if (speaking != null) {
             return ResponseEntity.ok(speaking);
         } else {
