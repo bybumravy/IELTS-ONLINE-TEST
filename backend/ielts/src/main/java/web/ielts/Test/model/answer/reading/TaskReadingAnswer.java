@@ -1,12 +1,12 @@
-package web.ielts.Test.model.answer;
+package web.ielts.Test.model.answer.reading;
 
 import java.util.List;
 
-class Task {
+class TaskReadingAnswer {
     private int taskNumber;
     private String title;
     private String paragraph;
-    private List<SectionAnswer> sections;
+    private List<SectionReadingAnswer> sections;
 
     public int getTaskNumber() {
         return taskNumber;
@@ -32,11 +32,11 @@ class Task {
         this.paragraph = paragraph;
     }
 
-    public List<SectionAnswer> getSections() {
+    public List<SectionReadingAnswer> getSections() {
         return sections;
     }
 
-    public void setSections(List<SectionAnswer> sections) {
+    public void setSections(List<SectionReadingAnswer> sections) {
         this.sections = sections;
     }
 }

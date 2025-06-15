@@ -1,4 +1,4 @@
-package web.ielts.Test.model.answer;
+package web.ielts.Test.model.answer.reading;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -10,7 +10,7 @@ public class ReadingAnswer {
     @Id
     private String id;
     private String testId;
-    private List<Task> tasks;
+    private List<TaskReadingAnswer> taskReadingAnswers;
 
     public String getId() {
         return id;
@@ -28,12 +28,12 @@ public class ReadingAnswer {
         this.testId = testId;
     }
 
-    public List<Task> getTasks() {
-        return tasks;
+    public List<TaskReadingAnswer> getTasks() {
+        return taskReadingAnswers;
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+    public void setTasks(List<TaskReadingAnswer> taskReadingAnswers) {
+        this.taskReadingAnswers = taskReadingAnswers;
     }
 }
 

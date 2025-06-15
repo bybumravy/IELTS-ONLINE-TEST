@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
+import {useParams} from "react-router-dom";
 
 export interface Question {
     question: string | null;
@@ -33,7 +34,8 @@ interface QuestionWithStudentAnswer extends Question {
 }
 
 
-export default function IeltsReadingTest() {
+export default function ReadingTest() {
+    const { testId } = useParams<{ testId: string }>();
     const [currentPart, setCurrentPart] = useState(1);
     const [readingTest, setReadingTest] = useState<ReadingTest | null>(null);
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -43,7 +45,7 @@ export default function IeltsReadingTest() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch("http://localhost:8080/api/reading/t01");
+                const res = await fetch(`http://localhost:8080/api/reading/${testId}`);
                 const data: ReadingTest = await res.json();
 
                 let questionId = 1;
@@ -100,7 +102,7 @@ export default function IeltsReadingTest() {
 
         setIsSubmitted(true);
         try {
-            const response = await fetch("http://localhost:8080/api/answer", {
+            const response = await fetch("http://localhost:8080/api/reading/submit", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

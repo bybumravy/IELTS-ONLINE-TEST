@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
 import {useAuth} from "@/contexts/AuthContext";
+import {useNavigate, useParams} from "react-router-dom";
 
 interface WritingTask {
     type: string;
@@ -15,8 +16,9 @@ interface WritingData {
     task2: WritingTask;
 }
 
-export default function IELTSWritingPractice() {
+export default function WritingTest() {
     const { user } = useAuth();
+    const { testId } = useParams<{ testId: string }>();
     const [currentTask, setCurrentTask] = useState(1);
     const [essayTask1, setEssayTask1] = useState("");
     const [essayTask2, setEssayTask2] = useState("");
@@ -25,7 +27,7 @@ export default function IELTSWritingPractice() {
     const [writingData, setWritingData] = useState<WritingData | null>(null);
     const [timeRemaining, setTimeRemaining] = useState(60 * 60);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const navigate = useNavigate();
     // // Timer
     // useEffect(() => {
     //     const timer = setInterval(() => {
@@ -42,7 +44,7 @@ export default function IELTSWritingPractice() {
 
     // Fetch writing data
     useEffect(() => {
-        fetch("http://localhost:8080/api/writing/t01")
+        fetch(`http://localhost:8080/api/writing/${testId}`)
             .then((res) => res.json())
             .then((data) => setWritingData(data))
             .catch((err) => console.error("Error fetching writing data:", err));
@@ -105,6 +107,7 @@ export default function IELTSWritingPractice() {
             if (!response.ok) throw new Error("Failed to submit writing");
 
             const result = await response.json();
+            navigate(`/writing-result/${result.id}`);
             console.log("Writing saved:", result);
             alert("Your essay has been submitted successfully!");
         } catch (error) {
@@ -119,7 +122,7 @@ export default function IELTSWritingPractice() {
         <div className="min-h-screen bg-gray-50">
             <DoTestHeader initialTime={60 * 60} onSubmit={handleSubmit} />
 
-            <div className="flex h-[calc(100vh-80px)]">
+            <div className="flex h-[calc(100vh-100px)]">
                 {/* Left Panel */}
                 <div className="w-1/2 bg-white p-6 overflow-y-auto border-r border-gray-200">
                     {currentTask === 1 ? (

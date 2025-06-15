@@ -7,6 +7,8 @@ class Section {
     private String type;
     private String imageUrl;
     private String introduction;
+    private List<Question> questions;
+
 
     public String getImageUrl() {
         return imageUrl;
@@ -16,7 +18,6 @@ class Section {
         this.imageUrl = imageUrl;
     }
 
-    private List<Question> questions;
 
     public int getSectionNumber() {
         return sectionNumber;

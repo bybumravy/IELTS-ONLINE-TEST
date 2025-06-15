@@ -9,20 +9,11 @@ import java.util.List;
 public class Speaking {
 
     @Id
-    private String id;
     private String testId;
     private Part part1;
     private Part2 part2;
     private Part part3;
 
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getTestId() {
         return testId;
@@ -57,10 +48,18 @@ public class Speaking {
     }
 
     public static class Part {
+        private String introduction;
         private int partNumber;
         private String title;
         private List<Question> questions;
 
+        public String getIntroduction() {
+            return introduction;
+        }
+
+        public void setIntroduction(String introduction) {
+            this.introduction = introduction;
+        }
 
         public int getPartNumber() {
             return partNumber;
@@ -88,10 +87,19 @@ public class Speaking {
     }
 
     public static class Part2 {
+        private String introduction;
         private int partNumber;
         private String title;
         private String question;
         private List<String> cueCards;
+
+        public String getIntroduction() {
+            return introduction;
+        }
+
+        public void setIntroduction(String introduction) {
+            this.introduction = introduction;
+        }
 
         public int getPartNumber() {
             return partNumber;

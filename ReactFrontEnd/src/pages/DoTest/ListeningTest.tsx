@@ -2,6 +2,7 @@ import {useState, useRef, useEffect} from "react"
 import { Button } from "@/components/ui/button"
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader"
 import { Play, Pause, RotateCcw, RefreshCw, ChevronLeft, ChevronRight, Volume2, ChevronDown } from "lucide-react"
+import {useParams} from "react-router-dom";
 
 type Question = {
     question: string;
@@ -26,17 +27,43 @@ type TaskListening = {
 };
 
 type ListeningTest = {
-    _id: string;
     testId: string;
     audioUrl: string;
     tasks: TaskListening[];
 };
-
-
-export default function IeltsListeningTest() {
+const getQuestionNumbers = (taskListening: TaskListening): number[] => {
+    const numbers: number[] = [];
+    let counter = 1;
+    taskListening.sections.forEach((section) => {
+        section.questions.forEach(() => {
+            numbers.push(counter++);
+        });
+    });
+    return numbers;
+};
+const getTotalQuestions = (taskListenings: TaskListening[], currentTaskIndex: number): { start: number, end: number } => {
+    let totalQuestionsBefore = 0;
+    for (let i = 0; i < currentTaskIndex; i++) {
+        taskListenings[i].sections.forEach(section => {
+            totalQuestionsBefore += section.questions.length;
+        });
+    }
+    const currentTask = taskListenings[currentTaskIndex];
+    const totalQuestionsInCurrent = currentTask.sections.reduce((sum, section) => sum + section.questions.length, 0);
+    const start = totalQuestionsBefore + 1;
+    const end = totalQuestionsBefore + totalQuestionsInCurrent;
+    return { start, end };
+};
+interface QuestionWithStudentAnswer extends Question {
+    studentAnswer?: string | null;
+    questionId?: number;
+}
+export default function ListeningTest() {
+    const { testId } = useParams<{ testId: string }>();
     const [currentPart, setCurrentPart] = useState(1)
     const [isPlaying, setIsPlaying] = useState(false)
     const [currentTime, setCurrentTime] = useState(0)
+    const [answers, setAnswers] = useState<Record<number, string>>({});
     const [volume, setVolume] = useState(75)
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const [listeningTest, setListeningTest] = useState<ListeningTest | null>(null)
@@ -44,46 +71,93 @@ export default function IeltsListeningTest() {
     const [tasks, setTasks] = useState<TaskListening[]>([])
     const [duration, setDuration] = useState(0)
     const [progress, setProgress] = useState(0);
-    const currentTask = tasks?.find((task) => task.taskNumber === Number(currentPart)) || null;
 
     useEffect(() => {
-        fetch("http://localhost:8080/api/listening/t01")
-            .then((res) => res.json())
-            .then((data) => {
-                setListeningTest(data)
-                setTasks(data.tasks);
-                // setSections(data.tasks.sections);
-                console.log("Fetched tasks:", data.tasks)
-
-
+        fetch(`http://localhost:8080/api/listening/${testId}`, {
+            credentials: "include", // gửi cookie JWT
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
             })
-            .catch((err) => console.error("Failed to load listening test:", err))
-    }, [])
+            .then((data) => {
+                if (!data) return;
+
+                let questionId = 1;
+                const updated = structuredClone(data);
+
+                updated.tasks.forEach((task) => {
+                    task.sections.forEach((section) => {
+                        section.questions.forEach((question) => {
+                            (question as QuestionWithStudentAnswer).questionId = questionId++;
+                        });
+                    });
+                });
+
+                setListeningTest(updated);
+                setTasks(updated.tasks);
+            })
+            .catch((err) => console.error("Failed to load listening test:", err));
+    }, []);
 
 
     useEffect(() => {
         const audio = audioRef.current;
-        if (audio) {
-            const handleTimeUpdate = () => {
-                setCurrentTime(audio.currentTime);
+        if (!audio) return;
+
+        const handleTimeUpdate = () => {
+            setCurrentTime(audio.currentTime);
+            if (audio.duration) {
                 setProgress((audio.currentTime / audio.duration) * 100);
-            };
+            }
+        };
 
-            const handleLoadedMetadata = () => {
-                setDuration(audio.duration);
-            };
+        const handleLoadedMetadata = () => {
+            setDuration(audio.duration);
+        };
 
-            audio.addEventListener("timeupdate", handleTimeUpdate);
-            audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+        audio.addEventListener("timeupdate", handleTimeUpdate);
+        audio.addEventListener("loadedmetadata", handleLoadedMetadata);
 
-            return () => {
-                audio.removeEventListener("timeupdate", handleTimeUpdate);
-                audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
-            };
-        }
-    },  [currentTask, listeningTest]);
+        return () => {
+            audio.removeEventListener("timeupdate", handleTimeUpdate);
+            audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        };
+    }, [listeningTest]);
+
+    useEffect(() => {
+        if (!listeningTest) return;
+        const updatedData = structuredClone(listeningTest);
+
+        let questionId = 1;
+
+        updatedData?.tasks.forEach(task => {
+            task.sections.forEach(section => {
+                section.questions.forEach(question => {
+                    const q = question as QuestionWithStudentAnswer;
+                    q.studentAnswer = answers[questionId] ?? null;
+                    q.questionId = questionId;
+                    questionId++;
+                });
+            });
+        });
 
 
+
+
+        setListeningTest(updatedData);
+    }, [answers]);
+
+    const currentTaskIndex = currentPart - 1;
+    if (!listeningTest) return null;
+
+    const { start, end } = getTotalQuestions(listeningTest.tasks, currentTaskIndex);
+    const currentTask = listeningTest.tasks[currentTaskIndex];
     const togglePlayPause = () => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -133,6 +207,57 @@ export default function IeltsListeningTest() {
             .padStart(2, "0");
         return `${minutes}:${seconds}`;
     };
+    const handleAnswerChange = (questionId: number, answer: string) => {
+        setAnswers(prev => ({
+            ...prev,
+            [questionId]: answer,
+        }));
+    };
+    const handleSubmit = async () => {
+        if (!listeningTest) return;
+
+        const dataToSend = structuredClone(listeningTest);
+
+        // Xóa audioUrl ở cấp test
+        delete dataToSend.audioUrl;
+
+        // Xóa các trường không cần trong từng task
+        dataToSend.tasks.forEach(task => {
+            delete task.title;
+            delete task.audioIntroduction;
+
+            task.sections.forEach(section => {
+                delete section.introduction;
+                delete section.imageUrl;
+
+                section.questions.forEach(q => {
+                    delete q.explanation;
+                    delete q.options;
+
+                });
+            });
+        });
+
+        console.log("Dữ liệu sadfu khi xử lý:", JSON.stringify(dataToSend, null, 2));
+
+        try {
+            const res = await fetch("http://localhost:8080/api/listening/submit", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(dataToSend),
+            });
+
+            const result = await res.json();
+            console.log("Kết quả nộp bài:", result);
+            alert("Submit thành công!");
+        } catch (error) {
+            console.error("Lỗi khi submit:", error);
+            alert("Lỗi khi submit.");
+        }
+    };
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -141,7 +266,7 @@ export default function IeltsListeningTest() {
             )}
 
             <div className="sticky top-0 z-50 flex flex-col shadow-sm">
-                <DoTestHeader />
+                <DoTestHeader onSubmit={handleSubmit} />
 
                 <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
                     <Button
@@ -201,10 +326,25 @@ export default function IeltsListeningTest() {
                         </h1>
 
                         {currentTask.sections.map((section, sectionIdx) => (
+
                             <div key={sectionIdx} className="mb-10">
-                                <h2 className="text-xl font-semibold text-teal-600 mb-2">
-                                    Section {section.sectionNumber}
-                                </h2>
+                                {(() => {
+                                    const { start } = getTotalQuestions(tasks, currentTaskIndex); // dùng tasks từ state
+                                    let startNumber = start;
+
+                                    // Tính tổng số câu hỏi từ các section trước section hiện tại
+                                    for (let i = 0; i < sectionIdx; i++) {
+                                        startNumber += currentTask.sections[i].questions.length;
+                                    }
+
+                                    const endNumber = startNumber + section.questions.length - 1;
+
+                                    return (
+                                        <h2 className="text-xl font-semibold text-teal-600 mb-2">
+                                            Questions {startNumber}–{endNumber}
+                                        </h2>
+                                    );
+                                })()}
 
                                 {section.introduction && (
                                     <p className="text-gray-700 italic mb-4">{section.introduction}</p>
@@ -218,58 +358,70 @@ export default function IeltsListeningTest() {
                                     />
                                 )}
 
-                                {/*Hiển thị câu hỏi */}
-                                {section.questions.map((question, qIdx) => (
-                                    <div key={qIdx} className="mb-6">
-                                       {/*Nếu là true false thì seo ne*/}
-                                        {section.type === 'True/False/Not Given' || section.type === 'Yes/No/Not Given' ? (
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <p className="text-gray-800 font-medium">
-                                                    {qIdx + 1}. {question.question}
-                                                </p>
-                                                <select className="border border-gray-300 rounded p-2 min-w-[150px]">
-                                                    <option value="">Select</option>
-                                                    {question.options.map((option, optIdx) => (
-                                                        <option key={optIdx} value={option}>
-                                                            {option}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                {/*Nếu có options thì seo no*/}
-                                                <p className="text-gray-800 font-medium mb-3">
-                                                    {qIdx + 1}. {question.question}
-                                                </p>
-                                                {question.options?.length > 0 ? (
-                                                    <div className="space-y-2 mb-3">
-                                                        {question.options.map((option, optIdx) => (
-                                                            <div key={optIdx} className="flex items-center">
-                                                                <input
-                                                                    type="radio"
-                                                                    id={`sec${sectionIdx}-q${qIdx}-opt${optIdx}`}
-                                                                    name={`sec${sectionIdx}-question-${qIdx}`}
-                                                                    className="mr-2"
-                                                                />
-                                                                <label htmlFor={`sec${sectionIdx}-q${qIdx}-opt${optIdx}`}>
+                                {Array.isArray(section.questions) &&
+                                    section.questions.map((question, qIdx) => {
+
+                                        const q = question as QuestionWithStudentAnswer;
+                                        const qId = q.questionId!; // vì bạn đã gán trong useEffect
+
+                                        return (
+                                            <div key={qId} className="mb-6">
+                                                {section.type === 'dropdown' ? (
+                                                    <div className="flex items-center gap-3 mb-3">
+                                                        <p className="text-gray-800 font-medium">
+                                                            {qId}. {q.question}
+                                                        </p>
+                                                        <select
+                                                            value={answers[qId] || ""}
+                                                            onChange={(e) => handleAnswerChange(qId, e.target.value)}
+                                                            className="border border-gray-300 rounded p-2 min-w-[150px]"
+                                                        >
+                                                            <option value="">Select</option>
+                                                            {q.options.map((option, optIdx) => (
+                                                                <option key={optIdx} value={option}>
                                                                     {option}
-                                                                </label>
-                                                            </div>
-                                                        ))}
+                                                                </option>
+                                                            ))}
+                                                        </select>
                                                     </div>
                                                 ) : (
-                                                    // Các trường hợp còn lại
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Your answer"
-                                                        className="w-full border border-gray-300 rounded p-2"
-                                                    />
+                                                    <>
+                                                        <p className="text-gray-800 font-medium mb-3">
+                                                            {qId}. {q.question}
+                                                        </p>
+
+                                                        {q.options?.length > 0 ? (
+                                                            <div className="space-y-2 mb-3">
+                                                                {q.options.map((option, optIdx) => (
+                                                                    <div key={optIdx} className="flex items-center">
+                                                                        <input
+                                                                            type="radio"
+                                                                            id={`q${qId}-opt${optIdx}`}
+                                                                            name={`question-${qId}`}
+                                                                            value={option}
+                                                                            checked={answers[qId] === option}
+                                                                            onChange={() => handleAnswerChange(qId, option)}
+                                                                            className="mr-2"
+                                                                        />
+                                                                        <label htmlFor={`q${qId}-opt${optIdx}`}>{option}</label>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <input
+                                                                type="text"
+                                                                value={answers[qId] || ""}
+                                                                onChange={(e) => handleAnswerChange(qId, e.target.value)}
+                                                                placeholder="Your answer"
+                                                                className="w-full border border-gray-300 rounded p-2"
+                                                            />
+                                                        )}
+                                                    </>
                                                 )}
-                                            </>
-                                        )}
-                                    </div>
-                                ))}
+                                            </div>
+                                        );
+                                    })}
+
                             </div>
                         ))}
                     </>
@@ -281,27 +433,27 @@ export default function IeltsListeningTest() {
 
             {/* Thanh chuyển hướng */}
             {listeningTest && listeningTest.tasks && (
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
-                <div className="max-w-7xl mx-auto grid grid-cols-4 gap-4">
-                    {listeningTest.tasks.map((task) => {
-                        const isActive = currentPart === task.taskNumber
-                        return (
-                            <div
-                                key={task.taskNumber}
-                                onClick={() => setCurrentPart(task.taskNumber)}
-                                className={`border rounded-lg p-4 cursor-pointer transition duration-200 text-center ${
-                                    isActive
-                                        ? "border-teal-500 bg-teal-50 text-teal-700"
-                                        : "border-gray-200 bg-white hover:bg-gray-50 text-gray-800"
-                                }`}
-                            >
-                                <h3 className="font-semibold text-sm">Part {task.taskNumber}</h3>
-                            </div>
-                        )
-                    })}
+                <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+                    <div className="max-w-7xl mx-auto grid grid-cols-4 gap-4">
+                        {listeningTest.tasks.map((task) => {
+                            const isActive = currentPart === task.taskNumber
+                            return (
+                                <div
+                                    key={task.taskNumber}
+                                    onClick={() => setCurrentPart(task.taskNumber)}
+                                    className={`border rounded-lg p-4 cursor-pointer transition duration-200 text-center ${
+                                        isActive
+                                            ? "border-teal-500 bg-teal-50 text-teal-700"
+                                            : "border-gray-200 bg-white hover:bg-gray-50 text-gray-800"
+                                    }`}
+                                >
+                                    <h3 className="font-semibold text-sm">Part {task.taskNumber}</h3>
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
-            </div>
-                )}
+            )}
 
         </div>
     )

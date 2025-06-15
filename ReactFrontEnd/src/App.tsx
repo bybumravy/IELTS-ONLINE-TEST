@@ -8,9 +8,10 @@ import TipPage from "@/pages/TipPage";
 import RegisterPage from "@/components/sections/Register";
 import TipDetail from "@/pages/TipDetail";
 import ListTestPage from "@/pages/ListTestPage";
-import ListeningTestPage from "@/pages/DoTest/ListeningTest";
-import IeltsReadingTest from "@/pages/DoTest/ReadingTest";
-import IELTSResultWriting from "@/pages/Result/WritingResult";
+import WritingResult from "@/pages/Result/WritingResult";
+import ListeningTest from "@/pages/DoTest/ListeningTest";
+import ReadingTest from "@/pages/DoTest/ReadingTest";
+import WritingTest from "@/pages/DoTest/WritingTest";
 
 export default function App() {
     return (
@@ -21,14 +22,16 @@ export default function App() {
                     <Route path="/login" element={<Login />}/>
                     <Route path="/student/listAllTips" element={<MainLayout><TipPage /></MainLayout>}/>
                     <Route path="/register" element={<RegisterPage />}/>
-                    <Route path="/doTest/writing" element={<IELTSWritingPractice />} />
-                    <Route path="/doTest/listening"  element={<ListeningTestPage />} />
-                    <Route path="/doTest/reading"  element={<IeltsReadingTest />} />
-                    <Route path="/result/writing"  element={<MainLayout><IELTSResultWriting/></MainLayout>} />
-                    <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout> as React.ReactNode} />
-                    <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout> as React.ReactNode} />
+                    <Route path="/test/listening/:testId" element={<ListeningTest />} />
+                    <Route path="/test/reading/:testId" element={<ReadingTest />} />
+                    <Route path="/test/writing/:testId" element={<WritingTest />} />
+                    {/*<Route path="/test/speaking/:testId" element={<SpeakingTest />} />*/}
+                    <Route path="/writing-result/:resultId" element={<WritingResult />} />
+                    <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout>} />
+                    <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout>} />
                     <Route path="/test" element={<MainLayout><ListTestPage/></MainLayout>} />
                     <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout>} />
+
                 </Routes>
             </Router>
         </AuthProvider>

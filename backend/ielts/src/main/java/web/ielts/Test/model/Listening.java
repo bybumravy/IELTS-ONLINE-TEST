@@ -1,19 +1,18 @@
 package web.ielts.Test.model;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 @Document(collection = "Listening")
 
 public class Listening {
-    private String _id; // e.g. "l1"
+    @Id
     private String testId;
     private String audioUrl;
     private List<TaskListening> tasks;
 
-    // getters & setters
-    public String get_id() { return _id; }
-    public void set_id(String _id) { this._id = _id; }
+
     public String getTestId() { return testId; }
     public void setTestId(String testId) { this.testId = testId; }
     public String getAudioUrl() { return audioUrl; }

@@ -1,15 +1,14 @@
-package web.ielts.Test.model.answer;
+package web.ielts.Test.model.answer.reading;
 
 import java.util.List;
 
-public class SectionAnswer {
+public class SectionReadingAnswer {
     private int sectionNumber;
     private String type;
     private String introduction;
-    //@JsonProperty("questions")
-    private List<QuestionAnswer> questions;
+    private List<QuestionReadingAnswer> questions;
 
-    public SectionAnswer(int sectionNumber, String type, String introduction, List<QuestionAnswer> questions) {
+    public SectionReadingAnswer(int sectionNumber, String type, String introduction, List<QuestionReadingAnswer> questions) {
         this.sectionNumber = sectionNumber;
         this.type = type;
         this.introduction = introduction;
@@ -40,11 +39,11 @@ public class SectionAnswer {
         this.introduction = introduction;
     }
 
-    public List<QuestionAnswer> getQuestions() {
+    public List<QuestionReadingAnswer> getQuestions() {
         return questions;
     }
 
-    public void setQuestions(List<QuestionAnswer> questions) {
+    public void setQuestions(List<QuestionReadingAnswer> questions) {
         this.questions = questions;
     }
 

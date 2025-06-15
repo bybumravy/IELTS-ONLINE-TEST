@@ -1,17 +1,17 @@
-package web.ielts.Test.model.answer;
+package web.ielts.Test.model.answer.reading;
 
 import java.util.List;
 
-public class QuestionAnswer{
+public class QuestionReadingAnswer {
     private String question;
     private String answer;
     private List<String> options;
-    private String explanation; // ✅ Đúng tên theo JSON
+    private String explanation;
 
     private String studentAnswer;
     private int questionId;
 
-    public QuestionAnswer(String question, String answer, List<String> options, String explanation, String studentAnswer, int questionId) {
+    public QuestionReadingAnswer(String question, String answer, List<String> options, String explanation, String studentAnswer, int questionId) {
         this.question = question;
         this.answer = answer;
         this.options = options;

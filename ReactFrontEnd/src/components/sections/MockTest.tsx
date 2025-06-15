@@ -80,7 +80,7 @@ function MockTest({ selectedSkill = 'All Skills' }: MockTestProps) {
 
     const handleStartTest = (testId: string): void => {
         const skill = selectedSkill === 'All Skills' ? 'full' : selectedSkill.toLowerCase();
-        navigate(`/test/${testId}/${skill}`);
+        navigate(`/test/${skill}/${testId}`);
     };
 
     if (loading) {
@@ -102,7 +102,6 @@ function MockTest({ selectedSkill = 'All Skills' }: MockTestProps) {
     return (
         <div className="space-y-8">
             {Object.entries(testsByYear)
-                .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
                 .map(([year, tests]) => (
                     <motion.div
                         key={year}
