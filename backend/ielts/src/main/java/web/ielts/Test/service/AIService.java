@@ -12,10 +12,10 @@ import web.ielts.Test.model.answer.writing.WritingAIResponse;
 @Service
 public class AIService {
 
-    private final OpenAiChatModel chatClient;
+    private final OpenAiChatModel chatModel;
     private final ObjectMapper objectMapper;
     public AIService(OpenAiChatModel chatModel, ObjectMapper objectMapper) {
-        this.chatClient = chatModel;
+        this.chatModel = chatModel;
         this.objectMapper = objectMapper;
     }
 
@@ -29,7 +29,7 @@ public class AIService {
 //        """ + studentAnswer;
 //
 //        // Gửi prompt và lấy content trả về
-//        var response = chatClient
+//        var response = chatModel
 ////                .prompt()
 ////                .user(prompt)
 //                .call(prompt);
@@ -71,7 +71,7 @@ public class AIService {
         System.out.println("==== PROMPT GỬI AI TASK 1 ====");
         System.out.println(prompt);
 
-        ChatResponse response = chatClient.call(new Prompt(new UserMessage(prompt)));
+        ChatResponse response = chatModel.call(new Prompt(new UserMessage(prompt)));
         String content = response.getResult().toString();
 
         System.out.println("==== RESPONSE FROM AI ====");
@@ -109,7 +109,7 @@ public class AIService {
         System.out.println("==== PROMPT GỬI AI TASK 2 ====");
         System.out.println(prompt);
 
-        ChatResponse response = chatClient.call(new Prompt(new UserMessage(prompt)));
+        ChatResponse response = chatModel.call(new Prompt(new UserMessage(prompt)));
         String content = response.getResult().toString();
 
         System.out.println("==== RESPONSE FROM AI ====");
