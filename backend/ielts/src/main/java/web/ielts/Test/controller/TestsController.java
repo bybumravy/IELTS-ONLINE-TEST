@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.jsonwebtoken.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -73,15 +74,6 @@ public class TestsController {
     @GetMapping("/test/count")
     public int volumeOfTest() {
         return (int) testRepo.count();
-    }
-    @PostMapping("/test/save")
-    public ResponseEntity<String> saveTest(@RequestParam("file") MultipartFile file) {
-        try {
-            testService.processAndSaveJson(file); // phương thức xử lý trong service
-            return ResponseEntity.ok("Upload and save successful!");
-        } catch (IOException | java.io.IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
-        }
     }
 
 }

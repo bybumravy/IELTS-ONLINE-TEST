@@ -263,7 +263,7 @@ const handleSave = async () => {
       speaking: speakingCollection
     };
 
-    const response = await fetch('http://localhost:8080/api/test/save', {
+    const response = await fetch('http://localhost:8080/api/teacher/request-test', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

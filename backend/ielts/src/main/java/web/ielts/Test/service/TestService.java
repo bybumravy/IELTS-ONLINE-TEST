@@ -94,47 +94,6 @@ public class TestService {
             return null;
         }
     }
-    public void processAndSaveJson(MultipartFile file) throws IOException {
-        String json = new String(file.getBytes(), StandardCharsets.UTF_8);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(json);
-
-        // Create Test object
-        Test test = new Test();
-        test.setTestId(root.get("testId").asText());
-        test.setTestTitle(root.get("title").asText());
-        test.setTags(mapper.convertValue(root.get("tags"), new TypeReference<List<String>>() {}));
-        test.setCreatedAt(root.get("createdAt").asText());
-
-        // Save test first to get the ID
-        testRepository.save(test);
-
-        // Process and save each skill
-        if (root.has("listening")) {
-            Listening listening = mapper.convertValue(root.get("listening"), Listening.class);
-            listening.setTestId(test.getTestId());
-            listeningRepository.save(listening);
-        }
-
-        if (root.has("reading")) {
-            Reading reading = mapper.convertValue(root.get("reading"), Reading.class);
-            reading.setTestId(test.getTestId());
-            readingRepository.save(reading);
-        }
-
-        if (root.has("writing")) {
-            Writing writing = mapper.convertValue(root.get("writing"), Writing.class);
-            writing.setTestId(test.getTestId());
-            writingRepository.save(writing);
-        }
-
-        if (root.has("speaking")) {
-            Speaking speaking = mapper.convertValue(root.get("speaking"), Speaking.class);
-            speaking.setTestId(test.getTestId());
-            speakingRepository.save(speaking);
-        }
-    }
-
 }
 
 
