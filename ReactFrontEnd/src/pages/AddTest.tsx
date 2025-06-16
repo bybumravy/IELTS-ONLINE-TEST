@@ -1,348 +1,147 @@
 import type { FC } from 'react';
-import { useState, useEffect } from 'react';
-import type { Question, Section, Task, Test, QuestionField, QuestionValue, QuestionUpdateHandler } from '../types/test';
-import { MAX_QUESTIONS_PER_SKILL, MIN_OPTIONS, skillColors } from '../types/test';
-import { AddListening } from '../components/test/AddListening';
-import { AddReading } from '../components/test/AddReading';
-import { AddWriting } from '../components/test/AddWriting';
-import { AddSpeaking } from '../components/test/AddSpeaking';
-import { motion, AnimatePresence } from 'framer-motion';
-import RichTextEditor from '../components/RichTextEditor';
+import { useState, useEffect, useCallback } from 'react';
+import type { Test, WritingTask } from '@/types/apiTypes';
+import { MAX_QUESTIONS_PER_SKILL, MIN_OPTIONS } from '@/types/apiTypes';
 
-interface QuestionFormProps {
-  question: Question;
-  onUpdate: (field: keyof Question, value: QuestionValue) => void;
-  skillType: keyof typeof skillColors;
-}
-
-const QuestionForm: FC<QuestionFormProps> = ({ 
-  question, 
-  onUpdate, 
-  skillType 
-}) => {
-  const addOption = () => {
-    const newOptions = [...question.options, ''];
-    onUpdate('options', newOptions);
-  };
-
-  const removeOption = (indexToRemove: number) => {
-    if (question.options.length <= MIN_OPTIONS) {
-      alert(`Minimum ${MIN_OPTIONS} options required`);
-      return;
-    }
-    const newOptions = question.options.filter((_, index) => index !== indexToRemove);
-    onUpdate('options', newOptions);
-  };
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="bg-white p-4 rounded-lg mb-4 shadow-sm"
-    >
-      <h5 className="font-medium mb-3 font-sans">Question {question.questionNumber}</h5>
-      <div className="space-y-4">
-        <div>
-          <label className="block font-medium mb-2 font-sans">Question:</label>
-          <input 
-            type="text" 
-            className="w-full rounded border px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
-            placeholder="Enter question"
-            value={question.question}
-            onChange={(e) => onUpdate('question', e.target.value)}
-          />
-        </div>
-        
-        <div>
-          <label className="block font-medium mb-2 font-sans">Answer:</label>
-          <input 
-            type="text" 
-            className="w-full rounded border px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
-            placeholder="Enter answer"
-            value={question.answer}
-            onChange={(e) => onUpdate('answer', e.target.value)}
-          />
-        </div>
-        
-        <div>
-          <label className="block font-medium mb-2 font-sans">
-            Explanation:
-            <button
-              type="button"
-              onClick={() => onUpdate('isRichText', !question.isRichText)}
-              className="ml-2 px-2 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200"
-            >
-              {question.isRichText ? 'Switch to Plain Text' : 'Switch to Rich Text'}
-            </button>
-          </label>
-          {question.isRichText ? (
-            <RichTextEditor
-              value={question.explanation}
-              onChange={(value) => onUpdate('explanation', value)}
-            />
-          ) : (
-            <textarea 
-              className="w-full rounded border px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
-              rows={3}
-              placeholder="Enter explanation"
-              value={question.explanation}
-              onChange={(e) => onUpdate('explanation', e.target.value)}
-            />
-          )}
-        </div>
-        
-        <div>
-          <label className="block font-medium mb-2 font-sans">Options:</label>
-          <div className="space-y-2">
-            <AnimatePresence>
-              {question.options.map((option, optIndex) => (
-                <motion.div
-                  key={`option-${optIndex}`}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="flex items-center gap-2"
-                >
-                  <input
-                    type="text"
-                    className="flex-1 rounded border px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
-                    placeholder={`Option ${optIndex + 1}`}
-                    value={option}
-                    onChange={(e) => {
-                      const newOptions = [...question.options];
-                      newOptions[optIndex] = e.target.value;
-                      onUpdate('options', newOptions);
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeOption(optIndex)}
-                    className="p-2 text-red-500 hover:text-red-700"
-                  >
-                    ×
-                  </button>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-          <button
-            type="button"
-            onClick={addOption}
-            className={`mt-2 px-4 py-2 ${skillColors[skillType].button} rounded ${skillColors[skillType].buttonHover} transition-all font-sans`}
-          >
-            + Add Option
-          </button>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-const SectionComponent = ({
-  section,
-  taskNum,
-  skillType,
-  onMethodChange,
-  onAddQuestion,
-  onUpdateQuestion
-}: {
-  section: Section;
-  taskNum: number;
-  skillType: keyof typeof skillColors;
-  onMethodChange: (method: string) => void;
-  onAddQuestion: () => void;
-  onUpdateQuestion: (questionIndex: number, field: keyof Question, value: QuestionValue) => void;
-}) => (
-  <div className={`${skillColors[skillType].section} p-4 rounded-lg mb-4`}>
-    <h4 className="font-medium mb-3 font-sans">Section {section.sectionNumber}</h4>
-    <div className="space-y-4">
-      <div>
-        <label className="block font-medium mb-2 font-sans">Method:</label>
-        <select 
-          className="w-full rounded border px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
-          value={section.method}
-          onChange={(e) => onMethodChange(e.target.value)}
-        >
-          <option value="">Select method</option>
-          <option value="multiple-choice">Multiple Choice</option>
-          <option value="fill-blank">Fill in the Blank</option>
-          <option value="true-false">True/False</option>
-        </select>
-      </div>
-
-      {section.questions.map((question, qIndex) => (
-        <QuestionForm
-          key={`question-${qIndex}`}
-          question={question}
-          skillType={skillType}
-          onUpdate={(field, value) => onUpdateQuestion(qIndex, field, value)}
-        />
-      ))}
-
-      <button 
-        onClick={onAddQuestion}
-        className={`w-full ${skillColors[skillType].button} rounded-lg p-2 text-gray-700 ${skillColors[skillType].buttonHover} transition-all font-sans`}
-      >
-        + Add Question
-      </button>
-    </div>
-  </div>
-);
-
-interface SkillSectionProps {
-  title: string;
-  skillType: keyof typeof skillColors;
-  taskCount: number;
-  questionCount: number;
-  sections: { [key: number]: Section[] };
-  onAddSection: (taskNum: number) => void;
-  onMethodChange: (taskNum: number, sectionNum: number, method: string) => void;
-  onAddQuestion: (taskNum: number, sectionNum: number) => void;
-  onUpdateQuestion: (taskNum: number, sectionNum: number, questionIndex: number, field: keyof Question, value: QuestionValue) => void;
-  children?: React.ReactNode;
-}
-
-const SkillSection: React.FC<SkillSectionProps> = ({
-  title,
-  skillType,
-  taskCount,
-  questionCount,
-  sections,
-  onAddSection,
-  onMethodChange,
-  onAddQuestion,
-  onUpdateQuestion,
-  children
-}) => (
-  <div className="mb-8">
-    <h2 className={`text-xl font-semibold mb-4 ${skillColors[skillType].bg} p-3 rounded font-sans`}>
-      {title} (Question {questionCount})
-    </h2>
-    <div className="space-y-6">
-      {Array.from({ length: taskCount }, (_, i) => i + 1).map((taskNum) => (
-        <div key={`${skillType}-task-${taskNum}`} className="border rounded-lg p-4">
-          <h3 className="font-semibold mb-4 font-sans">Task {taskNum}</h3>
-          {children}
-          
-          {sections[taskNum].map((section) => (
-            <SectionComponent
-              key={`${skillType}-section-${taskNum}-${section.sectionNumber}`}
-              section={section}
-              taskNum={taskNum}
-              skillType={skillType}
-              onMethodChange={(method) => onMethodChange(taskNum, section.sectionNumber, method)}
-              onAddQuestion={() => onAddQuestion(taskNum, section.sectionNumber)}
-              onUpdateQuestion={(qIndex, field, value) => 
-                onUpdateQuestion(taskNum, section.sectionNumber, qIndex, field, value)
-              }
-            />
-          ))}
-          
-          <button 
-            onClick={() => onAddSection(taskNum)}
-            className={`w-full ${skillColors[skillType].button} rounded-lg p-2 text-gray-700 ${skillColors[skillType].buttonHover} transition-all font-sans`}
-          >
-            + Add Section
-          </button>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-type Skill = 'general' | 'listening' | 'reading' | 'writing' | 'speaking';
-
-const skillTabs: { id: Skill; label: string }[] = [
-  { id: 'general', label: 'General Info' },
-  { id: 'listening', label: 'Listening' },
-  { id: 'reading', label: 'Reading' },
-  { id: 'writing', label: 'Writing' },
-  { id: 'speaking', label: 'Speaking' }
-];
+import { AddListening } from '@/components/sections/addTest/AddListening';
+import { AddWriting } from '@/components/sections/addTest/AddWriting';
+import { AddSpeaking } from '@/components/sections/addTest/AddSpeaking';
+import { AddReading } from '@/components/sections/addTest/AddReading';
+import General from '@/components/sections/addTest/General';
 
 interface TestDataState extends Test {
   newTag: string;
 }
 
+const AUTOSAVE_KEY = 'test_autosave_data';
+const AUTOSAVE_INTERVAL = 3000; // 30 giây
+
+const skillTabs = [
+  { id: 'general', label: 'General Info' } as const,
+  { id: 'listening', label: 'Listening' } as const,
+  { id: 'reading', label: 'Reading' } as const,
+  { id: 'writing', label: 'Writing' } as const,
+  { id: 'speaking', label: 'Speaking' } as const,
+];
+
+type Skill = typeof skillTabs[number]['id'];
+
 const AddTest: FC = () => {
-  const [testData, setTestData] = useState<TestDataState>({
-    testId: '',
-    title: '',
-    description: '',
-    tags: [],
-    createdAt: '',
-    updatedAt: '',
-    listening: [],
-    reading: [],
-    writing: [],
-    speaking: [],
-    newTag: ''
+  const [testData, setTestData] = useState<TestDataState>(() => {
+    const savedData = localStorage.getItem(AUTOSAVE_KEY);
+    if (savedData) {
+      try {
+        return JSON.parse(savedData);
+      } catch (e) {
+        console.error('Error loading autosaved data:', e);
+      }
+    }
+    return {
+      testId: '',
+      title: '',
+      tags: [],
+      createdAt: '',
+      listening: [],
+      reading: [],
+      writing: [],
+      speaking: [],
+      newTag: ''
+    };
   });
+
   const [activeTab, setActiveTab] = useState<Skill>('general');
 
+  // 🟡 Auto-save
   useEffect(() => {
-    // Generate testId based on the number of tests
-    const generateTestId = async () => {
+    const saveToLocalStorage = () => {
       try {
-        // This will be replaced with actual API call
-        const testCount = 0; // await getTestCount();
-        setTestData(prev => ({
-          ...prev,
-          testId: `TEST${String(testCount + 1).padStart(4, '0')}`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }));
-      } catch (error) {
-        console.error('Error generating test ID:', error);
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(testData));
+        console.log('Auto-saved test data');
+      } catch (e) {
+        console.error('Error auto-saving data:', e);
       }
     };
+    saveToLocalStorage();
+    const intervalId = setInterval(saveToLocalStorage, AUTOSAVE_INTERVAL);
+    return () => clearInterval(intervalId);
+  }, [testData]);
 
-    generateTestId();
+  // 🟢 Fetch test count để tạo testId
+  useEffect(() => {
+    const generateTestId = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/test/count');
+        if (!response.ok) throw new Error('Failed to fetch test count');
+        const countValue = await response.json();
+        setTestData((prev) => ({
+          ...prev,
+          testId: `T${String(countValue + 1).padStart(3, '0')}`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
+      } catch (error) {
+        console.error('Error fetching test count:', error);
+      }
+    };
+    if (!testData.testId) generateTestId();
   }, []);
 
-  const validateTest = () => {
-    const skillCounts = {
-      listening: 0,
-      reading: 0,
-      writing: 0,
-      speaking: 0
-    };
+  const clearAutosavedData = () => {
+    if (window.confirm('Are you sure you want to clear all saved data and start over?')) {
+      localStorage.removeItem(AUTOSAVE_KEY);
+      localStorage.removeItem('test_autosave_listening');
+      localStorage.removeItem('test_autosave_reading');
+      localStorage.removeItem('test_autosave_reading_paragraphs');
+      localStorage.removeItem('test_autosave_writing');
+      localStorage.removeItem('test_autosave_speaking');
+      window.location.reload();
+    }
+  };
 
-    // Count questions for each skill
-    Object.entries(skillCounts).forEach(([skill, _]) => {
-      testData[skill as keyof typeof skillCounts].forEach((task: Task) => {
-        task.sections.forEach((section: Section) => {
-          skillCounts[skill as keyof typeof skillCounts] += section.questions.length;
+  const validateTest = () => {
+    const skillCounts = { listening: 40, reading: 40 };
+
+    (['listening', 'reading'] as const).forEach((skill) => {
+      const tasks = testData[skill] as unknown;
+      if (Array.isArray(tasks)) {
+        tasks.forEach((task) => {
+          if (task?.sections && Array.isArray(task.sections)) {
+            task.sections.forEach((section: any) => {
+              if (section?.questions && Array.isArray(section.questions)) {
+                skillCounts[skill] += section.questions.length;
+              }
+            });
+          }
         });
-      });
+      }
     });
 
-    // Validate question counts
     const invalidSkills = Object.entries(skillCounts)
-      .filter(([_, count]) => count !== MAX_QUESTIONS_PER_SKILL)
+      .filter(([skill, count]) => skill !== 'writing' && skill !== 'speaking' && count !== MAX_QUESTIONS_PER_SKILL)
       .map(([skill, count]) => `${skill} (${count}/${MAX_QUESTIONS_PER_SKILL})`);
 
     if (invalidSkills.length > 0) {
-      alert(`Each skill must have exactly ${MAX_QUESTIONS_PER_SKILL} questions. Invalid skills: ${invalidSkills.join(', ')}`);
+      alert(`Listening and Reading must have exactly ${MAX_QUESTIONS_PER_SKILL} questions. Invalid: ${invalidSkills.join(', ')}`);
       return false;
     }
 
-    // Validate options
     let hasInvalidOptions = false;
-    Object.values(testData).forEach(tasks => {
-      if (Array.isArray(tasks)) {
-        tasks.forEach((task: Task) => {
-          task.sections.forEach((section: Section) => {
-            section.questions.forEach((question: Question) => {
-              if (question.options.length < MIN_OPTIONS) {
-                hasInvalidOptions = true;
-              }
-            });
+    const listening = testData.listening;
+    if (Array.isArray(listening)) {
+      listening.forEach((task) => {
+        if (task?.sections && Array.isArray(task.sections)) {
+          task.sections.forEach((section: any) => {
+            if (section?.questions && Array.isArray(section.questions)) {
+              section.questions.forEach((q: any) => {
+                if (!q.options || q.options.length < MIN_OPTIONS) {
+                  hasInvalidOptions = true;
+                }
+              });
+            }
           });
-        });
-      }
-    });
+        }
+      });
+    }
 
     if (hasInvalidOptions) {
       alert(`All questions must have at least ${MIN_OPTIONS} options.`);
@@ -351,228 +150,264 @@ const AddTest: FC = () => {
 
     return true;
   };
+const handleSave = async () => {
+  if (!validateTest()) return;
 
-  const handleSave = async () => {
-    if (!validateTest()) {
-      return;
-    }
+  try {
+    const listeningData = JSON.parse(localStorage.getItem('test_autosave_listening') || '[]');
+    const readingData = JSON.parse(localStorage.getItem('test_autosave_reading') || '[]');
+    const readingParagraphs = JSON.parse(localStorage.getItem('test_autosave_reading_paragraphs') || '{}');
+    const writingData = JSON.parse(localStorage.getItem('test_autosave_writing') || '[]');
+    const speakingData = JSON.parse(localStorage.getItem('test_autosave_speaking') || '[]');
 
-    try {
-      // Update timestamps
-      const now = new Date().toISOString();
-      const updatedTestData = {
-        ...testData,
-        updatedAt: now
-      };
+    const listeningCollection = {
+      testId: testData.testId,
+      audioUrl: listeningData.audioUrl || '',
+      tasks: Object.entries(listeningData.sections || {})
+        .filter(([key]) => !isNaN(Number(key)))
+        .map(([taskNumber, sections]) => ({
+          taskNumber: Number(taskNumber),
+          sections: (sections as any[]).map(section => ({
+            sectionNumber: section.sectionNumber,
+            type: section.type,
+            imageUrl: section.imageUrl || '',
+            introduction: section.introduction,
+            questions: section.questions.map((q: any) => ({
+              questionNumber: q.questionNumber,
+              question: q.question,
+              answer: q.answer,
+              explanation: q.explanation || '',
+              options: q.options || []
+            }))
+          }))
+        }))
+    };
 
-      // Save test data to JSON files
-      const collections = {
-        test: updatedTestData,
-        listening: updatedTestData.listening,
-        reading: updatedTestData.reading,
-        speaking: updatedTestData.speaking
-      };
+    const readingCollection = {
+      testId: testData.testId,
+      tasks: Object.entries(readingData)
+        .filter(([key]) => !isNaN(Number(key)))
+        .map(([taskNumber, passage]: [string, any]) => ({
+          taskNumber: Number(taskNumber),
+          paragraph: readingParagraphs[taskNumber] || '',
+          sections: Array.isArray(passage)
+            ? passage.map((section: any) => ({
+                sectionNumber: section.sectionNumber || 0,
+                type: section.type || '',
+                imageUrl: section.imageUrl || '',
+                introduction: section.introduction || '',
+                questions: Array.isArray(section.questions)
+                  ? section.questions.map((q: any) => ({
+                      questionNumber: q.questionNumber || 0,
+                      question: q.question || '',
+                      answer: q.answer || '',
+                      explanation: q.explanation || '',
+                      options: Array.isArray(q.options) ? q.options : []
+                    }))
+                  : []
+              }))
+            : []
+        }))
+    };
 
-      Object.entries(collections).forEach(([name, data]) => {
-        const jsonData = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonData], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${updatedTestData.testId}_${name}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      });
+    const writingCollection = {
+      testId: testData.testId,
+      tasks: Object.entries(writingData)
+        .filter(([key]) => !isNaN(Number(key)))
+        .map(([taskNumber, task]) => {
+          const t = task as WritingTask;
+          return {
+            taskNumber: parseInt(taskNumber) + 1,
+            imageUrl: t.imageUrl || '',
+            question: t.prompt || ''
+          };
+        })
+    };
 
-      alert('Test saved successfully!');
-    } catch (error) {
-      console.error('Error saving test:', error);
-      alert('Error saving test. Please try again.');
-    }
+    const speakingCollection = {
+      testId: testData.testId,
+      part1: {
+        partNumber: 1,
+        title: 'Introduction and Interview',
+        questions: (speakingData?.[0]?.questions || []).map((question: string, index: number) => ({
+          questionNumber: index + 1,
+          question: question
+        }))
+      },
+      part2: {
+        partNumber: 2,
+        title: 'Long Turn',
+        question: speakingData?.[1]?.cueCard?.topic || '',
+        cueCards: speakingData?.[1]?.cueCard?.points || []
+      },
+      part3: {
+        partNumber: 3,
+        title: 'Discussion',
+        questions: (speakingData?.[2]?.questions || []).map((question: string, index: number) => ({
+          questionNumber: index + 1,
+          question: question
+        }))
+      }
+    };
+
+    const requestBody = {
+      test: {
+        testId: testData.testId,
+        testTitle: testData.title,
+        createAt: testData.createdAt,
+        tags: testData.tags
+      },
+      listening: listeningCollection,
+      reading: readingCollection,
+      writing: writingCollection,
+      speaking: speakingCollection
+    };
+
+    const response = await fetch('http://localhost:8080/api/test/save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) throw new Error('Failed to save test');
+
+    const result = await response.text();
+    alert(`Test saved successfully: ${result}`);
+  } catch (error) {
+    console.error('Error saving test:', error);
+    alert('Error saving test.');
+  }
+};
+
+
+  // ✅ Memoized skill handlers
+  const handleSkillDataChange = (skill: keyof Test, data: any) => {
+    setTestData((prev) => ({ ...prev, [skill]: data }));
   };
 
+  const handleListeningChange = useCallback((data: any) => {
+    handleSkillDataChange('listening', data);
+  }, []);
+
+  const handleReadingChange = useCallback((data: any) => {
+    handleSkillDataChange('reading', data);
+  }, []);
+
+  const handleWritingChange = useCallback((data: any) => {
+    handleSkillDataChange('writing', data);
+  }, []);
+
+  const handleSpeakingChange = useCallback((data: any) => {
+    handleSkillDataChange('speaking', data);
+  }, []);
+
   const addTag = () => {
-    if (testData.newTag.trim() !== '') {
-      setTestData(prev => ({
+    if (testData.newTag.trim()) {
+      setTestData((prev) => ({
         ...prev,
         tags: [...prev.tags, prev.newTag.trim()],
-        newTag: ''
+        newTag: '',
       }));
     }
   };
 
-  const removeTag = (indexToRemove: number) => {
-    setTestData(prev => ({
+  const removeTag = (index: number) => {
+    setTestData((prev) => ({
       ...prev,
-      tags: prev.tags.filter((_, index) => index !== indexToRemove)
+      tags: prev.tags.filter((_, i) => i !== index),
     }));
   };
 
-  const handleInputChange = (field: keyof typeof testData, value: string) => {
-    setTestData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const getCurrentDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+  const handleInputChange = (field: keyof TestDataState, value: string) => {
+    setTestData((prev) => ({ ...prev, [field]: value }));
   };
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'general':
-        return (
-          <div className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <label className="w-24 font-semibold">Test ID:</label>
-              <input 
-                type="text" 
-                value={testData.testId}
-                disabled
-                className="flex-1 rounded border px-3 py-2 bg-gray-100"
-              />
-            </div>
-            <div className="flex items-center space-x-4">
-              <label className="w-24 font-semibold">Test Title:</label>
-              <input 
-                type="text" 
-                value={testData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                className="flex-1 rounded border px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all" 
-              />
-            </div>
-            <div className="flex items-center space-x-4">
-              <label className="w-24 font-semibold">Create at:</label>
-              <input 
-                type="date" 
-                className="flex-1 rounded border px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all" 
-                defaultValue={getCurrentDate()}
-                readOnly
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-4">
-                <label className="w-24 font-semibold">Tags:</label>
-                <div className="flex-1">
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {testData.tags.map((tag, index) => (
-                      <span 
-                        key={index} 
-                        className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center"
-                      >
-                        {tag}
-                        <button 
-                          onClick={() => removeTag(index)}
-                          className="ml-2 text-blue-600 hover:text-blue-800"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={testData.newTag}
-                      onChange={(e) => handleInputChange('newTag', e.target.value)}
-                      className="flex-1 rounded border px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
-                      placeholder="Add a tag"
-                    />
-                    <button
-                      onClick={addTag}
-                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-all"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
+        return <General testData={testData} handleInputChange={handleInputChange} addTag={addTag} removeTag={removeTag} />;
       case 'listening':
-        return <AddListening />;
+        return <AddListening onDataChange={handleListeningChange} />;
       case 'reading':
-        return <AddReading />;
+        return <AddReading onDataChange={handleReadingChange} />;
       case 'writing':
-        return <AddWriting />;
+        return <AddWriting onDataChange={handleWritingChange} />;
       case 'speaking':
-        return <AddSpeaking />;
+        return <AddSpeaking onDataChange={handleSpeakingChange} />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen p-6 font-sans">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-center text-2xl font-bold mb-6 font-sans">ADD TEST</h1>
-
-        {/* Navigation Tabs */}
-        <div className="flex border-b mb-6">
-          {skillTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 font-medium transition-all ${
-                activeTab === tab.id
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <div className="mb-8">
-          {renderTabContent()}
-        </div>
-
-        {/* Navigation Buttons */}
-        <div className="flex justify-between">
+    <div className="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen p-8 font-sans">
+      <div className="max-w-[90%] mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
+        <div className="border-b bg-gradient-to-r from-blue-600 to-blue-800 p-8">
+          <h1 className="text-center text-4xl font-bold text-white mb-2">Create New Test</h1>
+          <p className="text-center text-blue-100">Design your IELTS test with our intuitive interface</p>
+          <p className="text-center text-blue-200 text-sm mt-2">Auto-saving enabled - Your progress is automatically saved</p>
           <button
-            onClick={() => {
-              const currentIndex = skillTabs.findIndex(tab => tab.id === activeTab);
-              if (currentIndex > 0) {
-                setActiveTab(skillTabs[currentIndex - 1].id);
-              }
-            }}
-            className={`px-4 py-2 rounded-lg transition-all ${
-              activeTab === 'general'
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-gray-500 text-white hover:bg-gray-600'
-            }`}
-            disabled={activeTab === 'general'}
+            onClick={clearAutosavedData}
+            className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm mx-auto block"
           >
-            Previous
+            Clear Test
           </button>
-          
-          {activeTab === 'speaking' ? (
-            <button
-              onClick={handleSave}
-              className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-all font-sans"
-            >
-              Save Test
-            </button>
-          ) : (
+        </div>
+
+        <div className="p-8 bg-gray-50">
+          <div className="flex gap-1 bg-white rounded-xl shadow-sm p-2 mb-8">
+            {skillTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 px-6 py-4 font-medium rounded-lg transition-all ${activeTab === tab.id
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">{renderTabContent()}</div>
+
+          <div className="flex justify-between mt-8">
             <button
               onClick={() => {
-                const currentIndex = skillTabs.findIndex(tab => tab.id === activeTab);
-                if (currentIndex < skillTabs.length - 1) {
-                  setActiveTab(skillTabs[currentIndex + 1].id);
-                }
+                const currentIndex = skillTabs.findIndex((tab) => tab.id === activeTab);
+                if (currentIndex > 0) setActiveTab(skillTabs[currentIndex - 1].id);
               }}
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-all font-sans"
+              className={`px-8 py-3 rounded-lg transition-all font-medium ${activeTab === 'general'
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm'
+                }`}
+              disabled={activeTab === 'general'}
             >
-              Next
+              ← Previous
             </button>
-          )}
+
+            {activeTab === 'speaking' ? (
+              <button
+                onClick={handleSave}
+                className="bg-green-600 text-white px-10 py-3 rounded-lg hover:bg-green-700 shadow-sm transition-all font-medium"
+              >
+                Save Test
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  const currentIndex = skillTabs.findIndex((tab) => tab.id === activeTab);
+                  if (currentIndex < skillTabs.length - 1) setActiveTab(skillTabs[currentIndex + 1].id);
+                }}
+                className="bg-blue-600 text-white px-10 py-3 rounded-lg hover:bg-blue-700 shadow-sm transition-all font-medium"
+              >
+                Next →
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -580,4 +415,3 @@ const AddTest: FC = () => {
 };
 
 export default AddTest;
-  

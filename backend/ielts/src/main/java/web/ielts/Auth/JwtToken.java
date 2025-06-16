@@ -12,6 +12,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.userdetails.UserDetails;
+
 
 public class JwtToken {
     private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // random key
@@ -40,22 +42,50 @@ public class JwtToken {
                 .signWith(key)
                 .compact();
     }
-
     public static String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    public static String extractRole(String token) {
+        return extractAllClaims(token).get("role", String.class);
+    }
+
+    private static Claims extractAllClaims(String token) {
         try {
-            Claims claims = Jwts.parserBuilder() // ✅ đúng: tạo builder
-                .setSigningKey(key)              // ✅ thiết lập khóa ký
-                .build()                         // ✅ build ra JwtParser
-                .parseClaimsJws(token)           // ✅ parse token
-                .getBody();                      // ✅ lấy payload
-
-            return claims.getSubject(); // ✅ thường là email/username
-
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
         } catch (SignatureException e) {
             throw new RuntimeException("Invalid JWT signature");
         } catch (Exception e) {
             throw new RuntimeException("Invalid token");
         }
     }
+    public static boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    private static boolean isTokenExpired(String token) {
+        return extractAllClaims(token).getExpiration().before(new Date());
+    }
+//    public static String extractUsername(String token) {
+//        try {
+//            Claims claims = Jwts.parserBuilder() // ✅ đúng: tạo builder
+//                .setSigningKey(key)              // ✅ thiết lập khóa ký
+//                .build()                         // ✅ build ra JwtParser
+//                .parseClaimsJws(token)           // ✅ parse token
+//                .getBody();                      // ✅ lấy payload
+//
+//            return claims.getSubject(); // ✅ thường là email/username
+//
+//        } catch (SignatureException e) {
+//            throw new RuntimeException("Invalid JWT signature");
+//        } catch (Exception e) {
+//            throw new RuntimeException("Invalid token");
+//        }
+//    }
 }
 

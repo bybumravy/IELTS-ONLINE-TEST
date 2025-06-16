@@ -1,34 +1,17 @@
 package web.ielts.Test.model;
-
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-
+import java.util.List;
 @Document(collection = "Writing")
 public class Writing {
     @Id
-    private String id;
     private String testId;
-    private WritingTask task1;
-    private WritingTask task2;
+    private Task task1;
+    private Task task2;
 
-    public Writing() {
-    }
-
-    public Writing(String id, String testId, WritingTask task1, WritingTask task2) {
-        this.id = id;
-        this.testId = testId;
-        this.task1 = task1;
-        this.task2 = task2;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
+    // Getter & Setter
 
     public String getTestId() {
         return testId;
@@ -38,41 +21,32 @@ public class Writing {
         this.testId = testId;
     }
 
-    public WritingTask getTask1() {
+    public Task getTask1() {
         return task1;
     }
 
-    public void setTask1(WritingTask task1) {
+    public void setTask1(Task task1) {
         this.task1 = task1;
     }
 
-    public WritingTask getTask2() {
+    public Task getTask2() {
         return task2;
     }
 
-    public void setTask2(WritingTask task2) {
+    public void setTask2(Task task2) {
         this.task2 = task2;
     }
 
-    public static class WritingTask {
-        private String prompt;
+    // Inner class cho Task
+    public static class Task {
+
+        private int taskNumber;
         private String imageUrl;
+        private String type;
+        private String question;
 
-        public WritingTask() {
-        }
 
-        public WritingTask(String prompt, String imageUrl) {
-            this.prompt = prompt;
-            this.imageUrl = imageUrl;
-        }
-
-        public String getPrompt() {
-            return prompt;
-        }
-
-        public void setPrompt(String prompt) {
-            this.prompt = prompt;
-        }
+        // Getter & Setter
 
         public String getImageUrl() {
             return imageUrl;
@@ -80,6 +54,22 @@ public class Writing {
 
         public void setImageUrl(String imageUrl) {
             this.imageUrl = imageUrl;
+        }
+
+        public int getTaskNumber() {
+            return taskNumber;
+        }
+
+        public void setTaskNumber(int taskNumber) {
+            this.taskNumber = taskNumber;
+        }
+
+        public String getQuestion() {
+            return question;
+        }
+
+        public void setQuestion(String question) {
+            this.question = question;
         }
     }
 }

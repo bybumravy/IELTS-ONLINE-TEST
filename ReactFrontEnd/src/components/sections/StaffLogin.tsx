@@ -5,20 +5,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Mail, Lock, ArrowRight } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 function StaffLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const { login } = useAuth();
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    navigate('/staff-page'); // Simulate successful login
+    try {
+      await login(email, password);
+      navigate("/staff-page");
+    } catch (error) {
+      alert("Login failed");
+      console.error(error);
+    }
   };
 
-  const handleGoogleLogin = () => {
-    // Handle Google login for staff
-    navigate('/staff-page');
+ const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:8080/oauth2/authorization/google";
   };
 
   return (
@@ -73,15 +79,15 @@ function StaffLogin() {
               Sign In
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <div className="relative my-4">
+            {/* <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="bg-white px-2 text-gray-500">Or continue with</span>
               </div>
-            </div>
-            <Button 
+            </div> */}
+            {/* <Button 
               type="button" 
               variant="outline" 
               className="w-full border-2"
@@ -89,7 +95,7 @@ function StaffLogin() {
             >
               <img src="./assets/google.svg" alt="Google" className="mr-2 h-4 w-4" />
               Google
-            </Button>
+            </Button> */}
           </form>
         </CardContent>
       </Card>

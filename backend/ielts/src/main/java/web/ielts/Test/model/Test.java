@@ -1,3 +1,4 @@
+
 package web.ielts.Test.model;
 
 import org.springframework.data.annotation.Id;
@@ -10,7 +11,7 @@ import java.util.List;
 @Document(collection = "Test")
 public class Test {
     @Id
-    private String id;
+    private String TestId;
     private String testTitle;
     private List<String> tags;
     private String createdAt;
@@ -18,19 +19,19 @@ public class Test {
     public Test() {
     }
 
-    public Test(String id, String testTitle, List<String> tags, String createdAt) {
-        this.id = id;
+    public Test(String TestId, String testTitle, List<String> tags, String createdAt) {
+        this.TestId = TestId;
         this.testTitle = testTitle;
         this.tags = tags;
         this.createdAt = createdAt;
     }
 
-    public String getId() {
-        return id;
+    public String getTestId() {
+        return TestId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setTestId(String TestIdv) {
+        this.TestId = TestIdv;
     }
 
     public String getTestTitle() {

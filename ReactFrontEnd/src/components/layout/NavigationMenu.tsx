@@ -40,7 +40,7 @@ export function NavigationMenu() {
                         </Link>
                         <div className="border-t my-1"></div>
                         <Link
-                            to="/test/all-skill"
+                            to="/test"
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 font-medium"
                         >
                             All Tests

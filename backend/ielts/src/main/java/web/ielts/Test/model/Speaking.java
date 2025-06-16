@@ -3,36 +3,17 @@ package web.ielts.Test.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-
 import java.util.List;
 
 @Document(collection = "Speaking")
 public class Speaking {
+
     @Id
-    private String id;
     private String testId;
-    private SpeakingPart part1;
-    private SpeakingPart2 part2;
-    private SpeakingPart part3;
+    private Part part1;
+    private Part2 part2;
+    private Part part3;
 
-    public Speaking() {
-    }
-
-    public Speaking(String id, String testId, SpeakingPart part1, SpeakingPart2 part2, SpeakingPart part3) {
-        this.id = id;
-        this.testId = testId;
-        this.part1 = part1;
-        this.part2 = part2;
-        this.part3 = part3;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getTestId() {
         return testId;
@@ -42,75 +23,136 @@ public class Speaking {
         this.testId = testId;
     }
 
-    public SpeakingPart getPart1() {
+    public Part getPart1() {
         return part1;
     }
 
-    public void setPart1(SpeakingPart part1) {
+    public void setPart1(Part part1) {
         this.part1 = part1;
     }
 
-    public SpeakingPart2 getPart2() {
+    public Part2 getPart2() {
         return part2;
     }
 
-    public void setPart2(SpeakingPart2 part2) {
+    public void setPart2(Part2 part2) {
         this.part2 = part2;
     }
 
-    public SpeakingPart getPart3() {
+    public Part getPart3() {
         return part3;
     }
 
-    public void setPart3(SpeakingPart part3) {
+    public void setPart3(Part part3) {
         this.part3 = part3;
     }
 
-    public static class SpeakingPart {
-        private List<String> questions;
+    public static class Part {
+        private String introduction;
+        private int partNumber;
+        private String title;
+        private List<Question> questions;
 
-        public SpeakingPart() {
+        public String getIntroduction() {
+            return introduction;
         }
 
-        public SpeakingPart(List<String> questions) {
-            this.questions = questions;
+        public void setIntroduction(String introduction) {
+            this.introduction = introduction;
         }
 
-        public List<String> getQuestions() {
+        public int getPartNumber() {
+            return partNumber;
+        }
+
+        public void setPartNumber(int partNumber) {
+            this.partNumber = partNumber;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public List<Question> getQuestions() {
             return questions;
         }
 
-        public void setQuestions(List<String> questions) {
+        public void setQuestions(List<Question> questions) {
             this.questions = questions;
         }
     }
 
-    public static class SpeakingPart2 {
-        private String cueCard;
-        private List<String> suggestions;
+    public static class Part2 {
+        private String introduction;
+        private int partNumber;
+        private String title;
+        private String question;
+        private List<String> cueCards;
 
-        public SpeakingPart2() {
+        public String getIntroduction() {
+            return introduction;
         }
 
-        public SpeakingPart2(String cueCard, List<String> suggestions) {
-            this.cueCard = cueCard;
-            this.suggestions = suggestions;
+        public void setIntroduction(String introduction) {
+            this.introduction = introduction;
         }
 
-        public String getCueCard() {
-            return cueCard;
+        public int getPartNumber() {
+            return partNumber;
         }
 
-        public void setCueCard(String cueCard) {
-            this.cueCard = cueCard;
+        public void setPartNumber(int partNumber) {
+            this.partNumber = partNumber;
         }
 
-        public List<String> getSuggestions() {
-            return suggestions;
+        public String getTitle() {
+            return title;
         }
 
-        public void setSuggestions(List<String> suggestions) {
-            this.suggestions = suggestions;
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getQuestion() {
+            return question;
+        }
+
+        public void setQuestion(String question) {
+            this.question = question;
+        }
+
+        public List<String> getCueCards() {
+            return cueCards;
+        }
+
+        public void setCueCards(List<String> cueCards) {
+            this.cueCards = cueCards;
+        }
+
+    }
+
+    public static class Question {
+        private Integer questionNumber; // nullable
+        private String question;
+
+        public Integer getQuestionNumber() {
+            return questionNumber;
+        }
+
+        public void setQuestionNumber(Integer questionNumber) {
+            this.questionNumber = questionNumber;
+        }
+
+        public String getQuestion() {
+            return question;
+        }
+
+        public void setQuestion(String question) {
+            this.question = question;
         }
     }
 }

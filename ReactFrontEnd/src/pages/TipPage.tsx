@@ -155,8 +155,8 @@ function TipPage() {
                             <p className="text-gray-500 col-span-full text-center">No tips found.</p>
                         ) : (
                             filtered.map((tip) => (
-                                <Card 
-                                    key={tip.id} 
+                                <Card
+                                    key={tip.id}
                                     className="cursor-pointer hover:shadow-lg transition-shadow"
                                     onClick={() => navigate(`/${currentSkill}/${tip.id}`)}
                                 >

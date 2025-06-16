@@ -25,12 +25,11 @@ import jakarta.servlet.http.HttpServletRequest;
 public class AuthController {
 
     @Autowired
-    private AuthService loginService;
+    private AuthService authservice;
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO loginRequest) {
-        System.out.println("hello");
-        return loginService.login(
+        return authservice.login(
                 loginRequest.getEmail(),
                 loginRequest.getPassword()
         );
@@ -39,15 +38,19 @@ public class AuthController {
     @GetMapping("/user-info")
     public ResponseEntity<?> getUserInfo(@CookieValue(value = "jwt_token", required = false) String token) {
         try {
-            String username = loginService.getUsernameFromToken(token);
-            return ResponseEntity.ok(Map.of("username", username));
+            String username = authservice.getUsernameFromToken(token);
+            String role = authservice.getRoleFromToken(token);
+            return ResponseEntity.ok(Map.of(
+                    "username", username,
+                    "role", role
+            ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
         }
     }
     @PostMapping("/logout")
 public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request) {
-    List<ResponseCookie> cookies = loginService.logout(request);
+    List<ResponseCookie> cookies = authservice.logout(request);
 
     HttpHeaders headers = new HttpHeaders();
     for (ResponseCookie cookie : cookies) {

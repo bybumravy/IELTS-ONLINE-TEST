@@ -1,7 +1,12 @@
 package web.ielts.Test.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import web.ielts.Test.repository.*;
 import web.ielts.Test.dto.ListTest;
 import web.ielts.Test.model.Test;
@@ -10,11 +15,13 @@ import web.ielts.Test.model.Reading;
 import web.ielts.Test.model.Writing;
 import web.ielts.Test.model.Speaking;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,7 +67,7 @@ public class TestService {
 
     private <T> Map<Integer, List<ListTest>> getTestsBySkill(List<T> skills) {
         Map<String, Test> testMap = testRepository.findAll().stream()
-                .collect(Collectors.toMap(Test::getId, t -> t));
+                .collect(Collectors.toMap(Test::getTestId, t -> t));
 
         return skills.stream()
                 .map(skill -> {
@@ -82,13 +89,52 @@ public class TestService {
         if (test == null || test.getCreatedAt() == null || test.getCreatedAt().isEmpty()) return null;
         try {
             int year = LocalDate.parse(test.getCreatedAt()).getYear();
-            return new ListTest(test.getId(), test.getTestTitle(), year);
+            return new ListTest(test.getTestId(), test.getTestTitle(), year);
         } catch (DateTimeParseException e) {
             return null;
         }
     }
+    public void processAndSaveJson(MultipartFile file) throws IOException {
+        String json = new String(file.getBytes(), StandardCharsets.UTF_8);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(json);
 
-    public List<Test> getAllTests() {
-        return testRepository.findAll();
+        // Create Test object
+        Test test = new Test();
+        test.setTestId(root.get("testId").asText());
+        test.setTestTitle(root.get("title").asText());
+        test.setTags(mapper.convertValue(root.get("tags"), new TypeReference<List<String>>() {}));
+        test.setCreatedAt(root.get("createdAt").asText());
+
+        // Save test first to get the ID
+        testRepository.save(test);
+
+        // Process and save each skill
+        if (root.has("listening")) {
+            Listening listening = mapper.convertValue(root.get("listening"), Listening.class);
+            listening.setTestId(test.getTestId());
+            listeningRepository.save(listening);
+        }
+
+        if (root.has("reading")) {
+            Reading reading = mapper.convertValue(root.get("reading"), Reading.class);
+            reading.setTestId(test.getTestId());
+            readingRepository.save(reading);
+        }
+
+        if (root.has("writing")) {
+            Writing writing = mapper.convertValue(root.get("writing"), Writing.class);
+            writing.setTestId(test.getTestId());
+            writingRepository.save(writing);
+        }
+
+        if (root.has("speaking")) {
+            Speaking speaking = mapper.convertValue(root.get("speaking"), Speaking.class);
+            speaking.setTestId(test.getTestId());
+            speakingRepository.save(speaking);
+        }
     }
+
 }
+
+

@@ -2,19 +2,20 @@ package web.ielts.Test.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import io.jsonwebtoken.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.multipart.MultipartFile;
 import web.ielts.Test.dto.ListTest;
-import web.ielts.Test.model.Test;
-import web.ielts.Test.repository.TestRepository;
+import web.ielts.Test.model.*;
+import web.ielts.Test.repository.*;
 import web.ielts.Test.service.TestService;
-
 
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @RestController
@@ -23,8 +24,21 @@ public class TestsController {
 
     @Autowired
     private TestService testService;
+    
     @Autowired
     private TestRepository testRepo;
+    
+    @Autowired
+    private ListeningRepository listeningRepository;
+    
+    @Autowired
+    private ReadingRepository readingRepository;
+    
+    @Autowired
+    private WritingRepository writingRepository;
+    
+    @Autowired
+    private SpeakingRepository speakingRepository;
 
     @GetMapping("/test/all-skill")
     public Map<Integer, List<ListTest>> getTestsGroupedByYear() {
@@ -50,10 +64,24 @@ public class TestsController {
     public Map<Integer, List<ListTest>> getSpeakingTestsGroupedByYear() {
         return testService.getSpeakingTestsByYear();
     }
+
     @GetMapping("/3-tests")
     public List<Test> getThreeTests() {
         return testRepo.findAll(PageRequest.of(0, 3)).getContent();
     }
 
+    @GetMapping("/test/count")
+    public int volumeOfTest() {
+        return (int) testRepo.count();
+    }
+    @PostMapping("/test/save")
+    public ResponseEntity<String> saveTest(@RequestParam("file") MultipartFile file) {
+        try {
+            testService.processAndSaveJson(file); // phương thức xử lý trong service
+            return ResponseEntity.ok("Upload and save successful!");
+        } catch (IOException | java.io.IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
 
 }

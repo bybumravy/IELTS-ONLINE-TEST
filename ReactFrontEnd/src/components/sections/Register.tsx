@@ -109,9 +109,9 @@ const RegisterPage = () => {
                                 <span className="bg-white px-2 text-gray-500">Or continue with</span>
                             </div>
                         </div>
-                        <Button 
-                            type="button" 
-                            variant="outline" 
+                        <Button
+                            type="button"
+                            variant="outline"
                             className="w-full border-2"
                             onClick={handleGoogleSignup}
                         >

@@ -7,7 +7,6 @@ export function BackButton() {
 
     useEffect(() => {
         const toggleVisibility = () => {
-            // Hiển thị nút khi cuộn xuống 300px
             if (window.pageYOffset > 300) {
                 setIsVisible(true);
             } else {
@@ -36,7 +35,6 @@ export function BackButton() {
                     onClick={handleBack}
                     className="fixed bottom-8 right-8 z-50 p-3 bg-emerald-600 text-white rounded-full shadow-lg hover:bg-emerald-700 transition-colors duration-300 flex items-center justify-center group"
                     style={{
-                        // Đảm bảo nút không che content
                         transform: 'translateZ(0)',
                         willChange: 'transform'
                     }}
@@ -49,4 +47,4 @@ export function BackButton() {
             )}
         </AnimatePresence>
     );
-} 
+}
