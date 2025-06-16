@@ -9,37 +9,16 @@ const MomoPayment = ({ amount, orderInfo, onSuccess }) => {
 
     const handlePayment = async () => {
         try {
-            setLoading(true);
-            const response = await fetch(`http://localhost:8080/api/payment/create`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    orderId,
-                    amount,
-                    orderInfo,
-                    extraData: '',
-                    returnUrl: `http://localhost:5173/payment-callback?orderId=${orderId}`,
-                    notifyUrl: `http://localhost:8080/api/payment/ipn`
-                })
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.resultCode === 0) {
-                // Redirect to MoMo payment page
-                window.location.href = data.payUrl;
+            const response = await axios.post(`http://localhost:8080/api/momo/create`);
+            const payUrl = response.data.payUrl;
+            if (payUrl) {
+                window.location.href = payUrl;
             } else {
-                message.error('Failed to create payment: ' + data.message);
+                alert("Không nhận được URL thanh toán từ server.");
             }
         } catch (error) {
-            message.error('Error creating payment: ' + error.message);
-        } finally {
-            setLoading(false);
+            console.error("Lỗi khi tạo thanh toán MoMo:", error);
+            alert("Đã xảy ra lỗi khi tạo thanh toán.");
         }
     };
 

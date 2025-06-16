@@ -34,8 +34,8 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) //
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/payment/create",
-                                "/api/payment/ipn",
+                                "/api/momo/create",
+                                "/api/momo/ipn-handler",
                                 "/api/payment/callback",
                                 "/api/login",
                                 "/api/user-info",

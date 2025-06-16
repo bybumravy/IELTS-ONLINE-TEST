@@ -5,7 +5,7 @@ public class MomoParameter {
     public static String PARTNER_CLIENT_ID = "partnerClientId";
     public static String CALLBACK_TOKEN = "callbackToken";
     public static String DESCRIPTION = "description";
-    public static String ACCESS_KEY = "acceskey";
+    public static String ACCESS_KEY = "accessKey";
     public static String REQUEST_ID = "requestId";
     public static String AMOUNT = "amount";
     public static String ORDER_ID = "orderId";

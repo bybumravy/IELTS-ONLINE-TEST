@@ -12,6 +12,7 @@ import ListTestPage from "@/pages/ListTestPage";
 import IeltsResult from "@/pages/IeltsResult";
 import PaymentPage from "@/pages/Payment/PaymentPage.tsx";
 import PaymentCallback from "@/pages/Payment/PaymentCallback.tsx";
+import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
 
 export default function App() {
     return (
@@ -29,7 +30,7 @@ export default function App() {
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout> as React.ReactNode} />
                     <Route path="/result" element={<MainLayout><IeltsResult/></MainLayout> as React.ReactNode} />
                     <Route path="/api/payment/create" element={<MainLayout><PaymentPage/></MainLayout> as React.ReactNode} />
-                    <Route path="/payment-callback" element={<MainLayout><PaymentCallback /></MainLayout> as React.ReactNode} />
+                    <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout> as React.ReactNode} />
                     <Route path="/test" element={<MainLayout><ListTestPage /></MainLayout> as React.ReactNode} />
                     <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout> as React.ReactNode} />
                 </Routes>

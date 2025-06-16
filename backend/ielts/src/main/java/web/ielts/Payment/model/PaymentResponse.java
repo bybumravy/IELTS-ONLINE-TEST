@@ -19,9 +19,4 @@ public class PaymentResponse {
     private String payUrl;
     private String deepLink;
     private String qrCodeUrl;
-//    private String signature;
-//    private String transId;
-//    private String orderInfo;
-//    private String orderType;
-//    private String payType;
 } 
