@@ -14,6 +14,7 @@ import ReadingTest from "@/pages/DoTest/ReadingTest";
 import WritingTest from "@/pages/DoTest/WritingTest";
 import VoiceRecorder from "@/pages/DoTest/checkMic";
 import SpeakingTest from "@/pages/DoTest/SpeakingTest";
+import VerifyEmail from "@/components/sections/VerifyEmail";
 
 export default function App() {
     return (
@@ -35,7 +36,7 @@ export default function App() {
                     <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout>} />
                     <Route path="/test/speaking/:testId" element={<MainLayout><VoiceRecorder /></MainLayout>} />
                     <Route path="/checkMic/:testId" element={<MainLayout><SpeakingTest/></MainLayout>} />
-
+                    <Route path="/verify-email" element={<VerifyEmail/>} />
                 </Routes>
             </Router>
         </AuthProvider>

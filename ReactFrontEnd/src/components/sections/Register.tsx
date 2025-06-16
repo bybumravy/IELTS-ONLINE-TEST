@@ -23,10 +23,9 @@ const RegisterPage = () => {
 
         try {
             await register(email, password);
-            navigate("/");
-        } catch (error) {
-            alert("Registration failed");
-            console.error(error);
+
+        } catch (error: any) {
+            alert(error.message || "Registration failed");
         }
     };
 

@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-import web.ielts.Auth.AuthRepository;
+import web.ielts.Auth.repository.AuthRepository;
 
 @Component
 public class CustomUserDetailsService implements UserDetailsService {

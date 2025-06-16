@@ -1,4 +1,4 @@
-package web.ielts.Auth;
+package web.ielts.Auth.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
