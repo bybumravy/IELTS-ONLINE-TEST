@@ -15,6 +15,7 @@ import WritingResult from "@/pages/Result/WritingResult";
 import ListeningTest from "@/pages/DoTest/ListeningTest";
 import ReadingTest from "@/pages/DoTest/ReadingTest";
 import WritingTest from "@/pages/DoTest/WritingTest";
+import HistoryPage from "./pages/HistoryPage"
 
 export default function App() {
     return (
@@ -23,6 +24,7 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={<MainLayout><HomePage /></MainLayout>}/>
                     <Route path="/login" element={<Login />}/>
+                    <Route path="/test-history" element={<MainLayout><HistoryPage /></MainLayout>}/>
                     <Route path="/staff-login" element={<StaffLogin />}/>
                     <Route path="/staff-page" element={<StaffLayout><StaffPage /></StaffLayout>}/>
                     <Route path="/add-test" element={<StaffLayout><AddTest /></StaffLayout>}/>

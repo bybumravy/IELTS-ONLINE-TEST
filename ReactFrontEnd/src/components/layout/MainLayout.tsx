@@ -4,10 +4,15 @@ import {BackButton} from "@/components/ui/back-button";
 
 
 export const MainLayout = ({ children }) => (
-    <div className="min-h-screen bg-gray-50">
-        <Header />
-        {children}
-        <BackButton />
-        <Footer />
-    </div>
-)
+  <div className="flex flex-col min-h-screen bg-gray-50">
+    <Header />
+
+    <main className="flex-grow">
+      {children}
+      <BackButton />
+    </main>
+
+    <Footer />
+  </div>
+);
+
