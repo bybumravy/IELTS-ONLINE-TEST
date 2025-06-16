@@ -1,9 +1,16 @@
 package web.ielts.Test.model.answer.writing;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class EvaluationWritingAnswer {
+    @JsonProperty("TaskAchievement")
     private String TaskAchievement;
+
+    @JsonProperty("CoherenceCohesion")
     private String CoherenceCohesion;
+    @JsonProperty("LexicalResource")
     private String LexicalResource;
+    @JsonProperty("Grammar")
     private String Grammar;
 
     public String getTaskAchievement() {

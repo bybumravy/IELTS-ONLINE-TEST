@@ -9,13 +9,17 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.stereotype.Service;
 import web.ielts.Test.model.answer.writing.WritingAIResponse;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Service
 public class AIService {
 
-    private final OpenAiChatModel chatClient;
+    private final OpenAiChatModel chatModel;
     private final ObjectMapper objectMapper;
+
     public AIService(OpenAiChatModel chatModel, ObjectMapper objectMapper) {
-        this.chatClient = chatModel;
+        this.chatModel = chatModel;
         this.objectMapper = objectMapper;
     }
 
@@ -29,7 +33,7 @@ public class AIService {
 //        """ + studentAnswer;
 //
 //        // Gửi prompt và lấy content trả về
-//        var response = chatClient
+//        var response = chatModel
 ////                .prompt()
 ////                .user(prompt)
 //                .call(prompt);
@@ -71,8 +75,9 @@ public class AIService {
         System.out.println("==== PROMPT GỬI AI TASK 1 ====");
         System.out.println(prompt);
 
-        ChatResponse response = chatClient.call(new Prompt(new UserMessage(prompt)));
-        String content = response.getResult().toString();
+        ChatResponse response = chatModel.call(new Prompt(new UserMessage(prompt)));
+        String content = response.getResult().getOutput().getText();
+
 
         System.out.println("==== RESPONSE FROM AI ====");
         System.out.println(content);
@@ -109,7 +114,7 @@ public class AIService {
         System.out.println("==== PROMPT GỬI AI TASK 2 ====");
         System.out.println(prompt);
 
-        ChatResponse response = chatClient.call(new Prompt(new UserMessage(prompt)));
+        ChatResponse response = chatModel.call(new Prompt(new UserMessage(prompt)));
         String content = response.getResult().toString();
 
         System.out.println("==== RESPONSE FROM AI ====");
@@ -118,22 +123,28 @@ public class AIService {
     }
     private WritingAIResponse parseResponse(String content) {
         try {
-            // Tìm đoạn JSON trong response nếu cần (ví dụ nếu response chứa thêm nội dung không phải JSON)
-            int startIndex = content.indexOf("{");
-            int endIndex = content.lastIndexOf("}") + 1;
+            // Dùng regex để tìm đoạn JSON từ { đến } an toàn hơn
+            Pattern pattern = Pattern.compile("\\{.*\\}", Pattern.DOTALL);
+            Matcher matcher = pattern.matcher(content);
 
-            if (startIndex == -1 || endIndex == -1) {
+            if (matcher.find()) {
+                String jsonPart = matcher.group();
+
+                System.out.println("==== JSON PART ====");
+                System.out.println(jsonPart);
+
+                // Parse JSON thành đối tượng Java
+                return objectMapper.readValue(jsonPart, WritingAIResponse.class);
+            } else {
                 throw new IllegalArgumentException("Không tìm thấy JSON hợp lệ trong phản hồi");
             }
-
-            String jsonPart = content.substring(startIndex, endIndex);
-            return objectMapper.readValue(jsonPart, WritingAIResponse.class);
 
         } catch (Exception e) {
             System.err.println("Lỗi khi parse response: " + e.getMessage());
             throw new RuntimeException("Không thể phân tích phản hồi từ AI", e);
         }
     }
+
 
 
 

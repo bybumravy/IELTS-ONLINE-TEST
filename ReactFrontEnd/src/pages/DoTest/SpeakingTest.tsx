@@ -365,7 +365,7 @@ const SpeakingTest = () => {
                             );
 
                             try {
-                                const res = await fetch("http://localhost:8080/api/upload", {
+                                const res = await fetch("http://localhost:8080/verify/speaking/submit", {
                                     method: "POST",
                                     body: formData,
                                     credentials: "include",

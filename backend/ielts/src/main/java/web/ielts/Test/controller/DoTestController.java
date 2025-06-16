@@ -1,17 +1,29 @@
 package web.ielts.Test.controller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import web.ielts.Test.model.Listening;
 import web.ielts.Test.model.Reading;
 import web.ielts.Test.model.Speaking;
 import web.ielts.Test.model.Writing;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
+import web.ielts.Test.model.answer.speaking.SpeakingAnswer;
 import web.ielts.Test.model.answer.writing.WritingAnswer;
 import web.ielts.Test.service.DoTestService;
-import java.util.List;
+import web.ielts.User.User;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -48,7 +60,6 @@ public class DoTestController {
     @GetMapping("speaking/{testId}")
     public ResponseEntity<Speaking> getSpeakingByTestId(@PathVariable String testId) {
         Speaking speaking = doTestService.getSpeakingByTestId(testId);
-        System.out.println("successs");
         if (speaking != null) {
             return ResponseEntity.ok(speaking);
         } else {
@@ -68,8 +79,60 @@ public class DoTestController {
 
     @PostMapping("/listening/submit")
     public ResponseEntity<ListeningAnswer> saveListeningAnswer(@RequestBody ListeningAnswer answer) {
+        System.out.println("hi");
         return ResponseEntity.ok(doTestService.saveListeningAnswer(answer));
     }
+    @PostMapping("/speaking/submit")
+    public ResponseEntity<String> uploadFiles(
+            @RequestPart("metadata") MultipartFile metadataJson,
+            @RequestPart("files") MultipartFile[] files,
+            @AuthenticationPrincipal User user
+    ) {
+        String studentUsername = user.getUsername();
+        System.out.println("User: " + studentUsername);
 
+        String testId;
+        SpeakingAnswer submission;
+        SpeakingAnswer saved;
+
+        try {
+            String jsonString = new String(metadataJson.getBytes(), StandardCharsets.UTF_8);
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            JsonNode root = mapper.readTree(jsonString);
+
+            testId = root.get("testId").asText();
+
+            submission = mapper.readValue(jsonString, SpeakingAnswer.class);
+            submission.setName(studentUsername);
+            submission.setId(null); // Lưu lần đầu để sinh _id
+
+            saved = doTestService.saveSubmission(submission);
+            System.out.println(saved);
+            System.out.println("Saved initial submission with _id: " + saved.getId());
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body("Lỗi khi đọc hoặc lưu metadata JSON: " + e.getMessage());
+        }
+
+        String folderPath = "audio/user/" + studentUsername + "/" + testId + "_" + saved.getId();
+        Map<String, String> fileUrlMap = new HashMap<>();
+
+        for (MultipartFile file : files) {
+            try {
+                String key = folderPath + "/" + file.getOriginalFilename();
+                String url = doTestService.uploadFile(file, key);
+                fileUrlMap.put(file.getOriginalFilename(), url);
+                System.out.println("Uploaded: " + url);
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Upload failed: " + e.getMessage());
+            }
+        }
+
+        doTestService.updateAnswerUrls(saved, fileUrlMap);
+        doTestService.saveSubmission(saved);
+
+        return ResponseEntity.ok("✅ Upload và cập nhật thành công!");
+    }
 
 }

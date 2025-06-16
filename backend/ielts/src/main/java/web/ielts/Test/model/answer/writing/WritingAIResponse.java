@@ -1,8 +1,14 @@
 package web.ielts.Test.model.answer.writing;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class WritingAIResponse {
+    @JsonProperty("feedback")
     private String feedback;
+    @JsonProperty("evaluation")
     private EvaluationWritingAnswer evaluation;
+    @JsonProperty("sampleAnswer")
+
     private String sampleAnswer;
 
     public String getFeedback() {
