@@ -106,14 +106,14 @@ public class DoTestService {
             WritingAIResponse eval1 = aiService.WritingTask1(task1.getQuestion(), task1.getAnswer());
             task1.setFeedback(eval1.getFeedback());
             task1.setSampleAnswer(eval1.getSampleAnswer());
-            EvaluationWritingAnswer evaluation1 = eval1.getEvaluation();
-            EvaluationWritingAnswer task1Eva = task1.getEvaluation();
-            if (evaluation1 != null && task1Eva != null) {
-                task1Eva.setTaskAchievement(evaluation1.getTaskAchievement());
-                task1Eva.setCoherenceCohesion(evaluation1.getCoherenceCohesion());
-                task1Eva.setLexicalResource(evaluation1.getLexicalResource());
-                task1Eva.setGrammar(evaluation1.getGrammar());
-            }
+            System.out.println("================================");
+            System.out.println("in ra evaluation"  + eval1.getEvaluation().getCoherenceCohesion());
+task1.setEvaluation(eval1.getEvaluation());
+            task1.getEvaluation().setTaskAchievement(eval1.getEvaluation().getTaskAchievement());
+            task1.getEvaluation().setCoherenceCohesion(eval1.getEvaluation().getCoherenceCohesion());
+            task1.getEvaluation().setLexicalResource(eval1.getEvaluation().getLexicalResource());
+            task1.getEvaluation().setGrammar(eval1.getEvaluation().getGrammar());
+
         } catch (Exception e) {
             task1.setFeedback("Error getting AI evaluation: " + e.getMessage());
         }
@@ -123,14 +123,11 @@ public class DoTestService {
             WritingAIResponse eval2 = aiService.WritingTask2(task2.getQuestion(), task2.getAnswer());
             task2.setFeedback(eval2.getFeedback());
             task2.setSampleAnswer(eval2.getSampleAnswer());
-            EvaluationWritingAnswer evaluation2 = eval2.getEvaluation();
-            EvaluationWritingAnswer task2Eva = task2.getEvaluation();
-            if (evaluation2 != null && task2Eva != null) {
-                task2Eva.setTaskAchievement(evaluation2.getTaskAchievement());
-                task2Eva.setCoherenceCohesion(evaluation2.getCoherenceCohesion());
-                task2Eva.setLexicalResource(evaluation2.getLexicalResource());
-                task2Eva.setGrammar(evaluation2.getGrammar());
-            }
+            task2.setEvaluation(eval2.getEvaluation());
+            task2.getEvaluation().setTaskAchievement(eval2.getEvaluation().getTaskAchievement());
+            task2.getEvaluation().setCoherenceCohesion(eval2.getEvaluation().getCoherenceCohesion());
+            task2.getEvaluation().setLexicalResource(eval2.getEvaluation().getLexicalResource());
+            task2.getEvaluation().setGrammar(eval2.getEvaluation().getGrammar());
         } catch (Exception e) {
             task2.setFeedback("Error getting AI evaluation: " + e.getMessage());
         }
