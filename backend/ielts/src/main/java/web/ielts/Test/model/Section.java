@@ -10,15 +10,16 @@ class Section {
     private String introduction;
     private List<Question> questions;
 
-    public int getSectionNumber() {
-        return sectionNumber;
-    }
     public String getImageUrl() {
         return imageUrl;
     }
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public int getSectionNumber() {
+        return sectionNumber;
     }
 
     public void setSectionNumber(int sectionNumber) {

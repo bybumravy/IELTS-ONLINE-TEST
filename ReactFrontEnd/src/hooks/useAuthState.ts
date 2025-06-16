@@ -9,7 +9,11 @@ export function useAuthState(): AuthContextType {
         const fetchUser = async () => {
             try {
                 const data = await authService.getMe()
-                setUser({ username: data.username, role: data.role })
+                if (data) {
+                    setUser({ username: data.username, role: data.role })
+                } else {
+                    setUser(null)
+                }
             } catch {
                 setUser(null)
             }

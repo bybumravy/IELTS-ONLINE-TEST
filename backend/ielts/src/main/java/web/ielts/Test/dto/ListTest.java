@@ -1,7 +1,10 @@
 package web.ielts.Test.dto;
 
 
+import org.springframework.data.annotation.Id;
+
 public class ListTest {
+    @Id
     private String id;
     private String title;
     private int year;

@@ -1,4 +1,3 @@
-
 package web.ielts.Test.model;
 
 import org.springframework.data.annotation.Id;
@@ -49,10 +48,18 @@ public class Speaking {
     }
 
     public static class Part {
+        private String introduction;
         private int partNumber;
         private String title;
         private List<Question> questions;
 
+        public String getIntroduction() {
+            return introduction;
+        }
+
+        public void setIntroduction(String introduction) {
+            this.introduction = introduction;
+        }
 
         public int getPartNumber() {
             return partNumber;
@@ -80,10 +87,19 @@ public class Speaking {
     }
 
     public static class Part2 {
+        private String introduction;
         private int partNumber;
         private String title;
         private String question;
         private List<String> cueCards;
+
+        public String getIntroduction() {
+            return introduction;
+        }
+
+        public void setIntroduction(String introduction) {
+            this.introduction = introduction;
+        }
 
         public int getPartNumber() {
             return partNumber;
@@ -122,7 +138,6 @@ public class Speaking {
     public static class Question {
         private Integer questionNumber; // nullable
         private String question;
-
 
         public Integer getQuestionNumber() {
             return questionNumber;

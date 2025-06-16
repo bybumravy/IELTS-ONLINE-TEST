@@ -12,6 +12,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.userdetails.UserDetails;
+
 
 public class JwtToken {
     private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // random key
@@ -61,8 +63,14 @@ public class JwtToken {
             throw new RuntimeException("Invalid token");
         }
     }
+    public static boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
 
-
+    private static boolean isTokenExpired(String token) {
+        return extractAllClaims(token).getExpiration().before(new Date());
+    }
 //    public static String extractUsername(String token) {
 //        try {
 //            Claims claims = Jwts.parserBuilder() // ✅ đúng: tạo builder

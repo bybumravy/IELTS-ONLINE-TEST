@@ -8,17 +8,8 @@ import java.util.List;
 @Document(collection = "Reading")
 public class Reading {
     @Id
-    private String id;
     private String testId;
     private List<Task> tasks;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getTestId() {
         return testId;

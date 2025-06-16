@@ -8,9 +8,11 @@ import java.util.List;
 public class Writing {
     @Id
     private String testId;
-    private List<Task> tasks;
+    private Task task1;
+    private Task task2;
 
     // Getter & Setter
+
     public String getTestId() {
         return testId;
     }
@@ -19,12 +21,20 @@ public class Writing {
         this.testId = testId;
     }
 
-    public List<Task> getTasks() {
-        return tasks;
+    public Task getTask1() {
+        return task1;
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+    public void setTask1(Task task1) {
+        this.task1 = task1;
+    }
+
+    public Task getTask2() {
+        return task2;
+    }
+
+    public void setTask2(Task task2) {
+        this.task2 = task2;
     }
 
     // Inner class cho Task
@@ -32,7 +42,9 @@ public class Writing {
 
         private int taskNumber;
         private String imageUrl;
+        private String type;
         private String question;
+
 
         // Getter & Setter
 

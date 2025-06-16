@@ -32,3 +32,4 @@ export const register = async (email: string, password: string, role = "student"
 
     if (!res.ok) throw new Error("Register failed")
 }
+

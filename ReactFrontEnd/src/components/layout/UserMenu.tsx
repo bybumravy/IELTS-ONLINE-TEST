@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 interface UserMenuProps {
-  onLogout: () => void; // Sửa cú pháp
+    onLogout: () => void
 }
 
 export function UserMenu({ onLogout }: UserMenuProps) {
