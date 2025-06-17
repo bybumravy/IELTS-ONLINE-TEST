@@ -22,6 +22,7 @@ const RegisterPage = () => {
         }
 
         try {
+            alert("Hay check duong link trong gmail")
             await register(email, password);
 
         } catch (error: any) {
