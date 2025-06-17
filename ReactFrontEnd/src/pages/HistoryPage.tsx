@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import type { User } from '../types/apiTypes';
 import { useAuth } from '../contexts/AuthContext';
 import type { TestHistory } from '../services/historyService';
 import { getStudentTestHistory } from '../services/historyService';
