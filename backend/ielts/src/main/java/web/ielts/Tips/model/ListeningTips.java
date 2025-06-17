@@ -7,61 +7,90 @@ import java.util.List;
 @Document(collection = "ListeningTips")
 public class ListeningTips {
     private String id;
-
     private String type;
-    private String skill;
-
-    public String getSkill() {
-        return skill;
-    }
-
-    public void setSkill(String skill) {
-        this.skill = skill;
-    }
-
     private String description;
-
+    private String skill;
     private List<String> strategy;
 
     private List<String> tips;
 
     private List<Exercise> exercises;
+
     public static class Exercise {
-        private String question;
-        private List<String> options;
-        private String answer;
-        private String explanation;
+        private String audioUrl;
+        private String instruction;
+        private String imageUrl;
+        private List<Section> section;
 
-        public String getQuestion() {
-            return question;
+        public static class Section {
+            private List<String> question;
+            private List<String> options;
+            private String answer;
+            private String explanation;
+
+            public List<String> getQuestion() {
+                return question;
+            }
+
+            public void setQuestion(List<String> question) {
+                this.question = question;
+            }
+
+            public List<String> getOptions() {
+                return options;
+            }
+
+            public void setOptions(List<String> options) {
+                this.options = options;
+            }
+
+            public String getAnswer() {
+                return answer;
+            }
+
+            public void setAnswer(String answer) {
+                this.answer = answer;
+            }
+
+            public String getExplanation() {
+                return explanation;
+            }
+
+            public void setExplanation(String explanation) {
+                this.explanation = explanation;
+            }
         }
 
-        public void setQuestion(String question) {
-            this.question = question;
+        public String getAudioUrl() {
+            return audioUrl;
         }
 
-        public List<String> getOptions() {
-            return options;
+        public void setAudioUrl(String audioUrl) {
+            this.audioUrl = audioUrl;
         }
 
-        public void setOptions(List<String> options) {
-            this.options = options;
+        public String getInstruction() {
+            return instruction;
         }
 
-        public String getAnswer() {
-            return answer;
+        public void setInstruction(String instruction) {
+            this.instruction = instruction;
         }
 
-        public void setAnswer(String answer) {
-            this.answer = answer;
+        public String getImageUrl() {
+            return imageUrl;
         }
 
-        public String getExplanation() {
-            return explanation;
+        public void setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
         }
 
-        public void setExplanation(String explanation) {
-            this.explanation = explanation;
+        public List<Section> getSection() {
+            return section;
+        }
+
+        public void setSection(List<Section> section) {
+            this.section = section;
         }
     }
 
@@ -87,6 +116,14 @@ public class ListeningTips {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getSkill() {
+        return skill;
+    }
+
+    public void setSkill(String skill) {
+        this.skill = skill;
     }
 
     public List<String> getStrategy() {

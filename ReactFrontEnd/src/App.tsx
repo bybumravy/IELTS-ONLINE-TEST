@@ -5,7 +5,6 @@ import Login from "@/components/sections/Login"
 import { MainLayout } from "@/components/layout/MainLayout"
 import TipPage from "@/pages/TipPage";
 import RegisterPage from "@/components/sections/Register";
-import TipDetail from "@/pages/TipDetail";
 import ListTestPage from "@/pages/ListTestPage";
 import { StaffPage } from "./pages/StaffPage"
 import { StaffLayout } from "./components/layout/Staff/StaffLayout"
@@ -16,6 +15,11 @@ import ListeningTest from "@/pages/DoTest/ListeningTest";
 import ReadingTest from "@/pages/DoTest/ReadingTest";
 import WritingTest from "@/pages/DoTest/WritingTest";
 import HistoryPage from "./pages/HistoryPage"
+import IeltsResult from "@/pages/IeltsResult";
+import PaymentPage from "@/pages/Payment/PaymentPage.tsx";
+import TipDetail from "@/pages/TipDetail.tsx";
+import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
+
 
 export default function App() {
     return (
@@ -39,6 +43,9 @@ export default function App() {
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout>} />
                     <Route path="/test" element={<MainLayout><ListTestPage/></MainLayout>} />
                     <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout>} />
+                    <Route path="/result" element={<MainLayout><IeltsResult/></MainLayout>} />
+                    <Route path="/api/payment/create" element={<MainLayout><PaymentPage/></MainLayout>} />
+                    <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
                 </Routes>
             </Router>
         </AuthProvider>

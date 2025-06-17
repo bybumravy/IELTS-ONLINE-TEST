@@ -33,29 +33,36 @@ public class SecurityConfig {
     private JwtAuthenticationFilter jwtFilter;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-//                .cors(Customizer.withDefaults())
+        return http
                 .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/login",
-                    "/api/user-info",
-                    "/api/logout",
-                    "/oauth2/**","/login/oauth2/","/oauth2/",
-                        "/api/*", "/api/tips-summary", "/api/*/*", "/api/3-tests", "/api/*/*/*"
-                ).permitAll()
-                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .successHandler(customOAuth2SuccessHandler)
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
+                .cors(Customizer.withDefaults()) //
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/momo/create",
+                                "/api/momo/ipn-handler",
+                                "/api/payment/callback",
+                                "/api/login",
+                                "/api/user-info",
+                                "/api/logout",
+                                "/oauth2/**",
+                                "/login/oauth2/",
+                                "/oauth2/",
+                                "/api/*",
+                                "/api/payment/status/**",
+                                "/api/tips-summary",
+                                "/api/*/*",
+                                "/api/3-tests",
+                                "/api/*/*/*"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(customOAuth2SuccessHandler)
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
+                .build(); // ✅ Trả về cấu hình đã build
     }
 }
 
