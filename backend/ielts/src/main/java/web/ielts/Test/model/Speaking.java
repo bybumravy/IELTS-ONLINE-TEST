@@ -51,7 +51,16 @@ public class Speaking {
         private String introduction;
         private int partNumber;
         private String title;
+        private String instruction;
         private List<Question> questions;
+
+        public String getInstruction() {
+            return instruction;
+        }
+
+        public void setInstruction(String instruction) {
+            this.instruction = instruction;
+        }
 
         public String getIntroduction() {
             return introduction;
@@ -92,6 +101,15 @@ public class Speaking {
         private String title;
         private String question;
         private List<String> cueCards;
+        private String instruction;
+
+        public String getInstruction() {
+            return instruction;
+        }
+
+        public void setInstruction(String instruction) {
+            this.instruction = instruction;
+        }
 
         public String getIntroduction() {
             return introduction;

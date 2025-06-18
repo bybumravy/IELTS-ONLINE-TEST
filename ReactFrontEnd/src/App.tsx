@@ -34,8 +34,8 @@ export default function App() {
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout>} />
                     <Route path="/test" element={<MainLayout><ListTestPage/></MainLayout>} />
                     <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout>} />
-                    <Route path="/test/speaking/:testId" element={<MainLayout><VoiceRecorder /></MainLayout>} />
-                    <Route path="/checkMic/:testId" element={<MainLayout><SpeakingTest/></MainLayout>} />
+                    <Route path="/test/speaking/:testId" element={<VoiceRecorder />} />
+                    <Route path="/checkMic/:testId" element={<SpeakingTest/>} />
                     <Route path="/verify-email" element={<VerifyEmail/>} />
                 </Routes>
             </Router>
