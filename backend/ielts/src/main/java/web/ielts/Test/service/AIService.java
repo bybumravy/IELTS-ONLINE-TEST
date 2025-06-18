@@ -44,32 +44,79 @@ public class AIService {
     public WritingAIResponse WritingTask1(String question, String answer) {
         StringBuilder promptBuilder = new StringBuilder("""
         You must to use JSON format to return response.
-        You are an IELTS examiner. Review the following Task 1 writing and return a JSON object with:
-        - feedback: string
-        - evaluation: object with:
-            - TaskAchievement: score 1-9 (Does the candidate cover all key features and support comparisons where relevant?)
-            - CoherenceCohesion: score 1-9 (Is information logically organised and clearly linked?)
-            - LexicalResource: score 1-9 (Is vocabulary varied and appropriate for describing data?)
-            - Grammar: score 1-9 (Is grammar range and accuracy good?)
+            You are an IELTS examiner. Review the following Task 1 writing and return a JSON object with:
+        - feedback: {
+            - score: 6.5
+            - errorCorrections: array of objects with {
+                - originalText: string (text with error, mark errors with **),
+                - correctedText: string,
+                - errorType: string (spelling/grammar/vocabulary/linking),
+                - explanation: string
+            }
+            - sentenceImprovements: array of objects with {
+                - originalSentence: string,
+                - improvedSentence: string,
+                - techniquesUsed: array of strings (academic vocab/complex structures/logical flow),
+                - bandBoost: string (e.g. "5.0 → 6.0")
+            }
+            - overallComment: string
+        }
+        - evaluation: {
+            - TaskAchievement: number 1-9,
+            - CoherenceCohesion: number 1-9,
+            - LexicalResource: number 1-9,
+            - Grammar: number 1-9
+        }
         - sampleAnswer: string
+
+        Instructions:
+        1. For ERROR CORRECTIONS:
+            - Mark errors with **double asterisks**
+            - Example: "The **datas** shows" → "The data show" (grammar)
+    
+        2. For SENTENCE IMPROVEMENTS:
+            - Use academic vocabulary: "go up" → "increase steadily"
+            - Add complex structures: "This changed" → "This underwent a significant transformation"
+            - Improve logic: Add linking words like "Consequently," 
+            - Specify band score improvement
 
         Example:
         {
-          "feedback": "Your report covers the main trends well...",
+          "score": 6.5 ,
+          "feedback": {
+            "errorCorrections": [
+              {
+                "originalText": "The **datas** shows",
+                "correctedText": "The data show",
+                "errorType": "grammar",
+                "explanation": "Subject-verb agreement error"
+              }
+            ],
+            "sentenceImprovements": [
+              {
+                "originalSentence": "The graph goes up",
+                "improvedSentence": "The graph exhibits a steady upward trend, which indicates...",
+                "techniquesUsed": ["academic vocab", "relative clause"],
+                "bandBoost": "5.0 → 6.5"
+              }
+            ],
+            "overallComment": "Good data coverage but needs more sophisticated language..."
+          },
           "evaluation": {
-            "TaskAchievement": "7",
-            "CoherenceCohesion": "7",
-            "LexicalResource": "8",
-            "Grammar": "6"
+            "TaskAchievement": 7,
+            "CoherenceCohesion": 7,
+            "LexicalResource": 6,
+            "Grammar": 7
           },
           "sampleAnswer": "The bar chart illustrates..."
         }
-
+    
         Question:
         """)
-                .append(question)
-                .append("\nAnswer:\n")
-                .append(answer);
+                    .append(question)
+                    .append("\nAnswer:\n")
+                    .append(answer);
+
 
         String prompt = promptBuilder.toString();
         System.out.println("==== PROMPT GỬI AI TASK 1 ====");
@@ -85,37 +132,88 @@ public class AIService {
     }
 
     public WritingAIResponse WritingTask2(String question, String answer) {
-        String prompt = """
+        StringBuilder promptBuilder = new StringBuilder("""
         You must to use JSON format to return response.
-        You are an IELTS examiner. Review the following Task 2 essay and return a JSON object with:
-        - feedback: string
-        - evaluation: object with:
-            - TaskAchievement: score 1-9 (Does the essay address all parts of the task with well-developed ideas?)
-            - CoherenceCohesion: score 1-9 (Is the essay logically organized with effective linking?)
-            - LexicalResource: score 1-9 (Is vocabulary varied and precise?)
-            - Grammar: score 1-9 (Is grammar range and accuracy good?)
+            You are an IELTS examiner. Review the following Task 2 writing and return a JSON object with:
+        - feedback: {
+            - score: 6.5
+            - errorCorrections: array of objects with {
+                - originalText: string (text with error, mark errors with **),
+                - correctedText: string,
+                - errorType: string (spelling/grammar/vocabulary/linking),
+                - explanation: string
+            }
+            - sentenceImprovements: array of objects with {
+                - originalSentence: string,
+                - improvedSentence: string,
+                - techniquesUsed: array of strings (academic vocab/complex structures/logical flow),
+                - bandBoost: string (e.g. "5.0 → 6.0")
+            }
+            - overallComment: string
+        }
+        - evaluation: {
+            - TaskAchievement: number 1-9,
+            - CoherenceCohesion: number 1-9,
+            - LexicalResource: number 1-9,
+            - Grammar: number 1-9
+        }
         - sampleAnswer: string
+
+        Instructions:
+        1. For ERROR CORRECTIONS:
+            - Mark errors with **double asterisks**
+            - Example: "The **datas** shows" → "The data show" (grammar)
+    
+        2. For SENTENCE IMPROVEMENTS:
+            - Use academic vocabulary: "go up" → "increase steadily"
+            - Add complex structures: "This changed" → "This underwent a significant transformation"
+            - Improve logic: Add linking words like "Consequently," 
+            - Specify band score improvement
 
         Example:
         {
-          "feedback": "Your essay presents clear arguments...",
-          "evaluation": {
-            "TaskAchievement": "7",
-            "CoherenceCohesion": "8",
-            "LexicalResource": "8",
-            "Grammar": "7"
+          "score": 6.5 ,
+          "feedback": {
+            "errorCorrections": [
+              {
+                "originalText": "The **datas** shows",
+                "correctedText": "The data show",
+                "errorType": "grammar",
+                "explanation": "Subject-verb agreement error"
+              }
+            ],
+            "sentenceImprovements": [
+              {
+                "originalSentence": "The graph goes up",
+                "improvedSentence": "The graph exhibits a steady upward trend, which indicates...",
+                "techniquesUsed": ["academic vocab", "relative clause"],
+                "bandBoost": "5.0 → 6.5"
+              }
+            ],
+            "overallComment": "Good data coverage but needs more sophisticated language..."
           },
-          "sampleAnswer": "It is often argued that..."
+          "evaluation": {
+            "TaskAchievement": 7,
+            "CoherenceCohesion": 7,
+            "LexicalResource": 6,
+            "Grammar": 7
+          },
+          "sampleAnswer": "The bar chart illustrates..."
         }
-
+    
         Question:
-        """ + question + "\nAnswer:\n" + answer;
+        """)
+                .append(question)
+                .append("\nAnswer:\n")
+                .append(answer);
 
+
+        String prompt = promptBuilder.toString();
         System.out.println("==== PROMPT GỬI AI TASK 2 ====");
         System.out.println(prompt);
 
         ChatResponse response = chatModel.call(new Prompt(new UserMessage(prompt)));
-        String content = response.getResult().toString();
+        String content = response.getResult().getOutput().getText();
 
         System.out.println("==== RESPONSE FROM AI ====");
         System.out.println(content);

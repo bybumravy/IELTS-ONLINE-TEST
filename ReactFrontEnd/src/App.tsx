@@ -15,12 +15,14 @@ import WritingTest from "@/pages/DoTest/WritingTest";
 import VoiceRecorder from "@/pages/DoTest/checkMic";
 import SpeakingTest from "@/pages/DoTest/SpeakingTest";
 import VerifyEmail from "@/components/sections/VerifyEmail";
+import Component from "@/pages/IELTSResult";
 
 export default function App() {
     return (
         <AuthProvider>
             <Router>
                 <Routes>
+                    <Route path="/result" element={<MainLayout><Component /></MainLayout>}/>
                     <Route path="/" element={<MainLayout><HomePage /></MainLayout>}/>
                     <Route path="/login" element={<Login />}/>
                     <Route path="/student/listAllTips" element={<MainLayout><TipPage /></MainLayout>}/>
