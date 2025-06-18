@@ -75,10 +75,28 @@ public class WritingAIResponse {
     }
 
     public static class ErrorCorrection {
-        private String originalText; // Contains **marked** errors
+        private String originalText;
         private String correctedText;
-        private String errorType; // spelling/grammar/vocabulary/linking
+        private String errorType;
         private String explanation;
+        private int startIndex;
+        private int endIndex;
+
+        public int getStartIndex() {
+            return startIndex;
+        }
+
+        public void setStartIndex(int startIndex) {
+            this.startIndex = startIndex;
+        }
+
+        public int getEndIndex() {
+            return endIndex;
+        }
+
+        public void setEndIndex(int endIndex) {
+            this.endIndex = endIndex;
+        }
 
         public String getOriginalText() {
             return originalText;

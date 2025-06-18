@@ -25,7 +25,10 @@ interface ErrorCorrection {
     correctedText: string;
     errorType: string;
     explanation: string;
+    startIndex: number;
+    endIndex: number;
 }
+
 
 interface SentenceImprovement {
     originalSentence: string;
@@ -56,7 +59,12 @@ interface TaskWritingAnswer {
 export default function WritingResult() {
     const [data, setData] = useState<WritingAnswer | null>(null);
     const [loading, setLoading] = useState(true);
-    const [openSection, setOpenSection] = useState({
+    const [openSection, setOpenSection] = useState<{
+        questions1: boolean;
+        answer1: boolean;
+        questions2: boolean;
+        answer2: boolean;
+    }>({
         questions1: false,
         answer1: true,
         questions2: false,
@@ -73,106 +81,87 @@ export default function WritingResult() {
             .then(json => setData(json))
             .catch(err => console.error("Fetch error:", err))
             .finally(() => setLoading(false));
-    }, []);
+    }, [resultId]);
 
     if (loading) return <div className="p-8 text-center">Loading...</div>;
     if (!data) return <div className="p-8 text-center">No data found</div>;
-    const renderTextWithCorrections = (originalText: string, corrections: ErrorCorrection[]) => {
-        // Tạo một bản sao của văn bản gốc để thêm các chỉnh sửa
-        let correctedText = originalText;
-
-        // Áp dụng tất cả các chỉnh sửa từ AI
-        corrections.forEach(correction => {
-            correctedText = correctedText.replace(
-                correction.originalText,
-                `<span class="corrected-word" title="${correction.explanation}">${correction.correctedText}</span>`
+    // Highlight errors by matching originalText only (no position logic)
+    const renderTextWithCorrectionsByPosition = (answer: string, corrections: ErrorCorrection[]) => {
+        if (!corrections || corrections.length === 0) {
+            return (
+                <div className="whitespace-pre-line p-4 bg-gray-50 rounded border border-gray-200">
+                    {answer}
+                </div>
             );
-        });
+        }
+        return renderTextBasedHighlighting(answer, corrections);
+    };
 
+    // Simple text-based highlighting (no position, no debug)
+    const renderTextBasedHighlighting = (answer: string, corrections: ErrorCorrection[]) => {
+        let highlightedText = answer;
+        // Sort by length to avoid partial matches
+        const sortedCorrections = [...corrections].sort((a, b) => b.originalText.length - a.originalText.length);
+        sortedCorrections.forEach(correction => {
+            if (correction.originalText && correction.originalText.length > 0) {
+                const regex = new RegExp(escapeRegExp(correction.originalText), 'g');
+                const replacement = `<mark class=\"bg-red-100 text-red-700 font-semibold rounded-sm px-1\" title=\"${correction.explanation}\">${correction.originalText}</mark>`;
+                highlightedText = highlightedText.replace(regex, replacement);
+            }
+        });
         return (
-            <div className="relative">
-                <div
-                    className="whitespace-pre-line p-4 bg-gray-50 rounded border border-gray-200"
-                    dangerouslySetInnerHTML={{ __html: correctedText }}
-                />
-            </div>
+            <div
+                className="whitespace-pre-line p-4 bg-gray-50 rounded border border-gray-200"
+                dangerouslySetInnerHTML={{ __html: highlightedText }}
+            />
         );
     };
 
-    const renderImprovedSentences = (originalText: string, improvements: SentenceImprovement[]) => {
-        // Tạo một bản sao của văn bản gốc để thêm các cải tiến
-        let improvedText = originalText;
-
-        improvements.forEach(improvement => {
-            improvedText = improvedText.replace(
-                improvement.originalSentence,
-                `<span class="improved-sentence" title="${improvement.techniquesUsed.join(', ')}">${improvement.improvedSentence}</span>`
-            );
-        });
-
-        return (
-            <div className="relative">
-                <div
-                    className="whitespace-pre-line p-4 bg-blue-50 rounded border border-blue-200"
-                    dangerouslySetInnerHTML={{ __html: improvedText }}
-                />
-            </div>
-        );
+    // Utility for regex escaping
+    const escapeRegExp = (string: string) => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     };
 
     const renderFeedback = (originalText: string, feedback: Feedback) => (
         <div className="space-y-8">
-            {/* Phần 1: Văn bản gốc với lỗi được đánh dấu */}
+            {/*/!* Debug information *!/*/}
+            {/*{process.env.NODE_ENV === 'development' && (*/}
+            {/*    <div className="bg-blue-50 p-4 rounded border border-blue-200">*/}
+            {/*        <h4 className="font-medium mb-2 text-blue-800">Debug Information</h4>*/}
+            {/*        <div className="text-sm text-blue-700 space-y-1">*/}
+            {/*            <p>Total corrections: {feedback.errorCorrections.length}</p>*/}
+            {/*            <p>Text length: {originalText.length}</p>*/}
+            {/*            {feedback.errorCorrections.map((correction, index) => (*/}
+            {/*                <div key={index} className="ml-4">*/}
+            {/*                    <p>Correction {index + 1}:</p>*/}
+            {/*                    <p className="ml-4">Text: "{correction.originalText}"</p>*/}
+            {/*                    <p className="ml-4">Position: {correction.startIndex}-{correction.endIndex}</p>*/}
+            {/*                </div>*/}
+            {/*            ))}*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*)}*/}
+            {/* Highlight lỗi theo vị trí */}
             <div>
-                <h3 className="text-lg font-semibold mb-3 text-emerald-700">Original Text with Errors Highlighted</h3>
-                {renderTextWithCorrections(originalText, feedback.errorCorrections)}
-
+                <h3 className="text-lg font-semibold mb-3 text-emerald-700">Text with Errors Highlighted</h3>
+                {renderTextWithCorrectionsByPosition(originalText, feedback.errorCorrections)}
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     {feedback.errorCorrections.map((error, index) => (
                         <div key={index} className="bg-white p-3 rounded border border-gray-200">
                             <p className="text-sm">
-                                <span className="font-medium">Error:</span> <span className="text-red-500">{error.originalText}</span>
+                                <strong>Error:</strong> <span className="text-red-500">{error.originalText}</span>
                             </p>
                             <p className="text-sm">
-                                <span className="font-medium">Correction:</span> <span className="text-green-600">{error.correctedText}</span>
+                                <strong>Correction:</strong> <span className="text-green-600">{error.correctedText}</span>
                             </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                                {error.errorType} • {error.explanation}
-                            </p>
+                            <p className="text-xs text-gray-500 mt-1">{error.errorType} • {error.explanation}</p>
+                            {process.env.NODE_ENV === 'development' && (
+                                <p className="text-xs text-blue-500 mt-1">Position: {error.startIndex}-{error.endIndex}</p>
+                            )}
                         </div>
                     ))}
                 </div>
             </div>
-
-            {/* Phần 2: Văn bản với câu được nâng cấp */}
-            <div>
-                <h3 className="text-lg font-semibold mb-3 text-emerald-700">Improved Version</h3>
-                {renderImprovedSentences(originalText, feedback.sentenceImprovements)}
-
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {feedback.sentenceImprovements.map((improvement, index) => (
-                        <div key={index} className="bg-white p-3 rounded border border-gray-200">
-                            <p className="text-sm">
-                                <span className="font-medium">Original:</span> <span className="italic">{improvement.originalSentence}</span>
-                            </p>
-                            <p className="text-sm font-medium">
-                                <span className="font-medium">Improved:</span> <span className="text-blue-600">{improvement.improvedSentence}</span>
-                            </p>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                                {improvement.techniquesUsed.map((tech, i) => (
-                                    <span key={i} className="px-2 py-0.5 bg-gray-100 text-xs rounded-full">
-                  {tech}
-                </span>
-                                ))}
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">
-                                Estimated improvement: {improvement.bandBoost}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
             {/* Overall comment */}
             <div className="bg-white p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold mb-2 text-emerald-700">Overall Feedback</h3>
@@ -180,7 +169,8 @@ export default function WritingResult() {
             </div>
         </div>
     );
-    const renderTask = (task: TaskWritingAnswer, taskTitle: string, openKeyQ: string, openKeyA: string) => (
+
+    const renderTask = (task: TaskWritingAnswer, taskTitle: string, openKeyQ: keyof typeof openSection, openKeyA: keyof typeof openSection) => (
         <div className="mb-8">
             <div className="bg-emerald-600 text-white px-6 py-3 rounded-t-lg">
                 <h2 className="text-lg font-semibold">{taskTitle.toUpperCase()}</h2>
