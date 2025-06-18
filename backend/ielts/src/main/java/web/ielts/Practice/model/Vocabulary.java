@@ -11,13 +11,13 @@ public class Vocabulary {
     private String word;
     private String translate;
     private String explanation;
-    private Topic topic;
-    private Band band;
+    private String topic;
+    private String band;
     private List<ExampleSentence> exp;
 
     public Vocabulary() {}
 
-    public Vocabulary(String word, String translate, String explanation, Topic topic, Band band, List<ExampleSentence> exp) {
+    public Vocabulary(String word, String translate, String explanation, String topic, String band, List<ExampleSentence> exp) {
         this.word = word;
         this.translate = translate;
         this.explanation = explanation;
@@ -40,11 +40,11 @@ public class Vocabulary {
     public String getExplanation() { return explanation; }
     public void setExplanation(String explanation) { this.explanation = explanation; }
 
-    public Topic getTopic() { return topic; }
-    public void setTopic(Topic topic) { this.topic = topic; }
+    public String getTopic() { return topic; }
+    public void setTopic(String topic) { this.topic = topic; }
 
-    public Band getBand() { return band; }
-    public void setBand(Band band) { this.band = band; }
+    public String getBand() { return band; }
+    public void setBand(String band) { this.band = band; }
 
     public List<ExampleSentence> getExp() { return exp; }
     public void setExp(List<ExampleSentence> exp) { this.exp = exp; }

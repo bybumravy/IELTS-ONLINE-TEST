@@ -5,7 +5,7 @@ import  web.ielts.Practice.model.*;
 import java.util.List;
 
 public interface VocabularyRepository extends MongoRepository<Vocabulary, String> {
-    List<Vocabulary> findByTopic(Topic topic);
-    List<Vocabulary> findByBand(Band band);
-    List<Vocabulary> findByTopicAndBand(Topic topic, Band band);
+    List<Vocabulary> findByTopic(String topic);
+    List<Vocabulary> findByBand(String band);
+    List<Vocabulary> findByTopicAndBand(String topic, String band);
 }

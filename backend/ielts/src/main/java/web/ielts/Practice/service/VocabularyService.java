@@ -36,17 +36,17 @@ public class VocabularyService {
     }
 
     // Truy vấn theo topic
-    public List<Vocabulary> getByTopic(Topic topic) {
+    public List<Vocabulary> getByTopic(String topic) {
         return vocabularyRepository.findByTopic(topic);
     }
 
     // Truy vấn theo band
-    public List<Vocabulary> getByBand(Band band) {
+    public List<Vocabulary> getByBand(String band) {
         return vocabularyRepository.findByBand(band);
     }
 
     // Truy vấn theo cả topic và band
-    public List<Vocabulary> getByTopicAndBand(Topic topic, Band band) {
+    public List<Vocabulary> getByTopicAndBand(String topic, String band) {
         return vocabularyRepository.findByTopicAndBand(topic, band);
     }
 }

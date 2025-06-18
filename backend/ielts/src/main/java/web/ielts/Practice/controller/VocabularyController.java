@@ -28,7 +28,7 @@ public class VocabularyController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<Vocabulary> addVocabulary(@RequestBody Vocabulary vocabulary) {
         return ResponseEntity.ok(vocabularyService.addVocabulary(vocabulary));
     }
@@ -46,8 +46,8 @@ public class VocabularyController {
 
     @GetMapping("/filter")
     public ResponseEntity<List<Vocabulary>> filterVocabularies(
-            @RequestParam(required = false) Topic topic,
-            @RequestParam(required = false) Band band
+            @RequestParam(required = false) String topic,
+            @RequestParam(required = false) String band
     ) {
         if (topic != null && band != null) {
             return ResponseEntity.ok(vocabularyService.getByTopicAndBand(topic, band));
