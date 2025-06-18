@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { HomePage } from "@/pages/HomePage"
+//import IELTSWritingPractice from "@/pages/DoTest/WritingTest"
 import { AuthProvider } from "@/contexts/AuthContext"
 import Login from "@/components/sections/Login"
 import { MainLayout } from "@/components/layout/MainLayout"
@@ -14,6 +15,9 @@ import WritingResult from "@/pages/Result/WritingResult";
 import ListeningTest from "@/pages/DoTest/ListeningTest";
 import ReadingTest from "@/pages/DoTest/ReadingTest";
 import WritingTest from "@/pages/DoTest/WritingTest";
+import VoiceRecorder from "@/pages/DoTest/checkMic";
+import SpeakingTest from "@/pages/DoTest/SpeakingTest";
+import VerifyEmail from "@/components/sections/VerifyEmail";
 import HistoryPage from "./pages/HistoryPage"
 import IeltsResult from "@/pages/IeltsResult";
 import PaymentPage from "@/pages/Payment/PaymentPage.tsx";
@@ -43,6 +47,9 @@ export default function App() {
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout>} />
                     <Route path="/test" element={<MainLayout><ListTestPage/></MainLayout>} />
                     <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout>} />
+                    <Route path="/test/speaking/:testId" element={<VoiceRecorder />} />
+                    <Route path="/checkMic/:testId" element={<SpeakingTest/>} />
+                    <Route path="/verify-email" element={<VerifyEmail/>} />
                     <Route path="/result" element={<MainLayout><IeltsResult/></MainLayout>} />
                     <Route path="/api/payment/create" element={<MainLayout><PaymentPage/></MainLayout>} />
                     <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />

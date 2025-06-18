@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
 import {useParams} from "react-router-dom";
+import {useAuth} from "@/contexts/AuthContext";
 
 export interface Question {
     question: string | null;
@@ -27,6 +28,8 @@ export interface ReadingTest {
     idReading: string;
     testId: string;
     tasks: Task[];
+    username: string; // ✅ Thêm username
+    skill: string;
 }
 interface QuestionWithStudentAnswer extends Question {
     studentAnswer: string | null;
@@ -42,6 +45,7 @@ export default function ReadingTest() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const currentTask = tasks.find((task) => Number(task.taskNumber) === currentPart) || null;
     const [answers, setAnswers] = useState<Record<number, string>>({});
+    const {user} = useAuth()
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -103,38 +107,54 @@ export default function ReadingTest() {
         if (!readingTest) return;
 
         setIsSubmitted(true);
+
         try {
+            const dataToSend = {
+                username: user?.username || null,
+                skill: "reading",
+                ...readingTest,
+                tasks: readingTest.tasks.map(task => {
+                    const { title, ...restTask } = task;
+
+                    return {
+                        ...restTask,
+                        sections: task.sections.map(section => {
+                            const { paragraph, ...restSection } = section;
+
+                            return {
+                                ...restSection,
+                                questions: section.questions.map(question => ({
+                                    ...question,
+                                    studentAnswer: answers[(question as QuestionWithStudentAnswer).questionId] || null
+                                }))
+                            };
+                        })
+                    };
+                })
+            };
+
             const response = await fetch("http://localhost:8080/verify/reading/submit", {
                 method: "POST",
                 credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    ...readingTest,
-                    tasks: readingTest.tasks.map(task => ({
-                        ...task,
-                        sections: task.sections.map(section => ({
-                            ...section,
-                            questions: section.questions.map(question => ({
-                                ...question,
-                                studentAnswer: answers[(question as QuestionWithStudentAnswer).questionId] || null
-                            }))
-                        }))
-                    }))
-                }),
+                body: JSON.stringify(dataToSend),
             });
 
-            if (!response.ok) throw new Error("Submit failed");
+            if (!response.ok) throw new Error("Gửi bài thất bại");
+
             const result = await response.json();
-            console.log("Saved:", result);
-            setIsSubmitted(true);
+            console.log("Đã lưu:", result);
+            alert("🎉 Nộp bài thành công!");
         } catch (error) {
-            console.error("Error submitting:", error);
+            console.error("Lỗi khi nộp bài:", error);
+            alert("❌ Có lỗi xảy ra khi nộp bài.");
         } finally {
             setIsSubmitted(false);
         }
     };
+
 
     const getSectionQuestionRange = (task: Task | null, sectionIndex: number): { start: number; end: number } => {
         if (!task) return { start: 0, end: 0 };

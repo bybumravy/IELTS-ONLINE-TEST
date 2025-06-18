@@ -1,4 +1,4 @@
-package web.ielts.Auth;
+package web.ielts.Auth.controller;
 
 
 import java.util.HashMap;
@@ -9,15 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
 import jakarta.servlet.http.HttpServletRequest;
+import web.ielts.Auth.dto.AuthDTO;
+import web.ielts.Auth.service.AuthService;
+import web.ielts.User.User;
 
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @RestController
@@ -27,6 +25,19 @@ public class AuthController {
     @Autowired
     private AuthService authservice;
 
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User newUser) {
+
+        return authservice.register(newUser);
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
+
+
+        return authservice.verifyEmail(token);
+    }
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO loginRequest) {
         return authservice.login(

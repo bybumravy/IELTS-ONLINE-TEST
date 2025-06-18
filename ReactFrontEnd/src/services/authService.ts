@@ -26,6 +26,7 @@ export const getMe = async () => {
 export const register = async (email: string, password: string, role = "student") => {
     const res = await fetch("http://localhost:8080/api/register", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, role }),
     })

@@ -54,6 +54,7 @@ public class DoTestController {
 
     @GetMapping("/reading/{testId}")
     public ResponseEntity<Reading> getReadingByTestId(@PathVariable String testId) {
+        System.out.println("testIdsdfsdfsdfsdfsdfsdfsdfds: " + testId);
         Reading reading = doTestService.getReadingByTestId(testId);
         return reading != null ? ResponseEntity.ok(reading) : ResponseEntity.notFound().build();
     }

@@ -1,4 +1,4 @@
-package web.ielts.Auth;
+package web.ielts.Auth.dto;
 
 
 

@@ -78,6 +78,7 @@ export interface Question {
   options: string[];
 }
 
+
 export type QuestionField = keyof Question;
 export type QuestionValue = string | number | boolean | string[];
 
