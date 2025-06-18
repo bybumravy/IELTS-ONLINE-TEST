@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {useAuth} from "@/contexts/AuthContext";
 
 export interface Question {
@@ -46,6 +46,7 @@ export default function ReadingTest() {
     const currentTask = tasks.find((task) => Number(task.taskNumber) === currentPart) || null;
     const [answers, setAnswers] = useState<Record<number, string>>({});
     const {user} = useAuth()
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -147,6 +148,7 @@ export default function ReadingTest() {
             const result = await response.json();
             console.log("Đã lưu:", result);
             alert("🎉 Nộp bài thành công!");
+            navigate("/result");
         } catch (error) {
             console.error("Lỗi khi nộp bài:", error);
             alert("❌ Có lỗi xảy ra khi nộp bài.");

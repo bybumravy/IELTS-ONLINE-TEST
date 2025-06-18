@@ -104,7 +104,7 @@ public class DoTestController {
             testId = root.get("testId").asText();
 
             submission = mapper.readValue(jsonString, SpeakingAnswer.class);
-            submission.setName(studentUsername);
+            submission.setUsername(studentUsername);
             submission.setId(null); // Lưu lần đầu để sinh _id
 
             saved = doTestService.saveSubmission(submission);

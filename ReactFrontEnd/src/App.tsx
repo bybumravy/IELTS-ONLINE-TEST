@@ -16,6 +16,7 @@ import VoiceRecorder from "@/pages/DoTest/checkMic";
 import SpeakingTest from "@/pages/DoTest/SpeakingTest";
 import VerifyEmail from "@/components/sections/VerifyEmail";
 
+import Component from "@/pages/DoTest/Component";
 export default function App() {
     return (
         <AuthProvider>
@@ -30,6 +31,7 @@ export default function App() {
                     <Route path="/test/writing/:testId" element={<WritingTest />} />
                     {/*<Route path="/test/speaking/:testId" element={<SpeakingTest />} />*/}
                     <Route path="/writing-result/:resultId" element={<MainLayout><WritingResult /></MainLayout>} />
+
                     <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout>} />
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout>} />
                     <Route path="/test" element={<MainLayout><ListTestPage/></MainLayout>} />
@@ -37,6 +39,7 @@ export default function App() {
                     <Route path="/test/speaking/:testId" element={<VoiceRecorder />} />
                     <Route path="/checkMic/:testId" element={<SpeakingTest/>} />
                     <Route path="/verify-email" element={<VerifyEmail/>} />
+                    <Route path="/result" element={<MainLayout><Component/></MainLayout> as React.ReactNode} />
                 </Routes>
             </Router>
         </AuthProvider>
