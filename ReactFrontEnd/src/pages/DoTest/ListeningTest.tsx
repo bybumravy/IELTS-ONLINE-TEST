@@ -2,17 +2,16 @@ import {useState, useRef, useEffect} from "react"
 import { Button } from "@/components/ui/button"
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader"
 import { Play, Pause, RotateCcw, Volume2 } from "lucide-react"
-import {useNavigate, useParams} from "react-router-dom";
+import {useLocation, useNavigate, useParams, useSearchParams} from "react-router-dom";
 import {useAuth} from "@/contexts/AuthContext";
-
-type Question = {
+export type Question = {
     question: string;
     answer: string;
     options: string[];
     explanation: string;
 };
 
-type Section = {
+export type Section = {
     sectionNumber: number;
     type: string;
     imageUrl: string;
@@ -20,14 +19,14 @@ type Section = {
     questions: Question[];
 };
 
-type TaskListening = {
+export type TaskListening = {
     taskNumber: number;
     title: string;
     audioIntroduction: string;
     sections: Section[];
 };
 
-type ListeningTest = {
+export type ListeningTest = {
     testId: string;
     audioUrl: string;
     tasks: TaskListening[];
@@ -74,8 +73,15 @@ export default function ListeningTest() {
     const [tasks, setTasks] = useState<TaskListening[]>([])
     const [duration, setDuration] = useState(0)
     const [progress, setProgress] = useState(0);
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const {user} = useAuth()
+
+
+    const mode = searchParams.get("mode"); // lấy 'fulltest'
+
+    console.log("testId:", testId);
+    console.log("mode:", mode);// Sẽ i;
     useEffect(() => {
         fetch(`http://localhost:8080/verify/listening/${testId}`, {
             credentials: "include",
@@ -262,7 +268,13 @@ export default function ListeningTest() {
             const result = await res.json();
             console.log("Kết quả nộp bài:", result);
             alert("Submit thành công!");
-            navigate("/result");
+            if(mode === "fulltest"){
+                navigate(`/test/reading/${testId}?mode=${mode}`);
+            }
+            else{
+                navigate("/result");
+            }
+
         } catch (error) {
             console.error("Lỗi khi submit:", error);
             alert("Lỗi khi submit.");

@@ -7,23 +7,16 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import web.ielts.Test.model.Listening;
-import web.ielts.Test.model.Reading;
-import web.ielts.Test.model.Speaking;
-import web.ielts.Test.model.Writing;
+import web.ielts.Test.model.*;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswer;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswerPart13;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswerPart2;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswerQuestion;
-import web.ielts.Test.model.answer.writing.EvaluationWritingAnswer;
 import web.ielts.Test.model.answer.writing.WritingAIResponse;
 import web.ielts.Test.model.answer.writing.WritingAnswer;
-import web.ielts.Test.repository.ListeningRepository;
-import web.ielts.Test.repository.ReadingRepository;
-import web.ielts.Test.repository.SpeakingRepository;
-import web.ielts.Test.repository.WritingRepository;
+import web.ielts.Test.repository.*;
 import web.ielts.Test.repository.answer.ListeningAnswerRepository;
 import web.ielts.Test.repository.answer.ReadingAnswerRepository;
 import web.ielts.Test.repository.answer.SpeakingAnswerRepository;
@@ -56,6 +49,8 @@ public class DoTestService {
     @Autowired
     private SpeakingAnswerRepository speakingAnswerRepository;
     @Autowired
+    private TestRepository testRepository;
+    @Autowired
     private AIService aiService;
     @Autowired
     private SpeakingRepository speakingRepository;
@@ -76,6 +71,7 @@ public class DoTestService {
         return writingRepository.findById(testId);
     }
 
+
     public List<Listening> getAllListeningTests() {
         return listeningRepository.findAll();
     }
@@ -86,6 +82,9 @@ public class DoTestService {
 
     public Reading getReadingByTestId(String testId) {
         return readingRepository.findByTestId(testId);
+    }
+    public Test getTestByTestId(String testId) {
+        return testRepository.findById(testId).orElse(null);
     }
 
     public ReadingAnswer saveReadingAnswer(ReadingAnswer answer) {

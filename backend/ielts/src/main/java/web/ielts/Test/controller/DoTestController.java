@@ -9,10 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import web.ielts.Test.model.Listening;
-import web.ielts.Test.model.Reading;
-import web.ielts.Test.model.Speaking;
-import web.ielts.Test.model.Writing;
+import web.ielts.Test.model.*;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswer;
@@ -66,7 +63,11 @@ public class DoTestController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    @GetMapping("/fulltest/{testId}")
+    public ResponseEntity<Test> getFullTestByTestId(@PathVariable String testId) {
+        Test test = doTestService.getTestByTestId(testId);
+        return test != null ? ResponseEntity.ok(test) : ResponseEntity.notFound().build();
+    }
     @PostMapping("/reading/submit")
     public ResponseEntity<ReadingAnswer> saveReadingAnswer(@RequestBody ReadingAnswer answer) {
         return ResponseEntity.ok(doTestService.saveReadingAnswer(answer));

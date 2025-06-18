@@ -17,6 +17,7 @@ import SpeakingTest from "@/pages/DoTest/SpeakingTest";
 import VerifyEmail from "@/components/sections/VerifyEmail";
 
 import Component from "@/pages/DoTest/Component";
+import FulllTest from "@/pages/DoTest/FullTest";
 export default function App() {
     return (
         <AuthProvider>
@@ -29,6 +30,7 @@ export default function App() {
                     <Route path="/test/listening/:testId" element={<ListeningTest />} />
                     <Route path="/test/reading/:testId" element={<ReadingTest />} />
                     <Route path="/test/writing/:testId" element={<WritingTest />} />
+                    <Route path="/test/full/:testId" element={<FulllTest />} />
                     {/*<Route path="/test/speaking/:testId" element={<SpeakingTest />} />*/}
                     <Route path="/writing-result/:resultId" element={<MainLayout><WritingResult /></MainLayout>} />
 
