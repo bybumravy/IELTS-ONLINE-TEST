@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { HomePage } from "@/pages/HomePage"
-//import IELTSWritingPractice from "@/pages/DoTest/WritingTest"
 import { AuthProvider } from "@/contexts/AuthContext"
 import Login from "@/components/sections/Login"
 import { MainLayout } from "@/components/layout/MainLayout"
 import TipPage from "@/pages/TipPage";
 import RegisterPage from "@/components/sections/Register";
+import TipDetail from "@/pages/TipDetail";
 import ListTestPage from "@/pages/ListTestPage";
 import { StaffPage } from "./pages/StaffPage"
 import { StaffLayout } from "./components/layout/Staff/StaffLayout"
@@ -19,13 +19,11 @@ import VoiceRecorder from "@/pages/DoTest/checkMic";
 import SpeakingTest from "@/pages/DoTest/SpeakingTest";
 import VerifyEmail from "@/components/sections/VerifyEmail";
 import HistoryPage from "./pages/HistoryPage"
-import IeltsResult from "@/pages/IeltsResult";
 import PaymentPage from "@/pages/Payment/PaymentPage.tsx";
-import TipDetail from "@/pages/TipDetail.tsx";
 import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
 import Contact from "@/pages/Contact";
 import HelpCenter from "@/pages/HelpCenter";
-
+import IeltsResult from "@/pages/IeltsResult";
 export default function App() {
     return (
         <AuthProvider>

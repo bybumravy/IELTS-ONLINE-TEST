@@ -6,9 +6,18 @@ public class TaskWritingAnswer {
     private String imageUrl;
     private String answer;
     private String wordCount;
-    private String feedback;
+    private String score;
+    private WritingAIResponse.Feedback feedback;
     private EvaluationWritingAnswer evaluation;
     private String sampleAnswer;
+
+    public String getScore() {
+        return score;
+    }
+
+    public void setScore(String score) {
+        this.score = score;
+    }
 
     public String getType() {
         return type;
@@ -50,11 +59,11 @@ public class TaskWritingAnswer {
         this.wordCount = wordCount;
     }
 
-    public String getFeedback() {
+    public WritingAIResponse.Feedback getFeedback() {
         return feedback;
     }
 
-    public void setFeedback(String feedback) {
+    public void setFeedback(WritingAIResponse.Feedback feedback) {
         this.feedback = feedback;
     }
 
