@@ -12,6 +12,8 @@ public class ListeningAnswer {
     private String id;
     private String testId;
     private List<TaskListeningAnswer> tasks;
+    private String username;
+    private String skill;
 
     public String getId() {
         return id;
@@ -38,10 +40,29 @@ public class ListeningAnswer {
     }
     public ListeningAnswer() {
     }
-    public ListeningAnswer(String id, String testId, List<TaskListeningAnswer> tasks) {
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getSkill() {
+        return skill;
+    }
+
+    public void setSkill(String skill) {
+        this.skill = skill;
+    }
+
+    public ListeningAnswer(String id, String testId, List<TaskListeningAnswer> tasks, String username, String skill) {
         this.id = id;
         this.testId = testId;
         this.tasks = tasks;
+        this.username = username;
+        this.skill = skill;
     }
 
     @Override

@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +33,7 @@ public class AuthService {
     private VerificationTokenRepository tokenRepository;
     @Autowired
     private EmailConfig emailConfig;
-
+    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
     @Value("${jwt.secret}")
     private final String jwtSecret = "J4gKu2KJ3Z5vP8t5NmE+lw6aD3vJ6GpN1kILUBo=";
 
@@ -74,7 +75,7 @@ public class AuthService {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Không tìm thấy tài khoản");
         }
-
+        user.setPassword(encoder.encode(user.getPassword()));
 
         authRepository.save(user);
         String tokenJwt = JwtToken.generateToken(user.getEmail(), user.getRole());
@@ -100,7 +101,7 @@ public class AuthService {
         User user = authRepository.findByEmail(email);
 
         System.out.println(user);
-        if (user != null && user.getPassword().equals(password)) {
+        if (user != null && encoder.matches(password, user.getPassword())) {
             String token = JwtToken.generateToken(user.getEmail(), user.getRole());
 
             ResponseCookie cookie = ResponseCookie.from("jwt_token", token)
