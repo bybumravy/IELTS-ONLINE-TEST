@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
-import {useParams} from "react-router-dom";
+import {useParams, useNavigate} from "react-router-dom";
 import {useAuth} from "@/contexts/AuthContext";
 import { PenLine, Eraser } from "lucide-react";
 
@@ -52,6 +52,7 @@ export default function ReadingTest() {
     const paragraphRef = useRef<HTMLDivElement>(null);
     const [isEraserMode, setIsEraserMode] = useState(false);
     const initialTime = 3600;
+    const navigate = useNavigate();
 
     // Lấy thời gian còn lại từ localStorage hoặc tính toán lại
     function getInitialTimeRemaining() {
@@ -212,9 +213,11 @@ export default function ReadingTest() {
             });
 
             if (!response.ok) throw new Error("Gửi bài thất bại");
-
+            localStorage.removeItem(`reading-autosave-${testId}`);
+            localStorage.removeItem(`reading-startTime-${testId}`);
             const result = await response.json();
             console.log("Đã lưu:", result);
+            navigate("/result");
             alert("🎉 Nộp bài thành công!");
         } catch (error) {
             console.error("Lỗi khi nộp bài:", error);

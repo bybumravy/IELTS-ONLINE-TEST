@@ -40,7 +40,7 @@ public class AddWriting {
     }
 
 
-    class AddWritingTask {
+    public static class AddWritingTask {
         private int taskNumber;
         private String imageUrl;
         private String question;
