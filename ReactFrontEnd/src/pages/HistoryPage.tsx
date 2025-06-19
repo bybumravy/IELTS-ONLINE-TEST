@@ -69,7 +69,7 @@ const HistoryPage: React.FC = () => {
           <div>
             {filteredHistory.length === 0 ? (
               <p className="text-gray-500 text-center py-8">
-                Chưa có bài làm nào
+                Đã làm bài nào đâu mà xem lịch sử???
               </p>
             ) : (
               filteredHistory.map((item) => (

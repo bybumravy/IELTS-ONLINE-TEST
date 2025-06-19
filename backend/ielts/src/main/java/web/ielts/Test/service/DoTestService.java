@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import web.ielts.Test.dto.HistoryTest;
 import web.ielts.Test.model.Listening;
 import web.ielts.Test.model.Reading;
 import web.ielts.Test.model.Speaking;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DoTestService {
@@ -199,4 +201,58 @@ task1.setEvaluation(eval1.getEvaluation());
     public SpeakingAnswer saveSubmission(SpeakingAnswer submission) {
         return speakingAnswerRepository.save(submission);
     }
+
+    public List<HistoryTest> getListeningByUsername(String username) {
+        List<ListeningAnswer> answers = listeningAnswerRepository.findByUsername(username);
+        System.out.println("12");
+        List<HistoryTest> historyTests = answers.stream().map(answer -> {
+            HistoryTest history = new HistoryTest();
+            history.setUsername(answer.getUsername());
+            history.setSkill("listening");
+            history.setTestID(answer.getTestId());
+            return history;
+        }).collect(Collectors.toList());
+        return historyTests;
+    }
+
+    public List<HistoryTest> getWritingByUsername(String username) {
+        List<WritingAnswer> answers = writingAnswerRepository.findByUsername(username);
+        System.out.println("12");
+        List<HistoryTest> historyTests = answers.stream().map(answer -> {
+            HistoryTest history = new HistoryTest();
+            history.setUsername(answer.getUsername());
+            history.setSkill("writing");
+            history.setTestID(answer.getTestId());
+            return history;
+        }).collect(Collectors.toList());
+        return historyTests;
+    }
+
+    public List<HistoryTest> getSpeakingByUsername(String username) {
+        List<SpeakingAnswer> answers = speakingAnswerRepository.findByUsername(username);
+        System.out.println("12");
+        List<HistoryTest> historyTests = answers.stream().map(answer -> {
+            HistoryTest history = new HistoryTest();
+            history.setUsername(answer.getUsername());
+            history.setSkill("speaking");
+            history.setTestID(answer.getTestId());
+            return history;
+        }).collect(Collectors.toList());
+        return historyTests;
+    }
+
+
+    public List<HistoryTest> getReadingByUsername(String username) {
+        List<ReadingAnswer> answers = readingAnswerRepository.findByUsername(username);
+        System.out.println("12");
+        List<HistoryTest> historyTests = answers.stream().map(answer -> {
+            HistoryTest history = new HistoryTest();
+            history.setUsername(answer.getUsername());
+            history.setSkill("reading");
+            history.setTestID(answer.getTestId());
+            return history;
+        }).collect(Collectors.toList());
+        return historyTests;
+    }
+
 }

@@ -190,10 +190,10 @@ const SpeakingTest = () => {
             )}
         </div>
     );
-
+    console.log(user)
     const prepareSubmissionData = () => {
         if (!speaking) return null;
-
+        
         const cloned = JSON.parse(JSON.stringify(speaking));
         if ("username" in user) cloned.username = user.username;
 

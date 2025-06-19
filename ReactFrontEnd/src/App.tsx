@@ -23,7 +23,8 @@ import IeltsResult from "@/pages/IeltsResult";
 import PaymentPage from "@/pages/Payment/PaymentPage.tsx";
 import TipDetail from "@/pages/TipDetail.tsx";
 import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
-
+import Contact from "@/pages/Contact";
+import HelpCenter from "@/pages/HelpCenter";
 
 export default function App() {
     return (
@@ -31,6 +32,8 @@ export default function App() {
             <Router>
                 <Routes>
                     <Route path="/" element={<MainLayout><HomePage /></MainLayout>}/>
+                    <Route path="/contact" element={<MainLayout><Contact /></MainLayout>}/>
+                    <Route path="/help" element={<MainLayout><HelpCenter /></MainLayout>}/>
                     <Route path="/login" element={<Login />}/>
                     <Route path="/test-history" element={<MainLayout><HistoryPage /></MainLayout>}/>
                     <Route path="/staff-login" element={<StaffLogin />}/>
