@@ -6,7 +6,6 @@ public class TaskWritingAnswer {
     private String imageUrl;
     private String answer;
     private String wordCount;
-
     private String score;
     private WritingAIResponse.Feedback feedback;
     private EvaluationWritingAnswer evaluation;

@@ -10,7 +10,7 @@ public class WritingAIResponse {
     private EvaluationWritingAnswer evaluation;
     @JsonProperty("sampleAnswer")
     private String sampleAnswer;
-
+    @JsonProperty("score")
     private String score;
 
     public String getScore() {
@@ -136,6 +136,7 @@ public class WritingAIResponse {
         private String improvedSentence;
         private List<String> techniquesUsed; // academic vocab/complex structures/logical flow
         private String bandBoost; // Estimated band improvement
+
 
         public String getOriginalSentence() {
             return originalSentence;

@@ -25,23 +25,6 @@ public class AIService {
     }
 
 
-//    public String getFeedback(String studentAnswer) {
-//        System.out.println("Loading...");
-//        String prompt = """
-//        You are an IELTS examiner. Please review the following writing task answer and give a detailed feedback focusing on grammar, coherence, lexical resource, and task response. Be constructive and concise.
-//
-//        Answer:
-//        """ + studentAnswer;
-//
-//        // Gửi prompt và lấy content trả về
-//        var response = chatModel
-////                .prompt()
-////                .user(prompt)
-//                .call(prompt);
-//        System.out.println(response.toString());
-//        return response.toString();
-//    }
-
     public WritingAIResponse WritingTask1(String question, String answer) {
         // Create a helper string with character positions for the AI
         String answerWithPositions = createAnswerWithPositions(answer);
@@ -49,8 +32,9 @@ public class AIService {
         StringBuilder promptBuilder = new StringBuilder("""
     You must return response strictly in JSON format.
     You are an IELTS examiner. Review the following IELTS Writing Task 1 student answer based on the question provided and return a JSON object containing:
+    - score: decimal (overall band score, e.g. 6.5)
     - feedback: {
-        - score: decimal (overall band score, e.g. 6.5)
+        (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)
         - errorCorrections: array of {
             - originalText: string (exact text as it appears in the answer)
             - correctedText: string
@@ -59,11 +43,14 @@ public class AIService {
             - startIndex: number (0-based character position where originalText starts)
             - endIndex: number (0-based character position immediately after originalText ends)
         }
+        (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)
         - sentenceImprovements: array of {
             - originalSentence: string
             - improvedSentence: string
             - techniquesUsed: array of strings (e.g. "academic vocab", "complex structure")
             - bandBoost: string (e.g. "5.5 → 6.5")
+            - startIndex: number (0-based character position where originalText starts)
+            - endIndex: number (0-based character position immediately after originalText ends)
         }
         - overallComment: string
     }
@@ -79,9 +66,10 @@ public class AIService {
     1. startIndex must be the exact 0-based character position where originalText begins in the Answer string
     2. endIndex must be the character position immediately after the last character of originalText
     3. originalText must be the EXACT text as it appears in the Answer (including spaces, punctuation, case)
-    4. Verify that answer.substring(startIndex, endIndex) equals originalText exactly
-    5. Count every character including spaces, newlines, and punctuation
-    6. Use the character position reference below to find exact positions
+    4. Spell originalText correctly and check again if it is correct in the paragraph
+    5. Verify that answer.substring(startIndex, endIndex) equals originalText exactly
+    6. Count every character including spaces, newlines, and punctuation
+    7. Use the character position reference below to find exact positions
 
     Question:
     """).append(question)
@@ -125,8 +113,9 @@ public class AIService {
         StringBuilder promptBuilder = new StringBuilder("""
     You must return response strictly in JSON format.
     You are an IELTS examiner. Review the following IELTS Writing Task 2 student answer based on the question provided and return a JSON object containing:
+    - score: decimal (overall band score, e.g. 6.5)
     - feedback: {
-        - score: decimal (overall band score, e.g. 6.5)
+        (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)
         - errorCorrections: array of {
             - originalText: string (exact text as it appears in the answer)
             - correctedText: string
@@ -135,11 +124,13 @@ public class AIService {
             - startIndex: number (0-based character position where originalText starts)
             - endIndex: number (0-based character position immediately after originalText ends)
         }
+        (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)
         - sentenceImprovements: array of {
             - originalSentence: string
             - improvedSentence: string
-            - techniquesUsed: array of strings (e.g. "academic vocab", "complex structure")
+            - techniquesUsed: array of strings (e.g. "academic vocab", "complex structure", ....)
             - bandBoost: string (e.g. "5.5 → 6.5")
+        
         }
         - overallComment: string
     }
@@ -155,9 +146,11 @@ public class AIService {
     1. startIndex must be the exact 0-based character position where originalText begins in the Answer string
     2. endIndex must be the character position immediately after the last character of originalText
     3. originalText must be the EXACT text as it appears in the Answer (including spaces, punctuation, case)
-    4. Verify that answer.substring(startIndex, endIndex) equals originalText exactly
-    5. Count every character including spaces, newlines, and punctuation
-    6. Use the character position reference below to find exact positions
+    4. Spell originalText correctly and check again if it is correct in the paragraph
+    5. Verify that answer.substring(startIndex, endIndex) equals originalText exactly
+    6. Count every character including spaces, newlines, and punctuation
+    7. Use the character position reference below to find exact positions
+
 
     Question:
     """).append(question)
