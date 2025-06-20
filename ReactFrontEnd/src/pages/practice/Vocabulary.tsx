@@ -105,7 +105,7 @@ const VocabularyFormModal: React.FC<{
                     onClick={onClose}
                     aria-label="Close"
                 >×</button>
-                <h2 className="font-bold text-xl mb-6">{isEdit ? 'Edit Vocabulary' : 'Add Vocabulary'}</h2>
+                <h2 className="font-bold text-xl mb-6 " >{isEdit ? 'Edit Vocabulary' : 'Add Vocabulary'}</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <Label>Word</Label>
@@ -176,11 +176,11 @@ const VocabularyFormModal: React.FC<{
                                 </div>
                             ))}
                         </div>
-                        <Button type="button" onClick={addExample} className="mt-2" size="sm">
+                        <Button type="button" onClick={addExample} variant="outline" className="mt-2  hover:bg-emerald-600 hover:text-white" size="sm">
                             + Add Example
                         </Button>
                     </div>
-                    <Button type="submit" className="w-full mt-2">{isEdit ? 'Save Changes' : 'Add Vocabulary'}</Button>
+                    <Button type="submit" className="w-full mt-2 hover:bg-emerald-600 hover:text-white " variant="outline" >{isEdit ? 'Save Changes' : 'Add Vocabulary'}</Button>
                 </form>
             </Card>
         </div>
@@ -198,15 +198,15 @@ const VocabularyItem: React.FC<{
             <div>
                 <h2 className="text-lg font-bold">{vocabulary.word}</h2>
                 <div className="flex flex-wrap gap-2 my-1">
-                    <Badge>{vocabulary.topic}</Badge>
-                    <Badge variant="outline">Band {vocabulary.band}</Badge>
+                    <Badge className="bg-emerald-600 text-white">{vocabulary.topic}</Badge>
+                    <Badge className="bg-emerald-600 text-white">Band {vocabulary.band}</Badge>
                 </div>
             </div>
             <div>
-                <Button size="sm" variant="outline" className="mr-2" onClick={() => onEdit(vocabulary)}>
+                <Button size="sm" variant="outline" className="mr-2 hover:bg-emerald-600 hover:text-white" onClick={() => onEdit(vocabulary)}>
                     Edit
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => onDelete(vocabulary.id)}>
+                <Button size="sm" variant="outline" className="mr-2 hover:bg-emerald-600 hover:text-white" onClick={() => onDelete(vocabulary.id)}>
                     Delete
                 </Button>
             </div>
@@ -372,9 +372,9 @@ const Vocabulary: React.FC = () => {
                         </select>
                     </div>
                     <div className="flex gap-2">
-                        <Button onClick={applyFilters} variant="default"  >Apply Filters</Button>
-                        <Button onClick={resetFilters} variant="outline">Reset</Button>
-                        <Button onClick={() => setShowAdd(true)} >+ Add Vocabulary</Button>
+                        <Button onClick={applyFilters} variant="outline"  className="  hover:bg-emerald-600 hover:text-white" >Apply Filters</Button>
+                        <Button onClick={resetFilters} variant="outline"  className="  hover:bg-emerald-600 hover:text-white">Reset</Button>
+                        <Button onClick={() => setShowAdd(true)} variant="outline"  className="  hover:bg-emerald-600 hover:text-white">+ Add Vocabulary</Button>
                     </div>
                 </div>
             </Card>
