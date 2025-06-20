@@ -24,6 +24,7 @@ import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
 import Contact from "@/pages/Contact";
 import HelpCenter from "@/pages/HelpCenter";
 import IeltsResult from "@/pages/IeltsResult";
+import AcceptTestPage from "./pages/AcceptTestPage"
 export default function App() {
     return (
         <AuthProvider>
@@ -37,12 +38,13 @@ export default function App() {
                     <Route path="/staff-login" element={<StaffLogin />}/>
                     <Route path="/staff-page" element={<StaffLayout><StaffPage /></StaffLayout>}/>
                     <Route path="/add-test" element={<StaffLayout><AddTest /></StaffLayout>}/>
+                    <Route path="/accept-tests" element={<StaffLayout><AcceptTestPage/></StaffLayout>}/>
                     <Route path="/student/listAllTips" element={<MainLayout><TipPage /></MainLayout>}/>
                     <Route path="/register" element={<RegisterPage />}/>
                     <Route path="/test/listening/:testId" element={<ListeningTest />} />
                     <Route path="/test/reading/:testId" element={<ReadingTest />} />
                     <Route path="/test/writing/:testId" element={<WritingTest />} />
-                    {/*<Route path="/test/speaking/:testId" element={<SpeakingTest />} />*/}
+
                     <Route path="/writing-result/:resultId" element={<MainLayout><WritingResult /></MainLayout>} />
                     <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout>} />
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout>} />

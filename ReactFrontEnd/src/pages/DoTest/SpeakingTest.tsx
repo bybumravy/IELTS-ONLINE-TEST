@@ -17,7 +17,7 @@ type Speaking = {
     username: string; // ✅ Thêm username
     skill: string;
     part1: {
-        partNumber: number
+        partNumber: numbernpm 
         title: string
         instruction: string
         questions: { question: string }[]

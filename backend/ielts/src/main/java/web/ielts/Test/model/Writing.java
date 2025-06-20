@@ -39,37 +39,18 @@ public class Writing {
 
     // Inner class cho Task
     public static class Task {
-
         private int taskNumber;
         private String imageUrl;
         private String type;
         private String question;
-
-
         // Getter & Setter
-
-        public String getImageUrl() {
-            return imageUrl;
-        }
-
-        public void setImageUrl(String imageUrl) {
-            this.imageUrl = imageUrl;
-        }
-
-        public int getTaskNumber() {
-            return taskNumber;
-        }
-
-        public void setTaskNumber(int taskNumber) {
-            this.taskNumber = taskNumber;
-        }
-
-        public String getQuestion() {
-            return question;
-        }
-
-        public void setQuestion(String question) {
-            this.question = question;
-        }
+        public int getTaskNumber() { return taskNumber; }
+        public void setTaskNumber(int taskNumber) { this.taskNumber = taskNumber; }
+        public String getImageUrl() { return imageUrl; }
+        public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+        public String getType() { return type; }
+        public void setType(String type) { this.type = type; }
+        public String getQuestion() { return question; }
+        public void setQuestion(String question) { this.question = question; }
     }
 }
