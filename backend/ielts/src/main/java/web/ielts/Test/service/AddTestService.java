@@ -11,8 +11,10 @@ import web.ielts.Test.repository.add.*;
 import web.ielts.Test.model.Listening.TaskListening;
 import web.ielts.Test.model.Listening.Section;
 import web.ielts.Test.model.Listening.Question;
-import java.util.stream.Collectors;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.List;
 @Service
 public class AddTestService {
 
@@ -62,139 +64,150 @@ public class AddTestService {
             speakingRepository.save(speaking);
         }
     }
-//// Chuyển AddListening -> Listening
-//private Listening convertAddListeningToListening(AddListening addListening) {
-//    if (addListening == null) return null;
-//    Listening listening = new Listening();
-//    listening.setTestId(addListening.getTestId());
-//    listening.setAudioUrl(addListening.getAudioUrl());
-//    listening.setTasks(
-//        addListening.getTasks().stream().map(addTask -> {
-//            Listening.TaskListening task = new Listening.TaskListening();
-//            task.setTaskNumber(addTask.getTaskNumber());
-//            task.setSections(
-//                addTask.getSections().stream().map(addSection -> {
-//                    Listening.Section section = new Listening.Section();
-//                    section.setSectionNumber(addSection.getSectionNumber());
-//                    section.setType(addSection.getType());
-//                    section.setImageUrl(addSection.getImageUrl());
-//                    section.setIntroduction(addSection.getIntroduction());
-//                    section.setQuestions(
-//                        addSection.getQuestions().stream().map(addQ -> {
-//                            Listening.Question q = new Listening.Question();
-//                            q.setQuestion(addQ.getQuestion());
-//                            q.setAnswer(addQ.getAnswer());
-//                            q.setExplanation(addQ.getExplanation());
-//                            q.setOptions(addQ.getOptions());
-//                            return q;
-//                        }).collect(Collectors.toList())
-//                    );
-//                    return section;
-//                }).collect(Collectors.toList())
-//            );
-//            return task;
-//        }).collect(Collectors.toList())
-//    );
-//    return listening;
-//}
-//
-//private Reading convertAddReadingToReading(AddReading addReading) {
-//    if (addReading == null) return null;
-//    Reading reading = new Reading();
-//    reading.setTestId(addReading.getTestId());
-//    reading.setTasks(
-//        addReading.getTasks().stream().map(addTask -> {
-//            Reading.Task task = new Reading.Task();
-//            task.setTaskNumber(addTask.getTaskNumber());
-//            task.setParagraph(addTask.getParagraph());
-//            task.setSections(
-//                addTask.getSections().stream().map(addSection -> {
-//                    Reading.Section section = new Reading.Section();
-//                    section.setSectionNumber(addSection.getSectionNumber());
-//                    section.setType(addSection.getType());
-//                    section.setImageUrl(addSection.getImageUrl());
-//                    section.setIntroduction(addSection.getIntroduction());
-//                    section.setQuestions(
-//                        addSection.getQuestions().stream().map(addQ -> {
-//                            Reading.Question q = new Reading.Question();
-//                            q.setQuestion(addQ.getQuestion());
-//                            q.setAnswer(addQ.getAnswer());
-//                            q.setExplanation(addQ.getExplanation());
-//                            q.setOptions(addQ.getOptions());
-//                            return q;
-//                        }).collect(Collectors.toList())
-//                    );
-//                    return section;
-//                }).collect(Collectors.toList())
-//            );
-//            return task;
-//        }).collect(Collectors.toList())
-//    );
-//    return reading;
-//}
-//
-//private Writing convertAddWritingToWriting(AddWriting addWriting) {
-//    if (addWriting == null) return null;
-//    Writing writing = new Writing();
-//    writing.setTestId(addWriting.getTestId());
-//    writing.setTasks(
-//        addWriting.getTasks().stream().map(addTask -> {
-//            Writing.Task task = new Writing.Task();
-//            task.setTaskNumber(addTask.getTaskNumber());
-//            task.setImageUrl(addTask.getImageUrl());
-//            task.setQuestion(addTask.getQuestion());
-//            return task;
-//        }).collect(Collectors.toList())
-//    );
-//    return writing;
-//}
-//
-//private Speaking convertAddSpeakingToSpeaking(AddSpeaking addSpeaking) {
-//    if (addSpeaking == null) return null;
-//    Speaking speaking = new Speaking();
-//    speaking.setTestId(addSpeaking.getTestId());
-//
-//    // Part 1
-//    if (addSpeaking.getPart1() != null) {
-//        Speaking.Part part1 = new Speaking.Part();
-//        part1.setPartNumber(addSpeaking.getPart1().getPartNumber());
-//        part1.setTitle(addSpeaking.getPart1().getTitle());
-//        part1.setQuestions(
-//            addSpeaking.getPart1().getQuestions().stream().map(addQ -> {
-//                Speaking.Question q = new Speaking.Question();
-//                q.setQuestion(addQ.getQuestion());
-//                return q;
-//            }).collect(Collectors.toList())
-//        );
-//        speaking.setPart1(part1);
-//    }
-//
-//    // Part 2
-//    if (addSpeaking.getPart2() != null) {
-//        Speaking.Part2 part2 = new Speaking.Part2();
-//        part2.setPartNumber(addSpeaking.getPart2().getPartNumber());
-//        part2.setTitle(addSpeaking.getPart2().getTitle());
-//        part2.setQuestion(addSpeaking.getPart2().getQuestion());
-//        part2.setCueCards(addSpeaking.getPart2().getCueCards());
-//        speaking.setPart2(part2);
-//    }
-//
-//    // Part 3
-//    if (addSpeaking.getPart3() != null) {
-//        Speaking.Part part3 = new Speaking.Part();
-//        part3.setPartNumber(addSpeaking.getPart3().getPartNumber());
-//        part3.setTitle(addSpeaking.getPart3().getTitle());
-//        part3.setQuestions(
-//            addSpeaking.getPart3().getQuestions().stream().map(addQ -> {
-//                Speaking.Question q = new Speaking.Question();
-//                q.setQuestion(addQ.getQuestion());
-//                return q;
-//            }).collect(Collectors.toList())
-//        );
-//        speaking.setPart3(part3);
-//    }
-//
-//    return speaking;
-//}
+// Chuyển AddListening -> Listening
+public Listening convertAddListeningToListening(AddListening addListening) {
+    if (addListening == null) return null;
+
+    Listening listening = new Listening();
+    listening.setTestId(addListening.getTestId());
+    listening.setAudioUrl(addListening.getAudioUrl());
+
+    listening.setTasks(
+            addListening.getTasks().stream().map(addTask -> {
+                TaskListening task = new TaskListening();
+                task.setTaskNumber(addTask.getTaskNumber());
+                task.setSections(
+                        addTask.getSections().stream().map(addSection -> {
+                            Section section = new Section();
+                            section.setSectionNumber(addSection.getSectionNumber());
+                            section.setType(addSection.getType());
+                            section.setImageUrl(addSection.getImageUrl());
+                            section.setIntroduction(addSection.getIntroduction());
+                            section.setQuestions(
+                                    addSection.getQuestions().stream().map(addQ -> {
+                                        Question q = new Question();
+                                        q.setQuestion(addQ.getQuestion());
+                                        q.setAnswer(addQ.getAnswer());
+                                        q.setExplanation(addQ.getExplanation());
+                                        q.setOptions(addQ.getOptions());
+                                        return q;
+                                    }).collect(Collectors.toList())
+                            );
+
+                            return section;
+                        }).collect(Collectors.toList())
+                );
+
+                return task;
+            }).collect(Collectors.toList())
+    );
+
+    return listening;
+}
+
+
+public Reading convertAddReadingToReading(AddReading addReading) {
+    if (addReading == null) return null;
+    Reading reading = new Reading();
+    reading.setTestId(addReading.getTestId());
+    reading.setTasks(
+        addReading.getTasks().stream().map(addTask -> {
+            Reading.Task task = new Reading.Task();
+            task.setTaskNumber(addTask.getTaskNumber());
+            task.setParagraph(addTask.getParagraph());
+            task.setSections(
+                addTask.getSections().stream().map(addSection -> {
+                    Reading.Section section = new Reading.Section();
+                    section.setSectionNumber(addSection.getSectionNumber());
+                    section.setType(addSection.getType());
+                    section.setImageUrl(addSection.getImageUrl());
+                    section.setIntroduction(addSection.getIntroduction());
+                    section.setQuestions(
+                        addSection.getQuestions().stream().map(addQ -> {
+                            Reading.Question q = new Reading.Question();
+                            q.setQuestion(addQ.getQuestion());
+                            q.setAnswer(addQ.getAnswer());
+                            q.setExplanation(addQ.getExplanation());
+                            q.setOptions(addQ.getOptions());
+                            return q;
+                        }).collect(Collectors.toList())
+                    );
+                    return section;
+                }).collect(Collectors.toList())
+            );
+            return task;
+        }).collect(Collectors.toList())
+    );
+    return reading;
+}
+
+    public Writing convertAddWritingToWriting(AddWriting addWriting) {
+        if (addWriting == null) {
+            return null;
+        }
+
+        Writing writing = new Writing();
+        writing.setTestId(addWriting.getTestId());
+        writing.setTasks(
+                addWriting.getTasks().stream().map(AddWritingTask -> {
+                    Writing.Task task = new Writing.Task();
+                    task.setTaskNumber(AddWritingTask.getTaskNumber());
+                    task.setQuestion(AddWritingTask.getQuestion());
+                    task.setImageUrl(AddWritingTask.getImageUrl());
+                    return task;
+                }).collect(Collectors.toList())
+        );
+
+        return writing;
+    }
+
+
+public Speaking convertAddSpeakingToSpeaking(AddSpeaking addSpeaking) {
+    if (addSpeaking == null) return null;
+    Speaking speaking = new Speaking();
+    speaking.setTestId(addSpeaking.getTestId());
+
+    // Part 1
+    if (addSpeaking.getPart1() != null) {
+        Speaking.Part part1 = new Speaking.Part();
+        part1.setPartNumber(addSpeaking.getPart1().getPartNumber());
+        part1.setTitle(addSpeaking.getPart1().getTitle());
+        part1.setQuestions(
+            addSpeaking.getPart1().getQuestions().stream().map(addQ -> {
+                Speaking.Question q = new Speaking.Question();
+                q.setQuestion(addQ.getQuestion());
+                return q;
+            }).collect(Collectors.toList())
+        );
+        speaking.setPart1(part1);
+    }
+
+    // Part 2
+    if (addSpeaking.getPart2() != null) {
+        Speaking.Part2 part2 = new Speaking.Part2();
+        part2.setPartNumber(addSpeaking.getPart2().getPartNumber());
+        part2.setTitle(addSpeaking.getPart2().getTitle());
+        part2.setQuestion(addSpeaking.getPart2().getQuestion());
+        part2.setCueCards(addSpeaking.getPart2().getCueCards());
+        speaking.setPart2(part2);
+    }
+
+    // Part 3
+    if (addSpeaking.getPart3() != null) {
+        Speaking.Part part3 = new Speaking.Part();
+        part3.setPartNumber(addSpeaking.getPart3().getPartNumber());
+        part3.setTitle(addSpeaking.getPart3().getTitle());
+        part3.setQuestions(
+            addSpeaking.getPart3().getQuestions().stream().map(addQ -> {
+                Speaking.Question q = new Speaking.Question();
+                q.setQuestion(addQ.getQuestion());
+                return q;
+            }).collect(Collectors.toList())
+        );
+        speaking.setPart3(part3);
+    }
+
+    return speaking;
+}
 
 }

@@ -1,4 +1,3 @@
-
 package web.ielts.Config;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,7 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtFilter;
+    
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
          http
@@ -40,13 +40,28 @@ public class SecurityConfig {
                                 "/oauth2/**",
                                 "/login/oauth2/",
                                 "/oauth2/",
-                                "/api/*",
                                 "/api/payment/status/**",
                                 "/api/tips-summary",
-                                "/api/*/*",
                                 "/api/3-tests",
-                                "/api/*/*/*"
+                                "/api/test/all-skill",
+                                "/api/test/listening",
+                                "/api/test/reading",
+                                "/api/test/writing",
+                                "/api/test/speaking",
+                                "/api/test/count",
+                                "/verify/**",
+                                "/api/result/**"
                         ).permitAll()
+                        // Manager endpoints
+                        .requestMatchers(
+                                "/api/manager/**"
+                        ).hasAuthority("manager")
+                        // Teacher endpoints
+                        .requestMatchers(
+                                "/api/teacher/**"
+                        ).hasAuthority("teacher")
+                        // Other API endpoints
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
                 )
                  .oauth2Login(oauth2 -> oauth2

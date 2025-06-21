@@ -1,93 +1,105 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+
+interface AddTest {
+  id: string;
+  testId: string;
+  testTitle: string;
+  tags: string[];
+  createAt: string;
+}
 
 export default function AcceptTestPage() {
-  const [tests, setTests] = useState([]);
-  const [detail, setDetail] = useState<any>(null);
+  const [tests, setTests] = useState<AddTest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios.get('/api/manager/request-tests').then(res => setTests(res.data));
+    fetch("http://localhost:8080/api/manager/request-tests", {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Không thể tải danh sách đề thi.");
+        return res.json();
+      })
+      .then((data) => {
+        setTests(data);
+        setError(null);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(err.message);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const viewDetail = (testId: string) => {
-    axios.get(`/api/manager/request-test/${testId}`).then(res => setDetail(res.data));
-  };
-
   const acceptTest = async (testId: string) => {
-    await axios.post(`/api/manager/accept-test/${testId}`);
-    setTests(tests.filter((t: any) => t.testId !== testId));
-    setDetail(null);
-    alert('Đã duyệt đề thành công!');
+    const confirm = window.confirm("Bạn có chắc muốn duyệt đề này không?");
+    if (!confirm) return;
+
+    try {
+      const res = await fetch(`http://localhost:8080/api/manager/accept-test/${testId}`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Duyệt đề thất bại");
+
+      alert("Duyệt thành công!");
+      setTests(tests.filter((test) => test.testId !== testId));
+    } catch (err) {
+      alert("Duyệt thất bại!");
+      console.error(err);
+    }
   };
 
-  const deleteTest = async (testId: string) => {
-    await axios.delete(`/api/manager/request-test/${testId}`);
-    setTests(tests.filter((t: any) => t.testId !== testId));
-    setDetail(null);
-    alert('Đã xóa đề!');
-  };
+  if (loading) return <div className="text-center p-10 text-gray-500">Đang tải dữ liệu...</div>;
+  if (error) return <div className="text-center p-10 text-red-500">{error}</div>;
 
   return (
-    <div className="max-w-5xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Danh sách đề chờ duyệt</h1>
-      <table className="w-full border mb-8">
-        <thead>
-          <tr>
-            <th>TestId</th>
-            <th>Title</th>
-            <th>Tags</th>
-            <th>Ngày tạo</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {tests.map((test: any) => (
-            <tr key={test.testId}>
-              <td>{test.testId}</td>
-              <td>{test.testTitle}</td>
-              <td>{test.tags?.join(', ')}</td>
-              <td>{test.createAt}</td>
-              <td>
-                <button className="text-blue-600 underline" onClick={() => viewDetail(test.testId)}>
-                  View Detail
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Danh sách đề thi chờ duyệt</h1>
+      <div className="grid gap-4">
+        {tests.length === 0 ? (
+          <p className="text-gray-500">Không có đề nào đang chờ duyệt.</p>
+        ) : (
+          tests.map((test) => (
+            <div
+              key={test.testId}
+              className="bg-white shadow-md rounded-xl p-4 border border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center"
+            >
+              <div>
+                <h2 className="text-lg font-semibold">{test.testTitle}</h2>
+                <p className="text-sm text-gray-500">Mã đề: {test.testId}</p>
+                <p className="text-sm text-gray-500">Ngày tạo: {new Date(test.createAt).toLocaleString()}</p>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {test.tags?.map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-4 md:mt-0 flex gap-3">
+                <a
+                  href={`/request-test-detail/${test.testId}`}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm"
+                >
+                  Xem chi tiết
+                </a>
+                <button
+                  onClick={() => acceptTest(test.testId)}
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
+                >
+                  Duyệt đề
                 </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {detail && (
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Chi tiết đề: {detail.test?.testTitle}</h2>
-          <div className="flex gap-4 mb-4">
-            <button className="bg-green-600 text-white px-4 py-2 rounded" onClick={() => acceptTest(detail.test.testId)}>
-              Accept
-            </button>
-            <button className="bg-red-600 text-white px-4 py-2 rounded" onClick={() => deleteTest(detail.test.testId)}>
-              Delete
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-bold text-lg mb-2">Listening</h3>
-              <pre className="bg-gray-100 p-2 rounded">{JSON.stringify(detail.listening, null, 2)}</pre>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-lg mb-2">Reading</h3>
-              <pre className="bg-gray-100 p-2 rounded">{JSON.stringify(detail.reading, null, 2)}</pre>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-2">Writing</h3>
-              <pre className="bg-gray-100 p-2 rounded">{JSON.stringify(detail.writing, null, 2)}</pre>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-2">Speaking</h3>
-              <pre className="bg-gray-100 p-2 rounded">{JSON.stringify(detail.speaking, null, 2)}</pre>
-            </div>
-          </div>
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 }
