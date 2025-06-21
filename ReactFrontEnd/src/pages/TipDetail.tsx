@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import {BookOpen, Headphones, PenLine, Mic, CheckCircle, BrainCircuit, Lightbulb } from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle,} from "@/components/ui/card"
 import {Button} from "@/components/ui/button.tsx";
-
+import {customFetch} from "@/components/sections/customFetch";
 export interface Exercises {
     question: string;
     options?: string[];
@@ -29,7 +29,7 @@ function TipDetail() {
     useEffect(() => {
         if (!id) return;
 
-        fetch(`http://localhost:8080/api/${skill}/${id}`)
+        customFetch(`http://localhost:8080/api/${skill}/${id}`)
             .then((res) => res.json())
             .then((data: TipDetail) => {
                 setDetail(data);

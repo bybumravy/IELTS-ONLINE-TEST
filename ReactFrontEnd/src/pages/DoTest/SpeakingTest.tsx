@@ -10,7 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Clock, Mic, Play, Square, ChevronRight, CheckCircle, AlertCircle, Volume2, Brain } from "lucide-react"
 import {useNavigate, useParams} from "react-router-dom";
 import {useAuth} from "@/contexts/AuthContext";
-
+import {customFetch} from "@/components/sections/customFetch";
 type Speaking = {
     _id: string
     username: string;
@@ -77,9 +77,9 @@ const SpeakingTest = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/verify/speaking/${testId}`, {
+                const res = await customFetch(`http://localhost:8080/verify/speaking/${testId}`, {
                     method: "GET",
-                    credentials: "include",
+
                 });
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
@@ -97,18 +97,7 @@ const SpeakingTest = () => {
         };
     }, [testId]);
 
-    useEffect(() => {
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (partStarted) {
-                e.preventDefault();
-                e.returnValue = "Bài kiểm tra của bạn sẽ bị mất nếu bạn rời khỏi trang này. Bạn có chắc chắn muốn tiếp tục?";
-                return e.returnValue;
-            }
-        };
 
-        window.addEventListener("beforeunload", handleBeforeUnload);
-        return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-    }, [partStarted]);
 
 
 
@@ -313,6 +302,16 @@ const SpeakingTest = () => {
     }
 
     const handleSubmit = async () => {
+        if (recordingKey) {
+            stopRecording();
+            await new Promise(resolve => {
+                const check = () => {
+                    if (!recordingKey) resolve(true);
+                    else setTimeout(check, 100);
+                };
+                check();
+            });
+        }
         if (!timeUp && totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3) {
             alert(`Bạn cần ghi âm tổng cộng ít nhất ${MIN_RECORDING_TIMES.part3} giây cho PART3 trước khi nộp bài. Hiện tại: ${Math.floor(totalRecordingTime.part3)} giây`);
             setIsSubmitting(false);
@@ -333,10 +332,10 @@ const SpeakingTest = () => {
         );
 
         try {
-            const res = await fetch("http://localhost:8080/verify/speaking/submit", {
+            const res = await customFetch("http://localhost:8080/verify/speaking/submit", {
                 method: "POST",
                 body: formData,
-                credentials: "include",
+
             });
 
             if (!res.ok) throw new Error("Lỗi khi gửi bài!");

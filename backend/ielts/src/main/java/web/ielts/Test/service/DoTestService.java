@@ -23,6 +23,8 @@ import web.ielts.Test.repository.answer.SpeakingAnswerRepository;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -134,17 +136,6 @@ task1.setEvaluation(eval1.getEvaluation());
         return writingAnswerRepository.save(savedAnswer);
     }
 
-    public String uploadFile(MultipartFile file, String key) throws IOException {
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucket)
-                .key(key) // Không nối thêm filename nữa
-                .contentType(file.getContentType())
-                .build();
-
-        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-
-        return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
-    }
     public void updateAnswerUrls(SpeakingAnswer submission, Map<String, String> fileUrlMap) {
         // ✅ Debug log
         for (Map.Entry<String, String> entry : fileUrlMap.entrySet()) {
@@ -197,5 +188,16 @@ task1.setEvaluation(eval1.getEvaluation());
 
     public SpeakingAnswer saveSubmission(SpeakingAnswer submission) {
         return speakingAnswerRepository.save(submission);
+    }
+    public String uploadFile(MultipartFile file, String key) throws IOException {
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key) // Không nối thêm filename nữa
+                .contentType(file.getContentType())
+                .build();
+
+        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+        return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
     }
 }

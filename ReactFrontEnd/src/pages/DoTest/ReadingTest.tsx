@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-
+import {customFetch} from "@/components/sections/customFetch";
 export interface Question {
     question: string | null;
     answer: string | null;
@@ -69,7 +69,7 @@ export default function ReadingTest() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/verify/reading/${testId}`, { credentials: "include" });
+                const res = await customFetch(`http://localhost:8080/verify/reading/${testId}`);
                 const data: ReadingTest = await res.json();
 
                 let questionId = 1;

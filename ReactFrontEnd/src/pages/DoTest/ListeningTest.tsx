@@ -4,7 +4,7 @@ import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
 import { Play, Pause, RotateCcw, Volume2 } from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-
+import {customFetch} from "@/components/sections/customFetch";
 export type Question = {
     question: string;
     answer: string;
@@ -74,7 +74,7 @@ export default function ListeningTest() {
     // Fetch dữ liệu test listening
     useEffect(() => {
         if (!testId) return;
-        fetch(`http://localhost:8080/verify/listening/${testId}`, { credentials: "include" })
+        customFetch(`http://localhost:8080/verify/listening/${testId}`, )
             .then((res) => (res.ok ? res.json() : null))
             .then((data) => {
                 if (!data) return;
@@ -199,9 +199,8 @@ export default function ListeningTest() {
         });
 
         try {
-            const res = await fetch("http://localhost:8080/verify/listening/submit", {
+            const res = await customFetch("http://localhost:8080/verify/listening/submit", {
                 method: "POST",
-                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(dataToSend),
             });
