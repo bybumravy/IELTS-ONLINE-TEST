@@ -66,17 +66,17 @@ public class AddTestController {
     }
 
     @GetMapping("/manager/request-test/{testId}")
-    public ResponseEntity<Map<String, Object>> getRequestTestDetail(@PathVariable String testId) {
+    public ResponseEntity<Map<String, Object>> getRequestTestDetail(@PathVariable String TestId) {
         try {
-            AddTest addTest = addTestRepo.findById(testId).orElse(null);
+            AddTest addTest = addTestRepo.findById(TestId).orElse(null);
             if (addTest == null) {
                 return ResponseEntity.notFound().build();
             }
 
-            AddListening addListening = addListeningRepo.findByTestId(testId);
-            AddReading addReading = addReadingRepo.findByTestId(testId);
-            AddWriting addWriting = addWritingRepo.findByTestId(testId);
-            AddSpeaking addSpeaking = addSpeakingRepo.findByTestId(testId);
+            AddListening addListening = addListeningRepo.findByTestId(TestId);
+            AddReading addReading = addReadingRepo.findByTestId(TestId);
+            AddWriting addWriting = addWritingRepo.findByTestId(TestId);
+            AddSpeaking addSpeaking = addSpeakingRepo.findByTestId(TestId);
 
             Map<String, Object> response = new HashMap<>();
             response.put("test", addTest);
@@ -123,7 +123,7 @@ public class AddTestController {
     }
 
     @PostMapping("/manager/accept-test/{testId}")
-    public ResponseEntity<String> acceptTest(@PathVariable String testId) {
+    public ResponseEntity<String> acceptTest(@PathVariable("testId") String testId) {
         try {
             AddTest addTest = addTestRepo.findById(testId).orElse(null);
             AddListening addListening = addListeningRepo.findByTestId(testId);
@@ -134,12 +134,6 @@ public class AddTestController {
             if (addTest == null) return ResponseEntity.badRequest().body("Test not found");
 
             // Chuyển sang model chính
-            Test test = new Test();
-            test.setTestId(addTest.getTestId());
-            test.setTestTitle(addTest.getTestTitle());
-            test.setTags(addTest.getTags());
-            test.setCreatedAt(addTest.getCreateAt().toString());
-            testRepo.save(test);
 
             Listening listening = addTestService.convertAddListeningToListening(addListening);
             if (listening != null) listeningRepo.save(listening);
@@ -152,6 +146,13 @@ public class AddTestController {
 
             Speaking speaking = addTestService.convertAddSpeakingToSpeaking(addSpeaking);
             if (speaking != null) speakingRepo.save(speaking);
+
+            Test test = new Test();
+            test.setTestId(testService.generateNextTestId());
+            test.setTestTitle(addTest.getTestTitle());
+            test.setTags(addTest.getTags());
+            test.setCreatedAt(addTest.getCreateAt().toString());
+            testRepo.save(test);
 
             // Xóa bản ghi request
             addTestRepo.deleteById(testId);

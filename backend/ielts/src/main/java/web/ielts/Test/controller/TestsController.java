@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import web.ielts.Test.dto.ListTest;
 import web.ielts.Test.model.*;
 import web.ielts.Test.repository.*;
+import web.ielts.Test.repository.add.AddTestRepository;
 import web.ielts.Test.service.TestService;
 
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -28,7 +29,8 @@ public class TestsController {
     
     @Autowired
     private TestRepository testRepo;
-    
+    @Autowired
+    private AddTestRepository addTestRepo;
     @Autowired
     private ListeningRepository listeningRepository;
     
@@ -73,7 +75,7 @@ public class TestsController {
 
     @GetMapping("/test/count")
     public int volumeOfTest() {
-        return (int) testRepo.count();
+        return (int) addTestRepo.count();
     }
 
 }

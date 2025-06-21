@@ -50,17 +50,9 @@ public class SecurityConfig {
                                 "/api/test/speaking",
                                 "/api/test/count",
                                 "/verify/**",
-                                "/api/result/**"
-                        ).permitAll()
-                        // Manager endpoints
-                        .requestMatchers(
+                                "/api/result/**",
                                 "/api/manager/**"
-                        ).hasAuthority("manager")
-                        // Teacher endpoints
-                        .requestMatchers(
-                                "/api/teacher/**"
-                        ).hasAuthority("teacher")
-                        // Other API endpoints
+                        ).permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
                 )

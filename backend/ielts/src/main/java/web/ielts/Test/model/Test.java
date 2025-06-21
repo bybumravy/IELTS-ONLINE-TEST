@@ -11,7 +11,7 @@ import java.util.List;
 @Document(collection = "Test")
 public class Test {
     @Id
-    private String TestId;
+    private String testId;
     private String testTitle;
     private List<String> tags;
     private String createdAt;
@@ -20,18 +20,18 @@ public class Test {
     }
 
     public Test(String TestId, String testTitle, List<String> tags, String createdAt) {
-        this.TestId = TestId;
+        this.testId = TestId;
         this.testTitle = testTitle;
         this.tags = tags;
         this.createdAt = createdAt;
     }
 
     public String getTestId() {
-        return TestId;
+        return testId;
     }
 
-    public void setTestId(String TestIdv) {
-        this.TestId = TestIdv;
+    public void setTestId(String TestId) {
+        this.testId = TestId;
     }
 
     public String getTestTitle() {
