@@ -14,7 +14,7 @@ import {useAuth} from "@/contexts/AuthContext";
 // Mock user context for demo
 type Speaking = {
     _id: string
-    username: string; // ✅ Thêm username
+    username: string;
     skill: string;
     part1: {
         partNumber: number
@@ -60,8 +60,22 @@ const SpeakingTest = () => {
     const timerRef = useRef<NodeJS.Timeout | null>(null)
     const mediaRecorderRef = useRef<MediaRecorder | null>(null)
     const audioChunksRef = useRef<Blob[]>([])
+    const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
+    const [timeUp, setTimeUp] = useState(false);
+    const [totalRecordingTime, setTotalRecordingTime] = useState<{ [key in Part]: number }>({
+        part1: 0,
+        part2: 0,
+        part3: 0
+    })
+    const [recordingTimes, setRecordingTimes] = useState<{ [key: string]: number }>({})
 
-    // Mock data for demo
+    // Thời lượng ghi âm tối thiểu cho mỗi part
+    const MIN_RECORDING_TIMES = {
+        part1: 10,  // 1 phút
+        part2: 10,  // 50 giây
+        part3: 10   // 1 phút
+    }
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -89,34 +103,34 @@ const SpeakingTest = () => {
         if (!speaking) return 0
         const questions =
             currentPart === "part1" ? speaking.part1.questions : currentPart === "part3" ? speaking.part3.questions : []
-        if (currentPart === "part2") return 180
-        return 300 + (questions.length) * 5
+        if (currentPart === "part2") return     10
+        return 10
     }
 
     const startTimer = (seconds: number) => {
-        if (timerRef.current) return
-        setPartStarted(true)
-        setPartTimeLeft(seconds)
+        if (timerRef.current) return;
+        setPartStarted(true);
+        setPartTimeLeft(seconds);
+        setTimeUp(false); // Reset trạng thái hết giờ khi bắt đầu part mới
+
         timerRef.current = setInterval(() => {
             setPartTimeLeft((prev) => {
                 if (prev <= 1) {
-                    clearInterval(timerRef.current!)
-                    timerRef.current = null
-                    setShowTransition(true)
+                    clearInterval(timerRef.current!);
+                    timerRef.current = null;
 
                     if (currentPart === "part3") {
-                        setIsSubmitting(true)
+                        setTimeUp(true); // Đánh dấu đã hết giờ
+                        setIsSubmitting(true); // Tự động yêu cầu nộp bài
                     } else {
-                        setTimeout(goToNextPart, 2000)
+                        setShowTransition(true);
                     }
-
-                    return 0
+                    return 0;
                 }
-                return prev - 1
-            })
-        }, 1000)
-    }
-
+                return prev - 1;
+            });
+        }, 1000);
+    };
     const startThinking = (seconds: number, callback: () => void) => {
         setThinkingTime(seconds)
         setIsThinking(true)
@@ -134,58 +148,169 @@ const SpeakingTest = () => {
     }
 
     const startRecording = async (key: string) => {
-        if (!partStarted) startTimer(getInitialTime())
+        if (!partStarted) startTimer(getInitialTime());
+
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-            const mediaRecorder = new MediaRecorder(stream)
-            mediaRecorderRef.current = mediaRecorder
-            audioChunksRef.current = []
-            setRecordingKey(key)
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: "audio/webm" // hoặc audio/ogg
+            });
 
-            mediaRecorder.ondataavailable = (e: BlobEvent) => audioChunksRef.current.push(e.data)
-            mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" })
-                const url = URL.createObjectURL(audioBlob)
-                setAudioUrls((prev) => ({ ...prev, [key]: url }))
-                setRecordingKey(null)
-            }
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+            setRecordingKey(key);
+            setRecordingStartTime(Date.now());
 
-            mediaRecorder.start()
+            console.log("🎙️ Start recording:", key);
+
+            mediaRecorder.ondataavailable = (e: BlobEvent) => {
+                if (e.data && e.data.size > 0) {
+                    audioChunksRef.current.push(e.data);
+                }
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+                const url = URL.createObjectURL(audioBlob);
+
+                const audioContext = new AudioContext();
+                const reader = new FileReader();
+
+                reader.onload = async () => {
+                    const arrayBuffer = reader.result as ArrayBuffer;
+
+                    try {
+                        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                        const realDuration = Math.floor(audioBuffer.duration);
+                        console.log(`🎧 Real duration for ${key}: ${realDuration}s`);
+
+                        // Update duration for this question
+                        setRecordingTimes(prev => ({
+                            ...prev,
+                            [key]: realDuration
+                        }));
+
+                        // Update total recording time for part
+                        setTotalRecordingTime(prev => {
+                            const part = key.startsWith('part1') ? 'part1' :
+                                key.startsWith('part2') ? 'part2' : 'part3';
+
+                            const prevDuration = recordingTimes[key] || 0;
+
+                            // Nếu câu này đã có duration rồi → khi ghi lại sẽ trừ duration cũ, cộng duration mới
+                            const newTotal = prev[part] - prevDuration + realDuration;
+
+                            return {
+                                ...prev,
+                                [part]: newTotal
+                            };
+                        });
+
+                        // Save audio URL
+                        setAudioUrls(prev => ({ ...prev, [key]: url }));
+
+                        // Reset
+                        setRecordingKey(null);
+                        setRecordingStartTime(null);
+                    } catch (error) {
+                        console.error("Error decoding audio:", error);
+                    }
+                };
+
+                reader.readAsArrayBuffer(audioBlob);
+            };
+
+            mediaRecorder.start();
         } catch (error) {
-            console.error("Error accessing microphone:", error)
+            console.error(" Error accessing microphone:", error);
+            alert("Không thể truy cập microphone. Vui lòng kiểm tra trình duyệt hoặc cấp quyền micro.");
         }
-    }
+    };
 
-    const stopRecording = () => mediaRecorderRef.current?.stop()
+    const stopRecording = () => {
+        if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
+            console.log(`🛑 Stop recording: ${recordingKey}`);
+        }
+    };
+    const totalRecordingTimeRef = useRef(totalRecordingTime);
 
-    const nextQuestion = () => {
-        if (!speaking) return
+    useEffect(() => {
+        totalRecordingTimeRef.current = totalRecordingTime;
+    }, [totalRecordingTime]);
+    const nextQuestion = async () => {
+        if (!speaking) return;
 
-        const questions = currentPart === "part1" ? speaking.part1.questions : speaking.part3.questions
+        // Nếu đang ghi thì stop trước khi chuyển câu
+        if (recordingKey) {
+            console.log("➡️ Next question, auto stop recording...");
+            stopRecording();
+            // Đợi cho đến khi recording được xử lý xong
+            await new Promise(resolve => {
+                const check = () => {
+                    if (!recordingKey) resolve(true);
+                    else setTimeout(check, 100);
+                };
+                check();
+            });
+        }
+
+        const questions = currentPart === "part1" ? speaking.part1.questions : speaking.part3.questions;
+
+        if (currentPart === "part2") {
+            if (totalRecordingTimeRef.current.part2 >= MIN_RECORDING_TIMES.part2) {
+                setShowTransition(true);
+            } else {
+                alert(`Bạn cần ghi âm ít nhất ${MIN_RECORDING_TIMES.part2} giây cho Part 2 trước khi tiếp tục. Hiện tại: ${Math.floor(totalRecordingTimeRef.current.part2)} giây`);
+            }
+            return;
+        }
 
         if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex((prev) => prev + 1)
+            setCurrentQuestionIndex((prev) => prev + 1);
         } else {
-            if (currentPart === "part3") {
-                setIsSubmitting(true)
+            // Sử dụng ref để lấy giá trị mới nhất
+            const currentTotal = totalRecordingTimeRef.current[currentPart];
+            if (currentTotal >= MIN_RECORDING_TIMES[currentPart]) {
+                if (currentPart === "part3") {
+                    setIsSubmitting(true);
+                } else {
+                    setShowTransition(true);
+                }
             } else {
-                setShowTransition(true)
+                alert(`Bạn cần ghi âm tổng cộng ít nhất ${MIN_RECORDING_TIMES[currentPart]} giây cho ${currentPart.toUpperCase()} trước khi tiếp tục. Hiện tại: ${Math.floor(currentTotal)} giây`);
+                setCurrentQuestionIndex(0);
             }
         }
-    }
+    };
 
-    const goToNextPart = () => {
-        if (timerRef.current) clearInterval(timerRef.current)
-        timerRef.current = null
+    const goToNextPart = async () => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = null;
 
-        setShowTransition(false)
-        setPartStarted(false)
-        setShowConfirmNextPart(false)
-        setCurrentQuestionIndex(0)
 
-        if (currentPart === "part1") setCurrentPart("part2")
-        else if (currentPart === "part2") setCurrentPart("part3")
-    }
+        setShowTransition(false);
+        setPartStarted(false);
+        setShowConfirmNextPart(false);
+        setCurrentQuestionIndex(0);
+
+        if (currentPart === "part1") setCurrentPart("part2");
+        else if (currentPart === "part2") setCurrentPart("part3");
+    };
+
+
+    useEffect(() => {
+        if (currentQuestionIndex === speaking?.part3.questions.length - 1 &&
+            totalRecordingTime.part3 >= MIN_RECORDING_TIMES.part3) {
+            setIsSubmitting(true);
+        }
+    }, [totalRecordingTime.part3, currentQuestionIndex]);
+    useEffect(() => {
+        if (partTimeLeft === 0 && recordingKey) {
+            console.log("Timer ended, auto stop recording...");
+            stopRecording();
+        }
+    }, [partTimeLeft, recordingKey]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60)
@@ -197,6 +322,7 @@ const SpeakingTest = () => {
         const totalTime = getInitialTime()
         return ((totalTime - partTimeLeft) / totalTime) * 100
     }
+
 
     const renderQuestion = (q: string, key: string, isLast: boolean, onNext: () => void) => (
         <Card className="mb-6">
@@ -214,7 +340,7 @@ const SpeakingTest = () => {
                             onClick={() => {
                                 recordingKey === key
                                     ? stopRecording()
-                                    : startThinking(currentPart === "part2" ? 60 : 5, () => startRecording(key))
+                                    : startThinking(currentPart === "part2" ? 10 : 5, () => startRecording(key))
                             }}
                             disabled={isThinking}
                             variant={recordingKey === key ? "destructive" : "default"}
@@ -247,8 +373,42 @@ const SpeakingTest = () => {
                         )}
                     </div>
 
+                    {/* Hiển thị thời lượng ghi âm nếu có */}
+                    {recordingTimes[key] && (
+                        <div className="text-sm text-gray-500">
+                            Thời lượng ghi âm: {Math.floor(recordingTimes[key])} giây
+                        </div>
+                    )}
+
+                    {/* Hiển thị tổng thời lượng ghi âm của part */}
+                    <div className="text-sm font-medium text-blue-600">
+                        Tổng thời lượng {currentPart.toUpperCase()}: {Math.floor(totalRecordingTime[currentPart])} / {MIN_RECORDING_TIMES[currentPart]} giây
+                    </div>
+
+                    {/* Sửa điều kiện hiển thị nút */}
+                    {(currentPart === "part1" || currentPart === "part3") ? (
+                        <div className="mt-4">
+                            <Button onClick={onNext} variant="outline" className="w-full sm:w-auto">
+                                {isLast ? "Complete Part" : "Next Question"}
+                                <ChevronRight className="w-4 h-4 ml-2" />
+                            </Button>
+                        </div>
+                    ) : (
+                        // Thêm nút "Next Part" cho Part 2
+                        <div className="mt-4">
+                            <Button
+                                onClick={onNext}
+                                variant="outline"
+                                className="w-full sm:w-auto"
+                            >
+                                Next Part
+                                <ChevronRight className="w-4 h-4 ml-2" />
+                            </Button>
+                        </div>
+                    )}
+
                     {audioUrls[key] && (
-                        <div className="space-y-3 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <div className="space-y-3 p-4 bg-green-50 rounded-lg border border-green-200 mt-4">
                             <div className="flex items-center gap-2 text-green-700">
                                 <CheckCircle className="w-4 h-4" />
                                 <span className="font-medium">Recording completed</span>
@@ -257,12 +417,6 @@ const SpeakingTest = () => {
                                 <Volume2 className="w-4 h-4 text-gray-500" />
                                 <audio controls src={audioUrls[key]} className="flex-1" />
                             </div>
-                            {currentPart !== "part2" && (
-                                <Button onClick={onNext} variant="outline" className="w-full sm:w-auto">
-                                    {isLast ? "Complete Part" : "Next Question"}
-                                    <ChevronRight className="w-4 h-4 ml-2" />
-                                </Button>
-                            )}
                         </div>
                     )}
                 </div>
@@ -271,7 +425,7 @@ const SpeakingTest = () => {
     )
 
     const prepareSubmissionData = () => {
-        if (!speaking) return null
+
 
         const cloned = JSON.parse(JSON.stringify(speaking))
         if ("username" in user) cloned.username = user.username
@@ -280,19 +434,29 @@ const SpeakingTest = () => {
         cloned.part1.questions = cloned.part1.questions.map((q: any, i: number) => ({
             question: q.question,
             studentAnswer: audioUrls[`part1-${i + 1}`] ? `part1-${i + 1}.webm` : "",
+            duration: recordingTimes[`part1-${i + 1}`] || 0
         }))
 
         cloned.part2.studentAnswer = audioUrls["part2"] ? "part2.webm" : ""
+        cloned.part2.duration = recordingTimes["part2"] || 0
 
         cloned.part3.questions = cloned.part3.questions.map((q: any, i: number) => ({
             question: q.question,
             studentAnswer: audioUrls[`part3-${i + 1}`] ? `part3-${i + 1}.webm` : "",
+            duration: recordingTimes[`part3-${i + 1}`] || 0
         }))
 
         return cloned
     }
 
     const handleSubmit = async () => {
+        // Kiểm tra xem đã ghi âm đủ thời lượng cho part3 chưa
+        if (totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3) {
+            alert(`Bạn cần ghi âm tổng cộng ít nhất ${MIN_RECORDING_TIMES.part3} giây cho PART3 trước khi nộp bài. Hiện tại: ${Math.floor(totalRecordingTime.part3)} giây`);
+            setIsSubmitting(false);
+            return;
+        }
+
         const submissionData = prepareSubmissionData();
         if (!submissionData) return;
 
@@ -305,7 +469,7 @@ const SpeakingTest = () => {
                 formData.append("files", blob, `${key}.webm`);
             })
         );
-        console.log(submissionData)
+
         try {
             const res = await fetch("http://localhost:8080/verify/speaking/submit", {
                 method: "POST",
@@ -322,9 +486,7 @@ const SpeakingTest = () => {
         }
 
         setIsSubmitting(false);
-
     };
-
 
     if (loading) {
         return (
@@ -353,8 +515,6 @@ const SpeakingTest = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-
-
             <div className="max-w-4xl mx-auto px-4 py-8">
                 {/* Progress and Timer */}
                 <Card className="mb-6">
@@ -456,7 +616,7 @@ const SpeakingTest = () => {
                                         nextQuestion,
                                     )}
 
-                                {currentPart === "part2" && renderQuestion(speaking.part2.question, "part2", true, () => {})}
+                                {currentPart === "part2" && renderQuestion(speaking.part2.question, "part2", true, nextQuestion)}
 
                                 {currentPart === "part3" &&
                                     renderQuestion(
@@ -479,12 +639,34 @@ const SpeakingTest = () => {
                                             </div>
                                             <div className="flex gap-2">
                                                 {currentPart !== "part3" ? (
-                                                    <Button onClick={() => setShowConfirmNextPart(true)} variant="outline">
+                                                    <Button
+                                                        onClick={() => {
+                                                            if (totalRecordingTime[currentPart] >= MIN_RECORDING_TIMES[currentPart]) {
+                                                                setShowConfirmNextPart(true);
+                                                            } else {
+                                                                alert(`Bạn cần ghi âm tổng cộng ít nhất ${MIN_RECORDING_TIMES[currentPart]} giây cho ${currentPart.toUpperCase()} trước khi tiếp tục. Hiện tại: ${Math.floor(totalRecordingTime[currentPart])} giây`);
+                                                            }
+                                                        }}
+                                                        variant="outline"
+                                                        disabled={totalRecordingTime[currentPart] < MIN_RECORDING_TIMES[currentPart]}
+                                                        title={totalRecordingTime[currentPart] < MIN_RECORDING_TIMES[currentPart] ? `Bạn cần ghi âm thêm ${MIN_RECORDING_TIMES[currentPart] - Math.floor(totalRecordingTime[currentPart])} giây nữa` : ""}
+                                                    >
                                                         Skip to Next Part
                                                         <ChevronRight className="w-4 h-4 ml-2" />
                                                     </Button>
                                                 ) : (
-                                                    <Button onClick={() => setIsSubmitting(true)} className="bg-green-600 hover:bg-green-700">
+                                                    <Button
+                                                        onClick={() => {
+                                                            if (totalRecordingTime.part3 >= MIN_RECORDING_TIMES.part3) {
+                                                                setIsSubmitting(true);
+                                                            } else {
+                                                                alert(`Bạn cần ghi âm tổng cộng ít nhất ${MIN_RECORDING_TIMES.part3} giây cho PART3 trước khi nộp bài. Hiện tại: ${Math.floor(totalRecordingTime.part3)} giây`);
+                                                            }
+                                                        }}
+                                                        className="bg-green-600 hover:bg-green-700"
+                                                        disabled={totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3}
+                                                        title={totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3 ? `Bạn cần ghi âm thêm ${MIN_RECORDING_TIMES.part3 - Math.floor(totalRecordingTime.part3)} giây nữa` : ""}
+                                                    >
                                                         <CheckCircle className="w-4 h-4 mr-2" />
                                                         Submit Test
                                                     </Button>

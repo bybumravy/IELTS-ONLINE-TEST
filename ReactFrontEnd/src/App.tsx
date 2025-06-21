@@ -41,7 +41,7 @@ export default function App() {
                     <Route path="/test/speaking/:testId" element={<VoiceRecorder />} />
                     <Route path="/checkMic/:testId" element={<SpeakingTest/>} />
                     <Route path="/verify-email" element={<VerifyEmail/>} />
-                    <Route path="/result" element={<MainLayout><Component/></MainLayout> as React.ReactNode} />
+                    <Route path="/result" element={<MainLayout><Component/></MainLayout>} />
                 </Routes>
             </Router>
         </AuthProvider>
