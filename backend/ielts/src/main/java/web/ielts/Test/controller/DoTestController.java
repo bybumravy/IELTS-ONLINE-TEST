@@ -86,7 +86,7 @@ public class DoTestController {
     @PostMapping("/speaking/submit")
     public ResponseEntity<String> uploadFiles(
             @RequestPart("metadata") MultipartFile metadataJson,
-            @RequestPart("files") MultipartFile[] files,
+            @RequestPart(value = "files", required = false) MultipartFile[] files,
             @AuthenticationPrincipal User user
     ) {
         String studentUsername = user.getUsername();
@@ -118,16 +118,20 @@ public class DoTestController {
         String folderPath = "audio/user/" + studentUsername + "/" + testId + "_" + saved.getId();
         Map<String, String> fileUrlMap = new HashMap<>();
 
-        for (MultipartFile file : files) {
-            try {
-                String key = folderPath + "/" + file.getOriginalFilename();
-                String url = doTestService.uploadFile(file, key);
-                fileUrlMap.put(file.getOriginalFilename(), url);
-                System.out.println("Uploaded: " + url);
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Upload failed: " + e.getMessage());
+        if (files != null && files.length > 0) {
+            for (MultipartFile file : files) {
+                try {
+                    String key = folderPath + "/" + file.getOriginalFilename();
+                    String url = doTestService.uploadFile(file, key);
+                    fileUrlMap.put(file.getOriginalFilename(), url);
+                    System.out.println("Uploaded: " + url);
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Upload failed: " + e.getMessage());
+                }
             }
+        } else {
+            System.out.println("No files uploaded, only saving metadata.");
         }
 
         doTestService.updateAnswerUrls(saved, fileUrlMap);

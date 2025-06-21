@@ -6,12 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Clock, Mic, Play, Square, ChevronRight, CheckCircle, AlertCircle, Volume2, Brain } from "lucide-react"
 import {useNavigate, useParams} from "react-router-dom";
 import {useAuth} from "@/contexts/AuthContext";
 
-// Mock user context for demo
 type Speaking = {
     _id: string
     username: string;
@@ -56,12 +55,12 @@ const SpeakingTest = () => {
     const [showTransition, setShowTransition] = useState(false)
     const [showConfirmNextPart, setShowConfirmNextPart] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [timeUp, setTimeUp] = useState(false)
     const navigate = useNavigate();
     const timerRef = useRef<NodeJS.Timeout | null>(null)
     const mediaRecorderRef = useRef<MediaRecorder | null>(null)
     const audioChunksRef = useRef<Blob[]>([])
     const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
-    const [timeUp, setTimeUp] = useState(false);
     const [totalRecordingTime, setTotalRecordingTime] = useState<{ [key in Part]: number }>({
         part1: 0,
         part2: 0,
@@ -69,11 +68,10 @@ const SpeakingTest = () => {
     })
     const [recordingTimes, setRecordingTimes] = useState<{ [key: string]: number }>({})
 
-    // Thời lượng ghi âm tối thiểu cho mỗi part
     const MIN_RECORDING_TIMES = {
-        part1: 10,  // 1 phút
-        part2: 10,  // 50 giây
-        part3: 10   // 1 phút
+        part1: 10,
+        part2: 10,
+        part3: 10
     }
 
     useEffect(() => {
@@ -99,19 +97,33 @@ const SpeakingTest = () => {
         };
     }, [testId]);
 
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (partStarted) {
+                e.preventDefault();
+                e.returnValue = "Bài kiểm tra của bạn sẽ bị mất nếu bạn rời khỏi trang này. Bạn có chắc chắn muốn tiếp tục?";
+                return e.returnValue;
+            }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    }, [partStarted]);
+
+
+
     const getInitialTime = () => {
         if (!speaking) return 0
         const questions =
             currentPart === "part1" ? speaking.part1.questions : currentPart === "part3" ? speaking.part3.questions : []
-        if (currentPart === "part2") return     10
-        return 10
+        if (currentPart === "part2") return 180
+        return 300 + (questions.length) * 5
     }
-
     const startTimer = (seconds: number) => {
         if (timerRef.current) return;
         setPartStarted(true);
         setPartTimeLeft(seconds);
-        setTimeUp(false); // Reset trạng thái hết giờ khi bắt đầu part mới
+        setTimeUp(false);
 
         timerRef.current = setInterval(() => {
             setPartTimeLeft((prev) => {
@@ -120,8 +132,8 @@ const SpeakingTest = () => {
                     timerRef.current = null;
 
                     if (currentPart === "part3") {
-                        setTimeUp(true); // Đánh dấu đã hết giờ
-                        setIsSubmitting(true); // Tự động yêu cầu nộp bài
+                        setTimeUp(true);
+                        setIsSubmitting(true);
                     } else {
                         setShowTransition(true);
                     }
@@ -131,6 +143,7 @@ const SpeakingTest = () => {
             });
         }, 1000);
     };
+
     const startThinking = (seconds: number, callback: () => void) => {
         setThinkingTime(seconds)
         setIsThinking(true)
@@ -153,15 +166,13 @@ const SpeakingTest = () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const mediaRecorder = new MediaRecorder(stream, {
-                mimeType: "audio/webm" // hoặc audio/ogg
+                mimeType: "audio/webm"
             });
 
             mediaRecorderRef.current = mediaRecorder;
             audioChunksRef.current = [];
             setRecordingKey(key);
             setRecordingStartTime(Date.now());
-
-            console.log("🎙️ Start recording:", key);
 
             mediaRecorder.ondataavailable = (e: BlobEvent) => {
                 if (e.data && e.data.size > 0) {
@@ -178,26 +189,19 @@ const SpeakingTest = () => {
 
                 reader.onload = async () => {
                     const arrayBuffer = reader.result as ArrayBuffer;
-
                     try {
                         const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
                         const realDuration = Math.floor(audioBuffer.duration);
-                        console.log(`🎧 Real duration for ${key}: ${realDuration}s`);
 
-                        // Update duration for this question
                         setRecordingTimes(prev => ({
                             ...prev,
                             [key]: realDuration
                         }));
 
-                        // Update total recording time for part
                         setTotalRecordingTime(prev => {
                             const part = key.startsWith('part1') ? 'part1' :
                                 key.startsWith('part2') ? 'part2' : 'part3';
-
                             const prevDuration = recordingTimes[key] || 0;
-
-                            // Nếu câu này đã có duration rồi → khi ghi lại sẽ trừ duration cũ, cộng duration mới
                             const newTotal = prev[part] - prevDuration + realDuration;
 
                             return {
@@ -206,10 +210,7 @@ const SpeakingTest = () => {
                             };
                         });
 
-                        // Save audio URL
                         setAudioUrls(prev => ({ ...prev, [key]: url }));
-
-                        // Reset
                         setRecordingKey(null);
                         setRecordingStartTime(null);
                     } catch (error) {
@@ -222,7 +223,7 @@ const SpeakingTest = () => {
 
             mediaRecorder.start();
         } catch (error) {
-            console.error(" Error accessing microphone:", error);
+            console.error("Error accessing microphone:", error);
             alert("Không thể truy cập microphone. Vui lòng kiểm tra trình duyệt hoặc cấp quyền micro.");
         }
     };
@@ -230,22 +231,14 @@ const SpeakingTest = () => {
     const stopRecording = () => {
         if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
-            console.log(`🛑 Stop recording: ${recordingKey}`);
         }
     };
-    const totalRecordingTimeRef = useRef(totalRecordingTime);
 
-    useEffect(() => {
-        totalRecordingTimeRef.current = totalRecordingTime;
-    }, [totalRecordingTime]);
     const nextQuestion = async () => {
-        if (!speaking) return;
+        if (!speaking || (currentPart === "part3" && timeUp)) return;
 
-        // Nếu đang ghi thì stop trước khi chuyển câu
         if (recordingKey) {
-            console.log("➡️ Next question, auto stop recording...");
             stopRecording();
-            // Đợi cho đến khi recording được xử lý xong
             await new Promise(resolve => {
                 const check = () => {
                     if (!recordingKey) resolve(true);
@@ -258,10 +251,10 @@ const SpeakingTest = () => {
         const questions = currentPart === "part1" ? speaking.part1.questions : speaking.part3.questions;
 
         if (currentPart === "part2") {
-            if (totalRecordingTimeRef.current.part2 >= MIN_RECORDING_TIMES.part2) {
+            if (totalRecordingTime.part2 >= MIN_RECORDING_TIMES.part2) {
                 setShowTransition(true);
             } else {
-                alert(`Bạn cần ghi âm ít nhất ${MIN_RECORDING_TIMES.part2} giây cho Part 2 trước khi tiếp tục. Hiện tại: ${Math.floor(totalRecordingTimeRef.current.part2)} giây`);
+                alert(`Bạn cần ghi âm ít nhất ${MIN_RECORDING_TIMES.part2} giây cho Part 2 trước khi tiếp tục. Hiện tại: ${Math.floor(totalRecordingTime.part2)} giây`);
             }
             return;
         }
@@ -269,8 +262,7 @@ const SpeakingTest = () => {
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex((prev) => prev + 1);
         } else {
-            // Sử dụng ref để lấy giá trị mới nhất
-            const currentTotal = totalRecordingTimeRef.current[currentPart];
+            const currentTotal = totalRecordingTime[currentPart];
             if (currentTotal >= MIN_RECORDING_TIMES[currentPart]) {
                 if (currentPart === "part3") {
                     setIsSubmitting(true);
@@ -288,7 +280,6 @@ const SpeakingTest = () => {
         if (timerRef.current) clearInterval(timerRef.current);
         timerRef.current = null;
 
-
         setShowTransition(false);
         setPartStarted(false);
         setShowConfirmNextPart(false);
@@ -298,135 +289,7 @@ const SpeakingTest = () => {
         else if (currentPart === "part2") setCurrentPart("part3");
     };
 
-
-    useEffect(() => {
-        if (currentQuestionIndex === speaking?.part3.questions.length - 1 &&
-            totalRecordingTime.part3 >= MIN_RECORDING_TIMES.part3) {
-            setIsSubmitting(true);
-        }
-    }, [totalRecordingTime.part3, currentQuestionIndex]);
-    useEffect(() => {
-        if (partTimeLeft === 0 && recordingKey) {
-            console.log("Timer ended, auto stop recording...");
-            stopRecording();
-        }
-    }, [partTimeLeft, recordingKey]);
-
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60)
-        const secs = seconds % 60
-        return `${mins}:${secs.toString().padStart(2, "0")}`
-    }
-
-    const getProgressPercentage = () => {
-        const totalTime = getInitialTime()
-        return ((totalTime - partTimeLeft) / totalTime) * 100
-    }
-
-
-    const renderQuestion = (q: string, key: string, isLast: boolean, onNext: () => void) => (
-        <Card className="mb-6">
-            <CardContent className="p-6">
-                <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                            <span className="text-blue-600 font-semibold text-sm">Q</span>
-                        </div>
-                        <p className="text-lg leading-relaxed">{q}</p>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-3 items-start">
-                        <Button
-                            onClick={() => {
-                                recordingKey === key
-                                    ? stopRecording()
-                                    : startThinking(currentPart === "part2" ? 10 : 5, () => startRecording(key))
-                            }}
-                            disabled={isThinking}
-                            variant={recordingKey === key ? "destructive" : "default"}
-                            size="lg"
-                            className="min-w-[200px]"
-                        >
-                            {recordingKey === key ? (
-                                <>
-                                    <Square className="w-4 h-4 mr-2" />
-                                    Stop Recording
-                                </>
-                            ) : isThinking ? (
-                                <>
-                                    <Brain className="w-4 h-4 mr-2 animate-pulse" />
-                                    Thinking... ({thinkingTime}s)
-                                </>
-                            ) : (
-                                <>
-                                    <Mic className="w-4 h-4 mr-2" />
-                                    Start Recording
-                                </>
-                            )}
-                        </Button>
-
-                        {isThinking && (
-                            <div className="flex items-center gap-2 text-orange-600">
-                                <Brain className="w-4 h-4 animate-pulse" />
-                                <span className="text-sm font-medium">Preparation time: {thinkingTime}s</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Hiển thị thời lượng ghi âm nếu có */}
-                    {recordingTimes[key] && (
-                        <div className="text-sm text-gray-500">
-                            Thời lượng ghi âm: {Math.floor(recordingTimes[key])} giây
-                        </div>
-                    )}
-
-                    {/* Hiển thị tổng thời lượng ghi âm của part */}
-                    <div className="text-sm font-medium text-blue-600">
-                        Tổng thời lượng {currentPart.toUpperCase()}: {Math.floor(totalRecordingTime[currentPart])} / {MIN_RECORDING_TIMES[currentPart]} giây
-                    </div>
-
-                    {/* Sửa điều kiện hiển thị nút */}
-                    {(currentPart === "part1" || currentPart === "part3") ? (
-                        <div className="mt-4">
-                            <Button onClick={onNext} variant="outline" className="w-full sm:w-auto">
-                                {isLast ? "Complete Part" : "Next Question"}
-                                <ChevronRight className="w-4 h-4 ml-2" />
-                            </Button>
-                        </div>
-                    ) : (
-                        // Thêm nút "Next Part" cho Part 2
-                        <div className="mt-4">
-                            <Button
-                                onClick={onNext}
-                                variant="outline"
-                                className="w-full sm:w-auto"
-                            >
-                                Next Part
-                                <ChevronRight className="w-4 h-4 ml-2" />
-                            </Button>
-                        </div>
-                    )}
-
-                    {audioUrls[key] && (
-                        <div className="space-y-3 p-4 bg-green-50 rounded-lg border border-green-200 mt-4">
-                            <div className="flex items-center gap-2 text-green-700">
-                                <CheckCircle className="w-4 h-4" />
-                                <span className="font-medium">Recording completed</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Volume2 className="w-4 h-4 text-gray-500" />
-                                <audio controls src={audioUrls[key]} className="flex-1" />
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-    )
-
     const prepareSubmissionData = () => {
-
-
         const cloned = JSON.parse(JSON.stringify(speaking))
         if ("username" in user) cloned.username = user.username
         cloned.skill = "speaking";
@@ -450,8 +313,7 @@ const SpeakingTest = () => {
     }
 
     const handleSubmit = async () => {
-        // Kiểm tra xem đã ghi âm đủ thời lượng cho part3 chưa
-        if (totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3) {
+        if (!timeUp && totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3) {
             alert(`Bạn cần ghi âm tổng cộng ít nhất ${MIN_RECORDING_TIMES.part3} giây cho PART3 trước khi nộp bài. Hiện tại: ${Math.floor(totalRecordingTime.part3)} giây`);
             setIsSubmitting(false);
             return;
@@ -488,6 +350,114 @@ const SpeakingTest = () => {
         setIsSubmitting(false);
     };
 
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60)
+        const secs = seconds % 60
+        return `${mins}:${secs.toString().padStart(2, "0")}`
+    }
+
+    const getProgressPercentage = () => {
+        const totalTime = getInitialTime()
+        return ((totalTime - partTimeLeft) / totalTime) * 100
+    }
+
+    const renderQuestion = (q: string, key: string, isLast: boolean, onNext: () => void) => (
+        <Card className="mb-6">
+            <CardContent className="p-6">
+                <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <span className="text-blue-600 font-semibold text-sm">Q</span>
+                        </div>
+                        <p className="text-lg leading-relaxed">{q}</p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 items-start">
+                        <Button
+                            onClick={() => recordingKey === key ? stopRecording() : startThinking(currentPart === "part2" ? 10 : 5, () => startRecording(key))}
+                            disabled={isThinking || (currentPart === "part3" && timeUp)}
+                            variant={recordingKey === key ? "destructive" : "default"}
+                            size="lg"
+                            className="min-w-[200px]"
+                        >
+                            {recordingKey === key ? (
+                                <>
+                                    <Square className="w-4 h-4 mr-2" />
+                                    Stop Recording
+                                </>
+                            ) : isThinking ? (
+                                <>
+                                    <Brain className="w-4 h-4 mr-2 animate-pulse" />
+                                    Thinking... ({thinkingTime}s)
+                                </>
+                            ) : (
+                                <>
+                                    <Mic className="w-4 h-4 mr-2" />
+                                    Start Recording
+                                </>
+                            )}
+                        </Button>
+
+                        {isThinking && (
+                            <div className="flex items-center gap-2 text-orange-600">
+                                <Brain className="w-4 h-4 animate-pulse" />
+                                <span className="text-sm font-medium">Preparation time: {thinkingTime}s</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {recordingTimes[key] && (
+                        <div className="text-sm text-gray-500">
+                            Thời lượng ghi âm: {Math.floor(recordingTimes[key])} giây
+                        </div>
+                    )}
+
+                    <div className="text-sm font-medium text-blue-600">
+                        Tổng thời lượng {currentPart.toUpperCase()}: {Math.floor(totalRecordingTime[currentPart])} / {MIN_RECORDING_TIMES[currentPart]} giây
+                    </div>
+
+                    {(currentPart === "part1" || currentPart === "part3") ? (
+                        <div className="mt-4">
+                            <Button
+                                onClick={onNext}
+                                variant="outline"
+                                className="w-full sm:w-auto"
+                                disabled={currentPart === "part3" && timeUp}
+                            >
+                                {isLast ? "Complete Part" : "Next Question"}
+                                <ChevronRight className="w-4 h-4 ml-2" />
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="mt-4">
+                            <Button
+                                onClick={onNext}
+                                variant="outline"
+                                className="w-full sm:w-auto"
+                            >
+                                Next Part
+                                <ChevronRight className="w-4 h-4 ml-2" />
+                            </Button>
+                        </div>
+                    )}
+
+                    {audioUrls[key] && (
+                        <div className="space-y-3 p-4 bg-green-50 rounded-lg border border-green-200 mt-4">
+                            <div className="flex items-center gap-2 text-green-700">
+                                <CheckCircle className="w-4 h-4" />
+                                <span className="font-medium">Recording completed</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <Volume2 className="w-4 h-4 text-gray-500" />
+                                <audio controls src={audioUrls[key]} className="flex-1" />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    )
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -516,7 +486,6 @@ const SpeakingTest = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-4xl mx-auto px-4 py-8">
-                {/* Progress and Timer */}
                 <Card className="mb-6">
                     <CardContent className="p-6">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
@@ -530,10 +499,10 @@ const SpeakingTest = () => {
                                     <Badge variant={currentPart === "part3" ? "default" : "secondary"}>Part 3</Badge>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3 text-right">
-                                <Clock className="w-5 h-5 text-blue-600" />
+                            <div className={`flex items-center gap-3 text-right ${timeUp && currentPart === "part3" ? "text-red-600 animate-pulse" : ""}`}>
+                                <Clock className="w-5 h-5" />
                                 <div>
-                                    <div className="text-2xl font-bold text-blue-600">{formatTime(timerDisplay)}</div>
+                                    <div className="text-2xl font-bold">{formatTime(timerDisplay)}</div>
                                     <div className="text-sm text-gray-500">Time remaining</div>
                                 </div>
                             </div>
@@ -551,7 +520,16 @@ const SpeakingTest = () => {
                     </CardContent>
                 </Card>
 
-                {/* Transition Screen */}
+                {timeUp && currentPart === "part3" && (
+                    <Alert variant="destructive" className="mb-4">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Thời gian đã hết!</AlertTitle>
+                        <AlertDescription>
+                            Part 3 đã kết thúc. Hệ thống sẽ tự động nộp bài của bạn.
+                        </AlertDescription>
+                    </Alert>
+                )}
+
                 {showTransition ? (
                     <Card>
                         <CardContent className="p-8 text-center">
@@ -568,7 +546,6 @@ const SpeakingTest = () => {
                     </Card>
                 ) : (
                     <>
-                        {/* Instructions */}
                         {!partStarted && (
                             <Card className="mb-6">
                                 <CardHeader>
@@ -605,7 +582,6 @@ const SpeakingTest = () => {
                             </Card>
                         )}
 
-                        {/* Questions */}
                         {partStarted && (
                             <div className="space-y-6">
                                 {currentPart === "part1" &&
@@ -626,7 +602,6 @@ const SpeakingTest = () => {
                                         nextQuestion,
                                     )}
 
-                                {/* Navigation */}
                                 <Card>
                                     <CardContent className="p-4">
                                         <div className="flex flex-col sm:flex-row gap-3 justify-between">
@@ -656,16 +631,9 @@ const SpeakingTest = () => {
                                                     </Button>
                                                 ) : (
                                                     <Button
-                                                        onClick={() => {
-                                                            if (totalRecordingTime.part3 >= MIN_RECORDING_TIMES.part3) {
-                                                                setIsSubmitting(true);
-                                                            } else {
-                                                                alert(`Bạn cần ghi âm tổng cộng ít nhất ${MIN_RECORDING_TIMES.part3} giây cho PART3 trước khi nộp bài. Hiện tại: ${Math.floor(totalRecordingTime.part3)} giây`);
-                                                            }
-                                                        }}
+                                                        onClick={() => setIsSubmitting(true)}
                                                         className="bg-green-600 hover:bg-green-700"
-                                                        disabled={totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3}
-                                                        title={totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3 ? `Bạn cần ghi âm thêm ${MIN_RECORDING_TIMES.part3 - Math.floor(totalRecordingTime.part3)} giây nữa` : ""}
+                                                        disabled={timeUp}
                                                     >
                                                         <CheckCircle className="w-4 h-4 mr-2" />
                                                         Submit Test
@@ -680,7 +648,6 @@ const SpeakingTest = () => {
                     </>
                 )}
 
-                {/* Confirmation Dialogs */}
                 {showConfirmNextPart && (
                     <Card className="mt-6 border-orange-200 bg-orange-50">
                         <CardContent className="p-6">
@@ -713,16 +680,20 @@ const SpeakingTest = () => {
                                 <div className="flex-1">
                                     <h3 className="font-semibold text-green-900 mb-2">Submit Your Test?</h3>
                                     <p className="text-green-800 mb-4">
-                                        Are you ready to submit your speaking test? Once submitted, you cannot make any changes.
+                                        {timeUp
+                                            ? "Thời gian đã hết! Bài của bạn sẽ được nộp ngay bây giờ."
+                                            : "Are you ready to submit your speaking test? Once submitted, you cannot make any changes."}
                                     </p>
                                     <div className="flex gap-3">
                                         <Button onClick={handleSubmit} className="bg-green-600 hover:bg-green-700">
                                             <CheckCircle className="w-4 h-4 mr-2" />
-                                            Yes, Submit
+                                            {timeUp ? "Nộp bài ngay" : "Yes, Submit"}
                                         </Button>
-                                        <Button onClick={() => setIsSubmitting(false)} variant="outline">
-                                            Cancel
-                                        </Button>
+                                        {!timeUp && (
+                                            <Button onClick={() => setIsSubmitting(false)} variant="outline">
+                                                Cancel
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
