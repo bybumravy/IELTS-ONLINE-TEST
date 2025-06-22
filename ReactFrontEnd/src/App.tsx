@@ -19,34 +19,116 @@ import Component from "@/pages/DoTest/Component";
 import FulllTest from "@/pages/DoTest/FullTest";
 import LoginAdmin from "@/components/sections/LoginAdmin";
 import Adminpage from "@/pages/Adminpage";
-
+import SoftProtectedLayout from "@/components/sections/SoftProtectedLayout";
+import ProtectedLayout from "@/components/sections/ProtectedLayout";
+import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole";
 export default function App() {
     return (
         <AuthProvider>
             <Router>
                 <Routes>
-                    <Route path="/" element={<MainLayout><HomePage /></MainLayout>}/>
-                    <Route path="/adminpage" element={<Adminpage />}/>
-                    <Route path="/login" element={<Login />}/>
-                    <Route path="/loginadmin" element={<LoginAdmin />}/>
-                    <Route path="/student/listAllTips" element={<MainLayout><TipPage /></MainLayout>}/>
-                    <Route path="/register" element={<RegisterPage />}/>
-                    <Route path="/test/listening/:testId" element={<ListeningTest />} />
-                    <Route path="/test/reading/:testId" element={<ReadingTest />} />
-                    <Route path="/test/writing/:testId" element={<WritingTest />} />
-                    <Route path="/test/full/:testId" element={<FulllTest />} />
-                    {/*<Route path="/test/speaking/:testId" element={<SpeakingTest />} />*/}
-                    <Route path="/writing-result/:resultId" element={<MainLayout><WritingResult /></MainLayout>} />
 
-                    <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout>} />
-                    <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout>} />
-                    <Route path="/test" element={<MainLayout><ListTestPage/></MainLayout>} />
-                    <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout>} />
-                    <Route path="/test/speaking/:testId" element={<VoiceRecorder />} />
-                    <Route path="/checkMic/:testId" element={<SpeakingTest/>} />
-                    <Route path="/verify-email" element={<VerifyEmail/>} />
-                    <Route path="/result" element={<MainLayout><Component/></MainLayout>} />
+                    {/* Public - Không bắt login - Nếu login thì phải role student */}
+                    <Route path="/" element={
+                        <SoftProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><HomePage /></MainLayout>
+                        </SoftProtectedLayout>
+                    } />
+
+                    <Route path="/student/listAllTips" element={
+                        <SoftProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><TipPage /></MainLayout>
+                        </SoftProtectedLayout>
+                    } />
+
+                    <Route path="/:skill/:id" element={
+                        <SoftProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><TipDetail /></MainLayout>
+                        </SoftProtectedLayout>
+                    } />
+
+                    <Route path="/tips/:skill" element={
+                        <SoftProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><TipPage /></MainLayout>
+                        </SoftProtectedLayout>
+                    } />
+
+                    <Route path="/test" element={
+                        <SoftProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><ListTestPage /></MainLayout>
+                        </SoftProtectedLayout>
+                    } />
+
+                    <Route path="/test/:skill" element={
+                        <SoftProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><ListTestPage /></MainLayout>
+                        </SoftProtectedLayout>
+                    } />
+
+                    <Route path="/result" element={
+                        <SoftProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><Component /></MainLayout>
+                        </SoftProtectedLayout>
+                    } />
+
+                    {/* Trang Admin - bắt login role admin */}
+                    <Route path="/adminpage" element={
+                        <ProtectedLayoutRole allowRoles={["admin"]}>
+                            <Adminpage />
+                        </ProtectedLayoutRole>
+                    } />
+
+                    {/* Trang kỹ năng - bắt login role student */}
+                    <Route path="/test/listening/:testId" element={
+                        <ProtectedLayout allowRoles={["student"]}>
+                            <ListeningTest />
+                        </ProtectedLayout>
+                    } />
+
+                    <Route path="/test/reading/:testId" element={
+                        <ProtectedLayout allowRoles={["student"]}>
+                            <ReadingTest />
+                        </ProtectedLayout>
+                    } />
+
+                    <Route path="/test/writing/:testId" element={
+                        <ProtectedLayout allowRoles={["student"]}>
+                            <WritingTest />
+                        </ProtectedLayout>
+                    } />
+
+                    <Route path="/test/full/:testId" element={
+                        <ProtectedLayout allowRoles={["student"]}>
+                            <FulllTest />
+                        </ProtectedLayout>
+                    } />
+
+                    <Route path="/test/speaking/:testId" element={
+                        <ProtectedLayout allowRoles={["student"]}>
+                            <VoiceRecorder />
+                        </ProtectedLayout>
+                    } />
+
+                    <Route path="/checkMic/:testId" element={
+                        <ProtectedLayout allowRoles={["student"]}>
+                            <SpeakingTest />
+                        </ProtectedLayout>
+                    } />
+
+                    <Route path="/writing-result/:resultId" element={
+                        <ProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><WritingResult /></MainLayout>
+                        </ProtectedLayout>
+                    } />
+
+                    {/* Các route public - không cần login */}
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/loginadmin" element={<LoginAdmin />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/verify-email" element={<VerifyEmail />} />
+
                 </Routes>
+
             </Router>
         </AuthProvider>
     )

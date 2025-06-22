@@ -4,11 +4,16 @@ export const login = async (email: string, password: string) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password }),
-    })
-   console.log(res);
-    if (!res.ok) throw new Error("Login failed")
-}
+        body: JSON.stringify({
+            email,
+            password,
+            fromPath: window.location.pathname   // 👈 Gửi thêm path
+        }),
+    });
+
+    console.log(res);
+    if (!res.ok) throw new Error("Login failed");
+};
 
 export const logout = async () => {
     await fetch("http://localhost:8080/api/logout", {

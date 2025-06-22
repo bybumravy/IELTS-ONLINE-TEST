@@ -97,14 +97,26 @@ public class AuthService {
                 .body("Xác thực email thành công! Bạn có thể đăng nhập.");
     }
 
-    public ResponseEntity<Map<String, Object>> login(String email, String password) {
+    public ResponseEntity<Map<String, Object>> login(String email, String password,String path) {
         Map<String, Object> response = new HashMap<>();
 
         User user = authRepository.findByEmail(email);
+        String role = user.getRole();
 
+        // ✅ Nếu login từ "/login" → chỉ cho STUDENT login
+        if (path.equalsIgnoreCase("/login") && !role.equalsIgnoreCase("STUDENT")) {
+            response.put("status", "fail");
+            response.put("message", "Only STUDENT accounts can login here");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
+        if (path.equalsIgnoreCase("/loginadmin") && !role.equalsIgnoreCase("ADMIN")) {
+            response.put("status", "fail");
+            response.put("message", "Only admin accounts can login here");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
         System.out.println(user);
         if (user != null && encoder.matches(password, user.getPassword()) ) {
-            ResponseCookie cookie = createJwtCookie(user.getEmail(), user.getRole());
+            ResponseCookie cookie = createJwtCookie(user.getEmail(), role);
 
             response.put("status", "success");
             response.put("message", "Login successful");
