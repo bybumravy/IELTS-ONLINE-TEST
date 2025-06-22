@@ -15,16 +15,20 @@ import WritingTest from "@/pages/DoTest/WritingTest";
 import VoiceRecorder from "@/pages/DoTest/checkMic";
 import SpeakingTest from "@/pages/DoTest/SpeakingTest";
 import VerifyEmail from "@/components/sections/VerifyEmail";
-
 import Component from "@/pages/DoTest/Component";
 import FulllTest from "@/pages/DoTest/FullTest";
+import LoginAdmin from "@/components/sections/LoginAdmin";
+import Adminpage from "@/pages/Adminpage";
+
 export default function App() {
     return (
         <AuthProvider>
             <Router>
                 <Routes>
                     <Route path="/" element={<MainLayout><HomePage /></MainLayout>}/>
+                    <Route path="/adminpage" element={<Adminpage />}/>
                     <Route path="/login" element={<Login />}/>
+                    <Route path="/loginadmin" element={<LoginAdmin />}/>
                     <Route path="/student/listAllTips" element={<MainLayout><TipPage /></MainLayout>}/>
                     <Route path="/register" element={<RegisterPage />}/>
                     <Route path="/test/listening/:testId" element={<ListeningTest />} />

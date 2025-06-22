@@ -22,7 +22,10 @@ import web.ielts.Test.repository.answer.ReadingAnswerRepository;
 import web.ielts.Test.repository.answer.SpeakingAnswerRepository;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -190,14 +193,47 @@ task1.setEvaluation(eval1.getEvaluation());
         return speakingAnswerRepository.save(submission);
     }
     public String uploadFile(MultipartFile file, String key) throws IOException {
+        try {
+            // Giữ nguyên key gốc (không thay đổi đường dẫn thư mục)
+            String originalKey = key;
+
+            // Kiểm tra nếu là file WebM thì chuyển đổi
+            if (file.getContentType().equals("audio/webm")) {
+                File mp3File = AudioConverter.convertWebmToMp3(file);
+
+                // Chỉ thay đổi phần đuôi file từ .webm sang .mp3
+                String mp3Key = originalKey.replace(".webm", ".mp3");
+
+                try (InputStream is = new FileInputStream(mp3File)) {
+                    uploadToS3(is, mp3File.length(), mp3Key, "audio/mpeg");
+                }
+
+                mp3File.delete();
+                return buildUrl(mp3Key);
+            }
+            // Upload trực tiếp nếu không phải WebM
+            else {
+                uploadToS3(file.getInputStream(), file.getSize(), originalKey, file.getContentType());
+                return buildUrl(originalKey);
+            }
+        } catch (Exception e) {
+            throw new IOException("Failed to upload file: " + e.getMessage(), e);
+        }
+    }
+
+    private void uploadToS3(InputStream inputStream, long contentLength,
+                            String key, String contentType) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
-                .key(key) // Không nối thêm filename nữa
-                .contentType(file.getContentType())
+                .key(key)
+                .contentType(contentType)
                 .build();
 
-        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+        s3Client.putObject(putObjectRequest,
+                RequestBody.fromInputStream(inputStream, contentLength));
+    }
 
-        return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
+    private String buildUrl(String key) {
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, region, key);
     }
 }
