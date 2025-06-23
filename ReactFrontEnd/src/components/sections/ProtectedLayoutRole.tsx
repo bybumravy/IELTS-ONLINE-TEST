@@ -1,29 +1,35 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function ProtectedLayoutRole({ children, allowRoles }: { children: React.ReactNode; allowRoles: string[] }) {
+export default function ProtectedLayoutRole({
+                                                children,
+                                                allowRoles
+                                            }: {
+    children: React.ReactNode;
+    allowRoles: string[]
+}) {
+    const navigate = useNavigate();
     const { user } = useAuth();
-    const [blockReason, setBlockReason] = useState<string | null>(null);
-    console.log(user)
+    const hasChecked = useRef(false);
+
     useEffect(() => {
+        if (hasChecked.current) return;
+        hasChecked.current = true;
 
         if (!user) {
-            setBlockReason("Bạn phải đăng nhập mới vào được trang này");
-        } else if (!allowRoles.includes(user.role)) {
-            setBlockReason("Bạn không có quyền truy cập trang này");
-        } else {
-            setBlockReason(null); // OK, không bị block
+            navigate("/loginadmin", { state: { from: location.pathname } });
+            return;
         }
-    }, [user, allowRoles]);
 
-    useEffect(() => {
-        if (blockReason) {
-            window.alert(blockReason);
+        if (!user.role || !allowRoles.includes(user.role)) {
+
+            navigate("/error", { state: { code: 403 } });
         }
-    }, [blockReason]);
+    }, [user, allowRoles, navigate]);
 
-    if (blockReason) {
-        return null;
+    if (!user || !user.role || !allowRoles.includes(user.role)) {
+        return null; // Hoặc return loading spinner
     }
 
     return <>{children}</>;
