@@ -1,25 +1,41 @@
 import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, useLocation } from "react-router-dom";
 
-export default function ProtectedLayout({ children, allowRoles }: { children: React.ReactNode; allowRoles: string[] }) {
-    const { user } = useAuth();
+export default function ProtectedLayoutRole({
+                                                children,
+                                                allowRoles
+                                            }: {
+    children: React.ReactNode;
+    allowRoles: string[];
+}) {
+    const navigate = useNavigate();
     const location = useLocation();
+    const { user, isLoading } = useAuth();
 
     useEffect(() => {
+        if (isLoading) return;
+
         if (!user) {
-            window.alert("Bạn phải đăng nhập mới vào được trang này");
+            // Sử dụng replace: true để ngăn history stack
+            navigate("/login", {
+                replace: true,
+                state: { from: location.pathname }
+            });
+            return;
         }
-    }, [user]);
 
-    if (!user) {
-        // Chưa login → bắt login
-        return <Navigate to="/login" state={{ from: location }} replace />;
-    }
+        if (!user.role || !allowRoles.includes(user.role)) {
+            navigate("/error", {
+                replace: true,
+                state: { code: 403 }
+            });
+        }
+    }, [user, isLoading, allowRoles, navigate, location.pathname]);
 
-    if (!allowRoles.includes(user.role)) {
-        // Đã login nhưng sai role → chặn
-        return <Navigate to="/" replace />;
+    // Nếu đang loading hoặc user không hợp lệ, không render gì
+    if (isLoading || !user || !user.role || !allowRoles.includes(user.role)) {
+        return null;
     }
 
     return <>{children}</>;

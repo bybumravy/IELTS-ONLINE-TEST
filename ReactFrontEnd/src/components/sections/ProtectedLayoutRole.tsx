@@ -10,11 +10,11 @@ export default function ProtectedLayoutRole({
     allowRoles: string[]
 }) {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, isLoading } = useAuth(); // Lấy thêm isLoading
     const hasChecked = useRef(false);
 
     useEffect(() => {
-        if (hasChecked.current) return;
+        if (hasChecked.current || isLoading) return; // Chờ đến khi loading xong
         hasChecked.current = true;
 
         if (!user) {
@@ -23,13 +23,17 @@ export default function ProtectedLayoutRole({
         }
 
         if (!user.role || !allowRoles.includes(user.role)) {
-
             navigate("/error", { state: { code: 403 } });
         }
-    }, [user, allowRoles, navigate]);
+    }, [user, isLoading, allowRoles, navigate]); // Thêm isLoading vào dependencies
+
+    // Hiển thị loading nếu chưa xác định xong
+    if (isLoading) {
+        return <div>Loading...</div>; // Hoặc spinner
+    }
 
     if (!user || !user.role || !allowRoles.includes(user.role)) {
-        return null; // Hoặc return loading spinner
+        return null;
     }
 
     return <>{children}</>;
