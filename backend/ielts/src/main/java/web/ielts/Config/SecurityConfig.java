@@ -30,39 +30,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults()) //
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/momo/create",
-                                "/api/momo/ipn-handler",
-                                "/api/payment/callback",
-                                "/api/login",
-                                "/api/user-info",
-                                "/api/logout",
-                                "/oauth2/**",
-                                "/login/oauth2/",
-                                "/oauth2/",
-                                "/api/payment/status/**",
-                                "/api/tips-summary",
-                                "/api/3-tests",
-                                "/api/test/all-skill",
-                                "/api/test/listening",
-                                "/api/test/reading",
-                                "/api/test/writing",
-                                "/api/test/speaking",
-                                "/api/test/count",
-                                "/verify/**",
-                                "/api/result/**"
-                        ).permitAll()
-                        // Manager endpoints
-                        .requestMatchers(
-                                "/api/manager/**"
-                        ).hasAuthority("manager")
-                        // Teacher endpoints
-                        .requestMatchers(
-                                "/api/teacher/**"
-                        ).hasAuthority("teacher")
-                        // Other API endpoints
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                  .oauth2Login(oauth2 -> oauth2
                          .successHandler(customOAuth2SuccessHandler)

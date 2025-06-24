@@ -102,16 +102,16 @@ public class AddTestController {
 
             // Xóa tất cả dữ liệu liên quan
             addTestRepo.deleteById(testId);
-            
+
             AddListening addListening = addListeningRepo.findByTestId(testId);
             if (addListening != null) addListeningRepo.delete(addListening);
-            
+
             AddReading addReading = addReadingRepo.findByTestId(testId);
             if (addReading != null) addReadingRepo.delete(addReading);
-            
+
             AddWriting addWriting = addWritingRepo.findByTestId(testId);
             if (addWriting != null) addWritingRepo.delete(addWriting);
-            
+
             AddSpeaking addSpeaking = addSpeakingRepo.findByTestId(testId);
             if (addSpeaking != null) addSpeakingRepo.delete(addSpeaking);
 
@@ -123,7 +123,7 @@ public class AddTestController {
     }
 
     @PostMapping("/manager/accept-test/{testId}")
-    public ResponseEntity<String> acceptTest(@PathVariable String testId) {
+    public ResponseEntity<String> acceptTest(@PathVariable("testId") String testId) {
         try {
             AddTest addTest = addTestRepo.findById(testId).orElse(null);
             AddListening addListening = addListeningRepo.findByTestId(testId);
@@ -134,12 +134,6 @@ public class AddTestController {
             if (addTest == null) return ResponseEntity.badRequest().body("Test not found");
 
             // Chuyển sang model chính
-            Test test = new Test();
-            test.setTestId(addTest.getTestId());
-            test.setTestTitle(addTest.getTestTitle());
-            test.setTags(addTest.getTags());
-            test.setCreatedAt(addTest.getCreateAt().toString());
-            testRepo.save(test);
 
             Listening listening = addTestService.convertAddListeningToListening(addListening);
             if (listening != null) listeningRepo.save(listening);
@@ -152,6 +146,13 @@ public class AddTestController {
 
             Speaking speaking = addTestService.convertAddSpeakingToSpeaking(addSpeaking);
             if (speaking != null) speakingRepo.save(speaking);
+
+            Test test = new Test();
+            test.setTestId(testService.generateNextTestId());
+            test.setTestTitle(addTest.getTestTitle());
+            test.setTags(addTest.getTags());
+            test.setCreatedAt(addTest.getCreateAt().toString());
+            testRepo.save(test);
 
             // Xóa bản ghi request
             addTestRepo.deleteById(testId);

@@ -7,6 +7,7 @@ import web.ielts.Test.model.Reading;
 import web.ielts.Test.model.Speaking;
 import web.ielts.Test.model.Writing;
 import web.ielts.Test.model.add.*;
+import web.ielts.Test.repository.TestRepository;
 import web.ielts.Test.repository.add.*;
 import web.ielts.Test.model.Listening.TaskListening;
 import web.ielts.Test.model.Listening.Section;
@@ -20,6 +21,9 @@ public class AddTestService {
 
     @Autowired
     private AddTestRepository testRepository;
+
+    @Autowired
+    private TestRepository testRepo;
 
     @Autowired
     private AddListeningRepository listeningRepository;
@@ -64,12 +68,17 @@ public class AddTestService {
             speakingRepository.save(speaking);
         }
     }
+    public String generateNextTestId() {
+        long count = testRepo.count() + 1;
+        return String.format("T%03d", count);
+    }
+
 // Chuyển AddListening -> Listening
 public Listening convertAddListeningToListening(AddListening addListening) {
     if (addListening == null) return null;
 
     Listening listening = new Listening();
-    listening.setTestId(addListening.getTestId());
+    listening.setTestId(generateNextTestId());
     listening.setAudioUrl(addListening.getAudioUrl());
 
     listening.setTasks(
@@ -109,7 +118,7 @@ public Listening convertAddListeningToListening(AddListening addListening) {
 public Reading convertAddReadingToReading(AddReading addReading) {
     if (addReading == null) return null;
     Reading reading = new Reading();
-    reading.setTestId(addReading.getTestId());
+    reading.setTestId(generateNextTestId());
     reading.setTasks(
         addReading.getTasks().stream().map(addTask -> {
             Reading.Task task = new Reading.Task();
@@ -147,7 +156,7 @@ public Reading convertAddReadingToReading(AddReading addReading) {
         }
 
         Writing writing = new Writing();
-        writing.setTestId(addWriting.getTestId());
+        writing.setTestId(generateNextTestId());
         writing.setTasks(
                 addWriting.getTasks().stream().map(AddWritingTask -> {
                     Writing.Task task = new Writing.Task();
@@ -165,7 +174,7 @@ public Reading convertAddReadingToReading(AddReading addReading) {
 public Speaking convertAddSpeakingToSpeaking(AddSpeaking addSpeaking) {
     if (addSpeaking == null) return null;
     Speaking speaking = new Speaking();
-    speaking.setTestId(addSpeaking.getTestId());
+    speaking.setTestId(generateNextTestId());
 
     // Part 1
     if (addSpeaking.getPart1() != null) {

@@ -44,7 +44,6 @@ export default function App() {
                     <Route path="/test/listening/:testId" element={<ListeningTest />} />
                     <Route path="/test/reading/:testId" element={<ReadingTest />} />
                     <Route path="/test/writing/:testId" element={<WritingTest />} />
-
                     <Route path="/writing-result/:resultId" element={<MainLayout><WritingResult /></MainLayout>} />
                     <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout>} />
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout>} />

@@ -274,7 +274,7 @@ const handleSave = async () => {
     if (!response.ok) throw new Error('Failed to save test');
 
     const result = await response.text();
-    alert(`Test saved successfully: ${result}`);
+    alert(`Send request test successfully: ${result}`);
   } catch (error) {
     console.error('Error saving test:', error);
     alert('Error saving test.');

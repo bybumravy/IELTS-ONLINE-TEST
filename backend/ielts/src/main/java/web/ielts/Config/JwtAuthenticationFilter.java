@@ -29,12 +29,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws IOException, ServletException {
         String path = request.getRequestURI();
 
-//        if (path.startsWith("/oauth2/") ||
-//                path.startsWith("/login/oauth2/") ||
-//                path.equals("/api/login")) {
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
+       if (path.startsWith("/oauth2/") ||
+               path.startsWith("/login/oauth2/") ||
+               path.startsWith("/api/momo/create") ||
+               path.startsWith("/api/momo/ipn-handler") ||
+               path.startsWith("/api/payment/callback") ||
+               path.startsWith("/api/payment/status") ||
+               path.startsWith("/api/tips-summary") ||
+               path.startsWith("/api/3-tests") ||
+               path.startsWith("/api/test/all-skill") ||
+               path.startsWith("/api/test/listening") ||
+               path.startsWith("/api/test/reading") ||
+               path.startsWith("/api/test/writing") ||
+               path.startsWith("/api/test/speaking") ||
+               path.startsWith("/api/test/count") ||
+               path.startsWith("/verify") ||
+               path.startsWith("/api/result") ||
+               path.equals("/api/login")) {
+           filterChain.doFilter(request, response);
+           return;
+       }
 
         String token = getTokenFromCookies(request);
 
