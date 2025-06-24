@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import type { User } from '../types/apiTypes';
 import { useAuth } from '../contexts/AuthContext';
 import type { TestHistory } from '../services/historyService';
 import { getStudentTestHistory } from '../services/historyService';
@@ -70,7 +69,7 @@ const HistoryPage: React.FC = () => {
           <div>
             {filteredHistory.length === 0 ? (
               <p className="text-gray-500 text-center py-8">
-                Chưa có bài làm nào
+                Đã làm bài nào đâu mà xem lịch sử???
               </p>
             ) : (
               filteredHistory.map((item) => (

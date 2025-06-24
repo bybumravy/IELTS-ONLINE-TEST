@@ -15,30 +15,47 @@ import WritingResult from "@/pages/Result/WritingResult";
 import ListeningTest from "@/pages/DoTest/ListeningTest";
 import ReadingTest from "@/pages/DoTest/ReadingTest";
 import WritingTest from "@/pages/DoTest/WritingTest";
+import VoiceRecorder from "@/pages/DoTest/checkMic";
+import SpeakingTest from "@/pages/DoTest/SpeakingTest";
+import VerifyEmail from "@/components/sections/VerifyEmail";
 import HistoryPage from "./pages/HistoryPage"
-
+import PaymentPage from "@/pages/Payment/PaymentPage.tsx";
+import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
+import Contact from "@/pages/Contact";
+import HelpCenter from "@/pages/HelpCenter";
+import IeltsResult from "@/pages/IeltsResult";
+import AcceptTestPage from "./pages/AcceptTestPage"
 export default function App() {
     return (
         <AuthProvider>
             <Router>
                 <Routes>
                     <Route path="/" element={<MainLayout><HomePage /></MainLayout>}/>
+                    <Route path="/contact" element={<MainLayout><Contact /></MainLayout>}/>
+                    <Route path="/help" element={<MainLayout><HelpCenter /></MainLayout>}/>
                     <Route path="/login" element={<Login />}/>
                     <Route path="/test-history" element={<MainLayout><HistoryPage /></MainLayout>}/>
                     <Route path="/staff-login" element={<StaffLogin />}/>
                     <Route path="/staff-page" element={<StaffLayout><StaffPage /></StaffLayout>}/>
                     <Route path="/add-test" element={<StaffLayout><AddTest /></StaffLayout>}/>
+                    <Route path="/accept-tests" element={<StaffLayout><AcceptTestPage/></StaffLayout>}/>
                     <Route path="/student/listAllTips" element={<MainLayout><TipPage /></MainLayout>}/>
                     <Route path="/register" element={<RegisterPage />}/>
                     <Route path="/test/listening/:testId" element={<ListeningTest />} />
                     <Route path="/test/reading/:testId" element={<ReadingTest />} />
                     <Route path="/test/writing/:testId" element={<WritingTest />} />
-                    {/*<Route path="/test/speaking/:testId" element={<SpeakingTest />} />*/}
+
                     <Route path="/writing-result/:resultId" element={<MainLayout><WritingResult /></MainLayout>} />
                     <Route path="/:skill/:id" element={<MainLayout><TipDetail /></MainLayout>} />
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout>} />
                     <Route path="/test" element={<MainLayout><ListTestPage/></MainLayout>} />
                     <Route path="/test/:skill" element={<MainLayout><ListTestPage /></MainLayout>} />
+                    <Route path="/test/speaking/:testId" element={<VoiceRecorder />} />
+                    <Route path="/checkMic/:testId" element={<SpeakingTest/>} />
+                    <Route path="/verify-email" element={<VerifyEmail/>} />
+                    <Route path="/result" element={<MainLayout><IeltsResult/></MainLayout>} />
+                    <Route path="/api/payment/create" element={<MainLayout><PaymentPage/></MainLayout>} />
+                    <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
                 </Routes>
             </Router>
         </AuthProvider>

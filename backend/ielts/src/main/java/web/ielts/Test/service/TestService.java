@@ -94,42 +94,6 @@ public class TestService {
             return null;
         }
     }
-    public void processAndSaveJson(JsonNode root) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-
-        Test test = new Test();
-        test.setTestId(root.get("test").get("testId").asText());
-        test.setTestTitle(root.get("test").get("testTitle").asText());
-        test.setTags(mapper.convertValue(root.get("test").get("tags"), new TypeReference<List<String>>() {}));
-        test.setCreatedAt(root.get("test").get("createAt").asText());
-
-        testRepository.save(test);
-
-        if (root.has("listening")) {
-            Listening listening = mapper.treeToValue(root.get("listening"), Listening.class);
-            listening.setTestId(test.getTestId());
-            listeningRepository.save(listening);
-        }
-
-        if (root.has("reading")) {
-            Reading reading = mapper.treeToValue(root.get("reading"), Reading.class);
-            reading.setTestId(test.getTestId());
-            readingRepository.save(reading);
-        }
-
-        if (root.has("writing")) {
-            Writing writing = mapper.treeToValue(root.get("writing"), Writing.class);
-            writing.setTestId(test.getTestId());
-            writingRepository.save(writing);
-        }
-
-        if (root.has("speaking")) {
-            Speaking speaking = mapper.treeToValue(root.get("speaking"), Speaking.class);
-            speaking.setTestId(test.getTestId());
-            speakingRepository.save(speaking);
-        }
-    }
-
 }
 
 

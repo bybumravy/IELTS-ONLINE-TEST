@@ -22,11 +22,11 @@ const RegisterPage = () => {
         }
 
         try {
+            alert("Hay check duong link trong gmail")
             await register(email, password);
-            navigate("/");
-        } catch (error) {
-            alert("Registration failed");
-            console.error(error);
+
+        } catch (error: any) {
+            alert(error.message || "Registration failed");
         }
     };
 

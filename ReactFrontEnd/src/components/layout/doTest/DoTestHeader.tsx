@@ -7,9 +7,10 @@ import { useEffect, useState } from "react";
 interface DoTestHeaderProps {
     initialTime: number; // truyền thời gian ban đầu vào (giây)
     onSubmit: () => void;
+    extraActions?: React.ReactNode;
 }
 
-export function DoTestHeader({ initialTime, onSubmit }: DoTestHeaderProps) {
+export function DoTestHeader({ initialTime, onSubmit, extraActions }: DoTestHeaderProps) {
     const [timeRemaining, setTimeRemaining] = useState(initialTime);
 
     useEffect(() => {
@@ -54,6 +55,7 @@ export function DoTestHeader({ initialTime, onSubmit }: DoTestHeaderProps) {
 
                 {/* action buttons */}
                 <div className="flex items-center space-x-2">
+                {extraActions}
                     <Button variant="ghost" size="sm">
                         <Printer className="w-4 h-4" />
                     </Button>
@@ -69,6 +71,7 @@ export function DoTestHeader({ initialTime, onSubmit }: DoTestHeaderProps) {
                     >
                         Submit
                     </Button>
+                    
                 </div>
             </div>
         </header>

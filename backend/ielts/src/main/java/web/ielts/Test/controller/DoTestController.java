@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import web.ielts.Test.dto.HistoryTest;
 import web.ielts.Test.model.Listening;
 import web.ielts.Test.model.Reading;
 import web.ielts.Test.model.Speaking;
@@ -23,6 +24,7 @@ import web.ielts.User.User;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -54,6 +56,7 @@ public class DoTestController {
 
     @GetMapping("/reading/{testId}")
     public ResponseEntity<Reading> getReadingByTestId(@PathVariable String testId) {
+        System.out.println("testIdsdfsdfsdfsdfsdfsdfsdfds: " + testId);
         Reading reading = doTestService.getReadingByTestId(testId);
         return reading != null ? ResponseEntity.ok(reading) : ResponseEntity.notFound().build();
     }
@@ -104,7 +107,7 @@ public class DoTestController {
             testId = root.get("testId").asText();
 
             submission = mapper.readValue(jsonString, SpeakingAnswer.class);
-            submission.setName(studentUsername);
+            submission.setUsername(studentUsername);
             submission.setId(null); // Lưu lần đầu để sinh _id
 
             saved = doTestService.saveSubmission(submission);
@@ -133,6 +136,23 @@ public class DoTestController {
         doTestService.saveSubmission(saved);
 
         return ResponseEntity.ok("✅ Upload và cập nhật thành công!");
+    }
+
+    @GetMapping("/history/listening/{username}")
+    public List<HistoryTest> getListeningAnswerByTestId(@PathVariable String username) {
+        return doTestService.getListeningByUsername(username);
+    }
+    @GetMapping("/history/reading/{username}")
+    public List<HistoryTest> getReadingAnswerByTestId(@PathVariable String username) {
+        return doTestService.getReadingByUsername(username);
+    }
+    @GetMapping("/history/writing/{username}")
+    public List<HistoryTest> getWritingAnswerByTestId(@PathVariable String username) {
+        return doTestService.getWritingByUsername(username);
+    }
+    @GetMapping("/history/speaking/{username}")
+    public List<HistoryTest> getSpeakingAnswerByTestId(@PathVariable String username) {
+        return doTestService.getSpeakingByUsername(username);
     }
 
 }

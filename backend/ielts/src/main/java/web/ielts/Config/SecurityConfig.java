@@ -1,23 +1,15 @@
-
 package web.ielts.Config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.Customizer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import web.ielts.Auth.CustomOAuth2SuccessHandler;
@@ -31,29 +23,46 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtFilter;
+    
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-//                .cors(Customizer.withDefaults())
+         http
                 .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/login",
-                    "/api/user-info",
-                    "/api/logout",
-                    "/oauth2/**","/login/oauth2/","/oauth2/",
-                        "/api/*", "/api/tips-summary", "/api/*/*", "/api/3-tests", "/api/*/*/*"
-                ).permitAll()
-                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .successHandler(customOAuth2SuccessHandler)
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .cors(Customizer.withDefaults()) //
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/momo/create",
+                                "/api/momo/ipn-handler",
+                                "/api/payment/callback",
+                                "/api/login",
+                                "/api/user-info",
+                                "/api/logout",
+                                "/oauth2/**",
+                                "/login/oauth2/",
+                                "/oauth2/",
+                                "/api/payment/status/**",
+                                "/api/tips-summary",
+                                "/api/3-tests",
+                                "/api/test/all-skill",
+                                "/api/test/listening",
+                                "/api/test/reading",
+                                "/api/test/writing",
+                                "/api/test/speaking",
+                                "/api/test/count",
+                                "/verify/**",
+                                "/api/result/**",
+                                "/api/manager/**"
+                        ).permitAll()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().authenticated()
+                )
+                 .oauth2Login(oauth2 -> oauth2
+                         .successHandler(customOAuth2SuccessHandler)
+                 )
+                 .sessionManagement(session -> session
+                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                 )
+                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

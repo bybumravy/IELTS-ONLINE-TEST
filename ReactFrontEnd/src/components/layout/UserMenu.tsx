@@ -26,7 +26,6 @@ export function UserMenu({ onLogout }: UserMenuProps) {
     onLogout(); // Gọi hàm logout từ props
     navigate("/"); // Điều hướng về trang chủ
   };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

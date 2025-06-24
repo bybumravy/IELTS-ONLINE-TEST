@@ -2,7 +2,8 @@ import {useState, useRef, useEffect} from "react"
 import { Button } from "@/components/ui/button"
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader"
 import { Play, Pause, RotateCcw, Volume2 } from "lucide-react"
-import {useParams} from "react-router-dom";
+import {useParams, useNavigate} from "react-router-dom";
+import {useAuth} from "@/contexts/AuthContext";
 
 type Question = {
     question: string;
@@ -30,6 +31,8 @@ type ListeningTest = {
     testId: string;
     audioUrl: string;
     tasks: TaskListening[];
+    username: string; // ✅ Thêm username
+    skill: string;    // ✅ Thêm skill
 };
 const getQuestionNumbers = (taskListening: TaskListening): number[] => {
     const numbers: number[] = [];
@@ -71,7 +74,8 @@ export default function ListeningTest() {
     const [tasks, setTasks] = useState<TaskListening[]>([])
     const [duration, setDuration] = useState(0)
     const [progress, setProgress] = useState(0);
-
+    const {user} = useAuth()
+    const navigate = useNavigate();
     useEffect(() => {
         fetch(`http://localhost:8080/verify/listening/${testId}`, {
             credentials: "include",
@@ -218,6 +222,12 @@ export default function ListeningTest() {
 
         const dataToSend = structuredClone(listeningTest);
 
+        // ✅ Thêm username và skill
+        if (user?.username) {
+            dataToSend.username = user.username;
+        }
+        dataToSend.skill = "listening";
+
         // Xóa audioUrl ở cấp test
         delete dataToSend.audioUrl;
 
@@ -233,12 +243,11 @@ export default function ListeningTest() {
                 section.questions.forEach(q => {
                     delete q.explanation;
                     delete q.options;
-
                 });
             });
         });
 
-        console.log("Dữ liệu sadfu khi xử lý:", JSON.stringify(dataToSend, null, 2));
+        console.log("Dữ liệu sau khi xử lý:", JSON.stringify(dataToSend, null, 2));
 
         try {
             const res = await fetch("http://localhost:8080/verify/listening/submit", {
@@ -253,12 +262,12 @@ export default function ListeningTest() {
             const result = await res.json();
             console.log("Kết quả nộp bài:", result);
             alert("Submit thành công!");
+            navigate("/result");
         } catch (error) {
             console.error("Lỗi khi submit:", error);
             alert("Lỗi khi submit.");
         }
     };
-
     return (
         <div className="flex flex-col min-h-screen">
             {currentTask && (

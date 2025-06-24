@@ -3,6 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
 import {useAuth} from "@/contexts/AuthContext";
 import {useNavigate, useParams} from "react-router-dom";
+import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 
 interface WritingTask {
     type: string;
@@ -28,6 +29,9 @@ export default function WritingTest() {
     const [timeRemaining, setTimeRemaining] = useState(60 * 60);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
+    const [showWaitingModal, setShowWaitingModal] = useState(false);
+    const [resultId, setResultId] = useState<string | null>(null);
+
     // // Timer
     // useEffect(() => {
     //     const timer = setInterval(() => {
@@ -99,6 +103,9 @@ export default function WritingTest() {
         };
 
         setIsSubmitting(true);
+        setShowWaitingModal(true);
+        setResultId(null);
+
         try {
             const response = await fetch("http://localhost:8080/verify/writing/submit", {
                 method: "POST",
@@ -110,20 +117,46 @@ export default function WritingTest() {
             if (!response.ok) throw new Error("Failed to submit writing");
 
             const result = await response.json();
-            navigate(`/writing-result/${result.id}`);
-            console.log("Writing saved:", result);
-            alert("Your essay has been submitted successfully!");
+            setResultId(result.id);
         } catch (error) {
             console.error("Error submitting writing:", error);
             alert("Submit failed. Please try again.");
+            setShowWaitingModal(false);
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    // useEffect để chuyển trang khi đã có resultId
+    useEffect(() => {
+        if (resultId) {
+            const params = new URLSearchParams(window.location.search);
+            const mode = params.get("mode");
+            if (mode === "fulltest") {
+                navigate(`/test/speaking/${testId}?mode=fulltest`);
+            } else {
+                navigate(`/writing-result/${resultId}`);
+            }
+        }
+    }, [resultId, navigate, testId]);
+
     return (
         <div className="min-h-screen bg-gray-50">
             <DoTestHeader initialTime={60 * 60} onSubmit={handleSubmit} />
+
+            {/* Modal chờ AI chấm bài */}
+            <Dialog open={showWaitingModal}>
+                <DialogContent className="flex flex-col items-center gap-6 py-12 bg-white rounded-2xl shadow-2xl border-0">
+                    <div className="flex flex-col items-center gap-4">
+                        <svg className="animate-spin h-12 w-12 text-blue-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        <div className="text-2xl font-bold text-blue-700">AI đang chấm bài</div>
+                        <div className="text-gray-500 text-lg">Vui lòng đợi trong giây lát...</div>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             <div className="flex h-[calc(100vh-100px)]">
                 {/* Left Panel */}
