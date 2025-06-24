@@ -1,12 +1,14 @@
 package web.ielts.Test.service;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import web.ielts.Test.model.answer.writing.WritingAIResponse;
 
 import java.util.List;
@@ -16,162 +18,265 @@ import java.util.regex.Pattern;
 @Service
 public class AIService {
 
-    private final OpenAiChatModel chatModel;
+    private final WebClient webClient;
     private final ObjectMapper objectMapper;
-
-    public AIService(OpenAiChatModel chatModel, ObjectMapper objectMapper) {
-        this.chatModel = chatModel;
+    @Value("${openai.api.key}")
+    private String openaiApiKey;
+    public AIService(ObjectMapper objectMapper) {
+        this.webClient = WebClient.builder()
+                .baseUrl("https://api.openai.com/v1")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
         this.objectMapper = objectMapper;
     }
 
+    public WritingAIResponse WritingTask1(String imageUrl, String question, String answer) {
+        String prompt = buildTask1Prompt(question, answer);
+        String response = callOpenAITask1(prompt, imageUrl);
 
-    public WritingAIResponse WritingTask1(String question, String answer) {
-        // Create a helper string with character positions for the AI
-        String answerWithPositions = createAnswerWithPositions(answer);
-        
-        StringBuilder promptBuilder = new StringBuilder("""
-    You must return response strictly in JSON format.
-    You are an IELTS examiner. Review the following IELTS Writing Task 1 student answer based on the question provided and return a JSON object containing:
-    - score: decimal (overall band score, e.g. 6.5)
-    - feedback: {
-        (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)
-        - errorCorrections: array of {
-            - originalText: string (exact text as it appears in the answer)
-            - correctedText: string
-            - errorType: string (grammar, vocabulary, coherence, etc.)
-            - explanation: string
-            - startIndex: number (0-based character position where originalText starts)
-            - endIndex: number (0-based character position immediately after originalText ends)
-        }
-        (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)
-        - sentenceImprovements: array of {
-            - originalSentence: string
-            - improvedSentence: string
-            - techniquesUsed: array of strings (e.g. "academic vocab", "complex structure")
-            - bandBoost: string (e.g. "5.5 → 6.5")
-            - startIndex: number (0-based character position where originalText starts)
-            - endIndex: number (0-based character position immediately after originalText ends)
-        }
-        - overallComment: string
-    }
-    - evaluation: {
-        - TaskAchievement: 1-9
-        - CoherenceCohesion: 1-9
-        - LexicalResource: 1-9
-        - Grammar: 1-9
-    }
-    - sampleAnswer: string
-
-    CRITICAL INSTRUCTIONS FOR CHARACTER POSITIONS:
-    1. startIndex must be the exact 0-based character position where originalText begins in the Answer string
-    2. endIndex must be the character position immediately after the last character of originalText
-    3. originalText must be the EXACT text as it appears in the Answer (including spaces, punctuation, case)
-    4. Spell originalText correctly and check again if it is correct in the paragraph
-    5. Verify that answer.substring(startIndex, endIndex) equals originalText exactly
-    6. Count every character including spaces, newlines, and punctuation
-    7. Use the character position reference below to find exact positions
-
-    Question:
-    """).append(question)
-                .append("\nAnswer with character positions (for reference):\n")
-                .append(answerWithPositions)
-                .append("\n\nOriginal Answer:\n")
-                .append(answer);
-
-        String prompt = promptBuilder.toString();
-        System.out.println("==== PROMPT GỬI AI TASK 1 ====");
-        System.out.println(prompt);
-
-        ChatResponse response = chatModel.call(new Prompt(new UserMessage(prompt)));
-        String content = response.getResult().getOutput().getText();
-
-
-        System.out.println("==== RESPONSE FROM AI ====");
-        System.out.println(content);
-        return parseResponse(content, answer);
-    }
-
-    private String createAnswerWithPositions(String answer) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < answer.length(); i++) {
-            char c = answer.charAt(i);
-            if (c == '\n') {
-                sb.append("\\n[").append(i).append("]");
-            } else if (c == ' ') {
-                sb.append(" [").append(i).append("]");
-            } else {
-                sb.append(c).append("[").append(i).append("]");
-            }
-        }
-        return sb.toString();
+        return parseResponse(response, answer);
     }
 
     public WritingAIResponse WritingTask2(String question, String answer) {
-        // Create a helper string with character positions for the AI
-        String answerWithPositions = createAnswerWithPositions(answer);
-        
-        StringBuilder promptBuilder = new StringBuilder("""
-    You must return response strictly in JSON format.
-    You are an IELTS examiner. Review the following IELTS Writing Task 2 student answer based on the question provided and return a JSON object containing:
-    - score: decimal (overall band score, e.g. 6.5)
-    - feedback: {
-        (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)
-        - errorCorrections: array of {
-            - originalText: string (exact text as it appears in the answer)
-            - correctedText: string
-            - errorType: string (grammar, vocabulary, coherence, etc.)
-            - explanation: string
-            - startIndex: number (0-based character position where originalText starts)
-            - endIndex: number (0-based character position immediately after originalText ends)
+        String prompt = buildTask2Prompt(question, answer);
+        String response = callOpenAITask2(prompt);
+
+        return parseResponse(response, answer);
+    }
+
+    private String callOpenAITask1(String promptText, String imageUrl) {
+        try {
+            if (!imageUrl.startsWith("https://")) {
+                throw new IllegalArgumentException("Image URL must be a valid HTTPS URL");
+            }
+
+            // Log URL ảnh trước khi gửi
+            System.out.println("==== IMAGE URL BEING SENT TO OPENAI ====");
+            System.out.println(imageUrl);
+            System.out.println("==== VERIFYING IMAGE ACCESSIBILITY ====");
+
+            String requestBody = """
+        {
+          "model": "gpt-4o",
+          "messages": [
+            {
+              "role": "user",
+              "content": [
+                { "type": "text", "text": %s },
+                { "type": "image_url", "image_url": { "url": %s } }
+              ]
+            }
+          ],
+          "temperature": 0.2
         }
-        (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)
-        - sentenceImprovements: array of {
-            - originalSentence: string
-            - improvedSentence: string
-            - techniquesUsed: array of strings (e.g. "academic vocab", "complex structure", ....)
-            - bandBoost: string (e.g. "5.5 → 6.5")
-        
+        """.formatted(
+                    objectMapper.writeValueAsString(promptText),
+                    objectMapper.writeValueAsString(imageUrl)
+            );
+
+            // Log request body (ẩn API key)
+            System.out.println("==== REQUEST TO OPENAI (SANITIZED) ====");
+            System.out.println(requestBody.replace(openaiApiKey, "***"));
+
+            String response = webClient.post()
+                    .uri("/chat/completions")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + openaiApiKey)
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            JsonNode jsonNode = objectMapper.readTree(response);
+
+            // Kiểm tra xem response có chứa thông tin về ảnh không
+            if (jsonNode.has("usage")) {
+                JsonNode usage = jsonNode.get("usage");
+                int imageTokens = usage.has("image_tokens") ? usage.get("image_tokens").asInt() : 0;
+                System.out.println("==== IMAGE PROCESSING INFO ====");
+                System.out.println("Image tokens used: " + imageTokens);
+                System.out.println("Model: " + jsonNode.get("model").asText());
+            }
+
+            String content = jsonNode.get("choices").get(0).get("message").get("content").asText();
+            System.out.println("==== FULL RESPONSE FROM OPENAI ====");
+            System.out.println(content);
+
+            return content;
+
+        } catch (Exception e) {
+            System.err.println("==== OPENAI API ERROR ====");
+            e.printStackTrace();
+            throw new RuntimeException("OpenAI API error: " + e.getMessage());
         }
-        - overallComment: string
     }
-    - evaluation: {
-        - TaskAchievement: 1-9
-        - CoherenceCohesion: 1-9
-        - LexicalResource: 1-9
-        - Grammar: 1-9
+
+//    Call AIP co anh
+    private String callOpenAITask2(String prompt) {
+        try {
+            String requestBody = """
+            {
+              "model": "gpt-4o",
+              "messages": [
+                { "role": "user", "content": %s }
+              ],
+              "temperature": 0.1
+            }
+            """.formatted(objectMapper.writeValueAsString(prompt));
+
+            String response = webClient.post()
+                    .uri("/chat/completions")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + openaiApiKey)
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            JsonNode jsonNode = objectMapper.readTree(response);
+            String content = jsonNode.get("choices").get(0).get("message").get("content").asText();
+            System.out.println("==== RESPONSE FROM OPENAI ====");
+            System.out.println(content);
+
+            return content;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("OpenAI API error: " + e.getMessage());
+        }
     }
-    - sampleAnswer: string
 
-    CRITICAL INSTRUCTIONS FOR CHARACTER POSITIONS:
-    1. startIndex must be the exact 0-based character position where originalText begins in the Answer string
-    2. endIndex must be the character position immediately after the last character of originalText
-    3. originalText must be the EXACT text as it appears in the Answer (including spaces, punctuation, case)
-    4. Spell originalText correctly and check again if it is correct in the paragraph
-    5. Verify that answer.substring(startIndex, endIndex) equals originalText exactly
-    6. Count every character including spaces, newlines, and punctuation
-    7. Use the character position reference below to find exact positions
+    //Prompt cho Writing 1
+    private String buildTask1Prompt(String question, String answer) {
+        String promptBuilder1 =
+                "You must return response strictly in JSON format.\n" +
+                "You are an IELTS examiner analyzing Writing Task 1 based on visual data. Extremely strict grading " +
+                "1. DATA VERIFICATION:\n" +
+                "   - Cross-check ALL data points/trends between image and student's answer\n" +
+                "   - Flag ANY discrepancies\n" +
+                "   - Verify ALL numerical values/percentages against visual data (tolerance: 0% error)\n" +
+                "   - Missing key features = automatic Band 5 cap"+
+                "\n" +
+                "2. EVALUATION (Official IELTS Criteria):\n" +
+                "• Task Achievement (25%):\n" +
+                "     - [MUST HAVE] Clear overview paragraph (missing = max Band 5)\n" +
+                "     - Accurate data reporting (1 error = -0.5 band)\n" +
+                "     - Appropriate detail selection\n" +
+                "   • Coherence & Cohesion (25%):\n" +
+                "     - Logical paragraphing (Introduction/Overview/Details)\n" +
+                "     - Effective linking (but not repetitive)\n" +
+                "     - Progression (Band 7+ requires progression beyond listing)\n" +
+                "   • Lexical Resource (25%):\n" +
+                "     - Academic vocabulary (Band 9 requires ≥8 advanced terms)\n" +
+                "     - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
+                "     - Spelling (3 errors = -0.5 band)\n" +
+                "   • Grammar (25%):\n" +
+                "     - Tense accuracy (graph data must use past tense if historical)\n" +
+                "     - Complex structures (Band 7+ needs ≥3 complex sentences)\n" +
+                "     - Punctuation (comma errors = -0.5 band)"+
+                "\n" +
+                "3. SCORING SYSTEM:\n" +
+                "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
+                "   - Deduct 0.5 band per 2 major errors\n" +
+                "   - Automatic caps: No overview → max 5.0 | Data errors → max 6.5"+
 
+                "RESPONSE FORMAT:\n" +
+                "- score: decimal (overall band score, e.g. 6.5)\n" +
+                "- feedback: {\n" +
+                "    (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)\n" +
+                "    errorCorrections: [{\n" +
+                "      originalText: string,  // EXACT match required\n" +
+                "      correctedText: string,\n" +
+                "      errorType: string,\n" +
+                "      explanation: string,\n" +
+                "      sentenceContext: string // the full sentence from the answer that contains the originalText; must match exactly as in the answer\n" +
+                "    }],\n" +
+                "    (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)\n" +
+                "    sentenceImprovements: [{\n" +
+                "      originalSentence: string,\n" +
+                "      improvedSentence: string,\n" +
+                "      techniquesUsed: [string],\n" +
+                "      bandBoost: string (6 -> 6.5)\n" +
+                "    }],\n" +
+                "    overallComment: string\n" +
+                "}\n" +
+                "- evaluation: {\n" +
+                "    TaskAchievement: {scoreEva: string, reviewEva: string},\n" +
+                "    CoherenceCohesion: {scoreEva: string, reviewEva: string},\n" +
+                "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
+                "    Grammar: {scoreEva: string, reviewEva: string}\n" +
+                "  }\n" +
+                "sampleAnswer: string (Optional band 9 model)"+
+                "Question:\n" + question + "\n" +
+                "Original Answer:\n" + answer;
 
-    Question:
-    """).append(question)
-                .append("\nAnswer with character positions (for reference):\n")
-                .append(answerWithPositions)
-                .append("\n\nOriginal Answer:\n")
-                .append(answer);
-
-
-
-        String prompt = promptBuilder.toString();
-        System.out.println("==== PROMPT GỬI AI TASK 2 ====");
-        System.out.println(prompt);
-
-        ChatResponse response = chatModel.call(new Prompt(new UserMessage(prompt)));
-        String content = response.getResult().getOutput().getText();
-
-        System.out.println("==== RESPONSE FROM AI ====");
-        System.out.println(content);
-        return parseResponse(content, answer);
+        return promptBuilder1;
     }
+
+    private String buildTask2Prompt(String question, String answer) {
+        String promptBuilder2 =
+                "You must return response strictly in JSON format.\n" +
+                        "You are an IELTS examiner analyzing Writing Task 2. Extremely strict grading" +
+                        "1. DATA VERIFICATION:\n" +
+                        "   - Cross-check ALL data points/trends between image and student's answer\n" +
+                        "   - Flag ANY discrepancies\n" +
+                        "   - Verify ALL numerical values/percentages against visual data (tolerance: 0% error)\n" +
+                        "   - Missing key features = automatic Band 5 cap"+
+                        "\n" +
+                        "2. EVALUATION (Official IELTS Criteria):\n" +
+                        "• Task Achievement (25%):\n" +
+                        "     - [MUST HAVE] Clear overview paragraph (missing = max Band 5)\n" +
+                        "     - Accurate data reporting (1 error = -0.5 band)\n" +
+                        "     - Appropriate detail selection\n" +
+                        "   • Coherence & Cohesion (25%):\n" +
+                        "     - Logical paragraphing (Introduction/Overview/Details)\n" +
+                        "     - Effective linking (but not repetitive)\n" +
+                        "     - Progression (Band 7+ requires progression beyond listing)\n" +
+                        "   • Lexical Resource (25%):\n" +
+                        "     - Academic vocabulary (Band 9 requires ≥8 advanced terms)\n" +
+                        "     - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
+                        "     - Spelling (3 errors = -0.5 band)\n" +
+                        "   • Grammar (25%):\n" +
+                        "     - Tense accuracy (graph data must use past tense if historical)\n" +
+                        "     - Complex structures (Band 7+ needs ≥3 complex sentences)\n" +
+                        "     - Punctuation (comma errors = -0.5 band)"+
+                        "\n" +
+                        "3. SCORING SYSTEM:\n" +
+                        "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
+                        "   - Deduct 0.5 band per 2 major errors\n" +
+                        "   - Automatic caps: No overview → max 5.0 | Data errors → max 6.5"+
+
+                        "RESPONSE FORMAT:\n" +
+                        "- score: decimal (overall band score, e.g. 6.5)\n" +
+                        "- feedback: {\n" +
+                        "    (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)\n" +
+                        "    errorCorrections: [{\n" +
+                        "      originalText: string,  // EXACT match required\n" +
+                        "      correctedText: string,\n" +
+                        "      errorType: string,\n" +
+                        "      explanation: string,\n" +
+                        "      sentenceContext: string // the full sentence from the answer that contains the originalText; must match exactly as in the answer\n" +
+                        "    }],\n" +
+                        "    (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)\n" +
+                        "    sentenceImprovements: [{\n" +
+                        "      originalSentence: string,\n" +
+                        "      improvedSentence: string,\n" +
+                        "      techniquesUsed: [string],\n" +
+                        "      bandBoost: string (6 -> 6.5)\n" +
+                        "    }],\n" +
+                        "    overallComment: string\n" +
+                        "}\n" +
+                        "- evaluation: {\n" +
+                        "    TaskAchievement: {scoreEva: string, reviewEva: string},\n" +
+                        "    CoherenceCohesion: {scoreEva: string, reviewEva: string},\n" +
+                        "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
+                        "    Grammar: {scoreEva: string, reviewEva: string}\n" +
+                        "  }\n" +
+                        "sampleAnswer: string (Optional band 9 model)"+
+                        "Question:\n" + question + "\n" +
+                        "Original Answer:\n" + answer;
+
+        return promptBuilder2;
+    }
+
     private WritingAIResponse parseResponse(String content, String originalAnswer) {
         try {
             // Dùng regex để tìm đoạn JSON từ { đến } an toàn hơn
@@ -186,13 +291,7 @@ public class AIService {
 
                 // Parse JSON thành đối tượng Java
                 WritingAIResponse response = objectMapper.readValue(jsonPart, WritingAIResponse.class);
-                
-                // Validate and correct character positions if feedback exists
-                if (response.getFeedback() != null && response.getFeedback().getErrorCorrections() != null) {
-                    validateErrorCorrections(response.getFeedback().getErrorCorrections());
-                    validateAndCorrectPositions(response.getFeedback().getErrorCorrections(), originalAnswer);
-                }
-                
+
                 return response;
             } else {
                 throw new IllegalArgumentException("Không tìm thấy JSON hợp lệ trong phản hồi");
@@ -203,69 +302,5 @@ public class AIService {
             throw new RuntimeException("Không thể phân tích phản hồi từ AI", e);
         }
     }
-
-    private void validateErrorCorrections(List<WritingAIResponse.ErrorCorrection> corrections) {
-        for (int i = 0; i < corrections.size(); i++) {
-            WritingAIResponse.ErrorCorrection correction = corrections.get(i);
-            
-            // Check if originalText is not empty
-            if (correction.getOriginalText() == null || correction.getOriginalText().trim().isEmpty()) {
-                System.err.println("Empty originalText for correction " + i);
-                corrections.remove(i);
-                i--; // Adjust index after removal
-                continue;
-            }
-            
-            // Check if indices are valid
-            if (correction.getStartIndex() < 0 || correction.getEndIndex() <= correction.getStartIndex()) {
-                System.err.println("Invalid indices for correction " + i + ": startIndex=" + 
-                    correction.getStartIndex() + ", endIndex=" + correction.getEndIndex());
-                // Reset to safe values - will be handled by frontend
-                correction.setStartIndex(-1);
-                correction.setEndIndex(-1);
-            }
-        }
-    }
-
-    /**
-     * Validates and corrects error correction positions against the original answer text
-     */
-    private void validateAndCorrectPositions(List<WritingAIResponse.ErrorCorrection> corrections, String originalAnswer) {
-        for (WritingAIResponse.ErrorCorrection correction : corrections) {
-            if (correction.getStartIndex() >= 0 && correction.getEndIndex() > correction.getStartIndex()) {
-                // Check if the text at the specified position matches originalText
-                try {
-                    String actualText = originalAnswer.substring(correction.getStartIndex(), correction.getEndIndex());
-                    if (!actualText.equals(correction.getOriginalText())) {
-                        System.err.println("Text mismatch for correction: expected='" + correction.getOriginalText() + 
-                            "', actual='" + actualText + "' at positions " + correction.getStartIndex() + "-" + correction.getEndIndex());
-                        
-                        // Try to find the correct position
-                        int correctStart = originalAnswer.indexOf(correction.getOriginalText());
-                        if (correctStart != -1) {
-                            int correctEnd = correctStart + correction.getOriginalText().length();
-                            System.out.println("Corrected position: " + correctStart + "-" + correctEnd);
-                            correction.setStartIndex(correctStart);
-                            correction.setEndIndex(correctEnd);
-                        } else {
-                            // If text not found, mark as invalid
-                            correction.setStartIndex(-1);
-                            correction.setEndIndex(-1);
-                        }
-                    }
-                } catch (StringIndexOutOfBoundsException e) {
-                    System.err.println("Index out of bounds for correction: " + correction.getOriginalText());
-                    correction.setStartIndex(-1);
-                    correction.setEndIndex(-1);
-                }
-            }
-        }
-    }
-
-
-
-
-
-
 
 }

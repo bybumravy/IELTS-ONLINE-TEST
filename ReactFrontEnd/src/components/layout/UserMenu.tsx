@@ -26,9 +26,6 @@ export function UserMenu({ onLogout }: UserMenuProps) {
                         <AvatarFallback className="bg-emerald-600 text-white">
                         </AvatarFallback>
                     </Avatar>
-
-                    {/*{user?.username?.substring(0, 2).toUpperCase() || 'U'}*/}
-
                 </Button>
 
             </DropdownMenuTrigger>

@@ -4,44 +4,44 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EvaluationWritingAnswer {
     @JsonProperty("TaskAchievement")
-    private String TaskAchievement;
+    private Review TaskAchievement;
 
     @JsonProperty("CoherenceCohesion")
-    private String CoherenceCohesion;
+    private Review CoherenceCohesion;
     @JsonProperty("LexicalResource")
-    private String LexicalResource;
+    private Review LexicalResource;
     @JsonProperty("Grammar")
-    private String Grammar;
+    private Review Grammar;
 
-    public String getTaskAchievement() {
+    public Review getTaskAchievement() {
         return TaskAchievement;
     }
 
-    public void setTaskAchievement(String taskAchievement) {
+    public void setTaskAchievement(Review taskAchievement) {
         TaskAchievement = taskAchievement;
     }
 
-    public String getCoherenceCohesion() {
+    public Review getCoherenceCohesion() {
         return CoherenceCohesion;
     }
 
-    public void setCoherenceCohesion(String coherenceCohesion) {
+    public void setCoherenceCohesion(Review coherenceCohesion) {
         CoherenceCohesion = coherenceCohesion;
     }
 
-    public String getLexicalResource() {
+    public Review getLexicalResource() {
         return LexicalResource;
     }
 
-    public void setLexicalResource(String lexicalResource) {
+    public void setLexicalResource(Review lexicalResource) {
         LexicalResource = lexicalResource;
     }
 
-    public String getGrammar() {
+    public Review getGrammar() {
         return Grammar;
     }
 
-    public void setGrammar(String grammar) {
+    public void setGrammar(Review grammar) {
         Grammar = grammar;
     }
 }
