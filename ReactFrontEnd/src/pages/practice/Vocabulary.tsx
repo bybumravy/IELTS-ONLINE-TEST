@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Vocabulary as VocabularyType } from '@/lib/type';
-
-// UI Components
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +23,6 @@ const BANDS = [
     { value: '7.0', label: '7.0' },
 ];
 
-// --- Vocabulary Add/Edit Form Modal ---
 const VocabularyFormModal: React.FC<{
     open: boolean;
     onClose: () => void;
@@ -104,8 +101,9 @@ const VocabularyFormModal: React.FC<{
                     className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl"
                     onClick={onClose}
                     aria-label="Close"
-                >×</button>
-                <h2 className="font-bold text-xl mb-6 " >{isEdit ? 'Edit Vocabulary' : 'Add Vocabulary'}</h2>
+                >×
+                </button>
+                <h2 className="font-bold text-xl mb-6 ">{isEdit ? 'Edit Vocabulary' : 'Add Vocabulary'}</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <Label>Word</Label>
@@ -169,25 +167,27 @@ const VocabularyFormModal: React.FC<{
                                         required
                                     />
                                     {formData.exp.length > 1 && (
-                                        <Button type="button" variant="ghost" size="sm" onClick={() => removeExample(idx)}>
+                                        <Button type="button" variant="ghost" size="sm"
+                                                onClick={() => removeExample(idx)}>
                                             Remove
                                         </Button>
                                     )}
                                 </div>
                             ))}
                         </div>
-                        <Button type="button" onClick={addExample} variant="outline" className="mt-2  hover:bg-emerald-600 hover:text-white" size="sm">
+                        <Button type="button" onClick={addExample} variant="outline"
+                                className="mt-2 hover:bg-emerald-600 hover:text-white" size="sm">
                             + Add Example
                         </Button>
                     </div>
-                    <Button type="submit" className="w-full mt-2 hover:bg-emerald-600 hover:text-white " variant="outline" >{isEdit ? 'Save Changes' : 'Add Vocabulary'}</Button>
+                    <Button type="submit" className="w-full mt-2 hover:bg-emerald-600 hover:text-white"
+                            variant="outline">{isEdit ? 'Save Changes' : 'Add Vocabulary'}</Button>
                 </form>
             </Card>
         </div>
     );
 };
 
-// --- Vocabulary Item Card ---
 const VocabularyItem: React.FC<{
     vocabulary: VocabularyType;
     onEdit: (vocab: VocabularyType) => void;
@@ -203,10 +203,12 @@ const VocabularyItem: React.FC<{
                 </div>
             </div>
             <div>
-                <Button size="sm" variant="outline" className="mr-2 hover:bg-emerald-600 hover:text-white" onClick={() => onEdit(vocabulary)}>
+                <Button size="sm" variant="outline" className="mr-2 hover:bg-emerald-600 hover:text-white"
+                        onClick={() => onEdit(vocabulary)}>
                     Edit
                 </Button>
-                <Button size="sm" variant="outline" className="mr-2 hover:bg-emerald-600 hover:text-white" onClick={() => onDelete(vocabulary.id)}>
+                <Button size="sm" variant="outline" className="mr-2 hover:bg-emerald-600 hover:text-white"
+                        onClick={() => onDelete(vocabulary.id)}>
                     Delete
                 </Button>
             </div>
@@ -217,27 +219,44 @@ const VocabularyItem: React.FC<{
             {vocabulary.exp?.length > 0 && (
                 <div className="mt-2">
                     <div className="font-semibold text-gray-700 mb-1">Examples:</div>
-                    <ul className="list-disc list-inside">
-                        {vocabulary.exp.map((ex, i) => (
-                            <li key={i}>
-                                <span className="text-gray-800">English: {ex.esentence}</span><br/>
-                                <span className="text-gray-800">Vietnamese: {ex.vsentence}</span>
-                            </li>
-                        ))}
-                    </ul>
+                    {vocabulary.exp?.length > 0 && (
+                        <div className="mt-2">
+                            <div className="font-semibold text-gray-700 mb-1">Examples:</div>
+                            <ul className="list-disc list-inside">
+                                {vocabulary.exp.map((ex, i) => (
+                                    <React.Fragment key={i}>
+                                        <li>
+                                            <span className="text-gray-800">English: {ex.esentence}</span>
+                                        </li>
+                                        <li>
+                                            <span className="text-gray-800">Vietnamese: {ex.vsentence}</span>
+                                        </li>
+                                    </React.Fragment>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
     </Card>
 );
 
-// --- Main Vocabulary Page ---
 const Vocabulary: React.FC = () => {
     const { user } = useAuth();
     const [vocabularies, setVocabularies] = useState<VocabularyType[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [filters, setFilters] = useState({ topic: '', band: '' });
+    const [appliedFilters, setAppliedFilters] = useState({ topic: '', band: '' });
+
+    // Search & Pagination states
+    const [search, setSearch] = useState('');
+    const [searchInput, setSearchInput] = useState('');
+    const [page, setPage] = useState(0); // Backend page index starts at 0
+    const pageSize = 10;
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalElements, setTotalElements] = useState(0);
 
     // Modal state
     const [showAdd, setShowAdd] = useState(false);
@@ -248,21 +267,24 @@ const Vocabulary: React.FC = () => {
     const fetchVocabularies = async () => {
         try {
             setLoading(true);
-            const { topic, band } = filters;
-            let url = `${API_BASE}/vocabulary`;
-            if (topic || band) {
-                const params = new URLSearchParams();
-                if (topic) params.append('topic', topic);
-                if (band) params.append('band', band);
-                url += `/filter?${params.toString()}`;
-            }
+            const { topic, band } = appliedFilters;
+            const params = new URLSearchParams();
+            if (search) params.append('keyword', search);
+            if (topic) params.append('topic', topic);
+            if (band) params.append('band', band);
+            params.append('page', page.toString());
+            params.append('size', pageSize.toString());
+
+            let url = `${API_BASE}/vocabulary/filter?${params.toString()}`;
             const response = await fetch(url, {
                 headers: { 'Content-Type': 'application/json' },
                 credentials: "include"
             });
             if (!response.ok) throw new Error('Failed to fetch vocabularies');
             const data = await response.json();
-            setVocabularies(data);
+            setVocabularies(data.content || []);
+            setTotalPages(data.totalPages || 1);
+            setTotalElements(data.totalElements || 0);
             setError('');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
@@ -280,8 +302,7 @@ const Vocabulary: React.FC = () => {
                 body: JSON.stringify(vocabulary),
             });
             if (!response.ok) throw new Error('Failed to add vocabulary');
-            const newVocabulary = await response.json();
-            setVocabularies((prev) => [...prev, newVocabulary]);
+            await fetchVocabularies();
             setError('');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to add vocabulary');
@@ -297,8 +318,7 @@ const Vocabulary: React.FC = () => {
                 body: JSON.stringify(updated),
             });
             if (!response.ok) throw new Error('Failed to update vocabulary');
-            const updatedVocab = await response.json();
-            setVocabularies((prev) => prev.map((v) => (v.id === id ? updatedVocab : v)));
+            await fetchVocabularies();
             setError('');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to update vocabulary');
@@ -312,25 +332,50 @@ const Vocabulary: React.FC = () => {
                 credentials: "include"
             });
             if (!response.ok) throw new Error('Failed to delete vocabulary');
-            setVocabularies((prev) => prev.filter((v) => v.id !== id));
+            await fetchVocabularies();
             setError('');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to delete vocabulary');
         }
     };
 
+    // Fetch lại khi search, page, pageSize, appliedFilters thay đổi
     useEffect(() => {
         if (user) fetchVocabularies();
-    }, [user]);
+        // eslint-disable-next-line
+    }, [user, page, pageSize, appliedFilters.topic, appliedFilters.band, search]);
 
-    // Filter handler
+    // Khi thay đổi filter chỉ đổi state, không fetch
     const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFilters((prev) => ({ ...prev, [name]: value }));
+        setFilters(prev => ({ ...prev, [name]: value }));
+        setPage(0);
     };
-    const applyFilters = () => fetchVocabularies();
+
+    // Khi chọn filter xong, bấm Apply mới áp dụng và fetch
+    const applyFilters = () => {
+        setAppliedFilters({ ...filters });
+        setPage(0);
+    };
+
+    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchInput(e.target.value);
+    };
+
+    // Khi nhấn Enter trong ô search, thực hiện tìm kiếm
+    const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            setSearch(searchInput);
+            setPage(0);
+        }
+    };
+
     const resetFilters = () => {
         setFilters({ topic: '', band: '' });
+        setAppliedFilters({ topic: '', band: '' });
+        setSearch('');
+        setSearchInput('');
+        setPage(0);
         setTimeout(fetchVocabularies, 0);
     };
 
@@ -350,6 +395,14 @@ const Vocabulary: React.FC = () => {
             <Card className="mb-6 p-6">
                 <div className="flex flex-col md:flex-row gap-4 items-center">
                     <div className="flex-1 flex gap-2">
+                        <Input
+                            type="text"
+                            placeholder="Search vocabulary..."
+                            value={searchInput}
+                            onChange={handleSearchInputChange}
+                            onKeyDown={handleSearchKeyDown}
+                            className="w-full px-2 py-2 rounded border border-gray-300"
+                        />
                         <select
                             name="topic"
                             value={filters.topic}
@@ -372,9 +425,12 @@ const Vocabulary: React.FC = () => {
                         </select>
                     </div>
                     <div className="flex gap-2">
-                        <Button onClick={applyFilters} variant="outline"  className="  hover:bg-emerald-600 hover:text-white" >Apply Filters</Button>
-                        <Button onClick={resetFilters} variant="outline"  className="  hover:bg-emerald-600 hover:text-white">Reset</Button>
-                        <Button onClick={() => setShowAdd(true)} variant="outline"  className="  hover:bg-emerald-600 hover:text-white">+ Add Vocabulary</Button>
+                        <Button onClick={applyFilters} variant="outline"
+                                className="hover:bg-emerald-600 hover:text-white">Apply Filters</Button>
+                        <Button onClick={resetFilters} variant="outline"
+                                className="hover:bg-emerald-600 hover:text-white">Reset</Button>
+                        <Button onClick={() => setShowAdd(true)} variant="outline"
+                                className="hover:bg-emerald-600 hover:text-white">+ Add Vocabulary</Button>
                     </div>
                 </div>
             </Card>
@@ -412,6 +468,31 @@ const Vocabulary: React.FC = () => {
                         />
                     ))
                 )}
+            </div>
+
+            {/* Pagination controls */}
+            <div className="flex justify-between items-center mt-6">
+                <div>
+                    <span className="text-gray-600">
+                        Showing page {page + 1} of {totalPages} ({totalElements} items)
+                    </span>
+                </div>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        disabled={page === 0}
+                        onClick={() => setPage(page - 1)}
+                    >
+                        Previous
+                    </Button>
+                    <Button
+                        variant="outline"
+                        disabled={page + 1 >= totalPages}
+                        onClick={() => setPage(page + 1)}
+                    >
+                        Next
+                    </Button>
+                </div>
             </div>
         </div>
     );

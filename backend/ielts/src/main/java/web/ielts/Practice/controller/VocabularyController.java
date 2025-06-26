@@ -1,10 +1,11 @@
 package web.ielts.Practice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import web.ielts.Practice.model.*;
-import web.ielts.Practice.service.*;
+import web.ielts.Practice.model.Vocabulary;
+import web.ielts.Practice.service.VocabularyService;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,19 +45,16 @@ public class VocabularyController {
         return ResponseEntity.noContent().build();
     }
 
+    // Phân trang + tìm kiếm + filter topic/band
     @GetMapping("/filter")
-    public ResponseEntity<List<Vocabulary>> filterVocabularies(
+    public ResponseEntity<Page<Vocabulary>> filterVocabularies(
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String topic,
-            @RequestParam(required = false) String band
+            @RequestParam(required = false) String band,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        if (topic != null && band != null) {
-            return ResponseEntity.ok(vocabularyService.getByTopicAndBand(topic, band));
-        } else if (topic != null) {
-            return ResponseEntity.ok(vocabularyService.getByTopic(topic));
-        } else if (band != null) {
-            return ResponseEntity.ok(vocabularyService.getByBand(band));
-        } else {
-            return ResponseEntity.ok(vocabularyService.getAllVocabularies());
-        }
+        Page<Vocabulary> result = vocabularyService.searchAndPaginate(keyword, topic, band, page, size);
+        return ResponseEntity.ok(result);
     }
 }
