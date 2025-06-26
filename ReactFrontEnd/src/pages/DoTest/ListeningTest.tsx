@@ -175,7 +175,7 @@ export default function ListeningTest() {
 
     const handleAnswerChange = (qid: number, ans: string) => {
         setAnswers((prev) => ({ ...prev, [qid]: ans }));
-    };
+    };d
 
     const handleSubmit = async () => {
         if (!listeningTest) return;
@@ -188,15 +188,22 @@ export default function ListeningTest() {
         dataToSend.tasks.forEach((task) => {
             delete task.title;
             delete task.audioIntroduction;
+
             task.sections.forEach((section) => {
                 delete section.introduction;
                 delete section.imageUrl;
+
                 section.questions.forEach((q) => {
-                    delete q.explanation;
-                    delete q.options;
+                    const question = q as QuestionWithStudentAnswer;
+                    const qid = question.questionId!;
+                    question.studentAnswer = answers[qid] || null;
+
+                    delete question.explanation;
+                    delete question.options;
                 });
             });
         });
+
 
         try {
             const res = await customFetch("http://localhost:8080/verify/listening/submit", {
