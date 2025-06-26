@@ -188,12 +188,18 @@ export default function ListeningTest() {
         dataToSend.tasks.forEach((task) => {
             delete task.title;
             delete task.audioIntroduction;
+
             task.sections.forEach((section) => {
                 delete section.introduction;
                 delete section.imageUrl;
+
                 section.questions.forEach((q) => {
-                    delete q.explanation;
-                    delete q.options;
+                    const question = q as QuestionWithStudentAnswer;
+                    const qid = question.questionId!;
+                    question.studentAnswer = answers[qid] || null;
+
+                    delete question.explanation;
+                    delete question.options;
                 });
             });
         });
@@ -207,11 +213,12 @@ export default function ListeningTest() {
             });
 
             const result = await res.json();
+            console.log(result);
             alert("Submit thành công!");
             if (mode === "fulltest") {
                 navigate(`/test/reading/${testId}?mode=${mode}`);
             } else {
-                navigate("/result");
+                navigate(`/listening-result/${result.id}`);
             }
         } catch (error) {
             console.error(error);
