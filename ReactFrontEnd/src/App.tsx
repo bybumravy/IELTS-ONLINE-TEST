@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { HomePage } from "@/pages/HomePage"
-import IELTSWritingPractice from "@/pages/DoTest/WritingTest"
+//import IELTSWritingPractice from "@/pages/DoTest/WritingTest"
 import { AuthProvider } from "@/contexts/AuthContext"
 import Login from "@/components/sections/Login"
 import { MainLayout } from "@/components/layout/MainLayout"
@@ -15,6 +15,7 @@ import WritingTest from "@/pages/DoTest/WritingTest";
 import VoiceRecorder from "@/pages/DoTest/checkMic";
 import SpeakingTest from "@/pages/DoTest/SpeakingTest";
 import Vocabulary from "@/pages/practice/Vocabulary.tsx";
+import VocabularyList from "@/pages/student/VocabularyList.tsx";
 
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
                     <Route path="/test/speaking/:testId" element={<MainLayout><VoiceRecorder /></MainLayout>} />
                     <Route path="/checkMic/:testId" element={<MainLayout><SpeakingTest/></MainLayout>} />
                     <Route path="/practice/vocabulary" element={<MainLayout><Vocabulary /></MainLayout>} />
+                    <Route path="/student/vocabulary" element={<MainLayout><VocabularyList /></MainLayout>} />
                 </Routes>
             </Router>
         </AuthProvider>
