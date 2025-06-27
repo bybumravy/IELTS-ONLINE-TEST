@@ -157,7 +157,6 @@ public class Speaking {
         private Integer questionNumber; // nullable
         private String question;
 
-
         public Integer getQuestionNumber() {
             return questionNumber;
         }

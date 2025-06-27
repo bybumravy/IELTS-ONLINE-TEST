@@ -1,7 +1,12 @@
 package web.ielts.Test.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import web.ielts.Test.repository.*;
 import web.ielts.Test.dto.ListTest;
 import web.ielts.Test.model.Test;
@@ -10,6 +15,7 @@ import web.ielts.Test.model.Reading;
 import web.ielts.Test.model.Writing;
 import web.ielts.Test.model.Speaking;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -61,7 +67,7 @@ public class TestService {
 
     private <T> Map<Integer, List<ListTest>> getTestsBySkill(List<T> skills) {
         Map<String, Test> testMap = testRepository.findAll().stream()
-                .collect(Collectors.toMap(Test::getId, t -> t));
+                .collect(Collectors.toMap(Test::getTestId, t -> t));
 
         return skills.stream()
                 .map(skill -> {
@@ -83,16 +89,11 @@ public class TestService {
         if (test == null || test.getCreatedAt() == null || test.getCreatedAt().isEmpty()) return null;
         try {
             int year = LocalDate.parse(test.getCreatedAt()).getYear();
-            return new ListTest(test.getId(), test.getTestTitle(), year);
+            return new ListTest(test.getTestId(), test.getTestTitle(), year);
         } catch (DateTimeParseException e) {
             return null;
         }
     }
-
-    public List<Test> getAllTests() {
-        return testRepository.findAll();
-    }
-
 }
 
 

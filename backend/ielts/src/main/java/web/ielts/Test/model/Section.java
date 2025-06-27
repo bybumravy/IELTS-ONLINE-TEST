@@ -1,3 +1,4 @@
+
 package web.ielts.Test.model;
 
 import java.util.List;
@@ -9,7 +10,6 @@ class Section {
     private String introduction;
     private List<Question> questions;
 
-
     public String getImageUrl() {
         return imageUrl;
     }
@@ -17,7 +17,6 @@ class Section {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
-
 
     public int getSectionNumber() {
         return sectionNumber;

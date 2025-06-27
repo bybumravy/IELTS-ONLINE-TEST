@@ -62,6 +62,12 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         else if(user.getRole().equalsIgnoreCase("ADMIN")){
             response.sendRedirect("http://localhost:5173/adminpage");
         }
+        else if(user.getRole().equalsIgnoreCase("TEAcher")){
+            response.sendRedirect("http://localhost:5173/staff-page");
+        }
+        else{
+            response.sendRedirect("http://localhost:5173/staff-page");
+        }
         // Redirect về frontend (không cần token trên URL nữa)
 
     }

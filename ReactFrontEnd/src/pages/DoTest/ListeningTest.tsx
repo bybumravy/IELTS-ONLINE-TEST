@@ -213,11 +213,12 @@ export default function ListeningTest() {
             });
 
             const result = await res.json();
+            console.log(result);
             alert("Submit thành công!");
             if (mode === "fulltest") {
                 navigate(`/test/reading/${testId}?mode=${mode}`);
             } else {
-                navigate("/result");
+                navigate(`/listening-result/${result.id}`);
             }
         } catch (error) {
             console.error(error);

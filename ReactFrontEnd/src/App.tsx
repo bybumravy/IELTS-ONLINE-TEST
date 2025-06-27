@@ -1,48 +1,87 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { HomePage } from "@/pages/HomePage"
-import IELTSWritingPractice from "@/pages/DoTest/WritingTest"
 import { AuthProvider } from "@/contexts/AuthContext"
-import Login from "@/components/sections/Login"
+
+// Layouts
 import { MainLayout } from "@/components/layout/MainLayout"
-import TipPage from "@/pages/TipPage";
-import RegisterPage from "@/components/sections/Register";
-import TipDetail from "@/pages/TipDetail";
-import ListTestPage from "@/pages/ListTestPage";
-import WritingResult from "@/pages/Result/WritingResult";
-import ListeningTest from "@/pages/DoTest/ListeningTest";
-import ReadingTest from "@/pages/DoTest/ReadingTest";
-import WritingTest from "@/pages/DoTest/WritingTest";
-import VoiceRecorder from "@/pages/DoTest/checkMic";
-import SpeakingTest from "@/pages/DoTest/SpeakingTest";
-import VerifyEmail from "@/components/sections/VerifyEmail";
-import Component from "@/pages/DoTest/Component";
-import FulllTest from "@/pages/DoTest/FullTest";
-import LoginAdmin from "@/components/sections/LoginAdmin";
-import Adminpage from "@/pages/Adminpage";
-import SoftProtectedLayout from "@/components/sections/SoftProtectedLayout";
-import ProtectedLayout from "@/components/sections/ProtectedLayout";
-import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole";
+import { StaffLayout } from "@/components/layout/Staff/StaffLayout"
+
+//Payment
+import VnPayResultPage from "./pages/Payment/VNPayResultPage"
+import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
+
+// Pages - Public
+import { HomePage } from "@/pages/HomePage"
+import Login from "@/components/sections/Login"
+import RegisterPage from "@/components/sections/Register"
+import VerifyEmail from "@/components/sections/VerifyEmail"
+import Contact from "@/pages/Contact"
+import HelpCenter from "@/pages/HelpCenter"
+
+// Tips
+import TipPage from "@/pages/TipPage"
+import TipDetail from "@/pages/TipDetail"
+
+// Test Pages
+import ListTestPage from "@/pages/ListTestPage"
+import ListeningTest from "@/pages/DoTest/ListeningTest"
+import ReadingTest from "@/pages/DoTest/ReadingTest"
+import WritingTest from "@/pages/DoTest/WritingTest"
+import SpeakingTest from "@/pages/DoTest/SpeakingTest"
+import VoiceRecorder from "@/pages/DoTest/checkMic"
+import FulllTest from "@/pages/DoTest/FullTest"
 import ForgetPassword from "@/components/sections/ForgetPassword";
 import ResetPassword from "@/components/sections/ResetPassword";
+
+// Result
+import WritingResult from "@/pages/Result/WritingResult"
+
+import HistoryPage from "@/pages/HistoryPage"
+
+// Admin
+
+import LoginAdmin from "@/components/sections/LoginAdmin"
+import Adminpage from "@/pages/Adminpage"
+
+// Staff
+import StaffLogin from "@/components/sections/StaffLogin"
+import { StaffPage } from "@/pages/StaffPage"
+import AddTest from "@/pages/AddTest"
+import AcceptTestPage from "@/pages/AcceptTestPage"
+
+// Protected Layouts
+import SoftProtectedLayout from "@/components/sections/SoftProtectedLayout"
+import ProtectedLayout from "@/components/sections/ProtectedLayout"
+import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
+
 export default function App() {
     return (
         <AuthProvider>
             <Router>
                 <Routes>
 
-                    {/* Public - Không bắt login - Nếu login thì phải role student */}
+                    {/* ========== Public Routes (No login required) ========== */}
                     <Route path="/" element={
                         <SoftProtectedLayout allowRoles={["student"]}>
                             <MainLayout><HomePage /></MainLayout>
                         </SoftProtectedLayout>
                     } />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/verify-email" element={<VerifyEmail />} />
+                    <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
+                    <Route path="/help" element={<MainLayout><HelpCenter /></MainLayout>} />
 
+                    {/* ========== Soft Protected (Login optional, show more for students) ========== */}
                     <Route path="/student/listAllTips" element={
                         <SoftProtectedLayout allowRoles={["student"]}>
                             <MainLayout><TipPage /></MainLayout>
                         </SoftProtectedLayout>
                     } />
-
+                    <Route path="/tips/:skill" element={
+                        <SoftProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><TipPage /></MainLayout>
+                        </SoftProtectedLayout>
+                    } />
                     <Route path="/:skill/:id" element={
                         <SoftProtectedLayout allowRoles={["student"]}>
                             <MainLayout><TipDetail /></MainLayout>
@@ -67,11 +106,7 @@ export default function App() {
                         </SoftProtectedLayout>
                     } />
 
-                    <Route path="/result" element={
-                        <SoftProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><Component /></MainLayout>
-                        </SoftProtectedLayout>
-                    } />
+
 
                     {/* Trang Admin - bắt login role admin */}
                     <Route path="/adminpage" element={
@@ -116,18 +151,37 @@ export default function App() {
                             <SpeakingTest />
                         </ProtectedLayout>
                     } />
-
+                    <Route path="/test/full/:testId" element={
+                        <ProtectedLayout allowRoles={["student"]}>
+                            <FulllTest />
+                        </ProtectedLayout>
+                    } />
                     <Route path="/writing-result/:resultId" element={
                         <ProtectedLayout allowRoles={["student"]}>
                             <MainLayout><WritingResult /></MainLayout>
                         </ProtectedLayout>
                     } />
+                    <Route path="/test-history" element={
+                        <ProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><HistoryPage /></MainLayout>
+                        </ProtectedLayout>
+                    } />
 
-                    {/* Các route public - không cần login */}
-                    <Route path="/login" element={<Login />} />
+                    <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
+                    <Route path="/vnpay-result" element={<MainLayout><VnPayResultPage /></MainLayout>} />
+                    {/* ========== Admin Routes ========== */}
                     <Route path="/loginadmin" element={<LoginAdmin />} />
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/verify-email" element={<VerifyEmail />} />
+                    <Route path="/adminpage" element={
+                        <ProtectedLayoutRole allowRoles={["admin"]}>
+                            <Adminpage />
+                        </ProtectedLayoutRole>
+                    } />
+
+                    {/* ========== Staff Routes ========== */}
+                    <Route path="/staff-login" element={<StaffLogin />} />
+                    <Route path="/staff-page" element={<ProtectedLayoutRole allowRoles={["teacher", "manager"]}><StaffLayout><StaffPage /></StaffLayout></ProtectedLayoutRole>} />
+                    <Route path="/add-test" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><AddTest /></StaffLayout></ProtectedLayout>} />
+                    <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />
                     <Route path="/forgot-password" element={<ForgetPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                 </Routes>
