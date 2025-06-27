@@ -29,7 +29,7 @@ import Component from "@/pages/DoTest/Component"
 
 // Result
 import WritingResult from "@/pages/Result/WritingResult"
-import IeltsResult from "@/pages/IeltsResult"
+
 import HistoryPage from "@/pages/HistoryPage"
 
 // Admin
@@ -138,11 +138,7 @@ export default function App() {
                             <MainLayout><HistoryPage /></MainLayout>
                         </ProtectedLayout>
                     } />
-                    <Route path="/result" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><IeltsResult /></MainLayout>
-                        </ProtectedLayout>
-                    } />
+
 
                     {/* ========== Admin Routes ========== */}
                     <Route path="/loginadmin" element={<LoginAdmin />} />
