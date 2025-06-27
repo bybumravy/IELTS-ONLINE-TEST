@@ -2,10 +2,7 @@
 package web.ielts.Auth.service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +19,7 @@ import web.ielts.Auth.model.VerificationToken;
 import web.ielts.Auth.repository.VerificationTokenRepository;
 import web.ielts.Auth.repository.AuthRepository;
 import web.ielts.Config.EmailConfig;
+import web.ielts.Config.EmailForgetPasswordConfig;
 import web.ielts.User.User;
 
 @Component
@@ -33,6 +31,8 @@ public class AuthService {
     private VerificationTokenRepository tokenRepository;
     @Autowired
     private EmailConfig emailConfig;
+    @Autowired
+    private EmailForgetPasswordConfig emailForgetPasswordConfig;
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
     @Value("${jwt.secret}")
     private final String jwtSecret = "J4gKu2KJ3Z5vP8t5NmE+lw6aD3vJ6GpN1kILUBo=";
@@ -58,6 +58,54 @@ public class AuthService {
         emailConfig.sendVerificationEmail(newUser.getEmail(), token);
 
         return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
+    }
+    public ResponseEntity<?> forgotpassword(String email) {
+
+       User user = authRepository.findByEmail(email);
+       System.out.println(user.toString());
+           if (user == null) {
+               return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                       .body(Collections.singletonMap("message", "Email chưa đăng ký"));
+           }
+
+        // Tạo token xác thực
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = new VerificationToken(
+                token,
+                user.getEmail(),
+                user.getPassword(),
+                LocalDateTime.now().plusHours(24)
+                ,"student"
+        );
+
+        tokenRepository.save(verificationToken);
+
+
+        emailForgetPasswordConfig.sendResetPasswordEmail(user.getEmail(),token);
+
+        return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
+
+    }
+    public ResponseEntity<?> resetPassword(String token, String newPassword) {
+        VerificationToken verificationToken = tokenRepository.findByToken(token);
+        if (verificationToken == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ");
+        }
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn");
+        }
+
+        User user = authRepository.findByEmail(verificationToken.getUserEmail());
+        user.setPassword(encoder.encode(newPassword));
+        authRepository.save(user);
+
+        // Trả về role trong body JSON
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Đặt lại mật khẩu thành công");
+        response.put("role", user.getRole().toLowerCase()); // hoặc xử lý nếu là enum/list
+
+        return ResponseEntity.ok(response);
     }
     public ResponseCookie createJwtCookie(String email, String role) {
         String tokenJwt = JwtToken.generateToken(email, role);
@@ -167,5 +215,8 @@ public class AuthService {
 
     return List.of(jwtCookie, jsessionidCookie);
 }
+
+
+
 }
 

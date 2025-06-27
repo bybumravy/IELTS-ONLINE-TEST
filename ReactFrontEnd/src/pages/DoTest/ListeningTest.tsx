@@ -175,7 +175,7 @@ export default function ListeningTest() {
 
     const handleAnswerChange = (qid: number, ans: string) => {
         setAnswers((prev) => ({ ...prev, [qid]: ans }));
-    };d
+    };
 
     const handleSubmit = async () => {
         if (!listeningTest) return;

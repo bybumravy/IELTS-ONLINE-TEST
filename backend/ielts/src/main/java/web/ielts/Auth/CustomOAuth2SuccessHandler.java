@@ -26,8 +26,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         String email = oAuth2User.getAttribute("email");
         String googleId = oAuth2User.getAttribute("sub");
 
-
-
         User user = loginRepository.findByEmail(email);
         if (user == null) {
             user = new User();

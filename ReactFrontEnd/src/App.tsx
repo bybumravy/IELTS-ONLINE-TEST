@@ -22,6 +22,8 @@ import Adminpage from "@/pages/Adminpage";
 import SoftProtectedLayout from "@/components/sections/SoftProtectedLayout";
 import ProtectedLayout from "@/components/sections/ProtectedLayout";
 import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole";
+import ForgetPassword from "@/components/sections/ForgetPassword";
+import ResetPassword from "@/components/sections/ResetPassword";
 export default function App() {
     return (
         <AuthProvider>
@@ -126,7 +128,8 @@ export default function App() {
                     <Route path="/loginadmin" element={<LoginAdmin />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/verify-email" element={<VerifyEmail />} />
-
+                    <Route path="/forgot-password" element={<ForgetPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                 </Routes>
 
             </Router>
