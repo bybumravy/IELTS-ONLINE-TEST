@@ -1,22 +1,20 @@
 package web.ielts.Payment.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 
-@Builder
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class PaymentRequest {
-    private String partnerCode;
-    private String requestType;
-    private String orderId;
-    private String ipnUrl;
-    private long amount;
-    private String orderInfo;
-    private String requestId;
-    private String redirectUrl;
-    private String lang;
-    private String extraData;
-    private String signature;
+
+public class PaymentRequest <T> extends ResponseEntity<PaymentRequest.Payload<T>> {
+    public PaymentRequest(HttpStatusCode code, String message, T data) {
+        super(new Payload<>(code.value(), message, data),code);
+    }
+    @Builder
+    public static class Payload<T> {
+        public int code;
+        public String message;
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        public T data;
+    }
 }

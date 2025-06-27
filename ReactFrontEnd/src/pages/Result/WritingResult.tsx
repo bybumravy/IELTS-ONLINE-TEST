@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react"
 import { ChevronDown, ChevronUp, Award, FileText, MessageSquare, BookOpen, Target, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -7,12 +6,15 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Badge } from "@/components/ui/badge"
 import {useParams} from "react-router-dom";
 
-
+interface Review {
+    scoreEva: string;
+    reviewEva: string;
+}
 interface Evaluation {
-    TaskAchievement: string;
-    CoherenceCohesion: string;
-    LexicalResource: string;
-    Grammar: string;
+    TaskAchievement: Review;
+    CoherenceCohesion: Review;
+    LexicalResource: Review;
+    Grammar: Review;
 }
 
 interface WritingAnswer {
@@ -27,8 +29,7 @@ interface ErrorCorrection {
     correctedText: string;
     errorType: string;
     explanation: string;
-    startIndex: number;
-    endIndex: number;
+    sentenceContext: string;
 }
 
 
@@ -127,8 +128,8 @@ export default function WritingResult() {
     }
 
     const overallScore = calculateOverallScore()
-    // Highlight errors by matching originalText only (no position logic)
-    const renderTextWithCorrectionsByPosition = (answer: string, corrections: ErrorCorrection[]) => {
+    // Highlight errors by matching originalText only in the correct sentenceContext
+    const renderTextWithCorrectionsBySentenceContext = (answer: string, corrections: ErrorCorrection[]) => {
         if (!corrections || corrections.length === 0) {
             return (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -146,58 +147,59 @@ export default function WritingResult() {
             )
         }
 
-        // Sắp xếp theo startIndex tăng dần để tránh sai lệch vị trí
-        const sortedCorrections = [...corrections].sort((a, b) => a.startIndex - b.startIndex)
-        const elements: React.ReactNode[] = []
-        let currentIndex = 0
+        // Tạo mảng các câu trong answer
+        const sentences = answer.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g) || [answer];
+        // Đánh dấu các câu đã được sửa
+        const sentenceUsed: Record<number, boolean> = {};
+        // Tạo bản sao sentences để highlight
+        let highlightedSentences = [...sentences];
 
-        sortedCorrections.forEach((correction, index) => {
-            if (currentIndex < correction.startIndex) {
-                elements.push(
-                    <span key={`text-${index}`} className="text-slate-700">
-            {answer.slice(currentIndex, correction.startIndex)}
-          </span>,
-                )
-            }
-
-            elements.push(
-                <mark
-                    key={`mark-${index}`}
-                    className="bg-red-100 text-red-800 font-medium rounded-md px-2 py-1 cursor-help transition-colors hover:bg-red-200 relative"
-                    title={correction.explanation}
-                    data-error-index={index}
-                >
-                    {answer.slice(correction.startIndex, correction.endIndex)}
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-            {index + 1}
-          </span>
-                </mark>,
-            )
-
-            currentIndex = correction.endIndex
-        })
-
-        if (currentIndex < answer.length) {
-            elements.push(
-                <span key={`text-final`} className="text-slate-700">
-          {answer.slice(currentIndex)}
-        </span>,
-            )
-        }
+        corrections.forEach((correction, idx) => {
+            // Tìm index của câu context trong bài (ưu tiên lần đầu tiên)
+            const contextIdx = sentences.findIndex((s, i) => !sentenceUsed[i] && s.trim() === correction.sentenceContext.trim());
+            if (contextIdx === -1) return; // Không tìm thấy câu phù hợp
+            sentenceUsed[contextIdx] = true;
+            // Tìm vị trí từ cần sửa trong câu
+            const context = sentences[contextIdx];
+            const wordIdx = context.indexOf(correction.originalText);
+            if (wordIdx === -1) return;
+            // Chia câu thành 3 phần: trước, từ lỗi, sau
+            const before = context.slice(0, wordIdx);
+            const errorWord = context.slice(wordIdx, wordIdx + correction.originalText.length);
+            const after = context.slice(wordIdx + correction.originalText.length);
+            // Highlight từ lỗi
+            highlightedSentences[contextIdx] = (
+                <span key={`sentence-${idx}`}>
+                    {before}
+                    <mark
+                        className="bg-red-100 text-red-800 font-medium rounded-md px-2 py-1 cursor-help transition-colors hover:bg-red-200 relative"
+                        title={correction.explanation}
+                    >
+                        {errorWord}
+                        <span
+                            className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                            {idx + 1}
+                        </span>
+                    </mark>
+                    {after}
+                </span>
+            ) as string;
+        });
 
         return (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Text with highlights */}
                 <div className="lg:col-span-2">
                     <div className="whitespace-pre-line p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
-                        <div className="leading-relaxed">{elements}</div>
+                        <div className="leading-relaxed">
+                            {highlightedSentences.map((s, i) => <span key={i}>{s}</span>)}
+                        </div>
                     </div>
                 </div>
-
                 {/* Error list */}
                 <div className="lg:col-span-1 space-y-3">
                     <h4 className="font-semibold text-slate-800 mb-3">Error Details</h4>
-                    {sortedCorrections.map((error, index) => (
+                    {corrections.map((error, index) => (
                         <div key={index} className="bg-red-50 border border-red-200 rounded-lg p-4 relative">
                             <div className="absolute -top-2 -left-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
                                 {index + 1}
@@ -222,7 +224,7 @@ export default function WritingResult() {
                     ))}
                 </div>
             </div>
-        )
+        );
     }
 
     const renderTextWithSentenceImprovementsByContent = (answer: string, improvements: SentenceImprovement[]) => {
@@ -320,7 +322,7 @@ export default function WritingResult() {
             {feedbackView === "errors" && (
                 <div className="space-y-4">
                     {feedback.errorCorrections.length > 0 ? (
-                        renderTextWithCorrectionsByPosition(originalText, feedback.errorCorrections)
+                        renderTextWithCorrectionsBySentenceContext(originalText, feedback.errorCorrections)
                     ) : (
                         <div className="bg-green-50 p-6 rounded-xl border border-green-200 text-center">
                             <div className="text-green-600 mb-2">
@@ -477,29 +479,58 @@ export default function WritingResult() {
                     <div className="p-6 bg-white border-b border-slate-200">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                    <span className="font-medium text-slate-700">Task Achievement</span>
-                                    <Badge className={getScoreColor(task.evaluation?.TaskAchievement || "0")}>
-                                        {task.evaluation?.TaskAchievement}
-                                    </Badge>
+                                {/* Task Achievement */}
+                                <div className="p-3 bg-slate-50 rounded-lg space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-medium text-slate-700">Task Achievement</span>
+                                        <Badge className={getScoreColor(task.evaluation?.TaskAchievement.scoreEva || "0")}>
+                                            {task.evaluation?.TaskAchievement.scoreEva}
+                                        </Badge>
+                                    </div>
+                                    <p className="text-sm text-slate-600 bg-white p-2 rounded border">
+                                        {task.evaluation?.TaskAchievement.reviewEva}
+                                    </p>
                                 </div>
-                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                    <span className="font-medium text-slate-700">Coherence & Cohesion</span>
-                                    <Badge className={getScoreColor(task.evaluation?.CoherenceCohesion || "0")}>
-                                        {task.evaluation?.CoherenceCohesion}
-                                    </Badge>
+
+                                {/* Coherence & Cohesion */}
+                                <div className="p-3 bg-slate-50 rounded-lg space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-medium text-slate-700">Coherence & Cohesion</span>
+                                        <Badge className={getScoreColor(task.evaluation?.CoherenceCohesion.scoreEva || "0")}>
+                                            {task.evaluation?.CoherenceCohesion.scoreEva}
+                                        </Badge>
+                                    </div>
+                                    <p className="text-sm text-slate-600 bg-white p-2 rounded border">
+                                        {task.evaluation?.CoherenceCohesion.reviewEva}
+                                    </p>
                                 </div>
                             </div>
+
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                    <span className="font-medium text-slate-700">Lexical Resource</span>
-                                    <Badge className={getScoreColor(task.evaluation?.LexicalResource || "0")}>
-                                        {task.evaluation?.LexicalResource}
-                                    </Badge>
+                                {/* Lexical Resource */}
+                                <div className="p-3 bg-slate-50 rounded-lg space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-medium text-slate-700">Lexical Resource</span>
+                                        <Badge className={getScoreColor(task.evaluation?.LexicalResource.scoreEva || "0")}>
+                                            {task.evaluation?.LexicalResource.scoreEva}
+                                        </Badge>
+                                    </div>
+                                    <p className="text-sm text-slate-600 bg-white p-2 rounded border">
+                                        {task.evaluation?.LexicalResource.reviewEva}
+                                    </p>
                                 </div>
-                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                    <span className="font-medium text-slate-700">Grammar</span>
-                                    <Badge className={getScoreColor(task.evaluation?.Grammar || "0")}>{task.evaluation?.Grammar}</Badge>
+
+                                {/* Grammar */}
+                                <div className="p-3 bg-slate-50 rounded-lg space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-medium text-slate-700">Grammar</span>
+                                        <Badge className={getScoreColor(task.evaluation?.Grammar.scoreEva || "0")}>
+                                            {task.evaluation?.Grammar.scoreEva}
+                                        </Badge>
+                                    </div>
+                                    <p className="text-sm text-slate-600 bg-white p-2 rounded border">
+                                        {task.evaluation?.Grammar.reviewEva}
+                                    </p>
                                 </div>
                             </div>
                         </div>

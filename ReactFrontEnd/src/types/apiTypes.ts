@@ -19,6 +19,19 @@ export interface IELTSTest {
     createdAt: string
 }
 
+export interface Section{
+    question: string | string[];
+    options?: string[];
+    answer: string | string[];
+    explanation: string | string[];
+}
+export interface Exercises {
+    paragraph?: string;
+    audioUrl?: string;
+    instruction: string;
+    imageUrl?: string;
+    section: Section[];
+}
 
 export interface Tip {
     id: number

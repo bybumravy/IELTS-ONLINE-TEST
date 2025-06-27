@@ -5,6 +5,10 @@ import { AuthProvider } from "@/contexts/AuthContext"
 import { MainLayout } from "@/components/layout/MainLayout"
 import { StaffLayout } from "@/components/layout/Staff/StaffLayout"
 
+//Payment
+import VnPayResultPage from "./pages/Payment/VNPayResultPage"
+import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
+
 // Pages - Public
 import { HomePage } from "@/pages/HomePage"
 import Login from "@/components/sections/Login"
@@ -25,7 +29,7 @@ import WritingTest from "@/pages/DoTest/WritingTest"
 import SpeakingTest from "@/pages/DoTest/SpeakingTest"
 import VoiceRecorder from "@/pages/DoTest/checkMic"
 import FulllTest from "@/pages/DoTest/FullTest"
-import Component from "@/pages/DoTest/Component"
+
 
 // Result
 import WritingResult from "@/pages/Result/WritingResult"
@@ -91,11 +95,6 @@ export default function App() {
                             <MainLayout><ListTestPage /></MainLayout>
                         </SoftProtectedLayout>
                     } />
-                    <Route path="/result" element={
-                        <SoftProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><Component /></MainLayout>
-                        </SoftProtectedLayout>
-                    } />
 
                     {/* ========== Student Test Routes (Login required) ========== */}
                     <Route path="/test/listening/:testId" element={
@@ -139,7 +138,8 @@ export default function App() {
                         </ProtectedLayout>
                     } />
 
-
+                    <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
+                    <Route path="/vnpay-result" element={<MainLayout><VnPayResultPage /></MainLayout>} />
                     {/* ========== Admin Routes ========== */}
                     <Route path="/loginadmin" element={<LoginAdmin />} />
                     <Route path="/adminpage" element={

@@ -110,7 +110,7 @@ public class AIService {
         }
     }
 
-    //    Call AIP co anh
+//    Call AIP co anh
     private String callOpenAITask2(String prompt) {
         try {
             String requestBody = """
@@ -148,65 +148,65 @@ public class AIService {
     private String buildTask1Prompt(String question, String answer) {
         String promptBuilder1 =
                 "You must return response strictly in JSON format.\n" +
-                        "You are an IELTS examiner analyzing Writing Task 1 based on visual data. Extremely strict grading " +
-                        "1. DATA VERIFICATION:\n" +
-                        "   - Cross-check ALL data points/trends between image and student's answer\n" +
-                        "   - Flag ANY discrepancies\n" +
-                        "   - Verify ALL numerical values/percentages against visual data (tolerance: 0% error)\n" +
-                        "   - Missing key features = automatic Band 5 cap"+
-                        "\n" +
-                        "2. EVALUATION (Official IELTS Criteria):\n" +
-                        "• Task Achievement (25%):\n" +
-                        "     - [MUST HAVE] Clear overview paragraph (missing = max Band 5)\n" +
-                        "     - Accurate data reporting (1 error = -0.5 band)\n" +
-                        "     - Appropriate detail selection\n" +
-                        "   • Coherence & Cohesion (25%):\n" +
-                        "     - Logical paragraphing (Introduction/Overview/Details)\n" +
-                        "     - Effective linking (but not repetitive)\n" +
-                        "     - Progression (Band 7+ requires progression beyond listing)\n" +
-                        "   • Lexical Resource (25%):\n" +
-                        "     - Academic vocabulary (Band 9 requires ≥8 advanced terms)\n" +
-                        "     - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
-                        "     - Spelling (3 errors = -0.5 band)\n" +
-                        "   • Grammar (25%):\n" +
-                        "     - Tense accuracy (graph data must use past tense if historical)\n" +
-                        "     - Complex structures (Band 7+ needs ≥3 complex sentences)\n" +
-                        "     - Punctuation (comma errors = -0.5 band)"+
-                        "\n" +
-                        "3. SCORING SYSTEM:\n" +
-                        "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
-                        "   - Deduct 0.5 band per 2 major errors\n" +
-                        "   - Automatic caps: No overview → max 5.0 | Data errors → max 6.5"+
+                "You are an IELTS examiner analyzing Writing Task 1 based on visual data. Extremely strict grading " +
+                "1. DATA VERIFICATION:\n" +
+                "   - Cross-check ALL data points/trends between image and student's answer\n" +
+                "   - Flag ANY discrepancies\n" +
+                "   - Verify ALL numerical values/percentages against visual data (tolerance: 0% error)\n" +
+                "   - Missing key features = automatic Band 5 cap"+
+                "\n" +
+                "2. EVALUATION (Official IELTS Criteria):\n" +
+                "• Task Achievement (25%):\n" +
+                "     - [MUST HAVE] Clear overview paragraph (missing = max Band 5)\n" +
+                "     - Accurate data reporting (1 error = -0.5 band)\n" +
+                "     - Appropriate detail selection\n" +
+                "   • Coherence & Cohesion (25%):\n" +
+                "     - Logical paragraphing (Introduction/Overview/Details)\n" +
+                "     - Effective linking (but not repetitive)\n" +
+                "     - Progression (Band 7+ requires progression beyond listing)\n" +
+                "   • Lexical Resource (25%):\n" +
+                "     - Academic vocabulary (Band 9 requires ≥8 advanced terms)\n" +
+                "     - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
+                "     - Spelling (3 errors = -0.5 band)\n" +
+                "   • Grammar (25%):\n" +
+                "     - Tense accuracy (graph data must use past tense if historical)\n" +
+                "     - Complex structures (Band 7+ needs ≥3 complex sentences)\n" +
+                "     - Punctuation (comma errors = -0.5 band)"+
+                "\n" +
+                "3. SCORING SYSTEM:\n" +
+                "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
+                "   - Deduct 0.5 band per 2 major errors\n" +
+                "   - Automatic caps: No overview → max 5.0 | Data errors → max 6.5"+
 
-                        "RESPONSE FORMAT:\n" +
-                        "- score: decimal (overall band score, e.g. 6.5)\n" +
-                        "- feedback: {\n" +
-                        "    (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)\n" +
-                        "    errorCorrections: [{\n" +
-                        "      originalText: string,  // EXACT match required\n" +
-                        "      correctedText: string,\n" +
-                        "      errorType: string,\n" +
-                        "      explanation: string,\n" +
-                        "      sentenceContext: string // the full sentence from the answer that contains the originalText; must match exactly as in the answer\n" +
-                        "    }],\n" +
-                        "    (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)\n" +
-                        "    sentenceImprovements: [{\n" +
-                        "      originalSentence: string,\n" +
-                        "      improvedSentence: string,\n" +
-                        "      techniquesUsed: [string],\n" +
-                        "      bandBoost: string (6 -> 6.5)\n" +
-                        "    }],\n" +
-                        "    overallComment: string\n" +
-                        "}\n" +
-                        "- evaluation: {\n" +
-                        "    TaskAchievement: {scoreEva: string, reviewEva: string},\n" +
-                        "    CoherenceCohesion: {scoreEva: string, reviewEva: string},\n" +
-                        "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
-                        "    Grammar: {scoreEva: string, reviewEva: string}\n" +
-                        "  }\n" +
-                        "sampleAnswer: string (Optional band 9 model)"+
-                        "Question:\n" + question + "\n" +
-                        "Original Answer:\n" + answer;
+                "RESPONSE FORMAT:\n" +
+                "- score: decimal (overall band score, e.g. 6.5)\n" +
+                "- feedback: {\n" +
+                "    (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)\n" +
+                "    errorCorrections: [{\n" +
+                "      originalText: string,  // EXACT match required\n" +
+                "      correctedText: string,\n" +
+                "      errorType: string,\n" +
+                "      explanation: string,\n" +
+                "      sentenceContext: string // the full sentence from the answer that contains the originalText; must match exactly as in the answer\n" +
+                "    }],\n" +
+                "    (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)\n" +
+                "    sentenceImprovements: [{\n" +
+                "      originalSentence: string,\n" +
+                "      improvedSentence: string,\n" +
+                "      techniquesUsed: [string],\n" +
+                "      bandBoost: string (6 -> 6.5)\n" +
+                "    }],\n" +
+                "    overallComment: string\n" +
+                "}\n" +
+                "- evaluation: {\n" +
+                "    TaskAchievement: {scoreEva: string, reviewEva: string},\n" +
+                "    CoherenceCohesion: {scoreEva: string, reviewEva: string},\n" +
+                "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
+                "    Grammar: {scoreEva: string, reviewEva: string}\n" +
+                "  }\n" +
+                "sampleAnswer: string (Optional band 9 model)"+
+                "Question:\n" + question + "\n" +
+                "Original Answer:\n" + answer;
 
         return promptBuilder1;
     }

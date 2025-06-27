@@ -1,7 +1,7 @@
 import {Badge} from "@/components/ui/badge.tsx";
 import {BookOpen, BrainCircuit, CheckCircle, Lightbulb} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import type {Exercises, TipDetail} from "@/types/apiTypes.ts"
+import type {Exercises} from "@/types/apiTypes.ts"
 
 interface StrategyAndTipProps {
     id: string | number;
@@ -13,7 +13,7 @@ interface StrategyAndTipProps {
     exercises: Exercises[];
 }
 
-export function StrategyAndTip({ id, type, skill, description, strategy, tips, exercises }: StrategyAndTipProps){
+export function StrategyAndTip({type, skill, description, strategy, tips }: StrategyAndTipProps){
     return(
         <div className="max-w-4xl mx-auto">
             <div className="mb-12">

@@ -166,6 +166,15 @@ export default function WritingTest() {
                             <h1 className="text-xl font-bold text-gray-800 mb-2">WRITING TASK 1</h1>
                             <p className="text-sm text-gray-600 mb-4">You should spend about <strong>20 minutes</strong> on this task.</p>
                             <p className="text-sm text-gray-700 mb-4">{writingData?.task1?.question || "Loading..."}</p>
+                            {writingData?.task1?.imageUrl && (
+                                <div className="mb-4">
+                                    <img
+                                        src={writingData.task1.imageUrl}
+                                        alt="Task 1 visual"
+                                        className="max-w-full h-auto border border-gray-200 rounded-lg"
+                                    />
+                                </div>
+                            )}
                             <p className="text-sm text-gray-700 mb-6">You should write <strong>at least 150 words</strong>.</p>
                         </div>
                     ) : (

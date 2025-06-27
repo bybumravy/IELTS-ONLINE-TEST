@@ -1,3 +1,5 @@
+"use client"
+
 import { useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -356,6 +358,7 @@ const SpeakingTest = () => {
             const res = await customFetch("http://localhost:8080/verify/speaking/submit", {
                 method: "POST",
                 body: formData,
+                credentials: "include",
             });
 
             if (!res.ok) throw new Error("Lỗi khi gửi bài!");
