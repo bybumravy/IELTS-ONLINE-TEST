@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -19,7 +20,7 @@ public class User implements UserDetails {
     private String email;
     private String password;
     private String role;
-    private boolean premium;
+    private LocalDateTime premiumExpiry;
     private String googleID;
 
     public User() {
@@ -29,16 +30,16 @@ public class User implements UserDetails {
         this.password = password;
         this.role = role;
     }
+
     @Override
     public String toString() {
         return "User{" +
-
-                ", firstName='" + firstName + '\'' +
+                "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
-                ", premium=" + premium +
+                ", premiumExpiry=" + premiumExpiry +
                 ", googleID='" + googleID + '\'' +
                 ", createdAt='" + createdAt + '\'' +
                 '}';
@@ -47,8 +48,6 @@ public class User implements UserDetails {
     public String getFirstName() {
         return firstName;
     }
-
-
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
@@ -86,12 +85,12 @@ public class User implements UserDetails {
         this.role = role;
     }
 
-    public boolean isPremium() {
-        return premium;
+    public LocalDateTime getPremiumExpiry() {
+        return premiumExpiry;
     }
 
-    public void setPremium(boolean premium) {
-        this.premium = premium;
+    public void setPremiumExpiry(LocalDateTime premiumExpiry) {
+        this.premiumExpiry = premiumExpiry;
     }
 
     public String getGoogleID() {
@@ -112,16 +111,17 @@ public class User implements UserDetails {
 
     private String createdAt;
 
-    public User(String createdAt, String email, String firstName, String googleID, String lastName, String password, boolean premium, String role) {
-        this.createdAt = createdAt;
-        this.email = email;
+    public User(String firstName, String lastName, String email, String password, String role, LocalDateTime premiumExpiry, String googleID, String createdAt) {
         this.firstName = firstName;
-        this.googleID = googleID;
         this.lastName = lastName;
+        this.email = email;
         this.password = password;
-        this.premium = premium;
         this.role = role;
+        this.premiumExpiry = premiumExpiry;
+        this.googleID = googleID;
+        this.createdAt = createdAt;
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority(role));
