@@ -16,8 +16,6 @@ export default function ListeningResult() {
     const [error, setError] = useState<string | null>(null)
 
     const { resultId } = useParams  <{ resultId: string }>();
-    // // TODO: lấy testId từ URL hoặc props
-    // const testId = "T002" // hardcode để test, thực tế lấy từ router
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -131,6 +129,10 @@ export default function ListeningResult() {
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Test ID:</span>
                                     <span className="text-sm font-medium">{result.testId}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Thời gian:</span>
+                                    <span className="text-sm font-medium">30 phút</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Tổng câu hỏi:</span>
