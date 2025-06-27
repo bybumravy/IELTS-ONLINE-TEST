@@ -1,4 +1,4 @@
-import { User, LogOut, Settings, Crown, History } from "lucide-react";
+import {User, LogOut, Settings, Crown, History, AlertCircle} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -10,14 +10,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import Report from "@/components/sections/Report";
+import {useState} from "react";
+import EditProfile from "@/components/sections/EditProfile";
 
 interface UserMenuProps {
     onLogout: () => void
 }
 
 export function UserMenu({ onLogout }: UserMenuProps) {
-    const { user } = useAuth();
+    const { user, fetchUser } = useAuth();
     const navigate = useNavigate();
+    const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
     const defaultAvatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${
         user?.username || "default"
     }&backgroundColor=65C3C8`;
@@ -27,6 +32,7 @@ export function UserMenu({ onLogout }: UserMenuProps) {
         navigate("/"); // Điều hướng về trang chủ
     };
     return (
+        <>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -39,7 +45,7 @@ export function UserMenu({ onLogout }: UserMenuProps) {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                <DropdownMenuItem onClick={() => setIsEditProfileOpen(true)}>
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                 </DropdownMenuItem>
@@ -55,6 +61,10 @@ export function UserMenu({ onLogout }: UserMenuProps) {
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsFeedbackOpen(true)}>
+                    <AlertCircle className="mr-2 h-4 w-4" />
+                    <span>Report</span>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -62,5 +72,12 @@ export function UserMenu({ onLogout }: UserMenuProps) {
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
+            <EditProfile isOpen={isEditProfileOpen} onClose={() => setIsEditProfileOpen(false)} />
+
+            <Report
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+    />
+    </>
     );
 }

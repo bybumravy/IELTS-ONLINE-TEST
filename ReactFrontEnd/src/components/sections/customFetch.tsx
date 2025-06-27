@@ -1,5 +1,4 @@
 export const customFetch = (url: string, options: RequestInit = {}) => {
-    // Các URL ngoại lệ — không cần credentials
     const excludeUrls = [
 
     ];
@@ -8,6 +7,6 @@ export const customFetch = (url: string, options: RequestInit = {}) => {
 
     return fetch(url, {
         ...options,
-        ...(shouldIncludeCredentials ? { credentials: "include" } : {}),  // nếu false → không thêm gì
+        ...(shouldIncludeCredentials ? { credentials: "include" } : {}),
     });
 };

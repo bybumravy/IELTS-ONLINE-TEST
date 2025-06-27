@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CateSkill from "@/components/sections/CateSkill";
 import MockTest from "@/components/sections/MockTest";
+import {HeroSection} from "@/components/sections/HeroSection";
 
 // Định nghĩa type kỹ năng
 type SkillType = 'Listening' | 'Reading' | 'Writing' | 'Speaking' | 'All Skills';
@@ -40,6 +41,8 @@ const ListTestPage = () => {
     };
 
     return (
+        <>
+            <HeroSection />
         <div className="min-h-screen bg-white">
             <section className="py-8 bg-gray-50">
                 <div className="container mx-auto">
@@ -56,6 +59,7 @@ const ListTestPage = () => {
                 </div>
             </section>
         </div>
+        </>
     );
 };
 

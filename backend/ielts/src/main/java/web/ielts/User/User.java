@@ -21,14 +21,58 @@ public class User implements UserDetails {
     private String role;
     private boolean premium;
     private String googleID;
+    private String birthDate;
+    private String gender;
+    private String phone;
+
 
     public User() {
     }
+
     public User(String email, String password,String role) {
         this.email = email;
         this.password = password;
         this.role = role;
     }
+
+    public User(String firstName, String lastName, String email, String password, String role, boolean premium, String googleID, String birthDate, String gender, String phone, String createdAt) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.premium = premium;
+        this.googleID = googleID;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.phone = phone;
+        this.createdAt = createdAt;
+    }
+
+    public String getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(String birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     @Override
     public String toString() {
         return "User{" +

@@ -34,6 +34,12 @@ export interface FAQ {
 export interface User {
     username: string
     role: 'student' | 'teacher' | 'manager' | 'admin'
+    firstName?: string
+    lastName?: string
+    birthDate?: string
+    gender?: string
+    phone?: string
+    premium?: boolean
 }
 
 export interface AuthContextType {

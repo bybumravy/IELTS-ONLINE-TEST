@@ -10,7 +10,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const data = await authService.getMe()
             if (data) {
-                setUser({ username: data.username, role: data.role })
+                setUser(data)
             } else {
                 setUser(null)
             }
