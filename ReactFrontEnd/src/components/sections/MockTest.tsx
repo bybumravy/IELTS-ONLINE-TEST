@@ -80,11 +80,6 @@ function MockTest({ selectedSkill = 'All Skills' }: MockTestProps) {
     };
 
     const handleStartTest = (testId: string): void => {
-        if (!user?.username) {
-            alert("⚠️ Bạn cần phải đăng nhập trước khi vào làm bài.");
-            navigate("/login");
-            return;
-        }
 
         const skill = selectedSkill === 'All Skills' ? 'full' : selectedSkill.toLowerCase();
         navigate(`/test/${skill}/${testId}`);

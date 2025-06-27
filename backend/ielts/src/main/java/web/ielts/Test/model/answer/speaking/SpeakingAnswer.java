@@ -12,6 +12,7 @@ public class SpeakingAnswer {
     private String id;
     private String testId;
     private String username;
+    private String skill;
     private SpeakingAnswerPart13 part1;
     private SpeakingAnswerPart2 part2;
     private SpeakingAnswerPart13 part3;
@@ -28,13 +29,7 @@ public class SpeakingAnswer {
         this.testId = testId;
     }
 
-    public String getUsername() {
-        return username;
-    }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public SpeakingAnswerPart13 getPart1() {
         return part1;
@@ -60,21 +55,39 @@ public class SpeakingAnswer {
         this.part3 = part3;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getSkill() {
+        return skill;
+    }
+
+    public void setSkill(String skill) {
+        this.skill = skill;
+    }
+
     public String getId() {
         return id;
+    }
+
+    public SpeakingAnswer(String id, String testId, String username, String skill, SpeakingAnswerPart13 part1, SpeakingAnswerPart2 part2, SpeakingAnswerPart13 part3) {
+        this.id = id;
+        this.testId = testId;
+        this.username = username;
+        this.skill = skill;
+        this.part1 = part1;
+        this.part2 = part2;
+        this.part3 = part3;
     }
 
     public void setId(String id) {
         this.id = id;
     }
 
-    public SpeakingAnswer(String id, String testId, String username, SpeakingAnswerPart13 part1, SpeakingAnswerPart2 part2, SpeakingAnswerPart13 part3) {
-        this.id = id;
-        this.testId = testId;
-        this.username = username;
-        this.part1 = part1;
-        this.part2 = part2;
-        this.part3 = part3;
-    }
 
 }

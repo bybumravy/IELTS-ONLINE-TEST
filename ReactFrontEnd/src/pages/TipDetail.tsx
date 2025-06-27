@@ -22,7 +22,7 @@ function TipDetail() {
     useEffect(() => {
         if (!id) return;
 
-        fetch(`http://localhost:8080/api/${skill}/${id}`)
+        const data = fetch(`http://localhost:8080/api/${skill}/${id}`)
             .then((res) => res.json())
             .then((data: TipDetail) => {
                 setDetail(data);
@@ -31,6 +31,7 @@ function TipDetail() {
                 console.error("Lỗi khi gọi API chi tiết tip:", error);
                 setDetail(null);
             });
+        console.log("Dât ne:" + data);
     }, [id, skill]);
 
     if (!detail) {

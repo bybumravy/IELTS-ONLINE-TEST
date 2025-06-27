@@ -29,46 +29,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws IOException, ServletException {
         String path = request.getRequestURI();
 
-       if (path.startsWith("/oauth2/") ||
-               path.startsWith("/login/oauth2/") ||
-               path.startsWith("/api/momo/create") ||
-               path.startsWith("/api/momo/ipn-handler") ||
-               path.startsWith("/api/payment/callback") ||
-               path.startsWith("/api/payment/status") ||
-               path.startsWith("/api/tips-summary") ||
-               path.startsWith("/api/3-tests") ||
-               path.startsWith("/api/test/all-skill") ||
-               path.startsWith("/api/test/listening") ||
-               path.startsWith("/api/test/reading") ||
-               path.startsWith("/api/test/writing") ||
-               path.startsWith("/api/test/speaking") ||
-               path.startsWith("/api/test/count") ||
-               path.startsWith("/verify") ||
-               path.startsWith("/api/result") ||
-               path.equals("/api/login")) {
-           filterChain.doFilter(request, response);
-           return;
-       }
+//        if (path.startsWith("/oauth2/") ||
+//                path.startsWith("/login/oauth2/") ||
+//                path.equals("/api/login")) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
 
         String token = getTokenFromCookies(request);
 
         if (token != null) {
             try {
                 String username = JwtToken.extractUsername(token);
-                System.out.println("check 0");
+
                 if (username != null && !(SecurityContextHolder.getContext().getAuthentication()
                         instanceof UsernamePasswordAuthenticationToken)) {
 
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    System.out.println("check 1");
+
                     if (JwtToken.isTokenValid(token, userDetails)) {
                         UsernamePasswordAuthenticationToken authToken =
                                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        System.out.println("check 2");
+
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
-                    System.out.println("check 3");
+
                 }
             } catch (Exception e) {
                 System.out.println("Token invalid: " + e.getMessage());
@@ -78,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } finally {
-            // SecurityContextHolder.clearContext();
+            SecurityContextHolder.clearContext();
         }
     }
     private String getTokenFromCookies(HttpServletRequest request) {

@@ -79,15 +79,15 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
               Sign In
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            {/* <div className="relative my-4">
+             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="bg-white px-2 text-gray-500">Or continue with</span>
               </div>
-            </div> */}
-            {/* <Button 
+            </div> 
+            <Button 
               type="button" 
               variant="outline" 
               className="w-full border-2"
@@ -95,7 +95,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             >
               <img src="./assets/google.svg" alt="Google" className="mr-2 h-4 w-4" />
               Google
-            </Button> */}
+            </Button>
           </form>
         </CardContent>
       </Card>

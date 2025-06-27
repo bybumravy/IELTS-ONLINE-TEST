@@ -10,17 +10,67 @@ import { BookOpen, Mail, Lock, ArrowRight } from "lucide-react";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  const getEmailErrorMessage = (value: string): string => {
+    if (!value) return "Email is required";
+
+    // Email regex chuẩn RFC 5322 simplified
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    if (!emailRegex.test(value)) {
+      return "Please enter a valid email address (e.g. you@example.com)";
+    }
+
+    return "";
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+
+    const errorMsg = getEmailErrorMessage(value);
+    setEmailError(errorMsg);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+
+    if (!value) {
+      setPasswordError("Password is required");
+    } else {
+      setPasswordError("");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      await login(email, password);
-      navigate("/");
-    } catch (error) {
-      alert("Login failed");
-      console.error(error);
+
+    // Validate email
+    const emailMsg = getEmailErrorMessage(email);
+    setEmailError(emailMsg);
+
+    // Validate password
+    let passwordMsg = "";
+    if (!password) {
+      passwordMsg = "Password is required";
+    }
+    setPasswordError(passwordMsg);
+
+    // If no errors, proceed login
+    if (!emailMsg && !passwordMsg) {
+      try {
+        await login(email, password);
+        navigate("/");
+      } catch (error) {
+        alert("Login failed");
+        console.error(error);
+      }
     }
   };
 
@@ -46,6 +96,7 @@ const LoginPage = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email field */}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -55,12 +106,16 @@ const LoginPage = () => {
                       type="email"
                       placeholder="you@example.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-9"
-                      required
+                      onChange={handleEmailChange}
+                      className={`pl-9 ${emailError ? "border-red-500" : ""}`}
                   />
                 </div>
+                {emailError && (
+                    <p className="text-red-500 text-sm mt-1">{emailError}</p>
+                )}
               </div>
+
+              {/* Password field */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
@@ -75,16 +130,22 @@ const LoginPage = () => {
                       type="password"
                       placeholder="••••••••"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-9"
-                      required
+                      onChange={handlePasswordChange}
+                      className={`pl-9 ${passwordError ? "border-red-500" : ""}`}
                   />
                 </div>
+                {passwordError && (
+                    <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                )}
               </div>
+
+              {/* Submit button */}
               <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
                 Sign In
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+
+              {/* Divider */}
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>
@@ -93,6 +154,8 @@ const LoginPage = () => {
                   <span className="bg-white px-2 text-gray-500">Or continue with</span>
                 </div>
               </div>
+
+              {/* Google login button */}
               <Button
                   type="button"
                   variant="outline"
@@ -104,6 +167,7 @@ const LoginPage = () => {
               </Button>
             </form>
 
+            {/* Sign up link */}
             <div className="mt-6 text-center text-sm">
               <span className="text-gray-500">Don't have an account?</span>{" "}
               <Link to="/register" className="text-emerald-600 hover:text-emerald-700 font-semibold">
@@ -115,5 +179,4 @@ const LoginPage = () => {
       </div>
   );
 };
-
 export default LoginPage;

@@ -59,7 +59,17 @@ public class AuthService {
 
         return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
     }
+    public ResponseCookie createJwtCookie(String email, String role) {
+        String tokenJwt = JwtToken.generateToken(email, role);
 
+        return ResponseCookie.from("jwt_token", tokenJwt)
+                .httpOnly(true)
+                .secure(false) // lên production thì đổi thành true (nếu có https)
+                .path("/")
+                .maxAge(24 * 60 * 60)
+                .sameSite("Lax")
+                .build();
+    }
     public ResponseEntity<?> verifyEmail(String token) {
         VerificationToken verificationToken = tokenRepository.findByToken(token);
         System.out.println(verificationToken.toString());
@@ -78,15 +88,7 @@ public class AuthService {
         user.setPassword(encoder.encode(user.getPassword()));
 
         authRepository.save(user);
-        String tokenJwt = JwtToken.generateToken(user.getEmail(), user.getRole());
-
-        ResponseCookie cookie = ResponseCookie.from("jwt_token", tokenJwt)
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(24 * 60 * 60)
-                .sameSite("Lax")
-                .build();
+        ResponseCookie cookie = createJwtCookie(user.getEmail(), user.getRole());
 
 
 
@@ -95,22 +97,26 @@ public class AuthService {
                 .body("Xác thực email thành công! Bạn có thể đăng nhập.");
     }
 
-    public ResponseEntity<Map<String, Object>> login(String email, String password) {
+    public ResponseEntity<Map<String, Object>> login(String email, String password,String path) {
         Map<String, Object> response = new HashMap<>();
 
         User user = authRepository.findByEmail(email);
+        String role = user.getRole();
 
+        // ✅ Nếu login từ "/login" → chỉ cho STUDENT login
+        if (path.equalsIgnoreCase("/login") && !role.equalsIgnoreCase("STUDENT")) {
+            response.put("status", "fail");
+            response.put("message", "Only STUDENT accounts can login here");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
+        if (path.equalsIgnoreCase("/loginadmin") && !role.equalsIgnoreCase("ADMIN")) {
+            response.put("status", "fail");
+            response.put("message", "Only admin accounts can login here");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
         System.out.println(user);
-        if (user != null && encoder.matches(password, user.getPassword())) {
-            String token = JwtToken.generateToken(user.getEmail(), user.getRole());
-
-            ResponseCookie cookie = ResponseCookie.from("jwt_token", token)
-                    .httpOnly(true)
-                    .secure(false)
-                    .path("/")
-                    .maxAge(24 * 60 * 60)
-                    .sameSite("Lax")
-                    .build();
+        if (user != null && encoder.matches(password, user.getPassword()) ) {
+            ResponseCookie cookie = createJwtCookie(user.getEmail(), role);
 
             response.put("status", "success");
             response.put("message", "Login successful");

@@ -40,9 +40,11 @@ public class AuthController {
     }
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO loginRequest) {
+        System.out.println("From page: " + loginRequest.getFromPath());  // in ra /loginadmin
         return authservice.login(
                 loginRequest.getEmail(),
                 loginRequest.getPassword()
+                ,loginRequest.getFromPath()
         );
     }
 
