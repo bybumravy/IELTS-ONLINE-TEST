@@ -6,21 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { VocabularyItemStudent } from '@/components/VocabularyItemStudent';
 
-const TOPICS = [
-    { value: '', label: 'All Topics' },
-    { value: 'Environment', label: 'Environment' },
-    { value: 'Education', label: 'Education' },
-    { value: 'Technology', label: 'Technology' },
-];
-
-const BANDS = [
-    { value: '', label: 'All Bands' },
-    { value: '5.0', label: '5.0' },
-    { value: '6.0', label: '6.0' },
-    { value: '6.5', label: '6.5' },
-    { value: '7.0', label: '7.0' },
-];
-
 const VocabularyList: React.FC = () => {
     const { user } = useAuth();
     const [vocabularies, setVocabularies] = useState<VocabularyType[]>([]);
@@ -41,6 +26,23 @@ const VocabularyList: React.FC = () => {
     const [selectedVocab, setSelectedVocab] = useState<VocabularyType | null>(null);
 
     const API_BASE = "http://localhost:8080/api/practice";
+
+    // --- NEW: State for topics/bands fetched from backend ---
+    const [topics, setTopics] = useState<{ value: string, label: string }[]>([{ value: '', label: 'All Topics' }]);
+    const [bands, setBands] = useState<{ value: string, label: string }[]>([{ value: '', label: 'All Bands' }]);
+
+    // --- Fetch topics/bands from backend ---
+    useEffect(() => {
+        fetch(`${API_BASE}/vocabulary/topics`, { credentials: "include" })
+            .then(res => res.json())
+            .then(data => setTopics([{ value: '', label: 'All Topics' }, ...data.map((t: string) => ({ value: t, label: t }))]))
+            .catch(() => setTopics([{ value: '', label: 'All Topics' }]));
+
+        fetch(`${API_BASE}/vocabulary/bands`, { credentials: "include" })
+            .then(res => res.json())
+            .then(data => setBands([{ value: '', label: 'All Bands' }, ...data.map((b: string) => ({ value: b, label: b }))]))
+            .catch(() => setBands([{ value: '', label: 'All Bands' }]));
+    }, []);
 
     const fetchVocabularies = async () => {
         try {
@@ -137,7 +139,7 @@ const VocabularyList: React.FC = () => {
                             onChange={handleFilterChange}
                             className="w-full px-2 py-2 rounded border border-gray-300"
                         >
-                            {TOPICS.map(t => (
+                            {topics.map(t => (
                                 <option key={t.value} value={t.value}>{t.label}</option>
                             ))}
                         </select>
@@ -147,7 +149,7 @@ const VocabularyList: React.FC = () => {
                             onChange={handleFilterChange}
                             className="w-full px-2 py-2 rounded border border-gray-300"
                         >
-                            {BANDS.map(b => (
+                            {bands.map(b => (
                                 <option key={b.value} value={b.value}>{b.label}</option>
                             ))}
                         </select>

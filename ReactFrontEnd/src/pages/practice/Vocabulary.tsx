@@ -8,28 +8,16 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 
-const TOPICS = [
-    { value: '', label: 'All Topics' },
-    { value: 'Environment', label: 'Environment' },
-    { value: 'Education', label: 'Education' },
-    { value: 'Technology', label: 'Technology' },
-];
-
-const BANDS = [
-    { value: '', label: 'All Bands' },
-    { value: '5.0', label: '5.0' },
-    { value: '6.0', label: '6.0' },
-    { value: '6.5', label: '6.5' },
-    { value: '7.0', label: '7.0' },
-];
-
+// ------ MODAL COMPONENT -----
 const VocabularyFormModal: React.FC<{
     open: boolean;
     onClose: () => void;
     onSubmit: (vocabulary: Omit<VocabularyType, 'id'>) => void;
     initialData?: Omit<VocabularyType, 'id'>;
     isEdit?: boolean;
-}> = ({ open, onClose, onSubmit, initialData, isEdit }) => {
+    topics: { value: string, label: string }[];
+    bands: { value: string, label: string }[];
+}> = ({ open, onClose, onSubmit, initialData, isEdit, topics, bands }) => {
     const [formData, setFormData] = useState<Omit<VocabularyType, 'id'>>(initialData || {
         word: '',
         translate: '',
@@ -128,7 +116,7 @@ const VocabularyFormModal: React.FC<{
                                 className="w-full px-2 py-2 rounded border border-gray-300"
                             >
                                 <option value="">Select Topic</option>
-                                {TOPICS.slice(1).map(t => (
+                                {topics.filter(t => t.value).map(t => (
                                     <option key={t.value} value={t.value}>{t.label}</option>
                                 ))}
                             </select>
@@ -143,7 +131,7 @@ const VocabularyFormModal: React.FC<{
                                 className="w-full px-2 py-2 rounded border border-gray-300"
                             >
                                 <option value="">Select Band</option>
-                                {BANDS.slice(1).map(b => (
+                                {bands.filter(b => b.value).map(b => (
                                     <option key={b.value} value={b.value}>{b.label}</option>
                                 ))}
                             </select>
@@ -187,6 +175,7 @@ const VocabularyFormModal: React.FC<{
         </div>
     );
 };
+// ----- END MODAL ------
 
 const VocabularyItem: React.FC<{
     vocabulary: VocabularyType;
@@ -219,23 +208,18 @@ const VocabularyItem: React.FC<{
             {vocabulary.exp?.length > 0 && (
                 <div className="mt-2">
                     <div className="font-semibold text-gray-700 mb-1">Examples:</div>
-                    {vocabulary.exp?.length > 0 && (
-                        <div className="mt-2">
-                            <div className="font-semibold text-gray-700 mb-1">Examples:</div>
-                            <ul className="list-disc list-inside">
-                                {vocabulary.exp.map((ex, i) => (
-                                    <React.Fragment key={i}>
-                                        <li>
-                                            <span className="text-gray-800">English: {ex.esentence}</span>
-                                        </li>
-                                        <li>
-                                            <span className="text-gray-800">Vietnamese: {ex.vsentence}</span>
-                                        </li>
-                                    </React.Fragment>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                    <ul className="list-disc list-inside">
+                        {vocabulary.exp.map((ex, i) => (
+                            <React.Fragment key={i}>
+                                <li>
+                                    <span className="text-gray-800">English: {ex.esentence}</span>
+                                </li>
+                                <li>
+                                    <span className="text-gray-800">Vietnamese: {ex.vsentence}</span>
+                                </li>
+                            </React.Fragment>
+                        ))}
+                    </ul>
                 </div>
             )}
         </div>
@@ -263,6 +247,23 @@ const Vocabulary: React.FC = () => {
     const [editData, setEditData] = useState<VocabularyType | null>(null);
 
     const API_BASE = "http://localhost:8080/api/practice";
+
+    // --- NEW: State for topics/bands fetched from backend ---
+    const [topics, setTopics] = useState<{ value: string, label: string }[]>([{ value: '', label: 'All Topics' }]);
+    const [bands, setBands] = useState<{ value: string, label: string }[]>([{ value: '', label: 'All Bands' }]);
+
+    // --- Fetch topics/bands from backend ---
+    useEffect(() => {
+        fetch(`${API_BASE}/vocabulary/topics`, { credentials: "include" })
+            .then(res => res.json())
+            .then(data => setTopics([{ value: '', label: 'All Topics' }, ...data.map((t: string) => ({ value: t, label: t }))]))
+            .catch(() => setTopics([{ value: '', label: 'All Topics' }]));
+
+        fetch(`${API_BASE}/vocabulary/bands`, { credentials: "include" })
+            .then(res => res.json())
+            .then(data => setBands([{ value: '', label: 'All Bands' }, ...data.map((b: string) => ({ value: b, label: b }))]))
+            .catch(() => setBands([{ value: '', label: 'All Bands' }]));
+    }, []);
 
     const fetchVocabularies = async () => {
         try {
@@ -409,7 +410,7 @@ const Vocabulary: React.FC = () => {
                             onChange={handleFilterChange}
                             className="w-full px-2 py-2 rounded border border-gray-300"
                         >
-                            {TOPICS.map(t => (
+                            {topics.map(t => (
                                 <option key={t.value} value={t.value}>{t.label}</option>
                             ))}
                         </select>
@@ -419,7 +420,7 @@ const Vocabulary: React.FC = () => {
                             onChange={handleFilterChange}
                             className="w-full px-2 py-2 rounded border border-gray-300"
                         >
-                            {BANDS.map(b => (
+                            {bands.map(b => (
                                 <option key={b.value} value={b.value}>{b.label}</option>
                             ))}
                         </select>
@@ -440,6 +441,8 @@ const Vocabulary: React.FC = () => {
                 open={showAdd}
                 onClose={() => setShowAdd(false)}
                 onSubmit={handleAddVocabulary}
+                topics={topics}
+                bands={bands}
             />
 
             {/* Edit Modal */}
@@ -452,6 +455,8 @@ const Vocabulary: React.FC = () => {
                 }}
                 initialData={editData ? { ...editData, id: undefined } as any : undefined}
                 isEdit
+                topics={topics}
+                bands={bands}
             />
 
             {/* Vocabulary List */}

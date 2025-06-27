@@ -57,4 +57,13 @@ public class VocabularyController {
         Page<Vocabulary> result = vocabularyService.searchAndPaginate(keyword, topic, band, page, size);
         return ResponseEntity.ok(result);
     }
+    @GetMapping("/topics")
+    public ResponseEntity<List<String>> getAllTopics() {
+        return ResponseEntity.ok(vocabularyService.getAllTopics());
+    }
+
+    @GetMapping("/bands")
+    public ResponseEntity<List<String>> getAllBands() {
+        return ResponseEntity.ok(vocabularyService.getAllBands());
+    }
 }

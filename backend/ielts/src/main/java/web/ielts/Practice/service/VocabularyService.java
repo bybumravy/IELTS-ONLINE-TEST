@@ -4,8 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.mongodb.core.query.Query;
 import  web.ielts.Practice.model.*;
 import  web.ielts.Practice.repository.*;
 
@@ -16,6 +17,8 @@ import java.util.Optional;
 public class VocabularyService {
     @Autowired
     private VocabularyRepository vocabularyRepository;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     public List<Vocabulary> getAllVocabularies() {
         return vocabularyRepository.findAll();
@@ -37,22 +40,14 @@ public class VocabularyService {
         vocabulary.setId(id);
         return vocabularyRepository.save(vocabulary);
     }
+    public List<String> getAllTopics() {
+        return mongoTemplate.findDistinct(new Query(), "topic", "vocabularies", String.class);
+    }
 
-//    // Truy vấn theo topic
-//    public List<Vocabulary> getByTopic(String topic) {
-//        return vocabularyRepository.findByTopic(topic);
-//    }
-//
-//    // Truy vấn theo band
-//    public List<Vocabulary> getByBand(String band) {
-//        return vocabularyRepository.findByBand(band);
-//    }
-//
-//    // Truy vấn theo cả topic và band
-//    public List<Vocabulary> getByTopicAndBand(String topic, String band) {
-//        return vocabularyRepository.findByTopicAndBand(topic, band);
-//    }
-    // Phân trang & tìm kiếm theo từ khóa, topic, band
+    // Lấy danh sách band thực tế từ database
+    public List<String> getAllBands() {
+        return mongoTemplate.findDistinct(new Query(), "band", "vocabularies", String.class);
+    }
     public Page<Vocabulary> searchAndPaginate(String keyword, String topic, String band, int page, int size) {
         return vocabularyRepository
                 .findByWordContainingIgnoreCaseAndTopicContainingIgnoreCaseAndBandContainingIgnoreCase(
