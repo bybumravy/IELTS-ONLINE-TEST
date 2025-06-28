@@ -33,7 +33,7 @@ import FulllTest from "@/pages/DoTest/FullTest"
 
 // Result
 import WritingResult from "@/pages/Result/WritingResult"
-
+import ListeningResult from "./pages/Result/ListeningResult"
 import HistoryPage from "@/pages/HistoryPage"
 
 // Admin
@@ -130,6 +130,11 @@ export default function App() {
                     <Route path="/writing-result/:resultId" element={
                         <ProtectedLayout allowRoles={["student"]}>
                             <MainLayout><WritingResult /></MainLayout>
+                        </ProtectedLayout>
+                    } />
+                    <Route path="/listening-result/:resultId" element={
+                        <ProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><ListeningResult/></MainLayout>
                         </ProtectedLayout>
                     } />
                     <Route path="/test-history" element={
