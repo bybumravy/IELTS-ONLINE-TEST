@@ -1,4 +1,3 @@
-
 package web.ielts.Auth.service;
 
 import java.time.LocalDateTime;
@@ -167,5 +166,9 @@ public class AuthService {
 
     return List.of(jwtCookie, jsessionidCookie);
 }
+
+    public User getUserByEmail(String email) {
+        return authRepository.findByEmail(email);
+    }
 }
 

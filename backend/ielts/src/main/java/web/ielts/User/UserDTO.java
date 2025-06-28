@@ -19,7 +19,7 @@ public class UserDTO {
     private String country;
     private String timeZone;
     private String cuurency;
-
+    private String userName;
     public UserDTO() {
     }
 
@@ -36,6 +36,14 @@ public class UserDTO {
         this.country = country;
         this.timeZone = timeZone;
         this.cuurency = cuurency;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getFirstName() {

@@ -1,10 +1,10 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import {Clock, Mic, Play, Square, ChevronRight, CheckCircle, AlertCircle, Volume2, Brain, Menu} from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Mic, Square, ChevronRight, CheckCircle, AlertCircle, Volume2, Brain} from "lucide-react"
 import {useNavigate, useParams} from "react-router-dom";
 import {useAuth} from "@/contexts/AuthContext";
 import {customFetch} from "@/components/sections/customFetch";
@@ -12,8 +12,8 @@ import {DoTestSpeakingHeader} from "@/components/layout/doTest/DoTestSpeakingHea
 
 type Speaking = {
     _id: string
-    username: string;
-    skill: string;
+    username: string
+    skill: string
     part1: {
         partNumber: number
         title: string
@@ -57,7 +57,7 @@ const SpeakingTest = () => {
     const timerRef = useRef<number | null>(null)
     const mediaRecorderRef = useRef<MediaRecorder | null>(null)
     const audioChunksRef = useRef<Blob[]>([])
-    const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
+    const [ setRecordingStartTime] = useState<number | null>(null)
     const [totalRecordingTime, setTotalRecordingTime] = useState<{ [key in Part]: number }>({
         part1: 0,
         part2: 0,
@@ -377,7 +377,6 @@ const SpeakingTest = () => {
         const secs = seconds % 60
         return `${mins}:${secs.toString().padStart(2, "0")}`
     }
-
 
     const getCurrentQuestionKey = () => {
         if (currentPart === "part1") return `part1-${currentQuestionIndex + 1}`
@@ -734,6 +733,7 @@ const SpeakingTest = () => {
                         </Card>
                     </div>
                 </div>
+            </div>
 
                 {/* Navigation Buttons */}
                 <div className="mt-12 space-y-6">
@@ -799,7 +799,6 @@ const SpeakingTest = () => {
                     </div>
                 </div>
             </div>
-        </div>
     )
 }
 
