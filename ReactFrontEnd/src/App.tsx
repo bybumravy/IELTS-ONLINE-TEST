@@ -21,6 +21,7 @@ import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
 // import IeltsResult from "@/pages/IeltsResult";
 import FullTest from "@/pages/DoTest/FullTest";
 import ListeningResult from "@/pages/Result/ListeningResult";
+import SpeakingEvaluation from "@/pages/DoTest/SpeakingEvaluation";
 export default function App() {
     return (
         <AuthProvider>
@@ -37,6 +38,7 @@ export default function App() {
 
                     {/*DoTest*/}
                     <Route path="/test/listening/:testId" element={<ListeningTest />} />
+                    <Route path="/speakingevaluation" element={<SpeakingEvaluation />} />
                     <Route path="/test/reading/:testId" element={<ReadingTest />} />
                     <Route path="/test/writing/:testId" element={<WritingTest />} />
                     <Route path="/test/full/:testId" element={<FullTest />} />
