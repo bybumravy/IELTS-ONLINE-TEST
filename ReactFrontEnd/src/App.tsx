@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { AuthProvider } from "@/contexts/AuthContext"
+import ErrorBoundary from "@/components/ErrorBoundary"
 
 // Layouts
 import { MainLayout } from "@/components/layout/MainLayout"
@@ -16,6 +17,8 @@ import RegisterPage from "@/components/sections/Register"
 import VerifyEmail from "@/components/sections/VerifyEmail"
 import Contact from "@/pages/Contact"
 import HelpCenter from "@/pages/HelpCenter"
+import ErrorPage from "@/pages/ErrorPage"
+import NotFoundPage from "@/pages/NotFoundPage"
 
 // Tips
 import TipPage from "@/pages/TipPage"
@@ -56,118 +59,126 @@ import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
 
 export default function App() {
     return (
-        <AuthProvider>
-            <Router>
-                <Routes>
+        <ErrorBoundary>
+            <AuthProvider>
+                <Router>
+                    <Routes>
 
-                    {/* ========== Public Routes (No login required) ========== */}
-                    <Route path="/" element={
-                        <SoftProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><HomePage /></MainLayout>
-                        </SoftProtectedLayout>
-                    } />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/verify-email" element={<VerifyEmail />} />
-                    <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
-                    <Route path="/help" element={<MainLayout><HelpCenter /></MainLayout>} />
+                        {/* ========== Public Routes (No login required) ========== */}
+                        <Route path="/" element={
+                            <SoftProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><HomePage /></MainLayout>
+                            </SoftProtectedLayout>
+                        } />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/verify-email" element={<VerifyEmail />} />
+                        <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
+                        <Route path="/help" element={<MainLayout><HelpCenter /></MainLayout>} />
 
-                    {/* ========== Soft Protected (Login optional, show more for students) ========== */}
-                    <Route path="/student/listAllTips" element={
-                        <SoftProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><TipPage /></MainLayout>
-                        </SoftProtectedLayout>
-                    } />
-                    <Route path="/tips/:skill" element={
-                        <SoftProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><TipPage /></MainLayout>
-                        </SoftProtectedLayout>
-                    } />
-                    <Route path="/:skill/:id" element={
-                        <SoftProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><TipDetail /></MainLayout>
-                        </SoftProtectedLayout>
-                    } />
-                    <Route path="/test" element={
-                        <SoftProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><ListTestPage /></MainLayout>
-                        </SoftProtectedLayout>
-                    } />
-                    <Route path="/test/:skill" element={
-                        <SoftProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><ListTestPage /></MainLayout>
-                        </SoftProtectedLayout>
-                    } />
+                        {/* ========== Soft Protected (Login optional, show more for students) ========== */}
+                        <Route path="/student/listAllTips" element={
+                            <SoftProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><TipPage /></MainLayout>
+                            </SoftProtectedLayout>
+                        } />
+                        <Route path="/tips/:skill" element={
+                            <SoftProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><TipPage /></MainLayout>
+                            </SoftProtectedLayout>
+                        } />
+                        <Route path="/:skill/:id" element={
+                            <SoftProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><TipDetail /></MainLayout>
+                            </SoftProtectedLayout>
+                        } />
+                        <Route path="/test" element={
+                            <SoftProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><ListTestPage /></MainLayout>
+                            </SoftProtectedLayout>
+                        } />
+                        <Route path="/test/:skill" element={
+                            <SoftProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><ListTestPage /></MainLayout>
+                            </SoftProtectedLayout>
+                        } />
 
 
-                    <Route path="/practice/vocabulary" element={<SoftProtectedLayout allowRoles={["student"]}><MainLayout><VocabularyList /></MainLayout></SoftProtectedLayout>} />
+                        <Route path="/practice/vocabulary" element={<SoftProtectedLayout allowRoles={["student"]}><MainLayout><VocabularyList /></MainLayout></SoftProtectedLayout>} />
 
-                    {/* ========== Student Test Routes (Login required) ========== */}
-                    <Route path="/test/listening/:testId" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <ListeningTest />
-                        </ProtectedLayout>
-                    } />
-                    <Route path="/test/reading/:testId" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <ReadingTest />
-                        </ProtectedLayout>
-                    } />
-                    <Route path="/test/writing/:testId" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <WritingTest />
-                        </ProtectedLayout>
-                    } />
-                    <Route path="/test/speaking/:testId" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <VoiceRecorder />
-                        </ProtectedLayout>
-                    } />
-                    <Route path="/checkMic/:testId" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <SpeakingTest />
-                        </ProtectedLayout>
-                    } />
-                    <Route path="/test/full/:testId" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <FulllTest />
-                        </ProtectedLayout>
-                    } />
-                    <Route path="/writing-result/:resultId" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><WritingResult /></MainLayout>
-                        </ProtectedLayout>
-                    } />
-                    <Route path="/listening-result/:resultId" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><ListeningResult /></MainLayout>
-                        </ProtectedLayout>
-                    } />
-                    <Route path="/test-history" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><HistoryPage /></MainLayout>
-                        </ProtectedLayout>
-                    } />
+                        {/* ========== Student Test Routes (Login required) ========== */}
+                        <Route path="/test/listening/:testId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <ListeningTest />
+                            </ProtectedLayout>
+                        } />
+                        <Route path="/test/reading/:testId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <ReadingTest />
+                            </ProtectedLayout>
+                        } />
+                        <Route path="/test/writing/:testId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <WritingTest />
+                            </ProtectedLayout>
+                        } />
+                        <Route path="/test/speaking/:testId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <VoiceRecorder />
+                            </ProtectedLayout>
+                        } />
+                        <Route path="/checkMic/:testId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <SpeakingTest />
+                            </ProtectedLayout>
+                        } />
+                        <Route path="/test/full/:testId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <FulllTest />
+                            </ProtectedLayout>
+                        } />
+                        <Route path="/writing-result/:resultId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><WritingResult /></MainLayout>
+                            </ProtectedLayout>
+                        } />
+                        <Route path="/listening-result/:resultId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><ListeningResult /></MainLayout>
+                            </ProtectedLayout>
+                        } />
+                        <Route path="/test-history" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><HistoryPage /></MainLayout>
+                            </ProtectedLayout>
+                        } />
 
-                    <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
-                    <Route path="/vnpay-result" element={<MainLayout><VnPayResultPage /></MainLayout>} />
-                    {/* ========== Admin Routes ========== */}
-                    <Route path="/loginadmin" element={<LoginAdmin />} />
-                    <Route path="/adminpage" element={
-                        <ProtectedLayoutRole allowRoles={["admin"]}>
-                            <Adminpage />
-                        </ProtectedLayoutRole>
-                    } />
+                        <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
+                        <Route path="/vnpay-result" element={<MainLayout><VnPayResultPage /></MainLayout>} />
+                        {/* ========== Admin Routes ========== */}
+                        <Route path="/loginadmin" element={<LoginAdmin />} />
+                        <Route path="/adminpage" element={
+                            <ProtectedLayoutRole allowRoles={["admin"]}>
+                                <Adminpage />
+                            </ProtectedLayoutRole>
+                        } />
 
-                    {/* ========== Staff Routes ========== */}
-                    <Route path="/staff-login" element={<StaffLogin />} />
-                    <Route path="/staff-page" element={<ProtectedLayoutRole allowRoles={["teacher", "manager"]}><StaffLayout><StaffPage /></StaffLayout></ProtectedLayoutRole>} />
-                    <Route path="/add-test" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><AddTest /></StaffLayout></ProtectedLayout>} />
-                    <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />
-                    <Route path="/add-vocabulary" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><Vocabulary /></StaffLayout></ProtectedLayout>} />
+                        {/* ========== Staff Routes ========== */}
+                        <Route path="/staff-login" element={<StaffLogin />} />
+                        <Route path="/staff-page" element={<ProtectedLayoutRole allowRoles={["teacher", "manager"]}><StaffLayout><StaffPage /></StaffLayout></ProtectedLayoutRole>} />
+                        <Route path="/add-test" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><AddTest /></StaffLayout></ProtectedLayout>} />
+                        <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />
+                        <Route path="/add-vocabulary" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><Vocabulary /></StaffLayout></ProtectedLayout>} />
 
-                </Routes>
-            </Router>
-        </AuthProvider>
+                        {/* ========== Error Pages ========== */}
+                        <Route path="/error" element={<ErrorPage />} />
+
+                        {/* ========== 404 Not Found (Catch-all) ========== */}
+                        <Route path="*" element={<NotFoundPage />} />
+
+                    </Routes>
+                </Router>
+            </AuthProvider>
+        </ErrorBoundary>
     )
 }
