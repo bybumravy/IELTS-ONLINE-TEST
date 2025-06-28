@@ -1,8 +1,19 @@
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
-import {useAuth} from "@/contexts/AuthContext";
-import {useNavigate, useParams} from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface WritingTask {
     type: string;
@@ -26,21 +37,10 @@ export default function WritingTest() {
     const [wordCountTask2, setWordCountTask2] = useState(0);
     const [writingData, setWritingData] = useState<WritingData | null>(null);
     const [timeRemaining, setTimeRemaining] = useState(60 * 60);
+    const [gradingMethod, setGradingMethod] = useState<"ai" | "human">("ai");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showGradingDialog, setShowGradingDialog] = useState(false);
     const navigate = useNavigate();
-    // // Timer
-    // useEffect(() => {
-    //     const timer = setInterval(() => {
-    //         setTimeRemaining((prev) => {
-    //             if (prev <= 0) {
-    //                 clearInterval(timer);
-    //                 return 0;
-    //             }
-    //             return prev - 1;
-    //         });
-    //     }, 1000);
-    //     return () => clearInterval(timer);
-    // }, []);
 
     // Fetch writing data
     useEffect(() => {
@@ -63,6 +63,10 @@ export default function WritingTest() {
         const words = essayTask2.trim().split(/\s+/).filter((w) => w.length > 0);
         setWordCountTask2(words.length);
     }, [essayTask2]);
+
+    const handleSubmitClick = () => {
+        setShowGradingDialog(true);
+    };
 
     const handleSubmit = async () => {
         if (!writingData) return;
@@ -96,9 +100,12 @@ export default function WritingTest() {
             username: user?.username,
             task1: task1Submission,
             task2: task2Submission,
+            gradingMethod
         };
 
         setIsSubmitting(true);
+        setShowGradingDialog(false);
+
         try {
             const response = await fetch("http://localhost:8080/verify/writing/submit", {
                 method: "POST",
@@ -110,9 +117,16 @@ export default function WritingTest() {
             if (!response.ok) throw new Error("Failed to submit writing");
 
             const result = await response.json();
-            navigate(`/writing-result/${result.id}`);
-            console.log("Writing saved:", result);
-            alert("Your essay has been submitted successfully!");
+            if (gradingMethod === "ai") {
+                // Nếu chọn AI: chuyển đến trang kết quả ngay
+                navigate(`/writing-result/${result.id}`);
+                alert("Bài viết đã được chấm bằng AI!.Your essay has been submitted successfully!");
+            } else {
+                // Nếu chọn giáo viên: hiển thị thông báo chờ
+                alert("Bài viết đã gửi đến giáo viên. Bạn sẽ nhận kết quả trong vòng 3-5 ngày tới.Your essay has been submitted successfully!");
+                navigate("/"); // Hoặc trang nào đó phù hợp
+            }
+
         } catch (error) {
             console.error("Error submitting writing:", error);
             alert("Submit failed. Please try again.");
@@ -123,7 +137,49 @@ export default function WritingTest() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <DoTestHeader initialTime={60 * 60} onSubmit={handleSubmit} />
+            <DoTestHeader initialTime={60 * 60} onSubmit={handleSubmitClick} />
+
+            {/* Dialog chọn phương thức chấm bài */}
+            <Dialog open={showGradingDialog} onOpenChange={setShowGradingDialog}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Chọn phương thức chấm bài</DialogTitle>
+                        <DialogDescription>
+                            Vui lòng chọn cách bạn muốn bài viết của mình được chấm điểm
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <RadioGroup
+                            defaultValue="ai"
+                            onValueChange={(value) => setGradingMethod(value as "ai" | "human")}
+                        >
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="ai" id="ai" />
+                                <Label htmlFor="ai">Chấm bằng AI (Nhanh chóng)</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="teacher" id="human" />
+                                <Label htmlFor="teacher">Chấm bởi giáo viên (Chính xác hơn)</Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowGradingDialog(false)}
+                        >
+                            Hủy
+                        </Button>
+                        <Button
+                            type="submit"
+                            onClick={handleSubmit}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? "Đang gửi..." : "Xác nhận"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <div className="flex h-[calc(100vh-100px)]">
                 {/* Left Panel */}
@@ -131,8 +187,12 @@ export default function WritingTest() {
                     {currentTask === 1 ? (
                         <div>
                             <h1 className="text-xl font-bold text-gray-800 mb-2">WRITING TASK 1</h1>
-                            <p className="text-sm text-gray-600 mb-4">You should spend about <strong>20 minutes</strong> on this task.</p>
-                            <p className="text-sm text-gray-700 mb-4">{writingData?.task1?.question || "Loading..."}</p>
+                            <p className="text-sm text-gray-600 mb-4">
+                                You should spend about <strong>20 minutes</strong> on this task.
+                            </p>
+                            <p className="text-sm text-gray-700 mb-4">
+                                {writingData?.task1?.question || "Loading..."}
+                            </p>
                             {writingData?.task1?.imageUrl && (
                                 <div className="mb-4">
                                     <img
@@ -142,14 +202,22 @@ export default function WritingTest() {
                                     />
                                 </div>
                             )}
-                            <p className="text-sm text-gray-700 mb-6">You should write <strong>at least 150 words</strong>.</p>
+                            <p className="text-sm text-gray-700 mb-6">
+                                You should write <strong>at least 150 words</strong>.
+                            </p>
                         </div>
                     ) : (
                         <div>
                             <h1 className="text-xl font-bold text-gray-800 mb-2">WRITING TASK 2</h1>
-                            <p className="text-sm text-gray-600 mb-4">You should spend about <strong>40 minutes</strong> on this task.</p>
-                            <p className="text-sm text-gray-700 mb-4">{writingData?.task2?.question || "Loading..."}</p>
-                            <p className="text-sm text-gray-700 mb-6">Write <strong>at least 250 words</strong>.</p>
+                            <p className="text-sm text-gray-600 mb-4">
+                                You should spend about <strong>40 minutes</strong> on this task.
+                            </p>
+                            <p className="text-sm text-gray-700 mb-4">
+                                {writingData?.task2?.question || "Loading..."}
+                            </p>
+                            <p className="text-sm text-gray-700 mb-6">
+                                Write <strong>at least 250 words</strong>.
+                            </p>
                         </div>
                     )}
                 </div>
@@ -165,7 +233,9 @@ export default function WritingTest() {
                                 className="flex-1 resize-none border-gray-300 focus:border-teal-500 focus:ring-teal-500"
                             />
                             <div className="mt-4 flex justify-between items-center">
-                                <div className="text-sm text-gray-600">Words Count: <span className="font-medium">{wordCountTask1}</span></div>
+                                <div className="text-sm text-gray-600">
+                                    Words Count: <span className="font-medium">{wordCountTask1}</span>
+                                </div>
                             </div>
                         </>
                     ) : (
@@ -177,7 +247,9 @@ export default function WritingTest() {
                                 className="flex-1 resize-none border-gray-300 focus:border-teal-500 focus:ring-teal-500"
                             />
                             <div className="mt-4 flex justify-between items-center">
-                                <div className="text-sm text-gray-600">Words Count: <span className="font-medium">{wordCountTask2}</span></div>
+                                <div className="text-sm text-gray-600">
+                                    Words Count: <span className="font-medium">{wordCountTask2}</span>
+                                </div>
                             </div>
                         </>
                     )}
