@@ -30,6 +30,8 @@ import SpeakingTest from "@/pages/DoTest/SpeakingTest"
 import VoiceRecorder from "@/pages/DoTest/checkMic"
 import FulllTest from "@/pages/DoTest/FullTest"
 
+//Vocab
+import Vocabulary from "./pages/practice/Vocabulary"
 
 // Result
 import WritingResult from "@/pages/Result/WritingResult"
@@ -45,6 +47,7 @@ import StaffLogin from "@/components/sections/StaffLogin"
 import { StaffPage } from "@/pages/StaffPage"
 import AddTest from "@/pages/AddTest"
 import AcceptTestPage from "@/pages/AcceptTestPage"
+import VocabularyList from "./pages/student/VocabularyList"
 
 // Protected Layouts
 import SoftProtectedLayout from "@/components/sections/SoftProtectedLayout"
@@ -96,6 +99,9 @@ export default function App() {
                         </SoftProtectedLayout>
                     } />
 
+
+                    <Route path="/practice/vocabulary" element={<SoftProtectedLayout allowRoles={["student"]}><MainLayout><VocabularyList /></MainLayout></SoftProtectedLayout>} />
+
                     {/* ========== Student Test Routes (Login required) ========== */}
                     <Route path="/test/listening/:testId" element={
                         <ProtectedLayout allowRoles={["student"]}>
@@ -134,7 +140,7 @@ export default function App() {
                     } />
                     <Route path="/listening-result/:resultId" element={
                         <ProtectedLayout allowRoles={["student"]}>
-                            <MainLayout><ListeningResult/></MainLayout>
+                            <MainLayout><ListeningResult /></MainLayout>
                         </ProtectedLayout>
                     } />
                     <Route path="/test-history" element={
@@ -158,6 +164,7 @@ export default function App() {
                     <Route path="/staff-page" element={<ProtectedLayoutRole allowRoles={["teacher", "manager"]}><StaffLayout><StaffPage /></StaffLayout></ProtectedLayoutRole>} />
                     <Route path="/add-test" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><AddTest /></StaffLayout></ProtectedLayout>} />
                     <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />
+                    <Route path="/add-vocabulary" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><Vocabulary /></StaffLayout></ProtectedLayout>} />
 
                 </Routes>
             </Router>

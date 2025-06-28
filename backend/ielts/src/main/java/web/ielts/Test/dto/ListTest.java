@@ -14,9 +14,6 @@ public class ListTest {
         this.title = title;
         this.year = year;
     }
-
-    // getters + setters
-
     public String getId() {
         return id;
     }
