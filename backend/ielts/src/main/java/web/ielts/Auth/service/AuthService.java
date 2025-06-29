@@ -60,31 +60,24 @@ public class AuthService {
         return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
     }
     public ResponseEntity<?> forgotpassword(String email) {
+        // Giả sử bạn tìm token bằng email (hoặc cách khác)
+        VerificationToken token = tokenRepository.findByToken(email); // giả định tìm theo token hoặc email
 
-       User user = authRepository.findByEmail(email);
-       System.out.println(user.toString());
-           if (user == null) {
-               return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                       .body(Collections.singletonMap("message", "Email chưa đăng ký"));
-           }
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Collections.singletonMap("message", "Token không tồn tại"));
+        } else {
+            if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Collections.singletonMap("message", "Token đã hết hạn"));
+            } else {
+                // Token hợp lệ
+                // Thực hiện reset password hoặc gửi email xác nhận
+                emailForgetPasswordConfig.sendResetPasswordEmail(token.getUserEmail(), token.getToken());
 
-        // Tạo token xác thực
-        String token = UUID.randomUUID().toString();
-        VerificationToken verificationToken = new VerificationToken(
-                token,
-                user.getEmail(),
-                user.getPassword(),
-                LocalDateTime.now().plusHours(24)
-                ,"student"
-        );
-
-        tokenRepository.save(verificationToken);
-
-
-        emailForgetPasswordConfig.sendResetPasswordEmail(user.getEmail(),token);
-
-        return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
-
+                return ResponseEntity.ok("Gửi email thành công, vui lòng kiểm tra email.");
+            }
+        }
     }
     public ResponseEntity<?> resetPassword(String token, String newPassword) {
         VerificationToken verificationToken = tokenRepository.findByToken(token);
@@ -96,14 +89,22 @@ public class AuthService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn");
         }
 
+        // Thêm check password mới
+        if (newPassword == null || newPassword.length() < 8) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mật khẩu mới phải có ít nhất 8 ký tự");
+        }
+
         User user = authRepository.findByEmail(verificationToken.getUserEmail());
+        if(user == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User không tồn tại");
+        }
+
         user.setPassword(encoder.encode(newPassword));
         authRepository.save(user);
 
-        // Trả về role trong body JSON
         Map<String, String> response = new HashMap<>();
         response.put("message", "Đặt lại mật khẩu thành công");
-        response.put("role", user.getRole().toLowerCase()); // hoặc xử lý nếu là enum/list
+        response.put("role", user.getRole().toLowerCase());
 
         return ResponseEntity.ok(response);
     }
