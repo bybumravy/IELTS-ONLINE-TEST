@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 const audioUrl =
-    "https://swpieltsbucket.s3.ap-southeast-1.amazonaws.com/audio/user/phamhoangviet05052005@gmail.com/T002_685fe2cd72a6917d6ced8905/part2.mp3";
+    "https://swpieltsbucket.s3.ap-southeast-1.amazonaws.com/audio/user/phamhoangviet05052005@gmail.com/T001_68610f3022439e341eda8a14/part1-1.mp3";
 
 export default function SpeakingEvaluation() {
     const [result, setResult] = useState<any>(null);
