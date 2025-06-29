@@ -1,19 +1,38 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { CheckCircle, XCircle } from "lucide-react";
 
 export default function VnPayResultPage() {
     const [searchParams] = useSearchParams();
     const [status, setStatus] = useState<"success" | "failed" | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const responseCode = searchParams.get("vnp_ResponseCode");
         if (responseCode === "00") {
             setStatus("success");
+
+            // Gọi API nâng cấp premium
+            fetch("http://localhost:8080/api/user/upgrade-premium", {
+                method: "POST",
+                credentials: "include", // QUAN TRỌNG để gửi cookie JWT
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Failed to upgrade premium");
+                    return res.text();
+                })
+                .then(msg => console.log(msg))
+                .catch(err => console.error(err));
+
+            // Redirect sau 3 giây
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 3000);
         } else {
             setStatus("failed");
         }
     }, [searchParams]);
+
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 text-center px-4">

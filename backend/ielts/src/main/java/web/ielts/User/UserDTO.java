@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "user")
 public class UserDTO {
-
+    private String username;
     private String firstName;
     private String lastName;
     @Id
@@ -150,5 +150,13 @@ public class UserDTO {
                 ", timeZone='" + timeZone + '\'' +
                 ", cuurency='" + cuurency + '\'' +
                 '}';
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

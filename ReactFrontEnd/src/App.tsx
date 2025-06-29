@@ -52,6 +52,7 @@ import AcceptTestPage from "@/pages/AcceptTestPage"
 import SoftProtectedLayout from "@/components/sections/SoftProtectedLayout"
 import ProtectedLayout from "@/components/sections/ProtectedLayout"
 import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
+import SpeakingEvaluation from "@/pages/DoTest/SpeakingEvaluation";
 
 export default function App() {
     return (
@@ -184,6 +185,7 @@ export default function App() {
                     <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />
                     <Route path="/forgot-password" element={<ForgetPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/speakingevaluation" element={<SpeakingEvaluation />} />
                 </Routes>
 
             </Router>

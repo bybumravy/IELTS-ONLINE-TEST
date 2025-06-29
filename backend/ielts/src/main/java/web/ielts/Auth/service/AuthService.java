@@ -218,5 +218,9 @@ public class AuthService {
 
 
 
+
+    public User getUserByEmail(String email) {
+        return authRepository.findByEmail(email);
+    }
 }
 

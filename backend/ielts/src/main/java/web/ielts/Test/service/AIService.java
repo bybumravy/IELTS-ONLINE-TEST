@@ -156,23 +156,60 @@ public class AIService {
                 "   - Missing key features = automatic Band 5 cap"+
                 "\n" +
                 "2. EVALUATION (Official IELTS Criteria):\n" +
-                "• Task Achievement (25%):\n" +
-                "     - [MUST HAVE] Clear overview paragraph (missing = max Band 5)\n" +
-                "     - Accurate data reporting (1 error = -0.5 band)\n" +
-                "     - Appropriate detail selection\n" +
-                "   • Coherence & Cohesion (25%):\n" +
-                "     - Logical paragraphing (Introduction/Overview/Details)\n" +
-                "     - Effective linking (but not repetitive)\n" +
-                "     - Progression (Band 7+ requires progression beyond listing)\n" +
-                "   • Lexical Resource (25%):\n" +
-                "     - Academic vocabulary (Band 9 requires ≥8 advanced terms)\n" +
-                "     - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
-                "     - Spelling (3 errors = -0.5 band)\n" +
-                "   • Grammar (25%):\n" +
-                "     - Tense accuracy (graph data must use past tense if historical)\n" +
-                "     - Complex structures (Band 7+ needs ≥3 complex sentences)\n" +
-                "     - Punctuation (comma errors = -0.5 band)"+
-                "\n" +
+                        "• Task Achievement (25%):\n" +
+                        "- [MUST HAVE] Each main idea must be clearly extended with explanation and/or example. \n" +
+                        "  (If ideas are presented without development, cap maximum Band 6.)\n" +
+                        "- Ideas must be specific and avoid generalised statements. \n" +
+                        "  (Over-generalisation = -0.5 band)\n"+
+                        "   - [MUST HAVE] Clear overview paragraph (missing = max Band 5)\n" +
+                        "   - Accurate data reporting (1 error = -0.5 band)\n" +
+                        "   - Appropriate detail selection\n" +
+                        "   - IELTS Public Descriptors:\n" +
+                        "     • Band 9: Fully addresses all parts of the task. Presents a fully developed position with relevant, fully extended and well-supported ideas.\n" +
+                        "     • Band 8: Sufficiently addresses all parts. Presents a well-developed response with relevant, extended and supported ideas.\n" +
+                        "     • Band 7: Addresses all parts. Presents a clear position, extends and supports main ideas though there may be over-generalisation or lack of focus.\n" +
+                        "     • Band 6: Addresses most parts. Presents relevant main ideas though some may lack clarity, development or conclusions.\n" +
+                        "     • Band 5: Addresses task only partially. Some main ideas limited/irrelevant. Development may be unclear.\n" +
+                        "\n" +
+                        "• Coherence & Cohesion (25%):\n" +
+                        "- Cohesion must include varied linking devices and natural progression.\n" +
+                        "  (If listing-type progression dominates, cap at Band 6.)\n"+
+                        "   - Logical paragraphing (Introduction/Overview/Details)\n" +
+                        "   - Effective linking (but not repetitive)\n" +
+                        "   - Progression (Band 7+ requires progression beyond listing)\n" +
+                        "   - IELTS Public Descriptors:\n" +
+                        "     • Band 9: Uses cohesion naturally so it attracts no attention. Skilfully manages paragraphing.\n" +
+                        "     • Band 8: Sequences information and ideas logically. Manages all aspects of cohesion well. Uses paragraphing sufficiently and appropriately.\n" +
+                        "     • Band 7: Logically organises information with clear progression. Uses cohesive devices appropriately, though there may be under-/over-use.\n" +
+                        "     • Band 6: Arranges information coherently but cohesion may be faulty or mechanical. Paragraphing present but not always logical.\n" +
+                        "     • Band 5: Presents information with some organisation but lacks overall progression. Inadequate, inaccurate or over-use of cohesive devices. Poor paragraphing.\n" +
+                        "\n" +
+                        "• Lexical Resource (25%):\n"+
+                        "- Advanced vocabulary must include topic-specific academic collocations. \n" +
+                        "  (If vocabulary remains general and safe, cap at Band 6.)\n"+
+                        "   - Academic vocabulary (Band 9 requires ≥8 advanced terms)\n" +
+                        "   - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
+                        "   - Spelling (3 errors = -0.5 band)\n" +
+                        "   - IELTS Public Descriptors:\n" +
+                        "     • Band 9: Uses wide range of vocabulary naturally and precisely. Sophisticated control. Rare minor slips.\n" +
+                        "     • Band 8: Uses wide range fluently and flexibly. Skilfully uses uncommon items with rare inaccuracies.\n" +
+                        "     • Band 7: Uses sufficient range with flexibility. Attempts less common items with some errors.\n" +
+                        "     • Band 6: Uses adequate range. Attempts less common terms but with inaccuracy.\n" +
+                        "     • Band 5: Limited range. Noticeable spelling/word formation errors. May cause difficulty for the reader.\n" +
+                        "\n" +
+                        "• Grammar (25%):\n" +
+                        "- Minimum of 3 complex structures per body paragraph.\n" +
+                        "  (If majority are simple or compound sentences, cap at Band 6.)\n"+
+                        "   - Tense accuracy (graph data must use past tense if historical)\n" +
+                        "   - Complex structures (Band 7+ needs ≥3 complex sentences)\n" +
+                        "   - Punctuation (comma errors = -0.5 band)\n" +
+                        "   - IELTS Public Descriptors:\n" +
+                        "     • Band 9: Uses wide range of structures with full flexibility and accuracy. Rare minor slips.\n" +
+                        "     • Band 8: Uses wide range of structures. Majority of sentences are error-free.\n" +
+                        "     • Band 7: Uses variety of complex structures. Frequent error-free sentences.\n" +
+                        "     • Band 6: Mix of simple/complex forms. Some errors but rarely reduce communication.\n" +
+                        "     • Band 5: Limited range. Frequent grammatical and punctuation errors. Errors can cause difficulty for the reader."+
+                        "\n" +
                 "3. SCORING SYSTEM:\n" +
                 "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
                 "   - Deduct 0.5 band per 2 major errors\n" +
@@ -215,31 +252,63 @@ public class AIService {
         String promptBuilder2 =
                 "You must return response strictly in JSON format.\n" +
                         "You are an IELTS examiner analyzing Writing Task 2. Extremely strict grading" +
-                        "1. DATA VERIFICATION:\n" +
-                        "   - Cross-check ALL data points/trends between image and student's answer\n" +
-                        "   - Flag ANY discrepancies\n" +
-                        "   - Verify ALL numerical values/percentages against visual data (tolerance: 0% error)\n" +
-                        "   - Missing key features = automatic Band 5 cap"+
+                        "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
                         "\n" +
-                        "2. EVALUATION (Official IELTS Criteria):\n" +
                         "• Task Achievement (25%):\n" +
-                        "     - [MUST HAVE] Clear overview paragraph (missing = max Band 5)\n" +
-                        "     - Accurate data reporting (1 error = -0.5 band)\n" +
-                        "     - Appropriate detail selection\n" +
-                        "   • Coherence & Cohesion (25%):\n" +
-                        "     - Logical paragraphing (Introduction/Overview/Details)\n" +
-                        "     - Effective linking (but not repetitive)\n" +
-                        "     - Progression (Band 7+ requires progression beyond listing)\n" +
-                        "   • Lexical Resource (25%):\n" +
-                        "     - Academic vocabulary (Band 9 requires ≥8 advanced terms)\n" +
-                        "     - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
-                        "     - Spelling (3 errors = -0.5 band)\n" +
-                        "   • Grammar (25%):\n" +
-                        "     - Tense accuracy (graph data must use past tense if historical)\n" +
-                        "     - Complex structures (Band 7+ needs ≥3 complex sentences)\n" +
-                        "     - Punctuation (comma errors = -0.5 band)"+
+                        "- [MUST HAVE] Each main idea must be clearly extended with explanation and/or example. \n" +
+                        "  (If ideas are presented without development, cap maximum Band 6.)\n" +
+                        "- Ideas must be specific and avoid generalised statements. \n" +
+                        "  (Over-generalisation = -0.5 band)\n"+
+                        "   - [MUST HAVE] Clear overview paragraph (missing = max Band 5)\n" +
+                        "   - Accurate data reporting (1 error = -0.5 band)\n" +
+                        "   - Appropriate detail selection\n" +
+                        "   - IELTS Public Descriptors:\n" +
+                        "     • Band 9: Fully addresses all parts of the task. Presents a fully developed position with relevant, fully extended and well-supported ideas.\n" +
+                        "     • Band 8: Sufficiently addresses all parts. Presents a well-developed response with relevant, extended and supported ideas.\n" +
+                        "     • Band 7: Addresses all parts. Presents a clear position, extends and supports main ideas though there may be over-generalisation or lack of focus.\n" +
+                        "     • Band 6: Addresses most parts. Presents relevant main ideas though some may lack clarity, development or conclusions.\n" +
+                        "     • Band 5: Addresses task only partially. Some main ideas limited/irrelevant. Development may be unclear.\n" +
                         "\n" +
-                        "3. SCORING SYSTEM:\n" +
+                        "• Coherence & Cohesion (25%):\n" +
+                        "- Cohesion must include varied linking devices and natural progression.\n" +
+                        "  (If listing-type progression dominates, cap at Band 6.)\n"+
+                        "   - Logical paragraphing (Introduction/Overview/Details)\n" +
+                        "   - Effective linking (but not repetitive)\n" +
+                        "   - Progression (Band 7+ requires progression beyond listing)\n" +
+                        "   - IELTS Public Descriptors:\n" +
+                        "     • Band 9: Uses cohesion naturally so it attracts no attention. Skilfully manages paragraphing.\n" +
+                        "     • Band 8: Sequences information and ideas logically. Manages all aspects of cohesion well. Uses paragraphing sufficiently and appropriately.\n" +
+                        "     • Band 7: Logically organises information with clear progression. Uses cohesive devices appropriately, though there may be under-/over-use.\n" +
+                        "     • Band 6: Arranges information coherently but cohesion may be faulty or mechanical. Paragraphing present but not always logical.\n" +
+                        "     • Band 5: Presents information with some organisation but lacks overall progression. Inadequate, inaccurate or over-use of cohesive devices. Poor paragraphing.\n" +
+                        "\n" +
+                        "• Lexical Resource (25%):\n"+
+                        "- Advanced vocabulary must include topic-specific academic collocations. \n" +
+                        "  (If vocabulary remains general and safe, cap at Band 6.)\n"+
+                        "   - Academic vocabulary (Band 9 requires ≥8 advanced terms)\n" +
+                        "   - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
+                        "   - Spelling (3 errors = -0.5 band)\n" +
+                        "   - IELTS Public Descriptors:\n" +
+                        "     • Band 9: Uses wide range of vocabulary naturally and precisely. Sophisticated control. Rare minor slips.\n" +
+                        "     • Band 8: Uses wide range fluently and flexibly. Skilfully uses uncommon items with rare inaccuracies.\n" +
+                        "     • Band 7: Uses sufficient range with flexibility. Attempts less common items with some errors.\n" +
+                        "     • Band 6: Uses adequate range. Attempts less common terms but with inaccuracy.\n" +
+                        "     • Band 5: Limited range. Noticeable spelling/word formation errors. May cause difficulty for the reader.\n" +
+                        "\n" +
+                        "• Grammar (25%):\n" +
+                        "- Minimum of 3 complex structures per body paragraph.\n" +
+                        "  (If majority are simple or compound sentences, cap at Band 6.)\n"+
+                        "   - Tense accuracy (graph data must use past tense if historical)\n" +
+                        "   - Complex structures (Band 7+ needs ≥3 complex sentences)\n" +
+                        "   - Punctuation (comma errors = -0.5 band)\n" +
+                        "   - IELTS Public Descriptors:\n" +
+                        "     • Band 9: Uses wide range of structures with full flexibility and accuracy. Rare minor slips.\n" +
+                        "     • Band 8: Uses wide range of structures. Majority of sentences are error-free.\n" +
+                        "     • Band 7: Uses variety of complex structures. Frequent error-free sentences.\n" +
+                        "     • Band 6: Mix of simple/complex forms. Some errors but rarely reduce communication.\n" +
+                        "     • Band 5: Limited range. Frequent grammatical and punctuation errors. Errors can cause difficulty for the reader."+
+                        "\n" +
+                        "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
                         "   - Deduct 0.5 band per 2 major errors\n" +
                         "   - Automatic caps: No overview → max 5.0 | Data errors → max 6.5"+
