@@ -7,13 +7,18 @@ export default function SpeakingEvaluation() {
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
 
+    const question = "Where are you from?"; // hoặc lấy từ input nếu muốn
+
     const handleEvaluate = async () => {
         setLoading(true);
         try {
             const res = await fetch("http://localhost:8080/api/speaking/evaluate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ audioUrl }),
+                body: JSON.stringify({
+                    audioUrl,
+                    question, // gửi thêm câu hỏi
+                }),
             });
 
             if (!res.ok) throw new Error("Chấm điểm thất bại");
@@ -27,7 +32,6 @@ export default function SpeakingEvaluation() {
             setLoading(false);
         }
     };
-
     return (
         <div className="p-4 max-w-xl mx-auto">
             <h2 className="text-xl font-bold mb-4">Chấm điểm Speaking</h2>

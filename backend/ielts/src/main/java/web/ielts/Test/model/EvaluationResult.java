@@ -1,19 +1,16 @@
 package web.ielts.Test.model;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.Map;
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EvaluationResult {
     private String transcript;
-    private Map<String, Double> score;
+    private double fluency;
+    private double grammar;
+    private double vocabulary;
+    private double pronunciation;
     private double overallBand;
-    private String feedback;
-
-    public EvaluationResult(String transcript, Map<String, Double> score, double overallBand, String feedback) {
-        this.transcript = transcript;
-        this.score = score;
-        this.overallBand = overallBand;
-        this.feedback = feedback;
-    }
 
     public String getTranscript() {
         return transcript;
@@ -23,12 +20,36 @@ public class EvaluationResult {
         this.transcript = transcript;
     }
 
-    public Map<String, Double> getScore() {
-        return score;
+    public double getFluency() {
+        return fluency;
     }
 
-    public void setScore(Map<String, Double> score) {
-        this.score = score;
+    public void setFluency(double fluency) {
+        this.fluency = fluency;
+    }
+
+    public double getGrammar() {
+        return grammar;
+    }
+
+    public void setGrammar(double grammar) {
+        this.grammar = grammar;
+    }
+
+    public double getVocabulary() {
+        return vocabulary;
+    }
+
+    public void setVocabulary(double vocabulary) {
+        this.vocabulary = vocabulary;
+    }
+
+    public double getPronunciation() {
+        return pronunciation;
+    }
+
+    public void setPronunciation(double pronunciation) {
+        this.pronunciation = pronunciation;
     }
 
     public double getOverallBand() {
@@ -46,4 +67,12 @@ public class EvaluationResult {
     public void setFeedback(String feedback) {
         this.feedback = feedback;
     }
+
+    private String feedback;
+
+    // ✅ Constructor mặc định để Jackson có thể deserialize
+    public EvaluationResult() {}
+
+
+
 }
