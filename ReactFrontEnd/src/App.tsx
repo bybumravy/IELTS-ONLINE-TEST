@@ -16,6 +16,7 @@ import SpeakingTest from "@/pages/DoTest/SpeakingTest";
 import VerifyEmail from "@/components/sections/VerifyEmail";
 import VnPayResultPage from "@/pages/Payment/VnPayResultPage.tsx";
 import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
+import ReviewReport from "@/pages/ReviewReport.tsx";
 // import Contact from "@/pages/Contact";
 // import HelpCenter from "@/pages/HelpCenter";
 // import IeltsResult from "@/pages/IeltsResult";
@@ -56,20 +57,19 @@ export default function App() {
                     <Route path="/tips/:skill" element={<MainLayout><TipPage/></MainLayout>} />
 
                     {/*UserMenu*/}
-                    <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
-                    <Route path="/vnpay-result" element={<MainLayout><VnPayResultPage /></MainLayout>} />
                     {/*<Route path="/test-history" element={<MainLayout><HistoryPage /></MainLayout>}/>*/}
                     {/*Footer*/}
                     {/*<Route path="/contact" element={<MainLayout><Contact /></MainLayout>}/>*/}
                     {/*<Route path="/help" element={<MainLayout><HelpCenter /></MainLayout>}/>*/}
 
                     {/*Staff*/}
+                    <Route path="/review-report" element={<MainLayout><ReviewReport /></MainLayout>} />
                     {/*<Route path="/add-test" element={<StaffLayout><AddTest /></StaffLayout>}/>*/}
                     {/*<Route path="/staff-page" element={<StaffLayout><StaffPage /></StaffLayout>}/>*/}
 
                     {/*Premium*/}
-                    {/*<Route path="/api/payment/create" element={<MainLayout><PaymentPage/></MainLayout>} />*/}
-                    {/*<Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />*/}
+                    <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
+                    <Route path="/vnpay-result" element={<MainLayout><VnPayResultPage /></MainLayout>} />
 
                 </Routes>
             </Router>

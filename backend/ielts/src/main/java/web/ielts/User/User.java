@@ -1,6 +1,10 @@
 package web.ielts.User;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,7 +14,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Document(collection = "user")
 public class User implements UserDetails {
 
@@ -21,107 +28,19 @@ public class User implements UserDetails {
     private String password;
     private String role;
     private LocalDateTime premiumExpiry;
+//    private boolean premium;
     private String googleID;
 
-    public User() {
-    }
+    private String createdAt;
     public User(String email, String password,String role) {
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", role='" + role + '\'' +
-                ", premiumExpiry=" + premiumExpiry +
-                ", googleID='" + googleID + '\'' +
-                ", createdAt='" + createdAt + '\'' +
-                '}';
+    public boolean isPremiumActive() {
+        return premiumExpiry != null && premiumExpiry.isAfter(LocalDateTime.now());
     }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public LocalDateTime getPremiumExpiry() {
-        return premiumExpiry;
-    }
-
-    public void setPremiumExpiry(LocalDateTime premiumExpiry) {
-        this.premiumExpiry = premiumExpiry;
-    }
-
-    public String getGoogleID() {
-        return googleID;
-    }
-
-    public void setGoogleID(String googleID) {
-        this.googleID = googleID;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    private String createdAt;
-
-    public User(String firstName, String lastName, String email, String password, String role, LocalDateTime premiumExpiry, String googleID, String createdAt) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-        this.premiumExpiry = premiumExpiry;
-        this.googleID = googleID;
-        this.createdAt = createdAt;
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority(role));

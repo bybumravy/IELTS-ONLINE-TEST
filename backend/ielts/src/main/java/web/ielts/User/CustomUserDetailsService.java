@@ -12,6 +12,8 @@ import web.ielts.Auth.repository.AuthRepository;
 public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private AuthRepository authRepository;
+    @Autowired
+    private UserService userService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -19,6 +21,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
-        return user;
+        return userService.resetPremiumIfExpired(user);
     }
 }
