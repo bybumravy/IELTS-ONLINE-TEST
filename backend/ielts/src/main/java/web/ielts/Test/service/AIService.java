@@ -43,28 +43,47 @@ public class AIService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
 
+        // 🧠 Cấu hình system message nghiêm ngặt
+        String systemMessage = """
+You are an official IELTS Speaking examiner. You MUST follow all deduction rules given in the prompt STRICTLY.
+- Do not skip even minor vocabulary or grammar errors.
+- Always explain each deduction clearly.
+- NEVER give full score unless all descriptors are perfectly met.
+""";
+
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-4",
                 "messages", List.of(
-                        Map.of("role", "system", "content", "You are an IELTS Speaking evaluator."),
+                        Map.of("role", "system", "content", systemMessage),
                         Map.of("role", "user", "content", prompt)
                 ),
-                "temperature", 0.7
+                "temperature", 0,   // 🔥 RẤT QUAN TRỌNG: Ổn định đầu ra
+                "top_p", 1,
+                "max_tokens", 1500  // Tuỳ vào độ dài transcript, để tránh cắt nội dung
         );
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                "https://api.openai.com/v1/chat/completions",
-                entity,
-                String.class
-        );
-
         try {
-            JsonNode root = new ObjectMapper().readTree(response.getBody());
-            return root.get("choices").get(0).get("message").get("content").asText();
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    "https://api.openai.com/v1/chat/completions",
+                    entity,
+                    String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                JsonNode root = new ObjectMapper().readTree(response.getBody());
+                return root
+                        .path("choices")
+                        .path(0)
+                        .path("message")
+                        .path("content")
+                        .asText();
+            } else {
+                throw new RuntimeException("OpenAI API error: " + response.getStatusCode());
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse GPT response", e);
+            throw new RuntimeException("Failed to call OpenAI GPT API or parse response", e);
         }
     }
 
