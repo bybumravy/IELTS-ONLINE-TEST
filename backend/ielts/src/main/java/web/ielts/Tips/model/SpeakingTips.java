@@ -13,6 +13,13 @@ public class SpeakingTips {
     private String skill;
     private List<String> strategy;
 
+    public SpeakingTips(String id, String type, String description, String skill) {
+        this.id = id;
+        this.type = type;
+        this.description = description;
+        this.skill = skill;
+    }
+
     private List<String> tips;
 
     private List<Exercise> exercises;

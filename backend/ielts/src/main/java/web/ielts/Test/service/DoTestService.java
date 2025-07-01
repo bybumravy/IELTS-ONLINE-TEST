@@ -3,6 +3,7 @@ package web.ielts.Test.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -49,14 +50,19 @@ public class DoTestService {
 
     @Autowired
     private ListeningAnswerRepository listeningAnswerRepository;
+
     @Autowired
     private SpeakingAnswerRepository speakingAnswerRepository;
+
     @Autowired
     private TestRepository testRepository;
+
     @Autowired
     private AIService aiService;
+
     @Autowired
     private SpeakingRepository speakingRepository;
+
     @Autowired
     private S3Client s3Client;
 
@@ -66,14 +72,13 @@ public class DoTestService {
     @Value("${aws.s3.region}")
     private String region;
 
-
     public Speaking getSpeakingByTestId(String testId) {
         return speakingRepository.findByTestId(testId);
     }
+
     public Optional<Writing> getWritingByTestId(String testId) {
         return writingRepository.findById(testId);
     }
-
 
     public List<Listening> getAllListeningTests() {
         return listeningRepository.findAll();
@@ -86,6 +91,7 @@ public class DoTestService {
     public Reading getReadingByTestId(String testId) {
         return readingRepository.findByTestId(testId);
     }
+
     public Test getTestByTestId(String testId) {
         return testRepository.findById(testId).orElse(null);
     }
@@ -95,111 +101,165 @@ public class DoTestService {
     }
 
     public ListeningAnswer saveListeningAnswer(ListeningAnswer answer) {
-
         return listeningAnswerRepository.save(answer);
     }
 
-
     public WritingAnswer saveWritingAnswer(WritingAnswer answer) {
+        System.out.println("====== START SAVING WRITING ANSWER ======");
+
+        // Check 1: Validate input
+        if (answer == null) {
+            System.out.println("[ERROR] Writing answer must not be null.");
+            throw new IllegalArgumentException("Writing answer cannot be null");
+        }
+        System.out.println("✅ Input validation passed");
+
         WritingAnswer savedAnswer = writingAnswerRepository.save(answer);
+        System.out.println("📝 Saved answer to database with ID: " + savedAnswer.getId());
 
-        // Xử lý Task 1
+        // Process Task 1
+        System.out.println("\n====== PROCESSING TASK 1 ======");
         var task1 = savedAnswer.getTask1();
-        try {
-            WritingAIResponse eval1 = aiService.WritingTask1(task1.getImageUrl(),task1.getQuestion(), task1.getAnswer());
+        if (task1 != null) {  // Check if Task 1 exists
+            System.out.println("🔍 Task 1 detected");
+            try {
+                // Check 2: Validate task 1 content
+                if (StringUtils.isEmpty(task1.getAnswer())) {
+                    System.out.println("⚠️ Task 1 answer is empty, skipping evaluation");
+                } else {
+                    System.out.println("🔄 Calling AI to evaluate Task 1...");
+                    WritingAIResponse eval1 = aiService.WritingTask1(
+                            task1.getImageUrl(),
+                            task1.getQuestion(),
+                            task1.getAnswer()
+                    );
 
-            // Set feedback và sample answer
-            task1.setFeedback(eval1.getFeedback());
-            task1.getFeedback().setErrorCorrections(eval1.getFeedback().getErrorCorrections());
-            task1.getFeedback().setOverallComment(eval1.getFeedback().getOverallComment());
-            task1.getFeedback().setSentenceImprovements(eval1.getFeedback().getSentenceImprovements());
-            task1.setSampleAnswer(eval1.getSampleAnswer());
-            task1.setScore(eval1.getScore());
+                    // Check 3: Validate AI response
+                    if (eval1 == null) {
+                        System.out.println("[WARNING] AI returned null for Task 1");
+                    } else {
+                        System.out.println("✅ Received Task 1 evaluation from AI");
 
-            // Log evaluation
-            System.out.println("================================");
-            System.out.println("Task 1 Evaluation:");
-            System.out.println("- Task Achievement: " + eval1.getEvaluation().getTaskAchievement());
-            System.out.println("- Coherence Cohesion: " + eval1.getEvaluation().getCoherenceCohesion());
-            System.out.println("- Lexical Resource: " + eval1.getEvaluation().getLexicalResource());
-            System.out.println("- Grammar: " + eval1.getEvaluation().getGrammar());
+                        // Set feedback if available
+                        if (eval1.getFeedback() != null) {
+                            task1.setFeedback(eval1.getFeedback());
+                            System.out.println("📝 Feedback updated");
+                        } else {
+                            System.out.println("[WARNING] Feedback is null");
+                        }
 
-            // Set evaluation
-//            if (task1.getEvaluation() == null) {
-//                task1.setEvaluation(new WritingEvaluation());
-//            }
-            task1.setEvaluation(eval1.getEvaluation());
-            task1.getEvaluation().setTaskAchievement(eval1.getEvaluation().getTaskAchievement());
-            task1.getEvaluation().setCoherenceCohesion(eval1.getEvaluation().getCoherenceCohesion());
-            task1.getEvaluation().setLexicalResource(eval1.getEvaluation().getLexicalResource());
-            task1.getEvaluation().setGrammar(eval1.getEvaluation().getGrammar());
+                        // Set sample answer if available
+                        if (eval1.getSampleAnswer() != null) {
+                            task1.setSampleAnswer(eval1.getSampleAnswer());
+                            System.out.println("📝 Sample answer updated");
+                        }
 
-        } catch (Exception e) {
-            System.out.println("Error evaluating Task 1: " + e.getMessage());
+                        // Set score if available
+                        if (eval1.getScore() != null) {
+                            task1.setScore(eval1.getScore());
+                            System.out.println("⭐ Score: " + eval1.getScore());
+                        }
+
+                        // Set detailed evaluation if available
+                        if (eval1.getEvaluation() != null) {
+                            task1.setEvaluation(eval1.getEvaluation());
+                            System.out.println("📊 Detailed evaluation updated");
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("[ERROR] Error evaluating Task 1: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("⏩ No Task 1 to process");
         }
 
-        // Xử lý Task 2
+        // Process Task 2
+        System.out.println("\n====== PROCESSING TASK 2 ======");
         var task2 = savedAnswer.getTask2();
-        try {
+        if (task2 != null) {  // Check if Task 2 exists
+            System.out.println("🔍 Task 2 detected");
+            try {
+                // Check 4: Validate task 2 content
+                if (StringUtils.isEmpty(task2.getAnswer())) {
+                    System.out.println("⚠️ Task 2 answer is empty, skipping evaluation");
+                } else {
+                    System.out.println("🔄 Calling AI to evaluate Task 2...");
+                    WritingAIResponse eval2 = aiService.WritingTask2(
+                            task2.getQuestion(),
+                            task2.getAnswer()
+                    );
 
-            WritingAIResponse eval2 = aiService.WritingTask2(task2.getQuestion(), task2.getAnswer());
+                    // Check AI response
+                    if (eval2 == null) {
+                        System.out.println("[WARNING] AI returned null for Task 2");
+                    } else {
+                        System.out.println("✅ Received Task 2 evaluation from AI");
 
-            // Set feedback và sample answer
-            task2.setFeedback(eval2.getFeedback());
-            task2.setSampleAnswer(eval2.getSampleAnswer());
-            task2.setScore(eval2.getScore());
+                        // Set feedback if available
+                        if (eval2.getFeedback() != null) {
+                            task2.setFeedback(eval2.getFeedback());
+                            System.out.println("📝 Feedback updated");
+                        }
 
+                        // Set sample answer if available
+                        if (eval2.getSampleAnswer() != null) {
+                            task2.setSampleAnswer(eval2.getSampleAnswer());
+                            System.out.println("📝 Sample answer updated");
+                        }
 
+                        // Set score if available
+                        if (eval2.getScore() != null) {
+                            task2.setScore(eval2.getScore());
+                            System.out.println("⭐ Score: " + eval2.getScore());
+                        }
 
-            task2.getFeedback().setErrorCorrections(eval2.getFeedback().getErrorCorrections());
-            task2.getFeedback().setSentenceImprovements(eval2.getFeedback().getSentenceImprovements());
-            task2.getFeedback().setOverallComment(eval2.getFeedback().getOverallComment());
-            // Log evaluation
-            System.out.println("================================");
-            System.out.println("Task 2 Evaluation:");
-            System.out.println("- Task Achievement: " + eval2.getEvaluation().getTaskAchievement());
-            System.out.println("- Coherence Cohesion: " + eval2.getEvaluation().getCoherenceCohesion());
-            System.out.println("- Lexical Resource: " + eval2.getEvaluation().getLexicalResource());
-            System.out.println("- Grammar: " + eval2.getEvaluation().getGrammar());
-
-            // Set evaluation
-//            if (task2.getEvaluation() == null) {
-//                task2.setEvaluation(new WritingEvaluation());
-//            }
-            task2.setEvaluation(eval2.getEvaluation());
-            task2.getEvaluation().setTaskAchievement(eval2.getEvaluation().getTaskAchievement());
-            task2.getEvaluation().setCoherenceCohesion(eval2.getEvaluation().getCoherenceCohesion());
-            task2.getEvaluation().setLexicalResource(eval2.getEvaluation().getLexicalResource());
-            task2.getEvaluation().setGrammar(eval2.getEvaluation().getGrammar());
-
-        } catch (Exception e) {
-            System.out.println("Error evaluating Task 2: " + e.getMessage());
+                        // Set detailed evaluation if available
+                        if (eval2.getEvaluation() != null) {
+                            task2.setEvaluation(eval2.getEvaluation());
+                            System.out.println("📊 Detailed evaluation updated");
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("[ERROR] Error evaluating Task 2: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("⏩ No Task 2 to process");
         }
 
-        return writingAnswerRepository.save(savedAnswer);
+        // Save final result
+        System.out.println("\n====== SAVING FINAL RESULT ======");
+        WritingAnswer finalResult = writingAnswerRepository.save(savedAnswer);
+        System.out.println("💾 Final result saved successfully");
+        System.out.println("====== PROCESS COMPLETE ======\n");
+
+        return finalResult;
     }
 
+    // Update the answer URLs for speaking audio blobs to S3 URLs
     public void updateAnswerUrls(SpeakingAnswer submission, Map<String, String> fileUrlMap) {
-        // ✅ Debug log
+        // Debug log all mappings
         for (Map.Entry<String, String> entry : fileUrlMap.entrySet()) {
             String filename = entry.getKey();
             String s3Url = entry.getValue();
             System.out.println("File: " + filename + " → S3 URL: " + s3Url);
         }
 
-        // 🔹 Part 1
+        // Update Part 1
         SpeakingAnswerPart13 part1 = submission.getPart1();
         if (part1 != null && part1.getQuestions() != null) {
             for (SpeakingAnswerQuestion qa : part1.getQuestions()) {
-                String blob = qa.getStudentAnswer(); // blob:http://localhost/...
+                String blob = qa.getStudentAnswer();
                 String filename = extractFileName(blob);
-                String s3Url = fileUrlMap.getOrDefault(filename, blob); // dùng filename
-                System.out.println("Blob: " + blob + " → Filename: " + filename + " → S3: " + s3Url);
+                String s3Url = fileUrlMap.getOrDefault(filename, blob);
                 qa.setStudentAnswer(s3Url);
             }
         }
 
-        // 🔹 Part 2
+        // Update Part 2
         SpeakingAnswerPart2 part2 = submission.getPart2();
         if (part2 != null) {
             String blob = part2.getStudentAnswer();
@@ -208,7 +268,7 @@ public class DoTestService {
             part2.setStudentAnswer(s3Url);
         }
 
-        // 🔹 Part 3
+        // Update Part 3
         SpeakingAnswerPart13 part3 = submission.getPart3();
         if (part3 != null && part3.getQuestions() != null) {
             for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
@@ -219,29 +279,28 @@ public class DoTestService {
             }
         }
     }
+
+    // Helper: Extract filename from blob URL
     private String extractFileName(String blobUrl) {
-        // Ví dụ input: blob:http://localhost:5173/cd13919f-ec76-4e5e-a348-95e5c3f1265c
         try {
             return blobUrl.substring(blobUrl.lastIndexOf("/") + 1);
         } catch (Exception e) {
-            return blobUrl; // fallback
+            return blobUrl; // fallback in case of error
         }
     }
-
 
     public SpeakingAnswer saveSubmission(SpeakingAnswer submission) {
         return speakingAnswerRepository.save(submission);
     }
+
+    // Upload a file to S3 — converting WebM to MP3 if necessary
     public String uploadFile(MultipartFile file, String key) throws IOException {
         try {
-            // Giữ nguyên key gốc (không thay đổi đường dẫn thư mục)
             String originalKey = key;
 
-            // Kiểm tra nếu là file WebM thì chuyển đổi
+            // If the file is WebM audio, convert to MP3 before uploading
             if (file.getContentType().equals("audio/webm")) {
                 File mp3File = AudioService.convertWebmToMp3(file);
-
-                // Chỉ thay đổi phần đuôi file từ .webm sang .mp3
                 String mp3Key = originalKey.replace(".webm", ".mp3");
 
                 try (InputStream is = new FileInputStream(mp3File)) {
@@ -251,7 +310,7 @@ public class DoTestService {
                 mp3File.delete();
                 return buildUrl(mp3Key);
             }
-            // Upload trực tiếp nếu không phải WebM
+            // Otherwise, upload directly
             else {
                 uploadToS3(file.getInputStream(), file.getSize(), originalKey, file.getContentType());
                 return buildUrl(originalKey);
@@ -261,18 +320,18 @@ public class DoTestService {
         }
     }
 
-    private void uploadToS3(InputStream inputStream, long contentLength,
-                            String key, String contentType) {
+    // Helper: Upload file to S3 bucket
+    private void uploadToS3(InputStream inputStream, long contentLength, String key, String contentType) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
                 .contentType(contentType)
                 .build();
 
-        s3Client.putObject(putObjectRequest,
-                RequestBody.fromInputStream(inputStream, contentLength));
+        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, contentLength));
     }
 
+    // Helper: Build public URL for a file in the S3 bucket
     private String buildUrl(String key) {
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, region, key);
     }
