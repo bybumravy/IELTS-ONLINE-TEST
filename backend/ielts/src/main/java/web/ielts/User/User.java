@@ -14,6 +14,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -27,6 +29,8 @@ public class User implements UserDetails {
     private String email;
     private String password;
     private String role;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime premiumExpiry;
 //    private boolean premium;
     private String googleID;

@@ -24,9 +24,10 @@ public class UserService {
         return user;
     }
 
+
     public void upgradeToPremium(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setPremiumExpiry(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(1));// Premium trong 30 ngày
+        user.setPremiumExpiry(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(10));
         userRepository.save(user);
     }
 

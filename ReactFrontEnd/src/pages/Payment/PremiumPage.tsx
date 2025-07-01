@@ -1,4 +1,4 @@
-// IELTS Premium Page with MoMo Payment Integration
+// IELTS Premium Page with VNPay Payment Integration
 import {useEffect, useState} from "react"
 import {
     Check,
@@ -33,9 +33,11 @@ type Plan = {
 function formatPremiumRemainingTime(premiumExpiry: string | null): string {
     if (!premiumExpiry) return "Premium đã hết hạn";
 
-    const expiryDate = new Date(premiumExpiry);
+    const expiryDateUtc = new Date(premiumExpiry);
+    const expiryDateVN = new Date(expiryDateUtc.getTime() + 7 * 60 * 60 * 1000); // UTC+7
+
     const now = new Date();
-    const diffMs = expiryDate.getTime() - now.getTime();
+    const diffMs = expiryDateVN.getTime() - now.getTime();
 
     if (diffMs <= 0) return "Premium đã hết hạn";
 
@@ -51,6 +53,7 @@ function formatPremiumRemainingTime(premiumExpiry: string | null): string {
 
     return result.trim();
 }
+
 
 export default function PremiumPage() {
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
