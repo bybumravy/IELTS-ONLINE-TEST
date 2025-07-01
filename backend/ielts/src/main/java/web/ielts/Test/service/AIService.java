@@ -38,7 +38,7 @@ public class AIService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public String callSpeakingPart2(String prompt) {
+    public String callSpeakingPart(String prompt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
@@ -52,14 +52,14 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
 """;
 
         Map<String, Object> requestBody = Map.of(
-                "model", "gpt-4",
+                "model", "gpt-3.5-turbo",
                 "messages", List.of(
                         Map.of("role", "system", "content", systemMessage),
                         Map.of("role", "user", "content", prompt)
                 ),
-                "temperature", 0,   // 🔥 RẤT QUAN TRỌNG: Ổn định đầu ra
+                "temperature", 0,
                 "top_p", 1,
-                "max_tokens", 1500  // Tuỳ vào độ dài transcript, để tránh cắt nội dung
+                "max_tokens", 1500 // bạn có thể tăng lên nếu câu trả lời dài
         );
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
@@ -200,6 +200,25 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             throw new RuntimeException("OpenAI API error: " + e.getMessage());
         }
     }
+    private static final String IELTS_PUBLIC_DESCRIPTORSLexicalResource =
+            "  - IELTS Public Descriptors:\n" +
+                    "    • Band 9: Total flexibility and precise use in all contexts. Sustained use of accurate and idiomatic language.\n" +
+                    "    • Band 8: Wide resource, readily and flexibly used to discuss all topics and convey precise meaning. Skillful use of less common and idiomatic items despite occasional inaccuracies in word choice and collocation. Effective use of paraphrase as required.\n" +
+                    "    • Band 7: Resource flexibly used to discuss a variety of topics. Some ability to use less common and idiomatic items and an awareness of style and collocation is evident though inappropriacies occur. Effective use of paraphrase as required.\n" +
+                    "    • Band 6: Resource sufficient to discuss topics at length. Vocabulary use may be inappropriate but meaning is clear. Generally able to paraphrase successfully.\n" +
+                    "    • Band 5: Resource sufficient to discuss familiar and unfamiliar topics but there is limited flexibility. Attempts paraphrase but not always with success.\n" +
+                    "    • Band 9: Structures are precise and accurate at all times, apart from ‘mistakes’ characteristic of native speaker speech.\n" +
+                    "    • Band 8: Wide range of structures, flexibly used. The majority of sentences are error free. Occasional inappropriacies and non-systematic errors occur.\n" +
+                    "    • Band 7: A range of structures flexibly used. Error-free sentences are frequent. Some errors persist.\n" +
+                    "    • Band 6: Produces a mix of short and complex sentence forms with limited flexibility. Frequent errors in complex structures but communication is maintained.\n" +
+                    "    • Band 5: Mostly basic sentence forms. Complex structures are attempted but often contain errors that may reduce clarity.\n";
+    private static final String IELTS_PUBLIC_DESCRIPTORS_GRAMMAR =
+            "- IELTS Public Descriptors:\n" +
+                    "    • Band 9: Structures are precise and accurate at all times, apart from ‘mistakes’ characteristic of native speaker speech.\n" +
+                    "    • Band 8: Wide range of structures, flexibly used. The majority of sentences are error free. Occasional inappropriacies and non-systematic errors occur.\n" +
+                    "    • Band 7: A range of structures flexibly used. Error-free sentences are frequent. Some errors persist.\n" +
+                    "    • Band 6: Produces a mix of short and complex sentence forms with limited flexibility. Frequent errors in complex structures but communication is maintained.\n" +
+                    "    • Band 5: Mostly basic sentence forms. Complex structures are attempted but often contain errors that may reduce clarity.\n";
     public String buildSpeakingPart1Promot(String questions,String answer){
         String speakingPart1 =
                 "You must return response strictly in JSON format.\n" +
@@ -215,7 +234,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "• Lexical Resource (25%):\n" +
                         "- Advanced vocabulary must include topic-specific academic collocations.\n" +
                         "  (If vocabulary remains general and safe, cap at Band 6.)\n" +
-                        "  - Academic vocabulary (Band 9 requires ≥6 advanced terms,Band 8 >=4,Band 7 >= 2 )\n" +
+                        "  - Academic vocabulary (Band 9 requires ≥ 6 advanced terms,Band 8 >=4,Band 7 >= 2 )\n" +
                         "  - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
                         "  - Spelling (3 errors = -0.5 band)\n" +
                         "  - Word Choice:\n  • Misuse of formal/informal words, or awkward word forms → -0.25 per issue\n  • ≥3 major word choice issues → cap Band 6.5\n"+
@@ -224,13 +243,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "  • If advanced terms used are safe, rehearsed, or common for the topic (e.g., 'confidence', 'sophistication', 'stylish') → cap Band 7.0 +\n" +
                         "  • If idioms, phrasal verbs, or high-level topic-specific words are missing → cap Band 7.0 \n" +
                         "\"  • If a key term is repeated more than 3 times without paraphrasing, cap Lexical Resource at Band 7.0. Otherwise, deduct 0.25 for lack of paraphrase.\\n\"\n"+
-                        "  - IELTS Public Descriptors:\n" +
-                        "    • Band 9: Total flexibility and precise use in all contexts. Sustained use of accurate and idiomatic language.\n" +
-                        "    • Band 8: Wide resource, readily and flexibly used to discuss all topics and convey precise meaning. Skilful use of less common and idiomatic items despite occasional inaccuracies in word choice and collocation. Effective use of paraphrase as required.\n" +
-                        "    • Band 7: Resource flexibly used to discuss a variety of topics. Some ability to use less common and idiomatic items and an awareness of style and collocation is evident though inappropriacies occur. Effective use of paraphrase as required.\n" +
-                        "    • Band 6: Resource sufficient to discuss topics at length. Vocabulary use may be inappropriate but meaning is clear. Generally able to paraphrase successfully.\n" +
-                        "    • Band 5: Resource sufficient to discuss familiar and unfamiliar topics but there is limited flexibility. Attempts paraphrase but not always with success.\n" +
-
+                    IELTS_PUBLIC_DESCRIPTORSLexicalResource+
                         "• Grammatical Range and Accuracy (25%):\n" +
                         "- Must demonstrate a range of sentence structures, including at least 3 complex sentences throughout the response.\n" +
                         "  (If the majority of structures are basic/simple, cap at Band 6.)\n" +
@@ -241,16 +254,10 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "    • Passive voice (\"It is often said that...\")\n" +
                         "    • Subordinating conjunctions (\"Although, Even though, As soon as...\")\n" +
                         "- Grammatical accuracy: Subject–verb agreement, article use, prepositions, and modal verbs must be mostly accurate.\n" +
-                        "  (❗ If basic grammar errors are frequent and about 6 times → cap at Band 5.5–6.)\n" +
+                        "  (❗ If basic grammar errors are frequent and about 3 times → cap at Band 5.5–6.)\n" +
                         "- Natural delivery: Complex grammar should be used fluently and appropriately, not forced or awkward.\n" +
                         "  (❗ If errors arise due to unnatural overuse of grammar forms → penalty of -0.25 to -0.5 band depending on severity.)\n" +
-                        "- IELTS Public Descriptors:\n" +
-                        "    • Band 9: Structures are precise and accurate at all times, apart from ‘mistakes’ characteristic of native speaker speech.\n" +
-                        "    • Band 8: Wide range of structures, flexibly used. The majority of sentences are error free. Occasional inappropriacies and non-systematic errors occur.\n" +
-                        "    • Band 7: A range of structures flexibly used. Error-free sentences are frequent. Some errors persist.\n" +
-                        "    • Band 6: Produces a mix of short and complex sentence forms with limited flexibility. Frequent errors in complex structures but communication is maintained.\n" +
-                        "    • Band 5: Mostly basic sentence forms. Complex structures are attempted but often contain errors that may reduce clarity.\n" +
-
+                       IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
                         "   - Deduct 0.5 band per 2 major errors\n" +
@@ -282,6 +289,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "Original Answer:\n" + answer;
         return speakingPart1;
     }
+
     public String buildSpeakingPart2Promot(String question,String answer){
         String speakingPart2 =
                 "You must return response strictly in JSON format.\n" +
@@ -308,11 +316,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "  • If idioms, phrasal verbs, or high-level topic-specific words are missing → cap Band 7.0 \n" +
                         "  • If no paraphrase or synonyms used for key terms (e.g., repeating 'wedding', 'clothes', 'feel') → deduct 0.25 or cap Band 7.0n\""+
                         "  - IELTS Public Descriptors:\n" +
-                        "    • Band 9: Total flexibility and precise use in all contexts. Sustained use of accurate and idiomatic language.\n" +
-                        "    • Band 8: Wide resource, readily and flexibly used to discuss all topics and convey precise meaning. Skillful use of less common and idiomatic items despite occasional inaccuracies in word choice and collocation. Effective use of paraphrase as required.\n" +
-                        "    • Band 7: Resource flexibly used to discuss a variety of topics. Some ability to use less common and idiomatic items and an awareness of style and collocation is evident though inappropriacies occur. Effective use of paraphrase as required.\n" +
-                        "    • Band 6: Resource sufficient to discuss topics at length. Vocabulary use may be inappropriate but meaning is clear. Generally able to paraphrase successfully.\n" +
-                        "    • Band 5: Resource sufficient to discuss familiar and unfamiliar topics but there is limited flexibility. Attempts paraphrase but not always with success.\n" +
+                      IELTS_PUBLIC_DESCRIPTORSLexicalResource+
 
                         "• Grammatical Range and Accuracy (25%):\n" +
                         "- Must demonstrate a range of sentence structures, including at least 3 complex sentences throughout the response.\n" +
@@ -327,12 +331,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "  (❗ If basic grammar errors are frequent and about 4 times → cap at Band 5.5–6.)\n" +
                         "- Natural delivery: Complex grammar should be used fluently and appropriately, not forced or awkward.\n" +
                         "  (❗ If errors arise due to unnatural overuse of grammar forms → penalty of -0.25 to -0.5 band depending on severity.)\n" +
-                        "- IELTS Public Descriptors:\n" +
-                        "    • Band 9: Structures are precise and accurate at all times, apart from ‘mistakes’ characteristic of native speaker speech.\n" +
-                        "    • Band 8: Wide range of structures, flexibly used. The majority of sentences are error free. Occasional inappropriacies and non-systematic errors occur.\n" +
-                        "    • Band 7: A range of structures flexibly used. Error-free sentences are frequent. Some errors persist.\n" +
-                        "    • Band 6: Produces a mix of short and complex sentence forms with limited flexibility. Frequent errors in complex structures but communication is maintained.\n" +
-                        "    • Band 5: Mostly basic sentence forms. Complex structures are attempted but often contain errors that may reduce clarity.\n" +
+                      IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
 
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
@@ -364,6 +363,91 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "Question:\n" + question + "\n" +
                         "Original Answer:\n" + answer;
         return speakingPart2;
+    }
+    public String buildSpeakingPart3Prompt(String questions, String answer) {
+        String speakingPart3 =
+                "You must return response strictly in JSON format only — do not include any explanation or extra text.\n\n" +
+
+                        "You are an IELTS Speaking examiner evaluating a real IELTS Part 3 response. Grade fairly but generously, based on IELTS Band Descriptors.\n\n" +
+
+                        "Before evaluation, make sure to:\n" +
+                        "1. Understand the context of the question.\n" +
+                        "2. Read the full transcript of the user's response.\n" +
+                        "3. Check whether the response addresses the question clearly and appropriately.\n" +
+                        "⚠️ If the response is completely off-topic, give Band 3.0 regardless of other factors.\n\n" +
+
+                        "====================\n" +
+                        "1. EVALUATION CRITERIA (Adapted for Band 6.5–7.0 range)\n" +
+                        "====================\n\n" +
+
+                        "• Lexical Resource (25%):\n" +
+                        "- Reward topic-specific and varied vocabulary, even if slightly awkward.\n" +
+                        "- Academic or idiomatic vocabulary is a plus and should be rewarded when used correctly.\n" +
+                        "- Do not penalize formal or uncommon phrases (e.g., 'a plethora of') if meaning is clear.\n" +
+                        "- Accept repetition and minor word choice issues as long as the message remains clear.\n" +
+                        "- Minor idiomatic misuse or over-formality should not lower the score unless it confuses meaning.\n" +
+                        IELTS_PUBLIC_DESCRIPTORSLexicalResource + "\n\n" +
+
+                        "• Grammatical Range and Accuracy (25%):\n" +
+                        "- Accept a mix of simple and complex structures.\n" +
+                        "- Occasional grammar errors are expected and acceptable.\n" +
+                        "- Reward efforts to use conditionals, modals, passive voice, or inversion even if imperfect.\n" +
+                        "- Do not penalize non-critical mistakes like article or tense shifts if communication is successful.\n" +
+                        "- Prioritize overall clarity and natural delivery over perfect grammar.\n" +
+                        IELTS_PUBLIC_DESCRIPTORS_GRAMMAR + "\n\n" +
+
+                        "====================\n" +
+                        "2. SCORING SYSTEM\n" +
+                        "====================\n" +
+                        "9.0 = Expert | 7.5–8.5 = Very Good | 6.0–7.0 = Competent | 5.0–5.5 = Limited\n" +
+                        "- Only deduct for frequent or serious errors that hinder understanding.\n" +
+                        "- Do not reduce scores for high-level vocabulary used correctly but less commonly.\n\n" +
+
+                        "====================\n" +
+                        "3. RESPONSE FORMAT (Must return in JSON)\n" +
+                        "====================\n" +
+                        "{\n" +
+                        "  \"score\": decimal (e.g. 6.5),\n" +
+                        "  \"feedback\": {\n" +
+                        "    \"errorCorrections\": [\n" +
+                        "      {\n" +
+                        "        \"originalText\": string,\n" +
+                        "        \"correctedText\": string,\n" +
+                        "        \"errorType\": string,\n" +
+                        "        \"explanation\": string,\n" +
+                        "        \"sentenceContext\": string\n" +
+                        "      }\n" +
+                        "    ],\n" +
+                        "    \"sentenceImprovements\": [\n" +
+                        "      {\n" +
+                        "        \"originalSentence\": string,\n" +
+                        "        \"improvedSentence\": string,\n" +
+                        "        \"techniquesUsed\": [string],\n" +
+                        "        \"bandBoost\": string\n" +
+                        "      }\n" +
+                        "    ],\n" +
+                        "    \"overallComment\": string\n" +
+                        "  },\n" +
+                        "  \"evaluation\": {\n" +
+                        "    \"LexicalResource\": {\n" +
+                        "      \"scoreEva\": string,\n" +
+                        "      \"reviewEva\": string\n" +
+                        "    },\n" +
+                        "    \"Grammar\": {\n" +
+                        "      \"scoreEva\": string,\n" +
+                        "      \"reviewEva\": string\n" +
+                        "    }\n" +
+                        "  },\n" +
+                        "  \"sampleAnswer\": string (Optional band 9 model)\n" +
+                        "}\n\n" +
+
+                        "====================\n" +
+                        "4. TASK DETAILS\n" +
+                        "====================\n" +
+                        "Question:\n" + questions + "\n\n" +
+                        "Original Answer:\n" + answer;
+
+        return speakingPart3;
     }
     //Prompt cho Writing 1
     private String buildTask1Prompt(String question, String answer) {
