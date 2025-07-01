@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
-import {useAuth} from "@/contexts/AuthContext";
-import {useNavigate, useParams} from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface WritingTask {
     type: string;
@@ -12,8 +12,7 @@ interface WritingTask {
 
 interface WritingData {
     testId: string;
-    task1: WritingTask;
-    task2: WritingTask;
+    tasks: WritingTask[];
 }
 
 export default function WritingTest() {
@@ -28,29 +27,20 @@ export default function WritingTest() {
     const [timeRemaining, setTimeRemaining] = useState(60 * 60);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
-    // // Timer
-    // useEffect(() => {
-    //     const timer = setInterval(() => {
-    //         setTimeRemaining((prev) => {
-    //             if (prev <= 0) {
-    //                 clearInterval(timer);
-    //                 return 0;
-    //             }
-    //             return prev - 1;
-    //         });
-    //     }, 1000);
-    //     return () => clearInterval(timer);
-    // }, []);
 
     // Fetch writing data
     useEffect(() => {
-        fetch(`http://localhost:8080/verify/writing/${testId}`, {
-            credentials: "include",
+    fetch(`http://localhost:8080/verify/writing/${testId}`, {
+        credentials: "include",
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            console.log("Fetched Writing Data:", data); // ✅ In ra dữ liệu JSON
+            setWritingData(data);
         })
-            .then((res) => res.json())
-            .then((data) => setWritingData(data))
-            .catch((err) => console.error("Error fetching writing data:", err));
-    }, []);
+        .catch((err) => console.error("Error fetching writing data:", err));
+}, [testId]); // cũng nên thêm testId vào dependency array
+
 
     // Word count Task 1
     useEffect(() => {
@@ -65,25 +55,28 @@ export default function WritingTest() {
     }, [essayTask2]);
 
     const handleSubmit = async () => {
-        if (!writingData) return;
+        if (!writingData || writingData.tasks.length < 2) return;
+
+        const task1Data = writingData.tasks[0];
+        const task2Data = writingData.tasks[1];
 
         const task1Submission = essayTask1.trim()
             ? {
-                type: writingData.task1.type,
-                question: writingData.task1.question,
-                imageUrl: writingData.task1.imageUrl,
-                answer: essayTask1.trim(),
-                wordCount: wordCountTask1.toString(),
-            }
+                  type: task1Data.type,
+                  question: task1Data.question,
+                  imageUrl: task1Data.imageUrl,
+                  answer: essayTask1.trim(),
+                  wordCount: wordCountTask1.toString(),
+              }
             : null;
 
         const task2Submission = essayTask2.trim()
             ? {
-                type: writingData.task2.type,
-                question: writingData.task2.question,
-                answer: essayTask2.trim(),
-                wordCount: wordCountTask2.toString(),
-            }
+                  type: task2Data.type,
+                  question: task2Data.question,
+                  answer: essayTask2.trim(),
+                  wordCount: wordCountTask2.toString(),
+              }
             : null;
 
         if (!task1Submission && !task2Submission) {
@@ -111,7 +104,6 @@ export default function WritingTest() {
 
             const result = await response.json();
             navigate(`/writing-result/${result.id}`);
-            console.log("Writing saved:", result);
             alert("Your essay has been submitted successfully!");
         } catch (error) {
             console.error("Error submitting writing:", error);
@@ -132,11 +124,11 @@ export default function WritingTest() {
                         <div>
                             <h1 className="text-xl font-bold text-gray-800 mb-2">WRITING TASK 1</h1>
                             <p className="text-sm text-gray-600 mb-4">You should spend about <strong>20 minutes</strong> on this task.</p>
-                            <p className="text-sm text-gray-700 mb-4">{writingData?.task1?.question || "Loading..."}</p>
-                            {writingData?.task1?.imageUrl && (
+                            <p className="text-sm text-gray-700 mb-4">{writingData?.tasks?.[0]?.question || "Loading..."}</p>
+                            {writingData?.tasks?.[0]?.imageUrl && (
                                 <div className="mb-4">
                                     <img
-                                        src={writingData.task1.imageUrl}
+                                        src={writingData.tasks[0].imageUrl}
                                         alt="Task 1 visual"
                                         className="max-w-full h-auto border border-gray-200 rounded-lg"
                                     />
@@ -148,7 +140,7 @@ export default function WritingTest() {
                         <div>
                             <h1 className="text-xl font-bold text-gray-800 mb-2">WRITING TASK 2</h1>
                             <p className="text-sm text-gray-600 mb-4">You should spend about <strong>40 minutes</strong> on this task.</p>
-                            <p className="text-sm text-gray-700 mb-4">{writingData?.task2?.question || "Loading..."}</p>
+                            <p className="text-sm text-gray-700 mb-4">{writingData?.tasks?.[1]?.question || "Loading..."}</p>
                             <p className="text-sm text-gray-700 mb-6">Write <strong>at least 250 words</strong>.</p>
                         </div>
                     )}
@@ -185,7 +177,7 @@ export default function WritingTest() {
             </div>
 
             {/* Bottom Navigation */}
-            {writingData && writingData.task1 && writingData.task2 && (
+            {writingData?.tasks?.length === 2 && (
                 <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
                     <div className="max-w-8xl mx-auto grid grid-cols-2 gap-4">
                         {[1, 2].map((taskNumber) => {

@@ -40,10 +40,6 @@ public class DoTestController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-//    @GetMapping("/tests")
-//    public ResponseEntity<List<Listening>> getAllTests() {
-//        return ResponseEntity.ok(doTestService.getAllListeningTests());
-//    }
 
     @GetMapping("/listening/{testId}")
     public ResponseEntity<Listening> getListeningByTestId(@PathVariable String testId) {
