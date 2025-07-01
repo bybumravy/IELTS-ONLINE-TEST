@@ -38,7 +38,7 @@ public class AIService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public String call(String prompt) {
+    public String callSpeakingPart2(String prompt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
@@ -200,7 +200,171 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             throw new RuntimeException("OpenAI API error: " + e.getMessage());
         }
     }
+    public String buildSpeakingPart1Promot(String questions,String answer){
+        String speakingPart1 =
+                "You must return response strictly in JSON format.\n" +
+                        "You are an official IELTS Speaking examiner. You are evaluating a real IELTS Part 1 speaking response. Extremely strict grading.\n" +
+                        "Before evaluation, you must first carefully understand:\n" +
+                        "1. The question being asked (context and requirements)\n" +
+                        "2. The full transcript of the user's response (content, grammar, vocabulary)\n" +
+                        "3. You must evaluate whether the response is relevant to the question and does not go off-topic.\n" +
+                        "If the response is completely off-topic, you must give Band 3.0 regardless of other factors.\n" +
+                        "Once fully understood, proceed to scoring using official IELTS Band Descriptors.\n\n" +
+                        "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
+                        "\n" +
+                        "• Lexical Resource (25%):\n" +
+                        "- Advanced vocabulary must include topic-specific academic collocations.\n" +
+                        "  (If vocabulary remains general and safe, cap at Band 6.)\n" +
+                        "  - Academic vocabulary (Band 9 requires ≥6 advanced terms,Band 8 >=4,Band 7 >= 2 )\n" +
+                        "  - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
+                        "  - Spelling (3 errors = -0.5 band)\n" +
+                        "  - Word Choice:\n  • Misuse of formal/informal words, or awkward word forms → -0.25 per issue\n  • ≥3 major word choice issues → cap Band 6.5\n"+
+                        "- Additional Lexical Resource Capping Rules: +\n" +
+                        "  • If the vocabulary is accurate and formal but lacks idiomatic expressions or academic collocations → cap Band 7.0 \n" +
+                        "  • If advanced terms used are safe, rehearsed, or common for the topic (e.g., 'confidence', 'sophistication', 'stylish') → cap Band 7.0 +\n" +
+                        "  • If idioms, phrasal verbs, or high-level topic-specific words are missing → cap Band 7.0 \n" +
+                        "\"  • If a key term is repeated more than 3 times without paraphrasing, cap Lexical Resource at Band 7.0. Otherwise, deduct 0.25 for lack of paraphrase.\\n\"\n"+
+                        "  - IELTS Public Descriptors:\n" +
+                        "    • Band 9: Total flexibility and precise use in all contexts. Sustained use of accurate and idiomatic language.\n" +
+                        "    • Band 8: Wide resource, readily and flexibly used to discuss all topics and convey precise meaning. Skilful use of less common and idiomatic items despite occasional inaccuracies in word choice and collocation. Effective use of paraphrase as required.\n" +
+                        "    • Band 7: Resource flexibly used to discuss a variety of topics. Some ability to use less common and idiomatic items and an awareness of style and collocation is evident though inappropriacies occur. Effective use of paraphrase as required.\n" +
+                        "    • Band 6: Resource sufficient to discuss topics at length. Vocabulary use may be inappropriate but meaning is clear. Generally able to paraphrase successfully.\n" +
+                        "    • Band 5: Resource sufficient to discuss familiar and unfamiliar topics but there is limited flexibility. Attempts paraphrase but not always with success.\n" +
 
+                        "• Grammatical Range and Accuracy (25%):\n" +
+                        "- Must demonstrate a range of sentence structures, including at least 3 complex sentences throughout the response.\n" +
+                        "  (If the majority of structures are basic/simple, cap at Band 6.)\n" +
+                        "- Tense accuracy: Correct use of verb tenses in context (e.g., past experiences, future plans). Frequent tense errors or tense switching → band deduction.\n" +
+                        "- Complex structures: Band 7+ requires the candidate to naturally use structures such as:\n" +
+                        "    • Relative clauses (\"which I really enjoy...\")\n" +
+                        "    • Conditionals (\"If I had more time...\")\n" +
+                        "    • Passive voice (\"It is often said that...\")\n" +
+                        "    • Subordinating conjunctions (\"Although, Even though, As soon as...\")\n" +
+                        "- Grammatical accuracy: Subject–verb agreement, article use, prepositions, and modal verbs must be mostly accurate.\n" +
+                        "  (❗ If basic grammar errors are frequent and about 6 times → cap at Band 5.5–6.)\n" +
+                        "- Natural delivery: Complex grammar should be used fluently and appropriately, not forced or awkward.\n" +
+                        "  (❗ If errors arise due to unnatural overuse of grammar forms → penalty of -0.25 to -0.5 band depending on severity.)\n" +
+                        "- IELTS Public Descriptors:\n" +
+                        "    • Band 9: Structures are precise and accurate at all times, apart from ‘mistakes’ characteristic of native speaker speech.\n" +
+                        "    • Band 8: Wide range of structures, flexibly used. The majority of sentences are error free. Occasional inappropriacies and non-systematic errors occur.\n" +
+                        "    • Band 7: A range of structures flexibly used. Error-free sentences are frequent. Some errors persist.\n" +
+                        "    • Band 6: Produces a mix of short and complex sentence forms with limited flexibility. Frequent errors in complex structures but communication is maintained.\n" +
+                        "    • Band 5: Mostly basic sentence forms. Complex structures are attempted but often contain errors that may reduce clarity.\n" +
+
+                        "2. SCORING SYSTEM:\n" +
+                        "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
+                        "   - Deduct 0.5 band per 2 major errors\n" +
+
+                        "RESPONSE FORMAT:\n" +
+                        "- score: decimal (overall band score, e.g. 6.5)\n" +
+                        "- feedback: {\n" +
+                        "    errorCorrections: [{\n" +
+                        "      originalText: string,\n" +
+                        "      correctedText: string,\n" +
+                        "      errorType: string,\n" +
+                        "      explanation: string,\n" +
+                        "      sentenceContext: string\n" +
+                        "    }],\n" +
+                        "    sentenceImprovements: [{\n" +
+                        "      originalSentence: string,\n" +
+                        "      improvedSentence: string,\n" +
+                        "      techniquesUsed: [string],\n" +
+                        "      bandBoost: string\n" +
+                        "    }],\n" +
+                        "    overallComment: string\n" +
+                        "}\n" +
+                        "- evaluation: {\n" +
+                        "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
+                        "    Grammar: {scoreEva: string, reviewEva: string}\n" +
+                        "}\n" +
+                        "sampleAnswer: string (Optional band 9 model)\n" +
+                        "Question:\n" + questions + "\n" +
+                        "Original Answer:\n" + answer;
+        return speakingPart1;
+    }
+    public String buildSpeakingPart2Promot(String question,String answer){
+        String speakingPart2 =
+                "You must return response strictly in JSON format.\n" +
+                        "You are an official IELTS Speaking examiner. You are evaluating a real IELTS Part 2 speaking response. Extremely strict grading.\n" +
+                        "Before evaluation, you must first carefully understand:\n" +
+                        "1. The question being asked (context and requirements)\n" +
+                        "2. The full transcript of the user's response (content, grammar, vocabulary)\n" +
+                        "3. You must evaluate whether the response is relevant to the question and does not go off-topic.\n" +
+                        "If the response is completely off-topic, you must give Band 3.0 regardless of other factors.\n" +
+                        "You must also check whether the response answers **all bullet points** in the cue card. For **each missing or ignored point**, deduct **0.5 Band** from Fluency & Coherence.\n"+
+                        "Once fully understood, proceed to scoring using official IELTS Band Descriptors.\n\n" +
+                        "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
+                        "\n" +
+                        "• Lexical Resource (25%):\n" +
+                        "- Advanced vocabulary must include topic-specific academic collocations.\n" +
+                        "  (If vocabulary remains general and safe, cap at Band 6.)\n" +
+                        "  - Academic vocabulary (Band 9 requires ≥8 advanced terms,Band 8 >=6,Band 7 >= 4 )\n" +
+                        "  - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
+                        "  - Spelling (3 errors = -0.5 band)\n" +
+                        "  - Word Choice:\n  • Misuse of formal/informal words, or awkward word forms → -0.25 per issue\n  • ≥3 major word choice issues → cap Band 6.5\n"+
+                        "- Additional Lexical Resource Capping Rules:\\n\" +\n" +
+                        "  • If the vocabulary is accurate and formal but lacks idiomatic expressions or academic collocations → cap Band 7.0 \n" +
+                        "  • If advanced terms used are safe, rehearsed, or common for the topic (e.g., 'confidence', 'sophistication', 'stylish') → cap Band 7.0 +\n" +
+                        "  • If idioms, phrasal verbs, or high-level topic-specific words are missing → cap Band 7.0 \n" +
+                        "  • If no paraphrase or synonyms used for key terms (e.g., repeating 'wedding', 'clothes', 'feel') → deduct 0.25 or cap Band 7.0n\""+
+                        "  - IELTS Public Descriptors:\n" +
+                        "    • Band 9: Total flexibility and precise use in all contexts. Sustained use of accurate and idiomatic language.\n" +
+                        "    • Band 8: Wide resource, readily and flexibly used to discuss all topics and convey precise meaning. Skillful use of less common and idiomatic items despite occasional inaccuracies in word choice and collocation. Effective use of paraphrase as required.\n" +
+                        "    • Band 7: Resource flexibly used to discuss a variety of topics. Some ability to use less common and idiomatic items and an awareness of style and collocation is evident though inappropriacies occur. Effective use of paraphrase as required.\n" +
+                        "    • Band 6: Resource sufficient to discuss topics at length. Vocabulary use may be inappropriate but meaning is clear. Generally able to paraphrase successfully.\n" +
+                        "    • Band 5: Resource sufficient to discuss familiar and unfamiliar topics but there is limited flexibility. Attempts paraphrase but not always with success.\n" +
+
+                        "• Grammatical Range and Accuracy (25%):\n" +
+                        "- Must demonstrate a range of sentence structures, including at least 3 complex sentences throughout the response.\n" +
+                        "  (If the majority of structures are basic/simple, cap at Band 6.)\n" +
+                        "- Tense accuracy: Correct use of verb tenses in context (e.g., past experiences, future plans). Frequent tense errors or tense switching → band deduction.\n" +
+                        "- Complex structures: Band 7+ requires the candidate to naturally use structures such as:\n" +
+                        "    • Relative clauses (\"which I really enjoy...\")\n" +
+                        "    • Conditionals (\"If I had more time...\")\n" +
+                        "    • Passive voice (\"It is often said that...\")\n" +
+                        "    • Subordinating conjunctions (\"Although, Even though, As soon as...\")\n" +
+                        "- Grammatical accuracy: Subject–verb agreement, article use, prepositions, and modal verbs must be mostly accurate.\n" +
+                        "  (❗ If basic grammar errors are frequent and about 4 times → cap at Band 5.5–6.)\n" +
+                        "- Natural delivery: Complex grammar should be used fluently and appropriately, not forced or awkward.\n" +
+                        "  (❗ If errors arise due to unnatural overuse of grammar forms → penalty of -0.25 to -0.5 band depending on severity.)\n" +
+                        "- IELTS Public Descriptors:\n" +
+                        "    • Band 9: Structures are precise and accurate at all times, apart from ‘mistakes’ characteristic of native speaker speech.\n" +
+                        "    • Band 8: Wide range of structures, flexibly used. The majority of sentences are error free. Occasional inappropriacies and non-systematic errors occur.\n" +
+                        "    • Band 7: A range of structures flexibly used. Error-free sentences are frequent. Some errors persist.\n" +
+                        "    • Band 6: Produces a mix of short and complex sentence forms with limited flexibility. Frequent errors in complex structures but communication is maintained.\n" +
+                        "    • Band 5: Mostly basic sentence forms. Complex structures are attempted but often contain errors that may reduce clarity.\n" +
+
+                        "2. SCORING SYSTEM:\n" +
+                        "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
+                        "   - Deduct 0.5 band per 2 major errors\n" +
+
+                        "RESPONSE FORMAT:\n" +
+                        "- score: decimal (overall band score, e.g. 6.5)\n" +
+                        "- feedback: {\n" +
+                        "    errorCorrections: [{\n" +
+                        "      originalText: string,\n" +
+                        "      correctedText: string,\n" +
+                        "      errorType: string,\n" +
+                        "      explanation: string,\n" +
+                        "      sentenceContext: string\n" +
+                        "    }],\n" +
+                        "    sentenceImprovements: [{\n" +
+                        "      originalSentence: string,\n" +
+                        "      improvedSentence: string,\n" +
+                        "      techniquesUsed: [string],\n" +
+                        "      bandBoost: string\n" +
+                        "    }],\n" +
+                        "    overallComment: string\n" +
+                        "}\n" +
+                        "- evaluation: {\n" +
+                        "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
+                        "    Grammar: {scoreEva: string, reviewEva: string}\n" +
+                        "}\n" +
+                        "sampleAnswer: string (Optional band 9 model)\n" +
+                        "Question:\n" + question + "\n" +
+                        "Original Answer:\n" + answer;
+        return speakingPart2;
+    }
     //Prompt cho Writing 1
     private String buildTask1Prompt(String question, String answer) {
         String promptBuilder1 =

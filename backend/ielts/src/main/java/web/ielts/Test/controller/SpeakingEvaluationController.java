@@ -31,7 +31,9 @@ public class SpeakingEvaluationController {
         //System.out.println(url);
         String question = req.get("question");
         String trascriptText =whisper.transcribe(url);
+
         JsonNode transcript = whisper.transcribeWithTimestamps(url);
+
         System.out.println(transcript);
 
        Map<String, Object> prosodyFeatures = prosody.analyze(url,transcript);

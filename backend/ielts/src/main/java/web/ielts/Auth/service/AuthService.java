@@ -60,25 +60,25 @@ public class AuthService {
         return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
     }
     public ResponseEntity<?> forgotpassword(String email) {
-        // Giả sử bạn tìm token bằng email (hoặc cách khác)
-        VerificationToken token = tokenRepository.findByToken(email); // giả định tìm theo token hoặc email
+        User user = authRepository.findByEmail(email);
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = new VerificationToken(
+                token,
+                user.getEmail(),
+                user.getPassword(),
+                LocalDateTime.now().plusHours(24)
+                ,"student"
+        );// giả định tìm theo token hoặc email
+        tokenRepository.save(verificationToken);
 
-        if (token == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Collections.singletonMap("message", "Token không tồn tại"));
-        } else {
-            if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Collections.singletonMap("message", "Token đã hết hạn"));
-            } else {
                 // Token hợp lệ
                 // Thực hiện reset password hoặc gửi email xác nhận
-                emailForgetPasswordConfig.sendResetPasswordEmail(token.getUserEmail(), token.getToken());
+                emailForgetPasswordConfig.sendResetPasswordEmail(verificationToken.getUserEmail(), token);
 
                 return ResponseEntity.ok("Gửi email thành công, vui lòng kiểm tra email.");
             }
-        }
-    }
+
+
     public ResponseEntity<?> resetPassword(String token, String newPassword) {
         VerificationToken verificationToken = tokenRepository.findByToken(token);
         if (verificationToken == null) {
@@ -90,9 +90,7 @@ public class AuthService {
         }
 
         // Thêm check password mới
-        if (newPassword == null || newPassword.length() < 8) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mật khẩu mới phải có ít nhất 8 ký tự");
-        }
+
 
         User user = authRepository.findByEmail(verificationToken.getUserEmail());
         if(user == null){
