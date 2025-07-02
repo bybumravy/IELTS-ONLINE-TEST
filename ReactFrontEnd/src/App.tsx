@@ -55,6 +55,7 @@ import AddTest from "@/pages/AddTest"
 import AcceptTestPage from "@/pages/AcceptTestPage"
 import RequestTestDetailPage from "@/pages/RequestTestDetailPage"
 import VocabularyList from "./pages/student/VocabularyList"
+import ReviewReport from "@/pages/ReviewReport.tsx";
 
 // Protected Layouts
 import SoftProtectedLayout from "@/components/sections/SoftProtectedLayout"
@@ -177,7 +178,7 @@ export default function App() {
                         <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />
                         <Route path="/request-test-detail" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><RequestTestDetailPage /></StaffLayout></ProtectedLayout>} />
                         <Route path="/add-vocabulary" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><Vocabulary /></StaffLayout></ProtectedLayout>} />
-
+                        <Route path="/review-report" element={<MainLayout><ReviewReport /></MainLayout>} />
                         {/* ========== Error Pages ========== */}
                         <Route path="/error" element={<ErrorPage />} />
 

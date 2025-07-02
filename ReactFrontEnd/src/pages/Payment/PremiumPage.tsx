@@ -1,4 +1,4 @@
-// IELTS Premium Page with MoMo Payment Integration
+// IELTS Premium Page with VNPay Payment Integration
 import {useEffect, useState} from "react"
 import {
     Check,
@@ -33,10 +33,36 @@ type Plan = {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+function formatPremiumRemainingTime(premiumExpiry: string | null): string {
+    if (!premiumExpiry) return "Premium đã hết hạn";
+
+    const expiryDateUtc = new Date(premiumExpiry);
+    const expiryDateVN = new Date(expiryDateUtc.getTime() + 7 * 60 * 60 * 1000); // UTC+7
+
+    const now = new Date();
+    const diffMs = expiryDateVN.getTime() - now.getTime();
+
+    if (diffMs <= 0) return "Premium đã hết hạn";
+
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const days = Math.floor(diffMinutes / 1440);
+    const hours = Math.floor((diffMinutes % 1440) / 60);
+    const minutes = diffMinutes % 60;
+
+    let result = "Còn lại ";
+    if (days > 0) result += `${days} ngày `;
+    if (hours > 0) result += `${hours} giờ `;
+    if (days === 0 && hours === 0 && minutes > 0) result += `${minutes} phút`;
+
+    return result.trim();
+}
+
+
 export default function PremiumPage() {
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
     const [loading, setLoading] = useState(false)
     const [plans, setPlans] = useState<Plan[]>([])
+    const [premiumExpiry, setPremiumExpiry] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchPlans = async () => {
@@ -62,11 +88,35 @@ export default function PremiumPage() {
         fetchPlans()
     }, [])
 
+    useEffect(() => {
+        fetch('${API_URL}/api/user/me', {
+            method: "GET",
+            credentials: "include",
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                const expiry = data.premiumExpiry || null;
+                setPremiumExpiry(expiry);
+
+                // 👉 Chuyển sang giờ Việt Nam (nếu expiry tồn tại)
+                if (expiry) {
+                    const utcDate = new Date(expiry);
+                    const vietnamTime = new Date(utcDate.getTime() + 7 * 60 * 60 * 1000);
+                    console.log("⏰ Giờ hết hạn Premium (giờ VN):", vietnamTime.toLocaleString());
+                }
+            })
+            .catch(() => {
+                setPremiumExpiry(null);
+            });
+    }, []);
+
+
+
     const handlePay = async () => {
         if (!selectedPlan) return;
         setLoading(true);
         try {
-            const response = await fetch(`${API_URL}/vn-pay/create`, {
+            const response = await fetch(`${API_URL}/api/vn-pay/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -102,6 +152,14 @@ export default function PremiumPage() {
                 <Badge className="mb-4 bg-orange-100 text-orange-800 hover:bg-orange-200">
                     🚀 Ra mắt AI Chấm Bài IELTS
                 </Badge>
+                {/* ✅ Thêm badge hiển thị thời hạn Premium */}
+                {premiumExpiry && (
+                    <div className="mb-2">
+                        <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+                            🌟 Premium: {formatPremiumRemainingTime(premiumExpiry)}
+                        </Badge>
+                    </div>
+                )}
                 <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-orange-600 to-green-600 bg-clip-text text-transparent mb-4">
                     IELTS Premium AI
                 </h1>

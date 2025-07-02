@@ -258,7 +258,9 @@ export default function ListeningTest() {
                             onClick={togglePlayPause}
                             className="bg-teal-500 text-white hover:bg-teal-600"
                         >
-                            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                            <>
+                                {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                            </>
                         </Button>
                         <div className="flex-1">
                             <input

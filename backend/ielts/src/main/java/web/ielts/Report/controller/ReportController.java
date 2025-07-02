@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import web.ielts.Report.model.Report;
 import web.ielts.Report.repository.ReportRepository;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/report")
@@ -15,6 +17,11 @@ public class ReportController {
 
     public ReportController(ReportRepository reportRepository) {
         this.reportRepository = reportRepository;
+    }
+
+    @GetMapping
+    public List<Report> getAllReports() {
+        return reportRepository.findAll();
     }
 
 

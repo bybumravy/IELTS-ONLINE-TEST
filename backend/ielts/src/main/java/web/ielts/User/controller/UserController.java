@@ -1,15 +1,15 @@
 package web.ielts.User.controller;
 
-
-import com.sun.tools.jconsole.JConsoleContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import web.ielts.Auth.repository.AuthRepository;
 import web.ielts.Auth.service.AuthService;
 import web.ielts.User.User;
 import web.ielts.User.UserDTO;
+import web.ielts.User.UserService;
 import web.ielts.User.repository.UserRepository;
 
 import java.util.Optional;
@@ -28,7 +28,10 @@ public class UserController {
     @Autowired
     private AuthService authService;
 
-    // Lấy thông tin user theo username
+    @Autowired
+    private UserService userService;
+
+    // ✅ Lấy thông tin user theo username
     @GetMapping("/{username}")
     public ResponseEntity<?> getUserByEmail(@PathVariable String username) {
         Optional<User> userOpt = userRepository.findById(username);
@@ -47,7 +50,7 @@ public class UserController {
         }
     }
 
-    // Update thông tin user
+    // ✅ Cập nhật thông tin user
     @PutMapping("/{username}")
     public ResponseEntity<?> updateUser(@PathVariable String username, @RequestBody UserDTO updatedUserDto) {
         Optional<User> userOpt = userRepository.findById(username);
@@ -56,8 +59,6 @@ public class UserController {
         }
 
         User existingUser = userOpt.get();
-
-        // Cập nhật các field
         existingUser.setFirstName(updatedUserDto.getFirstName());
         existingUser.setLastName(updatedUserDto.getLastName());
         existingUser.setBirthDate(updatedUserDto.getBirthDate());
@@ -66,7 +67,6 @@ public class UserController {
 
         userRepository.save(existingUser);
 
-        // Trả về DTO
         UserDTO responseDto = new UserDTO();
         responseDto.setUserName(existingUser.getEmail());
         responseDto.setFirstName(existingUser.getFirstName());
@@ -78,27 +78,39 @@ public class UserController {
         return ResponseEntity.ok(responseDto);
     }
 
+    // ✅ Gộp nâng cấp premium từ cả AuthenticationPrincipal và JWT token
     @PostMapping("/upgrade-premium")
-    public ResponseEntity<?> upgradePremium(@CookieValue(value = "jwt_token", required = false) String token) {
-        if (token == null || token.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing token");
-        }
-
+    public ResponseEntity<?> upgradePremium(
+            @AuthenticationPrincipal User user,
+            @CookieValue(value = "jwt_token", required = false) String token
+    ) {
         try {
-            String username = authService.getUsernameFromToken(token);
-            User user = authRepository.findByEmail(username);
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            if (user != null) {
+                userService.upgradeToPremium(user.getEmail());
+                return ResponseEntity.ok("Đã nâng cấp premium thành công (qua authentication principal)");
             }
 
-            user.setPremium(true);
-            authRepository.save(user);
+            if (token != null && !token.isEmpty()) {
+                String username = authService.getUsernameFromToken(token);
+                User tokenUser = authRepository.findByEmail(username);
+                if (tokenUser == null) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+                }
 
-            return ResponseEntity.ok("Premium status updated");
+                tokenUser.setPremium(true);
+                authRepository.save(tokenUser);
+                return ResponseEntity.ok("Đã nâng cấp premium thành công (qua token)");
+            }
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Không có thông tin đăng nhập");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi: " + e.getMessage());
         }
     }
 
-
+    // ✅ Lấy thông tin người dùng và tự reset premium nếu hết hạn
+    @GetMapping("/me")
+    public User getCurrentUser(@AuthenticationPrincipal User user) {
+        return userService.resetPremiumIfExpired(user);
+    }
 }

@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -97,6 +98,40 @@ public class DoTestService {
     }
 
     public ListeningAnswer saveListeningAnswer(ListeningAnswer answer) {
+
+        int totalQuestions = 0;
+        int correctAnswers = 0;
+
+        for (var task : answer.getTasks()) {
+            for (var section : task.getSections()) {
+                for (var q : section.getQuestions()) {
+                    totalQuestions++;
+                    if (q.getAnswer() != null && q.getAnswer().equals(q.getStudentAnswer())) {
+                        correctAnswers++;
+                    }
+                }
+            }
+        }
+
+        answer.setTotalQuestions(totalQuestions);
+        answer.setTotalCorrect(correctAnswers);
+
+        double percent = totalQuestions == 0 ? 0.0 : (double) correctAnswers / totalQuestions;
+
+        double band;
+        if (percent >= 0.9) band = 9;
+        else if (percent >= 0.85) band = 8;
+        else if (percent >= 0.8) band = 7.5;
+        else if (percent >= 0.7) band = 7;
+        else if (percent >= 0.6) band = 6;
+        else if (percent >= 0.5) band = 5;
+        else band = 4;
+
+        answer.setBand(band);
+
+        if (answer.getSubmittedAt() == null) {
+            answer.setSubmittedAt(LocalDateTime.now());
+        }
 
         return listeningAnswerRepository.save(answer);
     }
