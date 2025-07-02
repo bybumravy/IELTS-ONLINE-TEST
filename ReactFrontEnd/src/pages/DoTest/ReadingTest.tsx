@@ -66,10 +66,12 @@ export default function ReadingTest() {
         localStorage.setItem("darkMode", isDarkMode ? "true" : "false");
     }, [isDarkMode]);
 
+    const API_URL = import.meta.env.VITE_API_URL;
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await customFetch(`http://localhost:8080/verify/reading/${testId}`);
+                const res = await customFetch(`${API_URL}/verify/reading/${testId}`);
                 const data: ReadingTest = await res.json();
 
                 let questionId = 1;
@@ -170,7 +172,7 @@ export default function ReadingTest() {
                 })),
             };
 
-            const response = await fetch("http://localhost:8080/verify/reading/submit", {
+            const response = await fetch(`${API_URL}/verify/reading/submit`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

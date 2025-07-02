@@ -23,6 +23,8 @@ interface User {
     originalEmail?: string;
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function ManageUsersTable({ role }: ManageUsersTableProps) {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
@@ -37,7 +39,7 @@ export default function ManageUsersTable({ role }: ManageUsersTableProps) {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const response = await customFetch(`http://localhost:8080/getuser/${role}`);
+            const response = await customFetch(`${API_URL}/getuser/${role}`);
             if (response.ok) {
                 const data = await response.json();
                 setUsers(data);
@@ -62,7 +64,7 @@ export default function ManageUsersTable({ role }: ManageUsersTableProps) {
     };
 
     const handleDelete = async (userEmail: string) => {
-        const res = await customFetch(`http://localhost:8080/getuser/deleteuser/${userEmail}`, {
+        const res = await customFetch(`${API_URL}/getuser/deleteuser/${userEmail}`, {
             method: 'DELETE'
         });
         if (res.ok) {
@@ -264,8 +266,8 @@ export default function ManageUsersTable({ role }: ManageUsersTableProps) {
                                     if (!isValid) return;
 
                                     const url = isCreateMode
-                                        ? `http://localhost:8080/getuser/createuser`
-                                        : `http://localhost:8080/getuser/updateuser`;
+                                        ? `${API_URL}/getuser/createuser`
+                                        : `${API_URL}/getuser/updateuser`;
 
                                     const method = isCreateMode ? 'POST' : 'PUT';
                                     console.log(JSON.stringify(selectedUser, null, 2));

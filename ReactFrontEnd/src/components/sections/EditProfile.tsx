@@ -25,6 +25,8 @@ interface ProfileDto {
     phone: string;
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
     const { user, fetchUser } = useAuth()
     const [profile, setProfile] = useState<ProfileDto>({
@@ -40,7 +42,7 @@ export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
     // Fetch data when dialog opens
     useEffect(() => {
         if (isOpen && user?.username) {
-            fetch(`http://localhost:8080/api/user/${user.username}`)
+            fetch(`${API_URL}/api/user/${user.username}`)
                 .then((res) => res.json())
                 .then((data) => setProfile(data))
                 .catch((err) => console.error(err))
@@ -52,7 +54,7 @@ export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
         setLoading(true)
         console.log("Vao put");
         try {
-            await customFetch(`http://localhost:8080/api/user/${user?.username}`, {
+            await customFetch(`${API_URL}/api/user/${user?.username}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(profile),

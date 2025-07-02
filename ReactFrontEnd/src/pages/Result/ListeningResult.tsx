@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CheckCircle, XCircle, Clock, Calendar, Target, TrendingUp, BookOpen, Download, Share2 } from "lucide-react"
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function ListeningResult() {
     const { user } = useAuth()
     const [searchParams] = useSearchParams();
@@ -23,7 +25,7 @@ export default function ListeningResult() {
     useEffect(() => {
         if (!resultId) return;
         setLoading(true);
-        fetch(`http://localhost:8080/api/result/listening/by-id?answerId=${resultId}`)
+        fetch(`${API_URL}/api/result/listening/by-id?answerId=${resultId}`)
             .then(res => {
                 if (!res.ok) throw new Error("Không tìm thấy kết quả");
                 return res.json();

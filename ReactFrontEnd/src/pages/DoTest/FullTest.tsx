@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Monitor, Lightbulb } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function FullTest() {
     const { testId } = useParams();
     const navigate = useNavigate();
@@ -18,7 +20,7 @@ export default function FullTest() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/verify/fulltest/${testId}`, {
+                const res = await fetch(`${API_URL}/verify/fulltest/${testId}`, {
                     method: "GET",
                     credentials: "include",
                 });

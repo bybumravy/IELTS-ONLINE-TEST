@@ -32,7 +32,19 @@ public class AuthController {
 
         return authservice.register(newUser);
     }
+    @PostMapping("/forgotpassword")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+         String email = request.get("email");
+        return authservice.forgotpassword(email);
 
+    }
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+
+        return authservice.resetPassword(token, newPassword);
+    }
     @GetMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
 

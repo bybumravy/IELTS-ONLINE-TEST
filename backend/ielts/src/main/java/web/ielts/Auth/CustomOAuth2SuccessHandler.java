@@ -26,8 +26,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         String email = oAuth2User.getAttribute("email");
         String googleId = oAuth2User.getAttribute("sub");
 
-
-
         User user = loginRepository.findByEmail(email);
         if (user == null) {
             user = new User();
@@ -65,7 +63,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
             response.sendRedirect("http://localhost:5173/adminpage");
         }
         else if(user.getRole().equalsIgnoreCase("TEAcher")){
-            response.sendRedirect("http://localhost:5173/staff-page");
+            response.sendRedirect("http://localhost:5173/teacher-page");
         }
         else{
             response.sendRedirect("http://localhost:5173/staff-page");

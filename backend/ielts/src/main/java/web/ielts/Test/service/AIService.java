@@ -4,14 +4,18 @@ package web.ielts.Test.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import web.ielts.Test.model.answer.writing.WritingAIResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +32,59 @@ public class AIService {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
         this.objectMapper = objectMapper;
+    }
+    @Value("${openai.api.key}")
+    private String apiKey;
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    public String call(String prompt) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(apiKey);
+
+        // 🧠 Cấu hình system message nghiêm ngặt
+        String systemMessage = """
+You are an official IELTS Speaking examiner. You MUST follow all deduction rules given in the prompt STRICTLY.
+- Do not skip even minor vocabulary or grammar errors.
+- Always explain each deduction clearly.
+- NEVER give full score unless all descriptors are perfectly met.
+""";
+
+        Map<String, Object> requestBody = Map.of(
+                "model", "gpt-4",
+                "messages", List.of(
+                        Map.of("role", "system", "content", systemMessage),
+                        Map.of("role", "user", "content", prompt)
+                ),
+                "temperature", 0,   // 🔥 RẤT QUAN TRỌNG: Ổn định đầu ra
+                "top_p", 1,
+                "max_tokens", 1500  // Tuỳ vào độ dài transcript, để tránh cắt nội dung
+        );
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    "https://api.openai.com/v1/chat/completions",
+                    entity,
+                    String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                JsonNode root = new ObjectMapper().readTree(response.getBody());
+                return root
+                        .path("choices")
+                        .path(0)
+                        .path("message")
+                        .path("content")
+                        .asText();
+            } else {
+                throw new RuntimeException("OpenAI API error: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to call OpenAI GPT API or parse response", e);
+        }
     }
 
     public WritingAIResponse WritingTask1(String imageUrl, String question, String answer) {

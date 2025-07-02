@@ -20,6 +20,8 @@ interface MockTestProps {
     selectedSkill: 'Listening' | 'Reading' | 'Writing' | 'Speaking' | 'All Skills';
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 // Sử dụng function component bình thường
 function MockTest({ selectedSkill = 'All Skills' }: MockTestProps) {
     const [testsByYear, setTestsByYear] = useState<TestsByYear>({});
@@ -34,10 +36,10 @@ function MockTest({ selectedSkill = 'All Skills' }: MockTestProps) {
                 setError(null);
                 const endpoint =
                     selectedSkill === 'All Skills'
-                        ? 'http://localhost:8080/api/test/all-skill'
-                        : `http://localhost:8080/api/test/${selectedSkill.toLowerCase()}`;
+                        ? '/api/test/all-skill'
+                        : `/api/test/${selectedSkill.toLowerCase()}`;
 
-                const response = await fetch(endpoint);
+                const response = await fetch(`${API_URL}${endpoint}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }

@@ -246,7 +246,7 @@ const Vocabulary: React.FC = () => {
     const [showAdd, setShowAdd] = useState(false);
     const [editData, setEditData] = useState<VocabularyType | null>(null);
 
-    const API_BASE = "http://localhost:8080/api/practice";
+    const API_URL = import.meta.env.VITE_API_URL;
 
     // --- NEW: State for topics/bands fetched from backend ---
     const [topics, setTopics] = useState<{ value: string, label: string }[]>([{ value: '', label: 'All Topics' }]);
@@ -254,12 +254,12 @@ const Vocabulary: React.FC = () => {
 
     // --- Fetch topics/bands from backend ---
     useEffect(() => {
-        fetch(`${API_BASE}/vocabulary/topics`, { credentials: "include" })
+        fetch(`${API_URL}/api/practice/vocabulary/topics`, { credentials: "include" })
             .then(res => res.json())
             .then(data => setTopics([{ value: '', label: 'All Topics' }, ...data.map((t: string) => ({ value: t, label: t }))]))
             .catch(() => setTopics([{ value: '', label: 'All Topics' }]));
 
-        fetch(`${API_BASE}/vocabulary/bands`, { credentials: "include" })
+        fetch(`${API_URL}/api/practice/vocabulary/bands`, { credentials: "include" })
             .then(res => res.json())
             .then(data => setBands([{ value: '', label: 'All Bands' }, ...data.map((b: string) => ({ value: b, label: b }))]))
             .catch(() => setBands([{ value: '', label: 'All Bands' }]));
@@ -276,7 +276,7 @@ const Vocabulary: React.FC = () => {
             params.append('page', page.toString());
             params.append('size', pageSize.toString());
 
-            let url = `${API_BASE}/vocabulary/filter?${params.toString()}`;
+            let url = `${API_URL}/api/practice/vocabulary/filter?${params.toString()}`;
             const response = await fetch(url, {
                 headers: { 'Content-Type': 'application/json' },
                 credentials: "include"
@@ -296,7 +296,7 @@ const Vocabulary: React.FC = () => {
 
     const handleAddVocabulary = async (vocabulary: Omit<VocabularyType, 'id'>) => {
         try {
-            const response = await fetch(`${API_BASE}/vocabulary/add`, {
+            const response = await fetch(`${API_URL}/api/practice/vocabulary/add`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: "include",
@@ -312,7 +312,7 @@ const Vocabulary: React.FC = () => {
 
     const handleEditVocabulary = async (id: string, updated: Omit<VocabularyType, 'id'>) => {
         try {
-            const response = await fetch(`${API_BASE}/vocabulary/${id}`, {
+            const response = await fetch(`${API_URL}/api/practice/vocabulary/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: "include",
@@ -328,7 +328,7 @@ const Vocabulary: React.FC = () => {
 
     const handleDeleteVocabulary = async (id: string) => {
         try {
-            const response = await fetch(`${API_BASE}/vocabulary/${id}`, {
+            const response = await fetch(`${API_URL}/api/practice/vocabulary/${id}`, {
                 method: 'DELETE',
                 credentials: "include"
             });

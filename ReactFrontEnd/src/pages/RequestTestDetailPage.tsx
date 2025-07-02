@@ -131,45 +131,45 @@ const ListeningView = ({ data }: { data: AddListening | null }) => {
       <div className="flex items-center gap-4">
         <span className="font-semibold">Audio File:</span>
         {data.audioUrl ? (
-          <audio controls src={data.audioUrl} className="w-full">
-            Your browser does not support the audio element.
-          </audio>
+        <audio controls src={data.audioUrl} className="w-full">
+          Your browser does not support the audio element.
+        </audio>
         ) : (
           <span className="text-red-500">No audio file provided</span>
         )}
       </div>
       {data.tasks && data.tasks.length > 0 ? (
         data.tasks.map((task, index) => (
-          <Card key={index}>
-            <CardHeader><CardTitle>Task {task.taskNumber}</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
+        <Card key={index}>
+          <CardHeader><CardTitle>Task {task.taskNumber}</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
               {task.sections && task.sections.length > 0 ? (
                 task.sections.map((section, sIndex) => (
-                  <div key={sIndex} className="p-4 border rounded-lg bg-gray-50/50">
-                    <h4 className="font-semibold mb-2 text-lg">Section {section.sectionNumber} <Badge variant="secondary">{section.type}</Badge></h4>
-                    {section.imageUrl && <img src={section.imageUrl} alt={`Section Visual`} className="my-2 rounded-md max-w-full md:max-w-md" />}
-                    {section.introduction && <p className="mb-2 italic text-gray-600">{section.introduction}</p>}
-                    <div className="space-y-3">
+              <div key={sIndex} className="p-4 border rounded-lg bg-gray-50/50">
+                <h4 className="font-semibold mb-2 text-lg">Section {section.sectionNumber} <Badge variant="secondary">{section.type}</Badge></h4>
+                {section.imageUrl && <img src={section.imageUrl} alt={`Section Visual`} className="my-2 rounded-md max-w-full md:max-w-md" />}
+                {section.introduction && <p className="mb-2 italic text-gray-600">{section.introduction}</p>}
+                <div className="space-y-3">
                         {section.questions && section.questions.length > 0 ? (
                           section.questions.map((q, qIndex) => (
-                              <div key={qIndex} className="pt-3 border-t">
-                                  <p><strong>{q.questionNumber || qIndex + 1}.</strong> {q.question}</p>
-                                  {q.options && q.options.length > 0 && <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-700">{q.options.map((opt, oIndex) => <li key={oIndex}>{opt}</li>)}</ul>}
+                        <div key={qIndex} className="pt-3 border-t">
+                            <p><strong>{q.questionNumber || qIndex + 1}.</strong> {q.question}</p>
+                            {q.options && q.options.length > 0 && <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-700">{q.options.map((opt, oIndex) => <li key={oIndex}>{opt}</li>)}</ul>}
                                   {q.answer && <p className="mt-2 text-green-700 font-semibold">Answer: {q.answer}</p>}
-                                  {q.explanation && <p className="text-sm text-blue-600 mt-1">Explanation: {q.explanation}</p>}
-                              </div>
+                            {q.explanation && <p className="text-sm text-blue-600 mt-1">Explanation: {q.explanation}</p>}
+                        </div>
                           ))
                         ) : (
                           <p className="text-gray-500 italic">No questions in this section</p>
                         )}
-                    </div>
-                  </div>
+                </div>
+              </div>
                 ))
               ) : (
                 <p className="text-gray-500 italic">No sections in this task</p>
               )}
-            </CardContent>
-          </Card>
+          </CardContent>
+        </Card>
         ))
       ) : (
         <p className="text-gray-500 italic">No tasks available</p>
@@ -185,38 +185,38 @@ const ReadingView = ({ data }: { data: AddReading | null }) => {
       <div className="space-y-6">
         {data.tasks && data.tasks.length > 0 ? (
           data.tasks.map((task, index) => (
-            <Card key={index}>
-              <CardHeader><CardTitle>Task {task.taskNumber}</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <div className="prose max-w-none p-4 bg-gray-50 rounded-lg border">
-                    <h4 className="font-semibold mb-2 text-lg">Paragraph</h4>
+          <Card key={index}>
+            <CardHeader><CardTitle>Task {task.taskNumber}</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="prose max-w-none p-4 bg-gray-50 rounded-lg border">
+                  <h4 className="font-semibold mb-2 text-lg">Paragraph</h4>
                     <p>{task.paragraph || 'No paragraph provided'}</p>
-                </div>
+              </div>
                 {task.sections && task.sections.length > 0 ? (
                   task.sections.map((section, sIndex) => (
-                    <div key={sIndex} className="p-4 border rounded-lg bg-gray-50/50">
-                      <h4 className="font-semibold mb-2 text-lg">Section {section.sectionNumber} <Badge variant="secondary">{section.type}</Badge></h4>
-                       <div className="space-y-3">
+                <div key={sIndex} className="p-4 border rounded-lg bg-gray-50/50">
+                  <h4 className="font-semibold mb-2 text-lg">Section {section.sectionNumber} <Badge variant="secondary">{section.type}</Badge></h4>
+                   <div className="space-y-3">
                         {section.questions && section.questions.length > 0 ? (
                           section.questions.map((q, qIndex) => (
-                              <div key={qIndex} className="pt-3 border-t">
-                                  <p><strong>{q.questionNumber || qIndex + 1}.</strong> {q.question}</p>
-                                  {q.options && q.options.length > 0 && <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-700">{q.options.map((opt, oIndex) => <li key={oIndex}>{opt}</li>)}</ul>}
+                        <div key={qIndex} className="pt-3 border-t">
+                            <p><strong>{q.questionNumber || qIndex + 1}.</strong> {q.question}</p>
+                            {q.options && q.options.length > 0 && <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-700">{q.options.map((opt, oIndex) => <li key={oIndex}>{opt}</li>)}</ul>}
                                   {q.answer && <p className="mt-2 text-green-700 font-semibold">Answer: {q.answer}</p>}
-                                  {q.explanation && <p className="text-sm text-blue-600 mt-1">Explanation: {q.explanation}</p>}
-                              </div>
+                            {q.explanation && <p className="text-sm text-blue-600 mt-1">Explanation: {q.explanation}</p>}
+                        </div>
                           ))
                         ) : (
                           <p className="text-gray-500 italic">No questions in this section</p>
                         )}
-                    </div>
-                    </div>
+                </div>
+                </div>
                   ))
                 ) : (
                   <p className="text-gray-500 italic">No sections in this task</p>
                 )}
-              </CardContent>
-            </Card>
+            </CardContent>
+          </Card>
           ))
         ) : (
           <p className="text-gray-500 italic">No tasks available</p>
@@ -232,13 +232,13 @@ const WritingView = ({ data }: { data: AddWriting | null }) => {
         <div className="space-y-6">
         {data.tasks && data.tasks.length > 0 ? (
           data.tasks.map((task, index) => (
-            <Card key={index}>
-              <CardHeader><CardTitle>Task {task.taskNumber}</CardTitle></CardHeader>
-              <CardContent>
-                  {task.imageUrl && <img src={task.imageUrl} alt={`Task visual`} className="my-2 rounded-md max-w-full md:max-w-md" />}
+          <Card key={index}>
+            <CardHeader><CardTitle>Task {task.taskNumber}</CardTitle></CardHeader>
+            <CardContent>
+                {task.imageUrl && <img src={task.imageUrl} alt={`Task visual`} className="my-2 rounded-md max-w-full md:max-w-md" />}
                   <p className="text-lg leading-relaxed">{task.question || 'No question provided'}</p>
-              </CardContent>
-            </Card>
+            </CardContent>
+          </Card>
           ))
         ) : (
           <p className="text-gray-500 italic">No tasks available</p>
@@ -408,13 +408,13 @@ export default function RequestTestDetailPage() {
                 </Button>
                 <div className="flex justify-between items-start">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-800">{testDetail.test.testTitle}</h1>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                            {testDetail.test.tags.map(tag => <Badge key={tag}>{tag}</Badge>)}
-                        </div>
-                         <p className="text-sm text-gray-500 mt-2">
-                            Requested on: {new Date(testDetail.test.createAt).toLocaleString()}
-                        </p>
+                <h1 className="text-3xl font-bold text-gray-800">{testDetail.test.testTitle}</h1>
+                <div className="flex flex-wrap gap-2 mt-2">
+                    {testDetail.test.tags.map(tag => <Badge key={tag}>{tag}</Badge>)}
+                </div>
+                 <p className="text-sm text-gray-500 mt-2">
+                    Requested on: {new Date(testDetail.test.createAt).toLocaleString()}
+                </p>
                         <p className="text-sm text-gray-500">
                             Test ID: {testDetail.test.testId}
                         </p>

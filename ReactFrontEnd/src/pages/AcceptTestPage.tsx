@@ -13,13 +13,14 @@ export default function AcceptTestPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchTests = async () => {
       setLoading(true);
       try {
-        const response = await fetch("http://localhost:8080/api/manager/request-tests", {
-          credentials: "include",
+        const response = await fetch(`${API_URL}/api/manager/request-tests`, {
+      credentials: "include",
         });
         
         if (!response.ok) {
@@ -46,7 +47,7 @@ export default function AcceptTestPage() {
     if (!confirm) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/manager/accept-test/${testId}`, {
+      const response = await fetch(`${API_URL}/api/manager/accept-test/${testId}`, {
         method: "POST",
         credentials: "include",
       });

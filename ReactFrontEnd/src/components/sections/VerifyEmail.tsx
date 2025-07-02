@@ -9,11 +9,12 @@ export default function VerifyEmail() {
     const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
     const token = searchParams.get("token");
     const navigate = useNavigate();
+    const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const verify = async () => {
             try {
-                const res = await fetch("http://localhost:8080/api/verify-email?token=" + token, {
+                const res = await fetch(`${API_URL}/api/verify-email?token=${token}`, {
                     method: "GET",
                     credentials: "include"
                 });

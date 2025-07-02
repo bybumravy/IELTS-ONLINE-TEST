@@ -60,6 +60,7 @@ interface TaskWritingAnswer {
     sampleAnswer: string;
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function WritingResult() {
     const [data, setData] = useState<WritingAnswer | null>(null);
@@ -80,7 +81,7 @@ export default function WritingResult() {
 
     const [feedbackView, setFeedbackView] = useState<"errors" | "improvements">("errors")
     useEffect(() => {
-        fetch(`http://localhost:8080/api/result/${resultId}`)
+        fetch(`${API_URL}/api/result/${resultId}`)
             .then(res => {
                 if (!res.ok) throw new Error("Failed to fetch data");
                 return res.json();

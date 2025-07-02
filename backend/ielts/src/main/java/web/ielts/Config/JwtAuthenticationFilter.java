@@ -19,19 +19,19 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    protected CustomUserDetailsService userDetailsService;
 
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+    public void doFilterInternal(HttpServletRequest request,
+                                 HttpServletResponse response,
+                                 FilterChain filterChain)
             throws IOException, ServletException {
         String path = request.getRequestURI();
 
 //        if (path.startsWith("/oauth2/") ||
 //                path.startsWith("/login/oauth2/") ||
-//                path.equals("/api/login")) {
+//                pat h.equals("/api/login")) {
 //            filterChain.doFilter(request, response);
 //            return;
 //        }

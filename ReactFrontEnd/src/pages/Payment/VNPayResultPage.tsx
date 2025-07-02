@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { CheckCircle, XCircle } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function VnPayResultPage() {
     const [searchParams] = useSearchParams();
     const [status, setStatus] = useState<"success" | "failed" | null>(null);
@@ -13,7 +15,7 @@ export default function VnPayResultPage() {
             setStatus("success");
 
             // Gọi API nâng cấp premium
-            fetch("http://localhost:8080/api/user/upgrade-premium", {
+            fetch(`${API_URL}/api/user/upgrade-premium`, {
                 method: "POST",
                 credentials: "include", // QUAN TRỌNG để gửi cookie JWT
             })

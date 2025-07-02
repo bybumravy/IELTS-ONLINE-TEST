@@ -6,6 +6,8 @@ interface MediaServicesProps {
   onImageUrlReceived?: (url: string) => void;
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export const MediaServices: FC<MediaServicesProps> = ({ onAudioUrlReceived, onImageUrlReceived }) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -25,7 +27,7 @@ export const MediaServices: FC<MediaServicesProps> = ({ onAudioUrlReceived, onIm
       const formData = new FormData();
       formData.append('audio', audioFile);
 
-      const response = await fetch('http://localhost:8080/api/media/upload-audio', {
+      const response = await fetch(`${API_URL}/api/media/upload-audio`, {
         method: 'POST',
         body: formData,
       });
@@ -58,7 +60,7 @@ export const MediaServices: FC<MediaServicesProps> = ({ onAudioUrlReceived, onIm
       const formData = new FormData();
       formData.append('image', imageFile);
 
-      const response = await fetch('http://localhost:8080/api/media/upload-image', {
+      const response = await fetch(`${API_URL}/api/media/upload-image`, {
         method: 'POST',
         body: formData,
       });

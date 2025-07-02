@@ -15,6 +15,8 @@ interface WritingData {
     tasks: WritingTask[];
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function WritingTest() {
     const { user } = useAuth();
     const { testId } = useParams<{ testId: string }>();
@@ -30,7 +32,7 @@ export default function WritingTest() {
 
     // Fetch writing data
     useEffect(() => {
-    fetch(`http://localhost:8080/verify/writing/${testId}`, {
+    fetch(`${API_URL}/verify/writing/${testId}`, {
         credentials: "include",
     })
         .then((res) => res.json())
@@ -93,7 +95,7 @@ export default function WritingTest() {
 
         setIsSubmitting(true);
         try {
-            const response = await fetch("http://localhost:8080/verify/writing/submit", {
+            const response = await fetch(`${API_URL}/verify/writing/submit`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

@@ -26,6 +26,8 @@ const skillTabs = [
 
 type Skill = typeof skillTabs[number]['id'];
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const AddTest: FC = () => {
   const [testData, setTestData] = useState<TestDataState>(() => {
     const savedData = localStorage.getItem(AUTOSAVE_KEY);
@@ -70,7 +72,7 @@ const AddTest: FC = () => {
   useEffect(() => {
     const generateTestId = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/test/count');
+        const response = await fetch(`${API_URL}/api/test/count`);
         if (!response.ok) throw new Error('Failed to fetch test count');
         const countValue = await response.json();
         setTestData((prev) => ({
@@ -263,7 +265,7 @@ const handleSave = async () => {
       speaking: speakingCollection
     };
 
-    const response = await fetch('http://localhost:8080/api/teacher/request-test', {
+    const response = await fetch(`${API_URL}/api/teacher/request-test`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

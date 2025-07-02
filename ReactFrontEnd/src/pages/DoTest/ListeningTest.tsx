@@ -71,10 +71,12 @@ export default function ListeningTest() {
         setIsDarkMode((prev) => !prev);
     };
 
+    const API_URL = import.meta.env.VITE_API_URL;
+
     // Fetch dữ liệu test listening
     useEffect(() => {
         if (!testId) return;
-        customFetch(`http://localhost:8080/verify/listening/${testId}`, )
+        customFetch(`${API_URL}/verify/listening/${testId}`, )
             .then((res) => (res.ok ? res.json() : null))
             .then((data) => {
                 if (!data) return;
@@ -206,7 +208,7 @@ export default function ListeningTest() {
 
 
         try {
-            const res = await customFetch("http://localhost:8080/verify/listening/submit", {
+            const res = await customFetch(`${API_URL}/verify/listening/submit`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(dataToSend),

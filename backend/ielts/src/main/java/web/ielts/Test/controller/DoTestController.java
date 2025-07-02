@@ -73,6 +73,8 @@ public class DoTestController {
 
     @PostMapping("/writing/submit")
     public ResponseEntity<WritingAnswer> saveWritingAnswer(@RequestBody WritingAnswer answer) {
+        System.out.println("sadfsadfdsfdsafjasdklfklasdjfkasjdflaskjdflkasdjflkasjdfasfasfasfasdfasdfasdfa");
+        System.out.println(answer.toString());
         return ResponseEntity.ok(doTestService.saveWritingAnswer(answer));
     }
 

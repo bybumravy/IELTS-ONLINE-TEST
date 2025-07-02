@@ -29,6 +29,8 @@ function TipPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const API_URL = import.meta.env.VITE_API_URL;
+
     const skills: SkillInfo[] = [
         {
             name: "Listening",
@@ -60,7 +62,7 @@ function TipPage() {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await fetch(`http://localhost:8080/api/student/${newSkill}`);
+                const response = await fetch(`${API_URL}/api/student/${newSkill}`);
                 if (!response.ok) throw new Error("Failed to fetch tips");
                 const data = await response.json();
                 setTips(data);

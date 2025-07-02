@@ -77,10 +77,12 @@ const SpeakingTest = () => {
         part3: 1,
     }
 
+    const API_URL = import.meta.env.VITE_API_URL;
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await customFetch(`http://localhost:8080/verify/speaking/${testId}`, {
+                const res = await customFetch(`${API_URL}/verify/speaking/${testId}`, {
                     method: "GET",
                 })
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
@@ -368,7 +370,7 @@ const SpeakingTest = () => {
         )
 
         try {
-            const res = await customFetch("http://localhost:8080/verify/speaking/submit", {
+            const res = await customFetch(`${API_URL}/verify/speaking/submit`, {
                 method: "POST",
                 body: formData,
             })

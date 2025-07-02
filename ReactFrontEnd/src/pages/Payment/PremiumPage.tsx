@@ -30,6 +30,9 @@ type Plan = {
     popular: boolean;
     description: string[];
 };
+
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function PremiumPage() {
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
     const [loading, setLoading] = useState(false)
@@ -38,7 +41,7 @@ export default function PremiumPage() {
     useEffect(() => {
         const fetchPlans = async () => {
             try {
-                const response = await fetch("http://localhost:8080/api/courses")
+                const response = await fetch(`${API_URL}/api/courses`)
                 if (!response.ok) {
                     throw new Error("Network response was not ok")
                 }
@@ -63,7 +66,7 @@ export default function PremiumPage() {
         if (!selectedPlan) return;
         setLoading(true);
         try {
-            const response = await fetch("http://localhost:8080/api/vn-pay/create", {
+            const response = await fetch(`${API_URL}/vn-pay/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

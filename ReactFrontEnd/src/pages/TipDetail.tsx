@@ -4,6 +4,7 @@ import {Button} from "@/components/ui/button.tsx";
 import {PracticeExercise} from "@/components/sections/PracticeExcercise.tsx";
 import type {Exercises} from "@/types/apiTypes"
 import {StrategyAndTip} from "@/components/sections/StrategyAndTip.tsx";
+
 interface TipDetail {
     id: string | number;
     type: string;
@@ -17,12 +18,12 @@ interface TipDetail {
 function TipDetail() {
     const [detail, setDetail] = useState<TipDetail | null>(null);
     const { skill, id } = useParams<{ skill: string; id: string }>();
-
+    const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         if (!id) return;
 
-        const data = fetch(`http://localhost:8080/api/${skill}/${id}`)
+        const data = fetch(`${API_URL}/api/${skill}/${id}`)
             .then((res) => res.json())
             .then((data: TipDetail) => {
                 setDetail(data);
@@ -32,7 +33,7 @@ function TipDetail() {
                 setDetail(null);
             });
         console.log("Dât ne:" + data);
-    }, [id, skill]);
+    }, [id, skill, API_URL]);
 
     if (!detail) {
         return (

@@ -15,6 +15,8 @@ interface FeedbackModalProps {
     onClose: () => void
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Report({ isOpen, onClose }: FeedbackModalProps) {
     const { user } = useAuth()
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -28,7 +30,7 @@ export default function Report({ isOpen, onClose }: FeedbackModalProps) {
         setIsSubmitting(true)
 
         try {
-            const response = await customFetch("http://localhost:8080/api/report", {
+            const response = await customFetch(`${API_URL}/api/report`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

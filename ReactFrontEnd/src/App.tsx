@@ -35,6 +35,8 @@ import FulllTest from "@/pages/DoTest/FullTest"
 
 //Vocab
 import Vocabulary from "./pages/practice/Vocabulary"
+import ForgetPassword from "@/components/sections/ForgetPassword";
+import ResetPassword from "@/components/sections/ResetPassword";
 
 // Result
 import WritingResult from "@/pages/Result/WritingResult"
@@ -42,6 +44,7 @@ import ListeningResult from "./pages/Result/ListeningResult"
 import HistoryPage from "@/pages/HistoryPage"
 
 // Admin
+
 import LoginAdmin from "@/components/sections/LoginAdmin"
 import Adminpage from "@/pages/Adminpage"
 
@@ -57,6 +60,7 @@ import VocabularyList from "./pages/student/VocabularyList"
 import SoftProtectedLayout from "@/components/sections/SoftProtectedLayout"
 import ProtectedLayout from "@/components/sections/ProtectedLayout"
 import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
+
 
 export default function App() {
     return (
@@ -74,6 +78,8 @@ export default function App() {
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/verify-email" element={<VerifyEmail />} />
+                        <Route path="/forgot-password" element={<ForgetPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
                         <Route path="/help" element={<MainLayout><HelpCenter /></MainLayout>} />
 

@@ -1,10 +1,8 @@
+
 package web.ielts.Auth.service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +19,7 @@ import web.ielts.Auth.model.VerificationToken;
 import web.ielts.Auth.repository.VerificationTokenRepository;
 import web.ielts.Auth.repository.AuthRepository;
 import web.ielts.Config.EmailConfig;
+import web.ielts.Config.EmailForgetPasswordConfig;
 import web.ielts.User.User;
 
 @Component
@@ -32,6 +31,8 @@ public class AuthService {
     private VerificationTokenRepository tokenRepository;
     @Autowired
     private EmailConfig emailConfig;
+    @Autowired
+    private EmailForgetPasswordConfig emailForgetPasswordConfig;
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
     @Value("${jwt.secret}")
     private final String jwtSecret = "J4gKu2KJ3Z5vP8t5NmE+lw6aD3vJ6GpN1kILUBo=";
@@ -57,6 +58,53 @@ public class AuthService {
         emailConfig.sendVerificationEmail(newUser.getEmail(), token);
 
         return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
+    }
+    public ResponseEntity<?> forgotpassword(String email) {
+        User user = authRepository.findByEmail(email);
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = new VerificationToken(
+                token,
+                user.getEmail(),
+                user.getPassword(),
+                LocalDateTime.now().plusHours(24)
+                ,"student"
+        );// giả định tìm theo token hoặc email
+        tokenRepository.save(verificationToken);
+
+        // Token hợp lệ
+        // Thực hiện reset password hoặc gửi email xác nhận
+        emailForgetPasswordConfig.sendResetPasswordEmail(verificationToken.getUserEmail(), token);
+
+        return ResponseEntity.ok("Gửi email thành công, vui lòng kiểm tra email.");
+    }
+
+
+    public ResponseEntity<?> resetPassword(String token, String newPassword) {
+        VerificationToken verificationToken = tokenRepository.findByToken(token);
+        if (verificationToken == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ");
+        }
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn");
+        }
+
+        // Thêm check password mới
+
+
+        User user = authRepository.findByEmail(verificationToken.getUserEmail());
+        if(user == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User không tồn tại");
+        }
+
+        user.setPassword(encoder.encode(newPassword));
+        authRepository.save(user);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Đặt lại mật khẩu thành công");
+        response.put("role", user.getRole().toLowerCase());
+
+        return ResponseEntity.ok(response);
     }
     public ResponseCookie createJwtCookie(String email, String role) {
         String tokenJwt = JwtToken.generateToken(email, role);
@@ -145,30 +193,32 @@ public class AuthService {
         return JwtToken.extractRole(token);
     }
 
-   public List<ResponseCookie> logout(HttpServletRequest request) {
-    // Xoá session
-   
+    public List<ResponseCookie> logout(HttpServletRequest request) {
+        // Xoá session
 
-    // Xoá jwt_token
-    ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", "")
-            .httpOnly(true)
-            .secure(false)
-            .path("/")
-            .maxAge(0)
-            .sameSite("Lax")
-            .build();
 
-    // Xoá JSESSIONID
-    ResponseCookie jsessionidCookie = ResponseCookie.from("JSESSIONID", "")
-            .path("/")
-            .maxAge(0)
-            .build();
+        // Xoá jwt_token
+        ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
 
-    return List.of(jwtCookie, jsessionidCookie);
-}
+        // Xoá JSESSIONID
+        ResponseCookie jsessionidCookie = ResponseCookie.from("JSESSIONID", "")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return List.of(jwtCookie, jsessionidCookie);
+    }
+
+
+
 
     public User getUserByEmail(String email) {
         return authRepository.findByEmail(email);
     }
 }
-
