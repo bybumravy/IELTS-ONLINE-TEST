@@ -22,6 +22,7 @@ import web.ielts.Test.repository.answer.ListeningAnswerRepository;
 import web.ielts.Test.repository.answer.ReadingAnswerRepository;
 import web.ielts.Test.repository.answer.SpeakingAnswerRepository;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
+import web.ielts.Test.service.AI.AIService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -112,7 +113,7 @@ public class DoTestService {
             System.out.println("[ERROR] Writing answer must not be null.");
             throw new IllegalArgumentException("Writing answer cannot be null");
         }
-        System.out.println("✅ Input validation passed");
+        System.out.println("Input validation passed");
 
         WritingAnswer savedAnswer = writingAnswerRepository.save(answer);
         System.out.println("📝 Saved answer to database with ID: " + savedAnswer.getId());

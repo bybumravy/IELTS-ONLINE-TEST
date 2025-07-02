@@ -40,6 +40,4 @@ public class ResultTestController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
-
 }

@@ -11,7 +11,7 @@ public class WritingAnswer {
     private String testId;
     private TaskWritingAnswer task1;
     private TaskWritingAnswer task2;
-
+    private String overallScore;
 
     public String getUsername() {
         return username;
@@ -53,4 +53,11 @@ public class WritingAnswer {
         this.task2 = task2;
     }
 
+    public String getOverallScore() {
+        return overallScore;
+    }
+
+    public void setOverallScore(String overallScore) {
+        this.overallScore = overallScore;
+    }
 }

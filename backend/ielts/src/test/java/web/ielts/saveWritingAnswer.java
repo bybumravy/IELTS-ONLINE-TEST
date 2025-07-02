@@ -6,10 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import web.ielts.Test.model.Writing;
 import web.ielts.Test.model.answer.writing.*;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
-import web.ielts.Test.service.AIService;
+import web.ielts.Test.service.AI.AIService;
 import web.ielts.Test.service.DoTestService;
 
 import static org.junit.jupiter.api.Assertions.*;
