@@ -19,19 +19,19 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    protected CustomUserDetailsService userDetailsService;
 
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+    public void doFilterInternal(HttpServletRequest request,
+                                 HttpServletResponse response,
+                                 FilterChain filterChain)
             throws IOException, ServletException {
         String path = request.getRequestURI();
 
 //        if (path.startsWith("/oauth2/") ||
 //                path.startsWith("/login/oauth2/") ||
-//                path.equals("/api/login")) {
+//                pat h.equals("/api/login")) {
 //            filterChain.doFilter(request, response);
 //            return;
 //        }
@@ -41,20 +41,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null) {
             try {
                 String username = JwtToken.extractUsername(token);
-                System.out.println("check 0");
+
                 if (username != null && !(SecurityContextHolder.getContext().getAuthentication()
                         instanceof UsernamePasswordAuthenticationToken)) {
 
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    System.out.println("check 1");
+
                     if (JwtToken.isTokenValid(token, userDetails)) {
                         UsernamePasswordAuthenticationToken authToken =
                                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        System.out.println("check 2");
+
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
-                    System.out.println("check 3");
+
                 }
             } catch (Exception e) {
                 System.out.println("Token invalid: " + e.getMessage());
@@ -64,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } finally {
-            // SecurityContextHolder.clearContext();
+            SecurityContextHolder.clearContext();
         }
     }
     private String getTokenFromCookies(HttpServletRequest request) {

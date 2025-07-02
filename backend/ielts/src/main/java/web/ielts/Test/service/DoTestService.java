@@ -8,29 +8,26 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import web.ielts.Test.dto.HistoryTest;
-import web.ielts.Test.model.Listening;
-import web.ielts.Test.model.Reading;
-import web.ielts.Test.model.Speaking;
-import web.ielts.Test.model.Writing;
+import web.ielts.Test.model.*;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswer;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswerPart13;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswerPart2;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswerQuestion;
-import web.ielts.Test.model.answer.writing.EvaluationWritingAnswer;
 import web.ielts.Test.model.answer.writing.WritingAIResponse;
 import web.ielts.Test.model.answer.writing.WritingAnswer;
-import web.ielts.Test.repository.ListeningRepository;
-import web.ielts.Test.repository.ReadingRepository;
-import web.ielts.Test.repository.SpeakingRepository;
-import web.ielts.Test.repository.WritingRepository;
+import web.ielts.Test.repository.*;
 import web.ielts.Test.repository.answer.ListeningAnswerRepository;
 import web.ielts.Test.repository.answer.ReadingAnswerRepository;
 import web.ielts.Test.repository.answer.SpeakingAnswerRepository;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,6 +55,8 @@ public class DoTestService {
     @Autowired
     private SpeakingAnswerRepository speakingAnswerRepository;
     @Autowired
+    private TestRepository testRepository;
+    @Autowired
     private AIService aiService;
     @Autowired
     private SpeakingRepository speakingRepository;
@@ -78,6 +77,7 @@ public class DoTestService {
         return writingRepository.findById(testId);
     }
 
+
     public List<Listening> getAllListeningTests() {
         return listeningRepository.findAll();
     }
@@ -89,6 +89,9 @@ public class DoTestService {
     public Reading getReadingByTestId(String testId) {
         return readingRepository.findByTestId(testId);
     }
+    public Test getTestByTestId(String testId) {
+        return testRepository.findById(testId).orElse(null);
+    }
 
     public ReadingAnswer saveReadingAnswer(ReadingAnswer answer) {
         return readingAnswerRepository.save(answer);
@@ -96,100 +99,123 @@ public class DoTestService {
 
     public ListeningAnswer saveListeningAnswer(ListeningAnswer answer) {
 
+        int totalQuestions = 0;
+        int correctAnswers = 0;
+
+        for (var task : answer.getTasks()) {
+            for (var section : task.getSections()) {
+                for (var q : section.getQuestions()) {
+                    totalQuestions++;
+                    if (q.getAnswer() != null && q.getAnswer().equals(q.getStudentAnswer())) {
+                        correctAnswers++;
+                    }
+                }
+            }
+        }
+
+        answer.setTotalQuestions(totalQuestions);
+        answer.setTotalCorrect(correctAnswers);
+
+        double percent = totalQuestions == 0 ? 0.0 : (double) correctAnswers / totalQuestions;
+
+        double band;
+        if (percent >= 0.9) band = 9;
+        else if (percent >= 0.85) band = 8;
+        else if (percent >= 0.8) band = 7.5;
+        else if (percent >= 0.7) band = 7;
+        else if (percent >= 0.6) band = 6;
+        else if (percent >= 0.5) band = 5;
+        else band = 4;
+
+        answer.setBand(band);
+
+        if (answer.getSubmittedAt() == null) {
+            answer.setSubmittedAt(LocalDateTime.now());
+        }
+
         return listeningAnswerRepository.save(answer);
     }
 
 
     public WritingAnswer saveWritingAnswer(WritingAnswer answer) {
         WritingAnswer savedAnswer = writingAnswerRepository.save(answer);
+        if(savedAnswer.getGradingMethod().equalsIgnoreCase("AI")) {
+            // Xử lý Task 1
+            System.out.println("helolllllll ai "+savedAnswer.getGradingMethod());
+            var task1 = savedAnswer.getTask1();
+            try {
+                WritingAIResponse eval1 = aiService.WritingTask1(task1.getImageUrl(), task1.getQuestion(), task1.getAnswer());
 
-        // Xử lý Task 1
-        var task1 = savedAnswer.getTask1();
-        try {
-            WritingAIResponse eval1 = aiService.WritingTask1(task1.getQuestion(), task1.getAnswer());
+                // Set feedback và sample answer
+                task1.setFeedback(eval1.getFeedback());
+                task1.getFeedback().setErrorCorrections(eval1.getFeedback().getErrorCorrections());
+                task1.getFeedback().setOverallComment(eval1.getFeedback().getOverallComment());
+                task1.getFeedback().setSentenceImprovements(eval1.getFeedback().getSentenceImprovements());
+                task1.setSampleAnswer(eval1.getSampleAnswer());
+                task1.setScore(eval1.getScore());
 
-            // Set feedback và sample answer
-            task1.setFeedback(eval1.getFeedback());
-            task1.getFeedback().setErrorCorrections(eval1.getFeedback().getErrorCorrections());
-            task1.getFeedback().setOverallComment(eval1.getFeedback().getOverallComment());
-            task1.getFeedback().setSentenceImprovements(eval1.getFeedback().getSentenceImprovements());
-            task1.setSampleAnswer(eval1.getSampleAnswer());
-            task1.setScore(eval1.getScore());
+                // Log evaluation
+               System.out.println("================================");
+                System.out.println("Task 1 Evaluation:");
+                System.out.println("- Task Achievement: " + eval1.getEvaluation().getTaskAchievement());
+                System.out.println("- Coherence Cohesion: " + eval1.getEvaluation().getCoherenceCohesion());
+                System.out.println("- Lexical Resource: " + eval1.getEvaluation().getLexicalResource());
+                System.out.println("- Grammar: " + eval1.getEvaluation().getGrammar());
 
-            // Log evaluation
-            System.out.println("================================");
-            System.out.println("Task 1 Evaluation:");
-            System.out.println("- Task Achievement: " + eval1.getEvaluation().getTaskAchievement());
-            System.out.println("- Coherence Cohesion: " + eval1.getEvaluation().getCoherenceCohesion());
-            System.out.println("- Lexical Resource: " + eval1.getEvaluation().getLexicalResource());
-            System.out.println("- Grammar: " + eval1.getEvaluation().getGrammar());
-
-            // Set evaluation
+                // Set evaluation
 //            if (task1.getEvaluation() == null) {
 //                task1.setEvaluation(new WritingEvaluation());
 //            }
-            task1.setEvaluation(eval1.getEvaluation());
-            task1.getEvaluation().setTaskAchievement(eval1.getEvaluation().getTaskAchievement());
-            task1.getEvaluation().setCoherenceCohesion(eval1.getEvaluation().getCoherenceCohesion());
-            task1.getEvaluation().setLexicalResource(eval1.getEvaluation().getLexicalResource());
-            task1.getEvaluation().setGrammar(eval1.getEvaluation().getGrammar());
+                task1.setEvaluation(eval1.getEvaluation());
+                task1.getEvaluation().setTaskAchievement(eval1.getEvaluation().getTaskAchievement());
+                task1.getEvaluation().setCoherenceCohesion(eval1.getEvaluation().getCoherenceCohesion());
+                task1.getEvaluation().setLexicalResource(eval1.getEvaluation().getLexicalResource());
+                task1.getEvaluation().setGrammar(eval1.getEvaluation().getGrammar());
 
-        } catch (Exception e) {
-            System.out.println("Error evaluating Task 1: " + e.getMessage());
-        }
+            } catch (Exception e) {
+                System.out.println("Error evaluating Task 1: " + e.getMessage());
+            }
 
-        // Xử lý Task 2
-        var task2 = savedAnswer.getTask2();
-        try {
+            // Xử lý Task 2
+            var task2 = savedAnswer.getTask2();
+            try {
 
-            WritingAIResponse eval2 = aiService.WritingTask2(task2.getQuestion(), task2.getAnswer());
+                WritingAIResponse eval2 = aiService.WritingTask2(task2.getQuestion(), task2.getAnswer());
 
-            // Set feedback và sample answer
-            task2.setFeedback(eval2.getFeedback());
-            task2.setSampleAnswer(eval2.getSampleAnswer());
-            task2.setScore(eval2.getScore());
+                // Set feedback và sample answer
+                task2.setFeedback(eval2.getFeedback());
+                task2.setSampleAnswer(eval2.getSampleAnswer());
+                task2.setScore(eval2.getScore());
 
 
+                task2.getFeedback().setErrorCorrections(eval2.getFeedback().getErrorCorrections());
+                task2.getFeedback().setSentenceImprovements(eval2.getFeedback().getSentenceImprovements());
+                task2.getFeedback().setOverallComment(eval2.getFeedback().getOverallComment());
+                // Log evaluation
+                System.out.println("================================");
+                System.out.println("Task 2 Evaluation:");
+                System.out.println("- Task Achievement: " + eval2.getEvaluation().getTaskAchievement());
+                System.out.println("- Coherence Cohesion: " + eval2.getEvaluation().getCoherenceCohesion());
+                System.out.println("- Lexical Resource: " + eval2.getEvaluation().getLexicalResource());
+                System.out.println("- Grammar: " + eval2.getEvaluation().getGrammar());
 
-            task2.getFeedback().setErrorCorrections(eval2.getFeedback().getErrorCorrections());
-            task2.getFeedback().setSentenceImprovements(eval2.getFeedback().getSentenceImprovements());
-            task2.getFeedback().setOverallComment(eval2.getFeedback().getOverallComment());
-            // Log evaluation
-            System.out.println("================================");
-            System.out.println("Task 2 Evaluation:");
-            System.out.println("- Task Achievement: " + eval2.getEvaluation().getTaskAchievement());
-            System.out.println("- Coherence Cohesion: " + eval2.getEvaluation().getCoherenceCohesion());
-            System.out.println("- Lexical Resource: " + eval2.getEvaluation().getLexicalResource());
-            System.out.println("- Grammar: " + eval2.getEvaluation().getGrammar());
-
-            // Set evaluation
+                // Set evaluation
 //            if (task2.getEvaluation() == null) {
 //                task2.setEvaluation(new WritingEvaluation());
 //            }
-            task2.setEvaluation(eval2.getEvaluation());
-            task2.getEvaluation().setTaskAchievement(eval2.getEvaluation().getTaskAchievement());
-            task2.getEvaluation().setCoherenceCohesion(eval2.getEvaluation().getCoherenceCohesion());
-            task2.getEvaluation().setLexicalResource(eval2.getEvaluation().getLexicalResource());
-            task2.getEvaluation().setGrammar(eval2.getEvaluation().getGrammar());
+                task2.setEvaluation(eval2.getEvaluation());
+                task2.getEvaluation().setTaskAchievement(eval2.getEvaluation().getTaskAchievement());
+                task2.getEvaluation().setCoherenceCohesion(eval2.getEvaluation().getCoherenceCohesion());
+                task2.getEvaluation().setLexicalResource(eval2.getEvaluation().getLexicalResource());
+                task2.getEvaluation().setGrammar(eval2.getEvaluation().getGrammar());
 
-        } catch (Exception e) {
-            System.out.println("Error evaluating Task 2: " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println("Error evaluating Task 2: " + e.getMessage());
+            }
         }
-
         return writingAnswerRepository.save(savedAnswer);
     }
 
-    public String uploadFile(MultipartFile file, String key) throws IOException {
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucket)
-                .key(key) // Không nối thêm filename nữa
-                .contentType(file.getContentType())
-                .build();
-
-        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-
-        return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
-    }
     public void updateAnswerUrls(SpeakingAnswer submission, Map<String, String> fileUrlMap) {
         // ✅ Debug log
         for (Map.Entry<String, String> entry : fileUrlMap.entrySet()) {
@@ -243,7 +269,50 @@ public class DoTestService {
     public SpeakingAnswer saveSubmission(SpeakingAnswer submission) {
         return speakingAnswerRepository.save(submission);
     }
+    public String uploadFile(MultipartFile file, String key) throws IOException {
+        try {
+            // Giữ nguyên key gốc (không thay đổi đường dẫn thư mục)
+            String originalKey = key;
 
+            // Kiểm tra nếu là file WebM thì chuyển đổi
+            if (file.getContentType().equals("audio/webm")) {
+                File mp3File = AudioService.convertWebmToMp3(file);
+
+                // Chỉ thay đổi phần đuôi file từ .webm sang .mp3
+                String mp3Key = originalKey.replace(".webm", ".mp3");
+
+                try (InputStream is = new FileInputStream(mp3File)) {
+                    uploadToS3(is, mp3File.length(), mp3Key, "audio/mpeg");
+                }
+
+                mp3File.delete();
+                return buildUrl(mp3Key);
+            }
+            // Upload trực tiếp nếu không phải WebM
+            else {
+                uploadToS3(file.getInputStream(), file.getSize(), originalKey, file.getContentType());
+                return buildUrl(originalKey);
+            }
+        } catch (Exception e) {
+            throw new IOException("Failed to upload file: " + e.getMessage(), e);
+        }
+    }
+
+    private void uploadToS3(InputStream inputStream, long contentLength,
+                            String key, String contentType) {
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType(contentType)
+                .build();
+
+        s3Client.putObject(putObjectRequest,
+                RequestBody.fromInputStream(inputStream, contentLength));
+    }
+
+    private String buildUrl(String key) {
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, region, key);
+    }
     public List<HistoryTest> getListeningByUsername(String username) {
         List<ListeningAnswer> answers = listeningAnswerRepository.findByUsername(username);
         System.out.println("12");
@@ -296,5 +365,4 @@ public class DoTestService {
         }).collect(Collectors.toList());
         return historyTests;
     }
-
 }

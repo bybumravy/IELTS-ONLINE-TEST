@@ -23,6 +23,9 @@ public class AddTestService {
     private AddTestRepository testRepository;
 
     @Autowired
+    private TestRepository testRepo;
+
+    @Autowired
     private AddListeningRepository listeningRepository;
 
     @Autowired
@@ -33,9 +36,6 @@ public class AddTestService {
 
     @Autowired
     private AddSpeakingRepository speakingRepository;
-
-    @Autowired
-    private TestRepository TestRepo;
 
     public void saveFullTest(AddTestRequest request) {
         // Lưu test chính
@@ -69,9 +69,10 @@ public class AddTestService {
         }
     }
     public String generateNextTestId() {
-        long count = TestRepo.count() + 1;
+        long count = testRepo.count() + 1;
         return String.format("T%03d", count);
     }
+
 // Chuyển AddListening -> Listening
 public Listening convertAddListeningToListening(AddListening addListening) {
     if (addListening == null) return null;

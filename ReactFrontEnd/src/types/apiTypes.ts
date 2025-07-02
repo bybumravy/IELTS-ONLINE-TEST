@@ -19,6 +19,19 @@ export interface IELTSTest {
     createdAt: string
 }
 
+export interface Section{
+    question: string | string[];
+    options?: string[];
+    answer: string | string[];
+    explanation: string | string[];
+}
+export interface Exercises {
+    paragraph?: string;
+    audioUrl?: string;
+    instruction: string;
+    imageUrl?: string;
+    section: Section[];
+}
 
 export interface Tip {
     id: number
@@ -35,6 +48,12 @@ export interface FAQ {
 export interface User {
     username: string
     role: 'student' | 'teacher' | 'manager' | 'admin'
+    firstName?: string
+    lastName?: string
+    birthDate?: string
+    gender?: string
+    phone?: string
+    premium?: boolean
 }
 
 export interface AuthContextType {

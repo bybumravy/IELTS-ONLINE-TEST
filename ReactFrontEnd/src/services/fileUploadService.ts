@@ -2,9 +2,10 @@ export const uploadFile = async (file: File, type: 'audio' | 'image'): Promise<s
     const formData = new FormData();
     formData.append('file', file);
 
+    const API_URL = import.meta.env.VITE_API_URL;
     const endpoint = type === 'audio' ? '/api/upload/audio' : '/api/upload/image';
 
-    const response = await fetch(`http://localhost:8080${endpoint}`, {
+    const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         body: formData,
         credentials: 'include'

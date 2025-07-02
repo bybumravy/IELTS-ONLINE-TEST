@@ -19,12 +19,13 @@ interface IELTSTest {
 export function HomePage() {
     const [tests, setTests] = useState<IELTSTest[]>([]);
     const [tips, setTips] = useState<{ [key: string]: Tip } | null>(null);
+    const API_URL = import.meta.env.VITE_API_URL;
     useEffect(() => {
-        fetch("http://localhost:8080/api/3-tests")
+        fetch(`${API_URL}/api/3-tests`)
             .then(res => res.json())
             .then(data => setTests(data))
 
-        fetch("http://localhost:8080/api/all/tips-summary")
+        fetch(`${API_URL}/api/all/tips-summary`)
             .then(res => res.json())
             .then(data => setTips(data));
     }, [])

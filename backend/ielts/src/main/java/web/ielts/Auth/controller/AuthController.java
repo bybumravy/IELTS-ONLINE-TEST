@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import web.ielts.Auth.dto.AuthDTO;
 import web.ielts.Auth.service.AuthService;
 import web.ielts.User.User;
@@ -31,7 +32,19 @@ public class AuthController {
 
         return authservice.register(newUser);
     }
+    @PostMapping("/forgotpassword")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+         String email = request.get("email");
+        return authservice.forgotpassword(email);
 
+    }
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+
+        return authservice.resetPassword(token, newPassword);
+    }
     @GetMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
 
@@ -40,9 +53,11 @@ public class AuthController {
     }
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO loginRequest) {
+        System.out.println("From page: " + loginRequest.getFromPath());  // in ra /loginadmin
         return authservice.login(
                 loginRequest.getEmail(),
                 loginRequest.getPassword()
+                ,loginRequest.getFromPath()
         );
     }
 

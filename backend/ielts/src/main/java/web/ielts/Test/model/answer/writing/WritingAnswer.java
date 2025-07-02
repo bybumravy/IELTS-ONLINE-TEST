@@ -12,7 +12,27 @@ public class WritingAnswer {
     private TaskWritingAnswer task1;
     private TaskWritingAnswer task2;
 
+    public String getGradingMethod() {
+        return gradingMethod;
+    }
 
+    @Override
+    public String toString() {
+        return "WritingAnswer{" +
+                "id='" + id + '\'' +
+                ", username='" + username + '\'' +
+                ", testId='" + testId + '\'' +
+                ", task1=" + task1 +
+                ", task2=" + task2 +
+                ", gradingMethod='" + gradingMethod + '\'' +
+                '}';
+    }
+
+    public void setGradingMethod(String gradingMethod) {
+        this.gradingMethod = gradingMethod;
+    }
+
+    private String gradingMethod;
     public String getUsername() {
         return username;
     }

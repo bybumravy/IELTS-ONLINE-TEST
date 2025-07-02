@@ -26,8 +26,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         String email = oAuth2User.getAttribute("email");
         String googleId = oAuth2User.getAttribute("sub");
 
-
-
         User user = loginRepository.findByEmail(email);
         if (user == null) {
             user = new User();
@@ -41,10 +39,10 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
             }
         }
         user = loginRepository.save(user);
-
+        String role = user.getRole();
 
 // Tạo JWT với role user vừa lấy (hoặc mới tạo)
-        String token = JwtToken.generateToken(email, user.getRole());
+        String token = JwtToken.generateToken(email,role );
 
 
         // Tạo Cookie
@@ -58,9 +56,20 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
 
         // Gửi cookie về trình duyệt
         response.addHeader("Set-Cookie", cookie.toString());
-
+        if(user.getRole().equalsIgnoreCase("STUDENT")){
+            response.sendRedirect("http://localhost:5173");
+        }
+        else if(user.getRole().equalsIgnoreCase("ADMIN")){
+            response.sendRedirect("http://localhost:5173/adminpage");
+        }
+        else if(user.getRole().equalsIgnoreCase("TEAcher")){
+            response.sendRedirect("http://localhost:5173/teacher-page");
+        }
+        else{
+            response.sendRedirect("http://localhost:5173/staff-page");
+        }
         // Redirect về frontend (không cần token trên URL nữa)
-        response.sendRedirect("http://localhost:5173");
+
     }
 
 }

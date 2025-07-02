@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Mic, Clock, Menu, ArrowRight, Info } from "lucide-react"
+import {DoTestSpeakingHeader} from "@/components/layout/doTest/DoTestSpeakingHeader";
 
 export default function VoiceRecorder() {
     const { testId } = useParams<{ testId: string }>()
@@ -78,23 +79,7 @@ export default function VoiceRecorder() {
 
     return (
         <div className="min-h-screen bg-white">
-            {/* Header */}
-            <header className="flex items-center justify-between p-4 bg-white">
-                <div className="flex items-center">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">ok</span>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-2 text-gray-600">
-                    <Clock className="w-5 h-5" />
-                    <span className="text-xl font-medium text-pink-400">{formatTime(timeLeft)}</span>
-                </div>
-
-                <Button variant="ghost" size="icon">
-                    <Menu className="w-6 h-6" />
-                </Button>
-            </header>
+            <DoTestSpeakingHeader initialTime={0} />
 
             {/* Main Content */}
             <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4">
@@ -117,13 +102,6 @@ export default function VoiceRecorder() {
                             {recording ? `Recording... ${timeLeft} seconds left` : "Press the button to start recording"}
                         </p>
 
-                        <div className="flex items-center justify-center gap-2 text-gray-600 mb-12">
-                            <span>To complete this activity, you must allow access to your system's microphone. Click</span>
-                            <div className="w-6 h-6 rounded-full bg-pink-400 flex items-center justify-center">
-                                <Info className="w-3 h-3 text-white" />
-                            </div>
-                            <span>the button below to Start.</span>
-                        </div>
 
                         <div className="flex gap-4 justify-center">
                             <Button
@@ -131,9 +109,6 @@ export default function VoiceRecorder() {
                                 className="bg-pink-400 hover:bg-pink-500 text-white px-8 py-3 rounded-lg font-medium"
                             >
                                 {recording ? "Stop Recording" : "Test Microphone"}
-                                <div className="w-4 h-4 rounded-full bg-white/20 ml-2 flex items-center justify-center">
-                                    <Info className="w-2 h-2 text-white" />
-                                </div>
                             </Button>
 
                             <Button

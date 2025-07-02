@@ -52,6 +52,13 @@ export function StaffNavigationMenu({ role, onLogout }: StaffNavigationMenuProps
                   </Button>
                 </Link>
               </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/add-vocabulary">
+                  <Button variant="ghost" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    Add Vocabulary
+                  </Button>
+                </Link>
+              </NavigationMenuItem>
             </>
           )}
 

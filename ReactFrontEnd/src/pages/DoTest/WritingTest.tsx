@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
-import {useAuth} from "@/contexts/AuthContext";
-import {useNavigate, useParams} from "react-router-dom";
-import { Dialog, DialogContent } from "@radix-ui/react-dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface WritingTask {
     type: string;
@@ -13,9 +12,10 @@ interface WritingTask {
 
 interface WritingData {
     testId: string;
-    task1: WritingTask;
-    task2: WritingTask;
+    tasks: WritingTask[];
 }
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function WritingTest() {
     const { user } = useAuth();
@@ -29,32 +29,20 @@ export default function WritingTest() {
     const [timeRemaining, setTimeRemaining] = useState(60 * 60);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
-    const [showWaitingModal, setShowWaitingModal] = useState(false);
-    const [resultId, setResultId] = useState<string | null>(null);
-
-    // // Timer
-    // useEffect(() => {
-    //     const timer = setInterval(() => {
-    //         setTimeRemaining((prev) => {
-    //             if (prev <= 0) {
-    //                 clearInterval(timer);
-    //                 return 0;
-    //             }
-    //             return prev - 1;
-    //         });
-    //     }, 1000);
-    //     return () => clearInterval(timer);
-    // }, []);
 
     // Fetch writing data
     useEffect(() => {
-        fetch(`http://localhost:8080/verify/writing/${testId}`, {
-            credentials: "include",
+    fetch(`${API_URL}/verify/writing/${testId}`, {
+        credentials: "include",
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            console.log("Fetched Writing Data:", data); // ✅ In ra dữ liệu JSON
+            setWritingData(data);
         })
-            .then((res) => res.json())
-            .then((data) => setWritingData(data))
-            .catch((err) => console.error("Error fetching writing data:", err));
-    }, []);
+        .catch((err) => console.error("Error fetching writing data:", err));
+}, [testId]); // cũng nên thêm testId vào dependency array
+
 
     // Word count Task 1
     useEffect(() => {
@@ -69,25 +57,28 @@ export default function WritingTest() {
     }, [essayTask2]);
 
     const handleSubmit = async () => {
-        if (!writingData) return;
+        if (!writingData || writingData.tasks.length < 2) return;
+
+        const task1Data = writingData.tasks[0];
+        const task2Data = writingData.tasks[1];
 
         const task1Submission = essayTask1.trim()
             ? {
-                type: writingData.task1.type,
-                question: writingData.task1.question,
-                imageUrl: writingData.task1.imageUrl,
-                answer: essayTask1.trim(),
-                wordCount: wordCountTask1.toString(),
-            }
+                  type: task1Data.type,
+                  question: task1Data.question,
+                  imageUrl: task1Data.imageUrl,
+                  answer: essayTask1.trim(),
+                  wordCount: wordCountTask1.toString(),
+              }
             : null;
 
         const task2Submission = essayTask2.trim()
             ? {
-                type: writingData.task2.type,
-                question: writingData.task2.question,
-                answer: essayTask2.trim(),
-                wordCount: wordCountTask2.toString(),
-            }
+                  type: task2Data.type,
+                  question: task2Data.question,
+                  answer: essayTask2.trim(),
+                  wordCount: wordCountTask2.toString(),
+              }
             : null;
 
         if (!task1Submission && !task2Submission) {
@@ -103,11 +94,8 @@ export default function WritingTest() {
         };
 
         setIsSubmitting(true);
-        setShowWaitingModal(true);
-        setResultId(null);
-
         try {
-            const response = await fetch("http://localhost:8080/verify/writing/submit", {
+            const response = await fetch(`${API_URL}/verify/writing/submit`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
@@ -117,46 +105,19 @@ export default function WritingTest() {
             if (!response.ok) throw new Error("Failed to submit writing");
 
             const result = await response.json();
-            setResultId(result.id);
+            navigate(`/writing-result/${result.id}`);
+            alert("Your essay has been submitted successfully!");
         } catch (error) {
             console.error("Error submitting writing:", error);
             alert("Submit failed. Please try again.");
-            setShowWaitingModal(false);
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // useEffect để chuyển trang khi đã có resultId
-    useEffect(() => {
-        if (resultId) {
-            const params = new URLSearchParams(window.location.search);
-            const mode = params.get("mode");
-            if (mode === "fulltest") {
-                navigate(`/test/speaking/${testId}?mode=fulltest`);
-            } else {
-                navigate(`/writing-result/${resultId}`);
-            }
-        }
-    }, [resultId, navigate, testId]);
-
     return (
         <div className="min-h-screen bg-gray-50">
             <DoTestHeader initialTime={60 * 60} onSubmit={handleSubmit} />
-
-            {/* Modal chờ AI chấm bài */}
-            <Dialog open={showWaitingModal}>
-                <DialogContent className="flex flex-col items-center gap-6 py-12 bg-white rounded-2xl shadow-2xl border-0">
-                    <div className="flex flex-col items-center gap-4">
-                        <svg className="animate-spin h-12 w-12 text-blue-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                        </svg>
-                        <div className="text-2xl font-bold text-blue-700">AI đang chấm bài</div>
-                        <div className="text-gray-500 text-lg">Vui lòng đợi trong giây lát...</div>
-                    </div>
-                </DialogContent>
-            </Dialog>
 
             <div className="flex h-[calc(100vh-100px)]">
                 {/* Left Panel */}
@@ -165,14 +126,23 @@ export default function WritingTest() {
                         <div>
                             <h1 className="text-xl font-bold text-gray-800 mb-2">WRITING TASK 1</h1>
                             <p className="text-sm text-gray-600 mb-4">You should spend about <strong>20 minutes</strong> on this task.</p>
-                            <p className="text-sm text-gray-700 mb-4">{writingData?.task1?.question || "Loading..."}</p>
+                            <p className="text-sm text-gray-700 mb-4">{writingData?.tasks?.[0]?.question || "Loading..."}</p>
+                            {writingData?.tasks?.[0]?.imageUrl && (
+                                <div className="mb-4">
+                                    <img
+                                        src={writingData.tasks[0].imageUrl}
+                                        alt="Task 1 visual"
+                                        className="max-w-full h-auto border border-gray-200 rounded-lg"
+                                    />
+                                </div>
+                            )}
                             <p className="text-sm text-gray-700 mb-6">You should write <strong>at least 150 words</strong>.</p>
                         </div>
                     ) : (
                         <div>
                             <h1 className="text-xl font-bold text-gray-800 mb-2">WRITING TASK 2</h1>
                             <p className="text-sm text-gray-600 mb-4">You should spend about <strong>40 minutes</strong> on this task.</p>
-                            <p className="text-sm text-gray-700 mb-4">{writingData?.task2?.question || "Loading..."}</p>
+                            <p className="text-sm text-gray-700 mb-4">{writingData?.tasks?.[1]?.question || "Loading..."}</p>
                             <p className="text-sm text-gray-700 mb-6">Write <strong>at least 250 words</strong>.</p>
                         </div>
                     )}
@@ -209,7 +179,7 @@ export default function WritingTest() {
             </div>
 
             {/* Bottom Navigation */}
-            {writingData && writingData.task1 && writingData.task2 && (
+            {writingData?.tasks?.length === 2 && (
                 <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
                     <div className="max-w-8xl mx-auto grid grid-cols-2 gap-4">
                         {[1, 2].map((taskNumber) => {

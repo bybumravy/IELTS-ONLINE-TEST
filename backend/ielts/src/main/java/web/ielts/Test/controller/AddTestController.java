@@ -9,6 +9,7 @@ import web.ielts.Test.repository.*;
 import web.ielts.Test.repository.add.*;
 import web.ielts.Test.service.AddTestService;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,17 +67,17 @@ public class AddTestController {
     }
 
     @GetMapping("/manager/request-test/{testId}")
-    public ResponseEntity<Map<String, Object>> getRequestTestDetail(@PathVariable String TestId) {
+    public ResponseEntity<Map<String, Object>> getRequestTestDetail(@PathVariable String testId) {
         try {
-            AddTest addTest = addTestRepo.findById(TestId).orElse(null);
+            AddTest addTest = addTestRepo.findById(testId).orElse(null);
             if (addTest == null) {
                 return ResponseEntity.notFound().build();
             }
 
-            AddListening addListening = addListeningRepo.findByTestId(TestId);
-            AddReading addReading = addReadingRepo.findByTestId(TestId);
-            AddWriting addWriting = addWritingRepo.findByTestId(TestId);
-            AddSpeaking addSpeaking = addSpeakingRepo.findByTestId(TestId);
+            AddListening addListening = addListeningRepo.findByTestId(testId);
+            AddReading addReading = addReadingRepo.findByTestId(testId);
+            AddWriting addWriting = addWritingRepo.findByTestId(testId);
+            AddSpeaking addSpeaking = addSpeakingRepo.findByTestId(testId);
 
             Map<String, Object> response = new HashMap<>();
             response.put("test", addTest);
@@ -102,16 +103,16 @@ public class AddTestController {
 
             // Xóa tất cả dữ liệu liên quan
             addTestRepo.deleteById(testId);
-            
+
             AddListening addListening = addListeningRepo.findByTestId(testId);
             if (addListening != null) addListeningRepo.delete(addListening);
-            
+
             AddReading addReading = addReadingRepo.findByTestId(testId);
             if (addReading != null) addReadingRepo.delete(addReading);
-            
+
             AddWriting addWriting = addWritingRepo.findByTestId(testId);
             if (addWriting != null) addWritingRepo.delete(addWriting);
-            
+
             AddSpeaking addSpeaking = addSpeakingRepo.findByTestId(testId);
             if (addSpeaking != null) addSpeakingRepo.delete(addSpeaking);
 
@@ -151,7 +152,8 @@ public class AddTestController {
             test.setTestId(testService.generateNextTestId());
             test.setTestTitle(addTest.getTestTitle());
             test.setTags(addTest.getTags());
-            test.setCreatedAt(addTest.getCreateAt().toString());
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+            test.setCreatedAt(isoFormat.format(addTest.getCreateAt()));
             testRepo.save(test);
 
             // Xóa bản ghi request

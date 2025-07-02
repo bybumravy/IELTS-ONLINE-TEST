@@ -19,8 +19,8 @@ public class Test {
     public Test() {
     }
 
-    public Test(String TestId, String testTitle, List<String> tags, String createdAt) {
-        this.testId = TestId;
+    public Test(String testId, String testTitle, List<String> tags, String createdAt) {
+        this.testId = testId;
         this.testTitle = testTitle;
         this.tags = tags;
         this.createdAt = createdAt;
@@ -30,8 +30,8 @@ public class Test {
         return testId;
     }
 
-    public void setTestId(String TestId) {
-        this.testId = TestId;
+    public void setTestId(String TestIdv) {
+        this.testId = TestIdv;
     }
 
     public String getTestTitle() {

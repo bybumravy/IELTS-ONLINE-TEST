@@ -10,10 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import web.ielts.Test.dto.HistoryTest;
-import web.ielts.Test.model.Listening;
-import web.ielts.Test.model.Reading;
-import web.ielts.Test.model.Speaking;
-import web.ielts.Test.model.Writing;
+import web.ielts.Test.model.*;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswer;
@@ -43,10 +40,6 @@ public class DoTestController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-//    @GetMapping("/tests")
-//    public ResponseEntity<List<Listening>> getAllTests() {
-//        return ResponseEntity.ok(doTestService.getAllListeningTests());
-//    }
 
     @GetMapping("/listening/{testId}")
     public ResponseEntity<Listening> getListeningByTestId(@PathVariable String testId) {
@@ -56,7 +49,6 @@ public class DoTestController {
 
     @GetMapping("/reading/{testId}")
     public ResponseEntity<Reading> getReadingByTestId(@PathVariable String testId) {
-        System.out.println("testIdsdfsdfsdfsdfsdfsdfsdfds: " + testId);
         Reading reading = doTestService.getReadingByTestId(testId);
         return reading != null ? ResponseEntity.ok(reading) : ResponseEntity.notFound().build();
     }
@@ -69,7 +61,11 @@ public class DoTestController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    @GetMapping("/fulltest/{testId}")
+    public ResponseEntity<Test> getFullTestByTestId(@PathVariable String testId) {
+        Test test = doTestService.getTestByTestId(testId);
+        return test != null ? ResponseEntity.ok(test) : ResponseEntity.notFound().build();
+    }
     @PostMapping("/reading/submit")
     public ResponseEntity<ReadingAnswer> saveReadingAnswer(@RequestBody ReadingAnswer answer) {
         return ResponseEntity.ok(doTestService.saveReadingAnswer(answer));
@@ -77,6 +73,8 @@ public class DoTestController {
 
     @PostMapping("/writing/submit")
     public ResponseEntity<WritingAnswer> saveWritingAnswer(@RequestBody WritingAnswer answer) {
+        System.out.println("sadfsadfdsfdsafjasdklfklasdjfkasjdflaskjdflkasdjflkasjdfasfasfasfasdfasdfasdfa");
+        System.out.println(answer.toString());
         return ResponseEntity.ok(doTestService.saveWritingAnswer(answer));
     }
 
@@ -88,7 +86,7 @@ public class DoTestController {
     @PostMapping("/speaking/submit")
     public ResponseEntity<String> uploadFiles(
             @RequestPart("metadata") MultipartFile metadataJson,
-            @RequestPart("files") MultipartFile[] files,
+            @RequestPart(value = "files", required = false) MultipartFile[] files,
             @AuthenticationPrincipal User user
     ) {
         String studentUsername = user.getUsername();
@@ -120,16 +118,20 @@ public class DoTestController {
         String folderPath = "audio/user/" + studentUsername + "/" + testId + "_" + saved.getId();
         Map<String, String> fileUrlMap = new HashMap<>();
 
-        for (MultipartFile file : files) {
-            try {
-                String key = folderPath + "/" + file.getOriginalFilename();
-                String url = doTestService.uploadFile(file, key);
-                fileUrlMap.put(file.getOriginalFilename(), url);
-                System.out.println("Uploaded: " + url);
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Upload failed: " + e.getMessage());
+        if (files != null && files.length > 0) {
+            for (MultipartFile file : files) {
+                try {
+                    String key = folderPath + "/" + file.getOriginalFilename();
+                    String url = doTestService.uploadFile(file, key);
+                    fileUrlMap.put(file.getOriginalFilename(), url);
+                    System.out.println("Uploaded: " + url);
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Upload failed: " + e.getMessage());
+                }
             }
+        } else {
+            System.out.println("No files uploaded, only saving metadata.");
         }
 
         doTestService.updateAnswerUrls(saved, fileUrlMap);

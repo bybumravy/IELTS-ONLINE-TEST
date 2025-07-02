@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface AddTest {
-  id: string;
   testId: string;
   testTitle: string;
   tags: string[];
@@ -12,24 +12,34 @@ export default function AcceptTestPage() {
   const [tests, setTests] = useState<AddTest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/manager/request-tests", {
+    const fetchTests = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`${API_URL}/api/manager/request-tests`, {
       credentials: "include",
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Không thể tải danh sách đề thi.");
-        return res.json();
-      })
-      .then((data) => {
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Fetched tests:', data);
         setTests(data);
         setError(null);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError(err.message);
-      })
-      .finally(() => setLoading(false));
+      } catch (err: any) {
+        console.error('Error fetching tests:', err);
+        setError(err.message || "Không thể tải danh sách đề thi.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTests();
   }, []);
 
   const acceptTest = async (testId: string) => {
@@ -37,23 +47,52 @@ export default function AcceptTestPage() {
     if (!confirm) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/api/manager/accept-test/${testId}`, {
+      const response = await fetch(`${API_URL}/api/manager/accept-test/${testId}`, {
         method: "POST",
         credentials: "include",
       });
 
-      if (!res.ok) throw new Error("Duyệt đề thất bại");
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Duyệt đề thất bại");
+      }
 
+      const result = await response.text();
+      console.log('Accept test result:', result);
       alert("Duyệt thành công!");
       setTests(tests.filter((test) => test.testId !== testId));
-    } catch (err) {
-      alert("Duyệt thất bại!");
-      console.error(err);
+    } catch (err: any) {
+      console.error('Error accepting test:', err);
+      alert(`Duyệt thất bại: ${err.message}`);
     }
   };
 
-  if (loading) return <div className="text-center p-10 text-gray-500">Đang tải dữ liệu...</div>;
-  if (error) return <div className="text-center p-10 text-red-500">{error}</div>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-500">Đang tải danh sách đề thi...</p>
+      </div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="text-center p-10">
+      <div className="text-red-500 mb-4">
+        <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <p className="text-lg font-semibold">Lỗi</p>
+      </div>
+      <p className="text-gray-600 mb-4">{error}</p>
+      <button 
+        onClick={() => window.location.reload()} 
+        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+      >
+        Thử lại
+      </button>
+    </div>
+  );
 
   return (
     <div className="p-6">
@@ -83,12 +122,12 @@ export default function AcceptTestPage() {
                 </div>
               </div>
               <div className="mt-4 md:mt-0 flex gap-3">
-                <a
-                  href={`/request-test-detail/${test.testId}`}
+                <button
+                  onClick={() => navigate(`/request-test-detail?id=${test.testId}`)}
                   className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm"
                 >
                   Xem chi tiết
-                </a>
+                </button>
                 <button
                   onClick={() => acceptTest(test.testId)}
                   className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"

@@ -79,24 +79,7 @@ public class WritingAIResponse {
         private String correctedText;
         private String errorType;
         private String explanation;
-        private int startIndex;
-        private int endIndex;
-
-        public int getStartIndex() {
-            return startIndex;
-        }
-
-        public void setStartIndex(int startIndex) {
-            this.startIndex = startIndex;
-        }
-
-        public int getEndIndex() {
-            return endIndex;
-        }
-
-        public void setEndIndex(int endIndex) {
-            this.endIndex = endIndex;
-        }
+        private String sentenceContext;
 
         public String getOriginalText() {
             return originalText;
@@ -128,6 +111,14 @@ public class WritingAIResponse {
 
         public void setExplanation(String explanation) {
             this.explanation = explanation;
+        }
+
+        public String getSentenceContext() {
+            return sentenceContext;
+        }
+
+        public void setSentenceContext(String sentenceContext) {
+            this.sentenceContext = sentenceContext;
         }
     }
 
@@ -168,45 +159,6 @@ public class WritingAIResponse {
 
         public void setBandBoost(String bandBoost) {
             this.bandBoost = bandBoost;
-        }
-    }
-
-    public static class Evaluation {
-        private int TaskAchievement;
-        private int CoherenceCohesion;
-        private int LexicalResource;
-        private int Grammar;
-
-        public int getTaskAchievement() {
-            return TaskAchievement;
-        }
-
-        public void setTaskAchievement(int taskAchievement) {
-            TaskAchievement = taskAchievement;
-        }
-
-        public int getCoherenceCohesion() {
-            return CoherenceCohesion;
-        }
-
-        public void setCoherenceCohesion(int coherenceCohesion) {
-            CoherenceCohesion = coherenceCohesion;
-        }
-
-        public int getLexicalResource() {
-            return LexicalResource;
-        }
-
-        public void setLexicalResource(int lexicalResource) {
-            LexicalResource = lexicalResource;
-        }
-
-        public int getGrammar() {
-            return Grammar;
-        }
-
-        public void setGrammar(int grammar) {
-            Grammar = grammar;
         }
     }
 }
