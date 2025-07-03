@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { CheckCircle, XCircle } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -7,7 +7,6 @@ const API_URL = import.meta.env.VITE_API_URL;
 export default function VnPayResultPage() {
     const [searchParams] = useSearchParams();
     const [status, setStatus] = useState<"success" | "failed" | null>(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const responseCode = searchParams.get("vnp_ResponseCode");

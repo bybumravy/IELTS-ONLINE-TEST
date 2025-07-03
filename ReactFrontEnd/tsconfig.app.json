@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,                         // ✅ BẮT BUỘC
     "incremental": true,
     "tsBuildInfoFile": "./.tscache/tsconfig.app.tsbuildinfo",
     "target": "ES2020",
@@ -15,7 +16,8 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "noEmit": true,
+    "noEmit": true,                           // ✅ PHẢI CHO PHÉP EMIT
+    "outDir": "dist",                          // ✅ Nên chỉ định thư mục output
     "jsx": "react-jsx",
 
     /* Linting */

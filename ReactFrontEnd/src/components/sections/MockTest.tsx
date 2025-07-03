@@ -4,7 +4,6 @@ import { ArrowRight, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {useAuth} from "@/contexts/AuthContext";
 
 interface ListTest {
     id: string;
@@ -28,7 +27,7 @@ function MockTest({ selectedSkill = 'All Skills' }: MockTestProps) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
-    const {user} = useAuth()
+
     useEffect(() => {
         const fetchTests = async () => {
             try {
