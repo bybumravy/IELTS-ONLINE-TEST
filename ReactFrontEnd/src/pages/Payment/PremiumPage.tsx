@@ -1,21 +1,13 @@
 // IELTS Premium Page with VNPay Payment Integration
 import {useEffect, useState} from "react"
 import {
-    Check,
-    Star,
-    Zap,
-    MessageSquare,
-    FileText,
-    Trophy,
-    Users,
-    Clock,
+    Check
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"

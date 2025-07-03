@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import {Search, Filter, Eye, MessageSquare, Download, CalendarIcon, FileText, BarChart3, PieChart, TrendingUp,} from "lucide-react"
+import {Search, Filter, Eye, MessageSquare, Download, CalendarIcon, FileText, BarChart3, PieChart} from "lucide-react"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 
@@ -88,10 +88,6 @@ export default function ReviewReport() {
         return Object.entries(result)
             .map(([date, count]) => ({ date, count }))
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    }
-    const getPercentageChange = (current: number, previous: number) => {
-        if (previous === 0) return "∞"
-        return (((current - previous) / previous) * 100).toFixed(1)
     }
 
     // Statistics data

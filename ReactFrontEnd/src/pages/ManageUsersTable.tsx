@@ -31,10 +31,9 @@ export default function ManageUsersTable({ role }: ManageUsersTableProps) {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [isCreateMode, setIsCreateMode] = useState(false);
-    const [birthDateError, setBirthDateError] = useState<string | null>(null);
+    const [_birthDateError, setBirthDateError] = useState<string | null>(null);
     const [emailError, setEmailError] = useState<string | null>(null);
     const [phoneError, setPhoneError] = useState<string | null>(null);
-    const [originalEmail, setOriginalEmail] = useState('');
     const [searchEmail, setSearchEmail] = useState('');
     const fetchUsers = async () => {
         setLoading(true);

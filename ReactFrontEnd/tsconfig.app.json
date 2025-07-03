@@ -1,4 +1,4 @@
-  {
+{
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./.tscache/tsconfig.app.tsbuildinfo",
@@ -11,13 +11,14 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
+    "noEmit": true,                           // ✅ PHẢI CHO PHÉP EMIT
+    "outDir": "dist",                          // ✅ Nên chỉ định thư mục output
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
     "jsx": "react-jsx",
 
     /* Linting */
