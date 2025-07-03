@@ -1,21 +1,27 @@
-package web.ielts.Test.dto;
+package web.ielts.History.dto;
+
+import java.time.LocalDateTime;
 
 public class HistoryTest {
     private String testID;
     private String username;
     private String skill;
+    private LocalDateTime submittedAt;
+    private double band;
 
-    public HistoryTest(String testID, String username, String skill) {
+    public HistoryTest() {
+    }
+
+    public HistoryTest(String testID, String username, String skill, LocalDateTime submittedAt, double band) {
         this.testID = testID;
         this.username = username;
         this.skill = skill;
+        this.submittedAt = submittedAt;
+        this.band = band;
     }
 
     public String getTestID() {
         return testID;
-    }
-
-    public HistoryTest() {
     }
 
     public void setTestID(String testID) {
@@ -38,12 +44,19 @@ public class HistoryTest {
         this.skill = skill;
     }
 
-    @Override
-    public String toString() {
-        return "HistoryTest{" +
-                "testID='" + testID + '\'' +
-                ", username='" + username + '\'' +
-                ", skill='" + skill + '\'' +
-                '}';
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
+    }
+
+    public double getBand() {
+        return band;
+    }
+
+    public void setBand(double band) {
+        this.band = band;
     }
 }

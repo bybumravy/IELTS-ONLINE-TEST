@@ -3,6 +3,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface WritingTask {
     type: string;
@@ -15,8 +28,6 @@ interface WritingData {
     tasks: WritingTask[];
 }
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export default function WritingTest() {
     const { user } = useAuth();
     const { testId } = useParams<{ testId: string }>();
@@ -26,35 +37,36 @@ export default function WritingTest() {
     const [wordCountTask1, setWordCountTask1] = useState(0);
     const [wordCountTask2, setWordCountTask2] = useState(0);
     const [writingData, setWritingData] = useState<WritingData | null>(null);
-    const [timeRemaining, setTimeRemaining] = useState(60 * 60);
+    const [gradingMethod, setGradingMethod] = useState<"ai" | "human">("ai");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showGradingDialog, setShowGradingDialog] = useState(false);
     const navigate = useNavigate();
 
-    // Fetch writing data
     useEffect(() => {
-    fetch(`${API_URL}/verify/writing/${testId}`, {
-        credentials: "include",
-    })
-        .then((res) => res.json())
-        .then((data) => {
-            console.log("Fetched Writing Data:", data); // ✅ In ra dữ liệu JSON
-            setWritingData(data);
+        fetch(`${API_URL}/verify/writing/${testId}`, {
+            credentials: "include",
         })
-        .catch((err) => console.error("Error fetching writing data:", err));
-}, [testId]); // cũng nên thêm testId vào dependency array
+            .then((res) => res.json())
+            .then((data) => {
+                console.log("Fetched Writing Data:", data);
+                setWritingData(data);
+            })
+            .catch((err) => console.error("Error fetching writing data:", err));
+    }, [testId]);
 
-
-    // Word count Task 1
     useEffect(() => {
         const words = essayTask1.trim().split(/\s+/).filter((w) => w.length > 0);
         setWordCountTask1(words.length);
     }, [essayTask1]);
 
-    // Word count Task 2
     useEffect(() => {
         const words = essayTask2.trim().split(/\s+/).filter((w) => w.length > 0);
         setWordCountTask2(words.length);
     }, [essayTask2]);
+
+    const handleSubmitClick = () => {
+        setShowGradingDialog(true);
+    };
 
     const handleSubmit = async () => {
         if (!writingData || writingData.tasks.length < 2) return;
@@ -91,9 +103,12 @@ export default function WritingTest() {
             username: user?.username,
             task1: task1Submission,
             task2: task2Submission,
+            gradingMethod,
         };
 
         setIsSubmitting(true);
+        setShowGradingDialog(false);
+
         try {
             const response = await fetch(`${API_URL}/verify/writing/submit`, {
                 method: "POST",
@@ -105,8 +120,13 @@ export default function WritingTest() {
             if (!response.ok) throw new Error("Failed to submit writing");
 
             const result = await response.json();
-            navigate(`/writing-result/${result.id}`);
-            alert("Your essay has been submitted successfully!");
+            if (gradingMethod === "ai") {
+                navigate(`/writing-result/${result.id}`);
+                alert("Bài viết đã được chấm bằng AI! Your essay has been submitted successfully!");
+            } else {
+                alert("Bài viết đã gửi đến giáo viên. Bạn sẽ nhận kết quả trong vòng 3-5 ngày tới.");
+                navigate("/");
+            }
         } catch (error) {
             console.error("Error submitting writing:", error);
             alert("Submit failed. Please try again.");
@@ -117,7 +137,41 @@ export default function WritingTest() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <DoTestHeader initialTime={60 * 60} onSubmit={handleSubmit} />
+            <DoTestHeader initialTime={60 * 60} onSubmit={handleSubmitClick} />
+
+            <Dialog open={showGradingDialog} onOpenChange={setShowGradingDialog}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Chọn phương thức chấm bài</DialogTitle>
+                        <DialogDescription>
+                            Vui lòng chọn cách bạn muốn bài viết của mình được chấm điểm
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <RadioGroup
+                            defaultValue="ai"
+                            onValueChange={(value) => setGradingMethod(value as "ai" | "human")}
+                        >
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="ai" id="ai" />
+                                <Label htmlFor="ai">Chấm bằng AI (Nhanh chóng)</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="human" id="human" />
+                                <Label htmlFor="human">Chấm bởi giáo viên (Chính xác hơn)</Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowGradingDialog(false)}>
+                            Hủy
+                        </Button>
+                        <Button type="submit" onClick={handleSubmit} disabled={isSubmitting}>
+                            {isSubmitting ? "Đang gửi..." : "Xác nhận"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <div className="flex h-[calc(100vh-100px)]">
                 {/* Left Panel */}
@@ -125,9 +179,13 @@ export default function WritingTest() {
                     {currentTask === 1 ? (
                         <div>
                             <h1 className="text-xl font-bold text-gray-800 mb-2">WRITING TASK 1</h1>
-                            <p className="text-sm text-gray-600 mb-4">You should spend about <strong>20 minutes</strong> on this task.</p>
-                            <p className="text-sm text-gray-700 mb-4">{writingData?.tasks?.[0]?.question || "Loading..."}</p>
-                            {writingData?.tasks?.[0]?.imageUrl && (
+                            <p className="text-sm text-gray-600 mb-4">
+                                You should spend about <strong>20 minutes</strong> on this task.
+                            </p>
+                            <p className="text-sm text-gray-700 mb-4">
+                                {writingData?.tasks[0]?.question || "Loading..."}
+                            </p>
+                            {writingData?.tasks[0]?.imageUrl && (
                                 <div className="mb-4">
                                     <img
                                         src={writingData.tasks[0].imageUrl}
@@ -136,14 +194,22 @@ export default function WritingTest() {
                                     />
                                 </div>
                             )}
-                            <p className="text-sm text-gray-700 mb-6">You should write <strong>at least 150 words</strong>.</p>
+                            <p className="text-sm text-gray-700 mb-6">
+                                You should write <strong>at least 150 words</strong>.
+                            </p>
                         </div>
                     ) : (
                         <div>
                             <h1 className="text-xl font-bold text-gray-800 mb-2">WRITING TASK 2</h1>
-                            <p className="text-sm text-gray-600 mb-4">You should spend about <strong>40 minutes</strong> on this task.</p>
-                            <p className="text-sm text-gray-700 mb-4">{writingData?.tasks?.[1]?.question || "Loading..."}</p>
-                            <p className="text-sm text-gray-700 mb-6">Write <strong>at least 250 words</strong>.</p>
+                            <p className="text-sm text-gray-600 mb-4">
+                                You should spend about <strong>40 minutes</strong> on this task.
+                            </p>
+                            <p className="text-sm text-gray-700 mb-4">
+                                {writingData?.tasks[1]?.question || "Loading..."}
+                            </p>
+                            <p className="text-sm text-gray-700 mb-6">
+                                Write <strong>at least 250 words</strong>.
+                            </p>
                         </div>
                     )}
                 </div>
@@ -159,7 +225,9 @@ export default function WritingTest() {
                                 className="flex-1 resize-none border-gray-300 focus:border-teal-500 focus:ring-teal-500"
                             />
                             <div className="mt-4 flex justify-between items-center">
-                                <div className="text-sm text-gray-600">Words Count: <span className="font-medium">{wordCountTask1}</span></div>
+                                <div className="text-sm text-gray-600">
+                                    Words Count: <span className="font-medium">{wordCountTask1}</span>
+                                </div>
                             </div>
                         </>
                     ) : (
@@ -171,7 +239,9 @@ export default function WritingTest() {
                                 className="flex-1 resize-none border-gray-300 focus:border-teal-500 focus:ring-teal-500"
                             />
                             <div className="mt-4 flex justify-between items-center">
-                                <div className="text-sm text-gray-600">Words Count: <span className="font-medium">{wordCountTask2}</span></div>
+                                <div className="text-sm text-gray-600">
+                                    Words Count: <span className="font-medium">{wordCountTask2}</span>
+                                </div>
                             </div>
                         </>
                     )}
@@ -179,7 +249,7 @@ export default function WritingTest() {
             </div>
 
             {/* Bottom Navigation */}
-            {writingData?.tasks?.length === 2 && (
+            {writingData && writingData.tasks.length === 2 && (
                 <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
                     <div className="max-w-8xl mx-auto grid grid-cols-2 gap-4">
                         {[1, 2].map((taskNumber) => {

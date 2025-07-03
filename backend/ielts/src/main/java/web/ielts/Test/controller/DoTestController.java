@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import web.ielts.Test.dto.HistoryTest;
 import web.ielts.Test.model.*;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
@@ -140,21 +139,6 @@ public class DoTestController {
         return ResponseEntity.ok("✅ Upload và cập nhật thành công!");
     }
 
-    @GetMapping("/history/listening/{username}")
-    public List<HistoryTest> getListeningAnswerByTestId(@PathVariable String username) {
-        return doTestService.getListeningByUsername(username);
-    }
-    @GetMapping("/history/reading/{username}")
-    public List<HistoryTest> getReadingAnswerByTestId(@PathVariable String username) {
-        return doTestService.getReadingByUsername(username);
-    }
-    @GetMapping("/history/writing/{username}")
-    public List<HistoryTest> getWritingAnswerByTestId(@PathVariable String username) {
-        return doTestService.getWritingByUsername(username);
-    }
-    @GetMapping("/history/speaking/{username}")
-    public List<HistoryTest> getSpeakingAnswerByTestId(@PathVariable String username) {
-        return doTestService.getSpeakingByUsername(username);
-    }
+
 
 }
