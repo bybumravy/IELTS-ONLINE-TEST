@@ -61,6 +61,7 @@ import ReviewReport from "@/pages/ReviewReport.tsx";
 import SoftProtectedLayout from "@/components/sections/SoftProtectedLayout"
 import ProtectedLayout from "@/components/sections/ProtectedLayout"
 import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
+import ReadingResult from "@/pages/Result/ReadingResult.tsx";
 
 
 export default function App() {
@@ -153,6 +154,11 @@ export default function App() {
                         <Route path="/listening-result/:resultId" element={
                             <ProtectedLayout allowRoles={["student"]}>
                                 <MainLayout><ListeningResult /></MainLayout>
+                            </ProtectedLayout>
+                        } />
+                        <Route path="/reading-result/:resultId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><ReadingResult /></MainLayout>
                             </ProtectedLayout>
                         } />
                         <Route path="/test-history" element={

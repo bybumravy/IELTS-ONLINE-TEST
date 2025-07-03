@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CheckCircle, XCircle, Clock, Calendar, Target, TrendingUp, BookOpen, Download, Share2 } from "lucide-react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -242,6 +242,16 @@ export default function ListeningResult() {
                                                             <p className="text-sm text-gray-600">Đáp án đúng:</p>
                                                             <p className="font-medium text-green-600">{q.answer}</p>
                                                         </div>
+                                                        {/* ✅ Thêm phần này để hiển thị explanation có highlight */}
+                                                        {q.explanation && (
+                                                            <div className="col-span-2">
+                                                                <p className="text-sm text-gray-600 mt-3">Giải thích:</p>
+                                                                <div
+                                                                    className="text-sm text-gray-800 p-2 bg-gray-100 rounded"
+                                                                    dangerouslySetInnerHTML={{ __html: q.explanation }}
+                                                                />
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             ))
