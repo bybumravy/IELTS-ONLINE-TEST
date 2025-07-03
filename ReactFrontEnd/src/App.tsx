@@ -22,6 +22,7 @@ import ReviewReport from "@/pages/ReviewReport.tsx";
 // import IeltsResult from "@/pages/IeltsResult";
 import FullTest from "@/pages/DoTest/FullTest";
 import ListeningResult from "@/pages/Result/ListeningResult";
+import TransactionHistory from "@/pages/ReviewTransactions.tsx";
 export default function App() {
     return (
         <AuthProvider>
@@ -64,6 +65,7 @@ export default function App() {
 
                     {/*Staff*/}
                     <Route path="/review-report" element={<MainLayout><ReviewReport /></MainLayout>} />
+                    <Route path="/review-transactions" element={<MainLayout><TransactionHistory /></MainLayout>} />
                     {/*<Route path="/add-test" element={<StaffLayout><AddTest /></StaffLayout>}/>*/}
                     {/*<Route path="/staff-page" element={<StaffLayout><StaffPage /></StaffLayout>}/>*/}
 

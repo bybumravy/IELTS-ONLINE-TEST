@@ -4,8 +4,9 @@ package web.ielts.Test.model.answer.listening;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @AllArgsConstructor
@@ -23,6 +24,6 @@ public class ListeningAnswer {
     private int totalQuestions;
     private int totalCorrect;
     private double band;
-    private LocalDateTime submittedAt;
-
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
+    private LocalDate submittedAt;
 }

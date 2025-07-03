@@ -24,7 +24,7 @@ public class UserController {
     @PostMapping("/upgrade-premium")
     public String upgradePremium(@AuthenticationPrincipal User user) {
         userService.upgradeToPremium(user.getEmail());
-        return "Đã nâng cấp premium thành công";
+        return "You have successfully upgraded to Premium.";
     }
 
     // ✅ Lấy thông tin người dùng và tự reset premium nếu hết hạn

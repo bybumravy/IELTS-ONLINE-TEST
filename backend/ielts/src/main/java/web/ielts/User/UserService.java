@@ -3,7 +3,7 @@ package web.ielts.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
@@ -27,7 +27,7 @@ public class UserService {
 
     public void upgradeToPremium(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setPremiumExpiry(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(10));
+        user.setPremiumExpiry(LocalDate.now(ZoneOffset.UTC).plusDays(1));
         userRepository.save(user);
     }
 

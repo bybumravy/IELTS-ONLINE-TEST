@@ -7,14 +7,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CheckCircle, XCircle, Clock, Calendar, Target, TrendingUp, BookOpen, Download, Share2 } from "lucide-react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import {formatDate} from "date-fns";
 
 export default function ListeningResult() {
     const { user } = useAuth()
-    // const [searchParams] = useSearchParams()
     const [result, setResult] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-
     const { resultId } = useParams<{ resultId: string }>()
     const navigate = useNavigate()
 
@@ -110,6 +109,11 @@ export default function ListeningResult() {
                                     <span className="text-sm font-medium">{result.testId}</span>
                                 </div>
                                 <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Ngày nôp:</span>
+                                    {/*<span className="text-sm font-medium">{formatDate(result.submittedAt, 'dd/MM/yyyy')}</span>*/}
+                                    <span className="text-sm font-medium">{result.submittedAt}</span>
+                                </div>
+                                <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Thời gian:</span>
                                     <span className="text-sm font-medium">30 phút</span>
                                 </div>
@@ -128,7 +132,7 @@ export default function ListeningResult() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-center">
-                                <div className={`text-4xl font-bold ${getBandColor(result.band)}`}>{result.band}</div>
+                                <div className={`text-4xl font-bold ${getBandColor(result.band)}`}>{result.band}/9</div>
                                 <p className="text-sm text-gray-600 mt-1">{getBandDescription(result.band)}</p>
                                 <Progress value={stats.percentage} className="mt-3 [&>div]:bg-green-600" />
                                 <p className="text-xs text-gray-500 mt-1">{stats.percentage}% chính xác</p>

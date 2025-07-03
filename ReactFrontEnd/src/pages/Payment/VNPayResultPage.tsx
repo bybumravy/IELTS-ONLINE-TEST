@@ -9,13 +9,14 @@ export default function VnPayResultPage() {
 
     useEffect(() => {
         const responseCode = searchParams.get("vnp_ResponseCode");
+
         if (responseCode === "00") {
             setStatus("success");
 
-            // Gọi API nâng cấp premium
+            // Gọi nâng cấp Premium
             fetch("http://localhost:8080/api/user/upgrade-premium", {
                 method: "POST",
-                credentials: "include", // QUAN TRỌNG để gửi cookie JWT
+                credentials: "include",
             })
                 .then(res => {
                     if (!res.ok) throw new Error("Failed to upgrade premium");
@@ -24,7 +25,29 @@ export default function VnPayResultPage() {
                 .then(msg => console.log(msg))
                 .catch(err => console.error(err));
 
-            // Redirect sau 3 giây
+            // ✅ Lấy selectedPlan từ localStorage
+            const stored = localStorage.getItem("selectedPlan");
+            const selectedPlan = stored ? JSON.parse(stored) : null;
+
+            if (selectedPlan) {
+                fetch("http://localhost:8080/api/transactions/save", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        type: selectedPlan.duration,              // ví dụ: "1 tháng"
+                        amount: selectedPlan.price,
+                        paymentMethod: "VNPay",
+                        status: "SUCCESS",
+                        message: "Giao dịch thành công",
+                    }),
+                });
+            }
+
+            // ✅ Dọn sạch sau khi xài xong
+            localStorage.removeItem("selectedPlan");
+
+            // Chuyển trang
             setTimeout(() => {
                 window.location.href = "/";
             }, 3000);
@@ -32,6 +55,7 @@ export default function VnPayResultPage() {
             setStatus("failed");
         }
     }, [searchParams]);
+
 
 
     return (

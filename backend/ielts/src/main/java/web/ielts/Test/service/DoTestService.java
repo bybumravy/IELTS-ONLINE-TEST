@@ -26,7 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -128,7 +128,7 @@ public class DoTestService {
         answer.setBand(band);
 
         if (answer.getSubmittedAt() == null) {
-            answer.setSubmittedAt(LocalDateTime.now());
+            answer.setSubmittedAt(LocalDate.now());
         }
 
         return listeningAnswerRepository.save(answer);

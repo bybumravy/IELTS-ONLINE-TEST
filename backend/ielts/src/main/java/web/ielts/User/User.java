@@ -1,17 +1,14 @@
 package web.ielts.User;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -29,10 +26,7 @@ public class User implements UserDetails {
     private String email;
     private String password;
     private String role;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private LocalDateTime premiumExpiry;
-//    private boolean premium;
+    private LocalDate premiumExpiry;
     private String googleID;
 
     private String createdAt;
@@ -43,7 +37,7 @@ public class User implements UserDetails {
     }
 
     public boolean isPremiumActive() {
-        return premiumExpiry != null && premiumExpiry.isAfter(LocalDateTime.now());
+        return premiumExpiry != null && premiumExpiry.isAfter(LocalDate.now());
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
