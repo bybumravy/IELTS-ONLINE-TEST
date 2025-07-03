@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -52,8 +52,7 @@ const ResetPassword = () => {
             });
 
             if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || "Có lỗi xảy ra");
+                console.log("ko reset duoc")
             }
 
             const data = await res.json();

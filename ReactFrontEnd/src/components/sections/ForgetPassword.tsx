@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,9 +11,9 @@ const API_URL = import.meta.env.VITE_API_URL;
 const ForgetPasswordPage = () => {
     const [email, setEmail] = useState("");
     const [emailError, setEmailError] = useState("");
-    const [message, setMessage] = useState("");
+    const [message] = useState("");
 
-    const navigate = useNavigate();
+
 
     const getEmailErrorMessage = (value: string): string => {
         if (!value) return "Email is required";
@@ -45,8 +45,8 @@ const ForgetPasswordPage = () => {
             });
 
             if (!res.ok) {
-                const text = await res.text(); // Đọc lỗi text nếu có
-                throw new Error(text || "Có lỗi xảy ra");
+
+               console.log("co loi xay ra")
             }
 
             // ✅ THÀNH CÔNG → Thông báo cứng

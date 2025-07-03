@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Mic, Clock, Menu, ArrowRight, Info } from "lucide-react"
+import { Mic, ArrowRight } from "lucide-react"
 import {DoTestSpeakingHeader} from "@/components/layout/doTest/DoTestSpeakingHeader";
 
 export default function VoiceRecorder() {
@@ -25,11 +25,6 @@ export default function VoiceRecorder() {
         }
     }, [recording, timeLeft])
 
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60)
-        const secs = seconds % 60
-        return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
-    }
 
     const startRecording = async () => {
         try {
@@ -57,19 +52,19 @@ export default function VoiceRecorder() {
     }
 
     const stopRecording = () => {
-        if (mediaRecorderRef.current && recording) {
-            mediaRecorderRef.current.stop()
-            setRecording(false)
-        }
-    }
-
-    const handleTestMicrophone = () => {
         if (recording) {
-            stopRecording()
-        } else {
-            startRecording()
+            mediaRecorderRef.current?.stop();
+            setRecording(false);
         }
-    }
+    };
+
+    const handleTestMicrophone = async () => {
+        if (recording) {
+            stopRecording();
+        } else {
+            await startRecording(); // 👈 tránh warning
+        }
+    };
 
     const handleSkip = () => {
         console.log("Skipped microphone test")
