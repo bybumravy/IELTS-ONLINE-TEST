@@ -19,7 +19,9 @@ export default function VerifyEmail() {
                     credentials: "include"
                 });
 
-                if (!res.ok) throw new Error(await res.text());
+                if (!res.ok){
+                    console.log("Loi verify")
+                }
 
                 await fetchUser(); // <-- cập nhật lại user từ backend
 
@@ -33,7 +35,10 @@ export default function VerifyEmail() {
         };
 
         if (token) {
-            verify();
+            // Dùng IIFE để không "bỏ qua" Promise
+            (async () => {
+                await verify();
+            })();
         } else {
             setMessage("⚠️ Thiếu token xác thực.");
             setIsSuccess(false);

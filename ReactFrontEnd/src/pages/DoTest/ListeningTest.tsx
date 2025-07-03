@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
 import { Play, Pause, RotateCcw, Volume2 } from "lucide-react";
@@ -42,7 +42,7 @@ interface QuestionWithStudentAnswer extends Question {
 
 export default function ListeningTest() {
     const { testId } = useParams<{ testId: string }>();
-    const containerRef = useRef<HTMLDivElement>(null); // ref container chính để fullscreen
+    const containerRef = useRef<HTMLDivElement | null>(null);
     const [currentPart, setCurrentPart] = useState(1);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -54,7 +54,7 @@ export default function ListeningTest() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { user } = useAuth();
-
+    const [isHighlightMode, setIsHighlightMode] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const mode = searchParams.get("mode");
 
@@ -62,7 +62,9 @@ export default function ListeningTest() {
     const [isDarkMode, setIsDarkMode] = useState(() => {
         return localStorage.getItem("darkMode") === "true";
     });
-
+    const toggleHighlightMode = () => {
+        setIsHighlightMode((prev) => !prev);
+    };
     useEffect(() => {
         localStorage.setItem("darkMode", isDarkMode ? "true" : "false");
     }, [isDarkMode]);
@@ -114,16 +116,19 @@ export default function ListeningTest() {
         };
     }, [listeningTest]);
 
-    // Hàm fullscreen chỉ fullscreen phần tử container này
     const handleFullscreen = () => {
         if (!containerRef.current) return;
 
         if (!document.fullscreenElement) {
-            containerRef.current.requestFullscreen().catch((err) =>
-                console.error(`Error attempting to enable fullscreen: ${err.message}`)
-            );
+            containerRef.current!.requestFullscreen()
+                .catch((err) => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
         } else {
-            document.exitFullscreen();
+            document.exitFullscreen()
+                .catch((err) => {
+                    console.error(`Error attempting to exit fullscreen: ${err.message}`);
+                });
         }
     };
 
@@ -133,12 +138,16 @@ export default function ListeningTest() {
 
         if (isPlaying) {
             audio.pause();
+            setIsPlaying(false);
         } else {
-            audio.play();
+            audio.play()
+                .then(() => setIsPlaying(true))
+                .catch((err) => {
+                    console.error("Không thể phát âm thanh:", err);
+                    setIsPlaying(false); // giữ trạng thái đúng nếu lỗi
+                });
         }
-        setIsPlaying(!isPlaying);
     };
-
     const resetAudio = () => {
         const audio = audioRef.current;
         if (audio) {
@@ -247,6 +256,8 @@ export default function ListeningTest() {
                         isDarkMode={isDarkMode}
                         toggleDarkMode={toggleDarkMode}
                         onFullscreenToggle={handleFullscreen} // truyền hàm fullscreen
+                        isHighlightMode={isHighlightMode}
+                        toggleHighlightMode={toggleHighlightMode}
                     />
                     <div className="flex items-center gap-3 px-4 py-3">
                         <Button variant="outline" size="icon" onClick={resetAudio}>

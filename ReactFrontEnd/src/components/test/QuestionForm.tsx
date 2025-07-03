@@ -10,8 +10,7 @@ export interface QuestionFormProps {
 
 export const QuestionForm: FC<QuestionFormProps> = ({ 
   question, 
-  onUpdate, 
-  skillType 
+  onUpdate 
 }) => (
   <div className="bg-white p-4 rounded-lg mb-4 shadow-sm">
     <h5 className="font-medium mb-3 font-sans">Question {question.questionNumber}</h5>

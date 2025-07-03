@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Mail, Lock, ArrowRight } from "lucide-react";
+import {Link} from "react-router-dom";
 
 const RegisterPage = () => {
     const [email, setEmail] = useState("");
@@ -115,7 +116,7 @@ const RegisterPage = () => {
                             className="w-full border-2"
                             onClick={handleGoogleSignup}
                         >
-                            <img src="/google.svg" alt="Google" className="mr-2 h-4 w-4" />
+                            <img  alt="Google" className="mr-2 h-4 w-4" />
                             Google
                         </Button>
                     </form>

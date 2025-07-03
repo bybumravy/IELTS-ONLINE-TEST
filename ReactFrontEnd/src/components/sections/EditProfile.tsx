@@ -28,7 +28,7 @@ interface ProfileDto {
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
-    const { user, fetchUser } = useAuth()
+    const { user } = useAuth()
     const [profile, setProfile] = useState<ProfileDto>({
         firstName: "",
         lastName: "",

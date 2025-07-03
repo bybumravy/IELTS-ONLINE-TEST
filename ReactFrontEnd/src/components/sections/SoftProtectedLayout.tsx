@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, useLocation } from "react-router-dom";
-import {useEffect} from "react";
+import { Navigate } from "react-router-dom";
+import React, {useEffect} from "react";
 export default function SoftProtectedLayout({ children, allowRoles }: { children: React.ReactNode; allowRoles: string[] }) {
     const { user } = useAuth();
 

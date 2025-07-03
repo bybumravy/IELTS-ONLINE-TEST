@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import { Monitor, Lightbulb } from "lucide-react";
+
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import {Lightbulb, Monitor} from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
 
 export default function FullTest() {
     const { testId } = useParams();
@@ -18,25 +20,28 @@ export default function FullTest() {
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        const fetchData = async () => {
+        (async () => {
             try {
                 const res = await fetch(`${API_URL}/verify/fulltest/${testId}`, {
                     method: "GET",
                     credentials: "include",
                 });
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+                if (!res.ok) {
+                    console.log("hello");
+                    return;
+                }
 
                 const data = await res.json();
                 console.log("Fetched test data:", data);
                 setTest(data);
-                setIsOpen(true);  // mở modal sau khi load xong
+                setIsOpen(true); // mở modal sau khi load xong
             } catch (err) {
                 console.error("Failed to fetch test:", err);
             } finally {
                 setLoading(false);
             }
-        };
-        fetchData();
+        })();
     }, [testId]);
 
     const handleConfirmStart = () => {
