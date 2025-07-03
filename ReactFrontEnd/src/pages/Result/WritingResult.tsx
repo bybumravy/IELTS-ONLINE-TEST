@@ -153,8 +153,7 @@ export default function WritingResult() {
         // Đánh dấu các câu đã được sửa
         const sentenceUsed: Record<number, boolean> = {};
         // Tạo bản sao sentences để highlight
-        let highlightedSentences = [...sentences];
-
+        let highlightedSentences: React.ReactNode[] = [...sentences];
         corrections.forEach((correction, idx) => {
             // Tìm index của câu context trong bài (ưu tiên lần đầu tiên)
             const contextIdx = sentences.findIndex((s, i) => !sentenceUsed[i] && s.trim() === correction.sentenceContext.trim());
@@ -184,7 +183,7 @@ export default function WritingResult() {
                     </mark>
                     {after}
                 </span>
-            ) as string;
+            );
         });
 
         return (

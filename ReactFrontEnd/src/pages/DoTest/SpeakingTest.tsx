@@ -57,7 +57,7 @@ const SpeakingTest = () => {
     const timerRef = useRef<number | null>(null)
     const mediaRecorderRef = useRef<MediaRecorder | null>(null)
     const audioChunksRef = useRef<Blob[]>([])
-    const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
+    const [_recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
     const [totalRecordingTime, setTotalRecordingTime] = useState<{ [key in Part]: number }>({
         part1: 0,
         part2: 0,
@@ -408,11 +408,6 @@ const SpeakingTest = () => {
     const getQuestionNumber = () => {
         if (currentPart === "part2") return ""
         return currentQuestionIndex + 1
-    }
-
-    const getPartTitle = () => {
-        if (!speaking) return ""
-        return `PART ${speaking[currentPart].partNumber} ${speaking[currentPart].title.toUpperCase()}`
     }
 
     if (loading) {

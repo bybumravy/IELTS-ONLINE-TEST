@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CheckCircle, XCircle, Clock, Calendar, Target, TrendingUp, BookOpen, Download, Share2 } from "lucide-react"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { useNavigate, useParams} from "react-router-dom"
 
 const API_URL = import.meta.env.VITE_API_URL;
 

@@ -43,7 +43,7 @@ export default function ReadingTest() {
     const [readingTest, setReadingTest] = useState<ReadingTest | null>(null);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [answers, setAnswers] = useState<Record<number, string>>({});
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [_isSubmitted, setIsSubmitted] = useState(false);
     const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -54,8 +54,8 @@ export default function ReadingTest() {
     const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
     const [isHighlightMode, setIsHighlightMode] = useState(false);
     const [showColorPicker, setShowColorPicker] = useState(false);
-    const [selectedText, setSelectedText] = useState<string>("");
-    const [selectedRange, setSelectedRange] = useState<Range | null>(null);  // 👈 Thêm state này
+    const [_selectedText, setSelectedText] = useState<string>("");
+    const [selectedRange, setSelectedRange] = useState<Range | null>(null);
 
     const currentTask = tasks.find((task) => Number(task.taskNumber) === currentPart) || null;
 
@@ -118,11 +118,9 @@ export default function ReadingTest() {
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const popup = document.getElementById("color-picker-popup");
-            const paragraph = paragraphRef.current;
 
             if (showColorPicker) {
                 const isClickInPopup = popup && popup.contains(event.target as Node);
-                const isClickInParagraph = paragraph && paragraph.contains(event.target as Node);
 
                 if (!isClickInPopup) {
                     // Nếu click ở đâu cũng được — kể cả trong paragraph — đều đóng popup
@@ -179,8 +177,6 @@ export default function ReadingTest() {
 
         try {
             const dataToSend = {
-                username: user?.username || null,
-                skill: "reading",
                 ...readingTest,
                 tasks: readingTest.tasks.map((task) => ({
                     ...task,

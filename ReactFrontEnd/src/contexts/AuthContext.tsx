@@ -6,7 +6,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true); // Thêm trạng thái loading
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchUser = async () => {
         setIsLoading(true);

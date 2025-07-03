@@ -1,4 +1,4 @@
-{
+  {
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./.tscache/tsconfig.app.tsbuildinfo",

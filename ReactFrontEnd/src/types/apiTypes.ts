@@ -57,11 +57,14 @@ export interface User {
 }
 
 export interface AuthContextType {
-    user: User | null
-    login: (email: string, password: string) => Promise<void>
-    logout: () => void
-    register: (email: string, password: string, role?: string) => Promise<void>
+    user: User | null;
+    login: (email: string, password: string) => Promise<void>;
+    logout: () => void;
+    register: (email: string, password: string, role?: string) => Promise<void>;
+    isLoading: boolean;
+    fetchUser: () => Promise<void>;
 }
+
 
 export interface ListeningQuestion {
     id: number;
