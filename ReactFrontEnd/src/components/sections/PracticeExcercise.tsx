@@ -8,7 +8,7 @@ interface PracticeExerciseProps {
 }
 export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
     const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
-    const [isSubmitted, setIsSubmitted] = useState(false);
+
     const [isSubmittedPerQuestion, setIsSubmittedPerQuestion] = useState<Record<string, boolean>>({});
 
     const handleAnswerChange = (key: string, value: string) => {
@@ -89,7 +89,7 @@ export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
                                     </div>
                                 )}
                                 {/* Hiển thị đoạn paragraph với html */}
-                                <div className="mb-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: exercise.paragraph }} />
+                                <div className="mb-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: exercise.paragraph ?? "" }} />
 
                                 {/* Hiển thị instruction */}
                                 <p className="mb-6 font-semibold italic" dangerouslySetInnerHTML={{ __html: exercise.instruction}}/>
