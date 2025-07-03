@@ -6,69 +6,45 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CheckCircle, XCircle, Clock, Calendar, Target, TrendingUp, BookOpen, Download, Share2 } from "lucide-react"
-import {useNavigate, useParams, useSearchParams} from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 
 export default function ListeningResult() {
     const { user } = useAuth()
-    const [searchParams] = useSearchParams();
+    // const [searchParams] = useSearchParams()
     const [result, setResult] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const { resultId } = useParams  <{ resultId: string }>();
-    // // TODO: lấy testId từ URL hoặc props
-    // const testId = "T002" // hardcode để test, thực tế lấy từ router
+    const { resultId } = useParams<{ resultId: string }>()
+    const navigate = useNavigate()
 
-    const navigate = useNavigate();
     useEffect(() => {
-        if (!resultId) return;
-        setLoading(true);
+        if (!resultId) return
+        setLoading(true)
         fetch(`http://localhost:8080/api/result/listening/by-id?answerId=${resultId}`)
             .then(res => {
-                if (!res.ok) throw new Error("Không tìm thấy kết quả");
-                return res.json();
+                if (!res.ok) throw new Error("Không tìm thấy kết quả")
+                return res.json()
             })
             .then(data => {
-                setResult(data);
-                setLoading(false);
+                setResult(data)
+                setLoading(false)
             })
             .catch(e => {
-                setError(e.message);
-                setLoading(false);
-            });
-    }, [resultId]);
+                setError(e.message)
+                setLoading(false)
+            })
+    }, [resultId])
 
     // Helper: tổng số câu hỏi, số đúng, số sai, %
     const calcStats = (result: any) => {
-        let totalQuestions = 0, correctAnswers = 0
-        result?.tasks?.forEach((task: any) => {
-            task.sections?.forEach((section: any) => {
-                section.questions?.forEach((q: any) => {
-                    totalQuestions++
-                    if (q.answer && q.answer === q.studentAnswer) correctAnswers++
-                })
-            })
-        })
         return {
-            totalQuestions,
-            correctAnswers,
-            percentage: totalQuestions ? Math.round((correctAnswers / totalQuestions) * 100) : 0
+            percentage: result.totalQuestions ? Math.round((result.totalCorrect / result.totalQuestions) * 100) : 0
         }
     }
-    const stats = result ? calcStats(result) : { totalQuestions: 0, correctAnswers: 0, percentage: 0 }
 
-    // Helper: band điểm (giả lập, bạn có thể map theo bảng điểm thực tế)
-    const getBand = (correct: number, total: number) => {
-        const percent = total ? correct / total : 0
-        if (percent >= 0.9) return 9
-        if (percent >= 0.85) return 8
-        if (percent >= 0.8) return 7.5
-        if (percent >= 0.7) return 7
-        if (percent >= 0.6) return 6
-        if (percent >= 0.5) return 5
-        return 4
-    }
-    const band = getBand(stats.correctAnswers, stats.totalQuestions)
+    // Tính toán sau khi đảm bảo result tồn tại
+    const stats = result ? calcStats(result) : { totalQuestions: 0, totalCorrect: 0, percentage: 0 }
 
     const getBandColor = (band: number) => {
         if (band >= 8) return "text-green-700"
@@ -76,6 +52,7 @@ export default function ListeningResult() {
         if (band >= 5.5) return "text-yellow-600"
         return "text-red-600"
     }
+
     const getBandDescription = (band: number) => {
         if (band >= 8) return "Very Good User"
         if (band >= 7) return "Good User"
@@ -133,8 +110,12 @@ export default function ListeningResult() {
                                     <span className="text-sm font-medium">{result.testId}</span>
                                 </div>
                                 <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Thời gian:</span>
+                                    <span className="text-sm font-medium">30 phút</span>
+                                </div>
+                                <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Tổng câu hỏi:</span>
-                                    <span className="text-sm font-medium">{stats.totalQuestions}</span>
+                                    <span className="text-sm font-medium">{result.totalQuestions}</span>
                                 </div>
                             </div>
                         </CardContent>
@@ -147,8 +128,8 @@ export default function ListeningResult() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-center">
-                                <div className={`text-4xl font-bold ${getBandColor(band)}`}>{band}</div>
-                                <p className="text-sm text-gray-600 mt-1">{getBandDescription(band)}</p>
+                                <div className={`text-4xl font-bold ${getBandColor(result.band)}`}>{result.band}</div>
+                                <p className="text-sm text-gray-600 mt-1">{getBandDescription(result.band)}</p>
                                 <Progress value={stats.percentage} className="mt-3 [&>div]:bg-green-600" />
                                 <p className="text-xs text-gray-500 mt-1">{stats.percentage}% chính xác</p>
                             </div>
@@ -164,11 +145,11 @@ export default function ListeningResult() {
                             <div className="space-y-2">
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Đúng:</span>
-                                    <span className="text-sm font-medium text-green-600">{stats.correctAnswers}/{stats.totalQuestions}</span>
+                                    <span className="text-sm font-medium text-green-600">{result.totalCorrect}/{result.totalQuestions}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Sai:</span>
-                                    <span className="text-sm font-medium text-red-600">{stats.totalQuestions - stats.correctAnswers}/{stats.totalQuestions}</span>
+                                    <span className="text-sm font-medium text-red-600">{result.totalQuestions - result.totalCorrect}/{result.totalQuestions}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Tỷ lệ:</span>
@@ -259,6 +240,16 @@ export default function ListeningResult() {
                                                             <p className="text-sm text-gray-600">Đáp án đúng:</p>
                                                             <p className="font-medium text-green-600">{q.answer}</p>
                                                         </div>
+                                                        {/* ✅ Thêm phần này để hiển thị explanation có highlight */}
+                                                        {q.explanation && (
+                                                            <div className="col-span-2">
+                                                                <p className="text-sm text-gray-600 mt-3">Giải thích:</p>
+                                                                <div
+                                                                    className="text-sm text-gray-800 p-2 bg-gray-100 rounded"
+                                                                    dangerouslySetInnerHTML={{ __html: q.explanation }}
+                                                                />
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             ))

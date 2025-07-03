@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
+import web.ielts.Test.model.answer.reading.ReadingAnswer;
 import web.ielts.Test.model.answer.writing.WritingAnswer;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
 import web.ielts.Test.service.ResultService;
@@ -36,10 +37,26 @@ public class ResultTestController {
 
     @GetMapping("/listening/by-id")
     public ResponseEntity<?> getListeningAnswerById(@RequestParam String answerId) {
-        return resultService.findById(answerId)
+        return resultService.findListeningById(answerId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
+    @PostMapping("/reading")
+    public ResponseEntity<?> submitReadingAnswer(@RequestBody ReadingAnswer answer) {
+        ReadingAnswer saved = resultService.saveAnswer(answer);
+        return ResponseEntity.ok(Map.of(
+                "message", "Saved successfully",
+                "answerId", saved.getId()
+        ));
+    }
+
+    @GetMapping("/reading/by-id")
+    public ResponseEntity<?> getReadingAnswerById(@RequestParam String answerId) {
+        return resultService.findReadingById(answerId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
 }

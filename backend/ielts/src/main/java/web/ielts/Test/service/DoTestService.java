@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import web.ielts.Test.dto.HistoryTest;
 import web.ielts.Test.model.*;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
@@ -27,10 +26,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class DoTestService {
@@ -97,6 +96,40 @@ public class DoTestService {
     }
 
     public ListeningAnswer saveListeningAnswer(ListeningAnswer answer) {
+
+        int totalQuestions = 0;
+        int correctAnswers = 0;
+
+        for (var task : answer.getTasks()) {
+            for (var section : task.getSections()) {
+                for (var q : section.getQuestions()) {
+                    totalQuestions++;
+                    if (q.getAnswer() != null && q.getAnswer().equals(q.getStudentAnswer())) {
+                        correctAnswers++;
+                    }
+                }
+            }
+        }
+
+        answer.setTotalQuestions(totalQuestions);
+        answer.setTotalCorrect(correctAnswers);
+
+        double percent = totalQuestions == 0 ? 0.0 : (double) correctAnswers / totalQuestions;
+
+        double band;
+        if (percent >= 0.9) band = 9;
+        else if (percent >= 0.85) band = 8;
+        else if (percent >= 0.8) band = 7.5;
+        else if (percent >= 0.7) band = 7;
+        else if (percent >= 0.6) band = 6;
+        else if (percent >= 0.5) band = 5;
+        else band = 4;
+
+        answer.setBand(band);
+
+        if (answer.getSubmittedAt() == null) {
+            answer.setSubmittedAt(LocalDateTime.now());
+        }
 
         return listeningAnswerRepository.save(answer);
     }
@@ -277,57 +310,5 @@ public class DoTestService {
 
     private String buildUrl(String key) {
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, region, key);
-    }
-    public List<HistoryTest> getListeningByUsername(String username) {
-        List<ListeningAnswer> answers = listeningAnswerRepository.findByUsername(username);
-        System.out.println("12");
-        List<HistoryTest> historyTests = answers.stream().map(answer -> {
-            HistoryTest history = new HistoryTest();
-            history.setUsername(answer.getUsername());
-            history.setSkill("listening");
-            history.setTestID(answer.getTestId());
-            return history;
-        }).collect(Collectors.toList());
-        return historyTests;
-    }
-
-    public List<HistoryTest> getWritingByUsername(String username) {
-        List<WritingAnswer> answers = writingAnswerRepository.findByUsername(username);
-        System.out.println("12");
-        List<HistoryTest> historyTests = answers.stream().map(answer -> {
-            HistoryTest history = new HistoryTest();
-            history.setUsername(answer.getUsername());
-            history.setSkill("writing");
-            history.setTestID(answer.getTestId());
-            return history;
-        }).collect(Collectors.toList());
-        return historyTests;
-    }
-
-    public List<HistoryTest> getSpeakingByUsername(String username) {
-        List<SpeakingAnswer> answers = speakingAnswerRepository.findByUsername(username);
-        System.out.println("12");
-        List<HistoryTest> historyTests = answers.stream().map(answer -> {
-            HistoryTest history = new HistoryTest();
-            history.setUsername(answer.getUsername());
-            history.setSkill("speaking");
-            history.setTestID(answer.getTestId());
-            return history;
-        }).collect(Collectors.toList());
-        return historyTests;
-    }
-
-
-    public List<HistoryTest> getReadingByUsername(String username) {
-        List<ReadingAnswer> answers = readingAnswerRepository.findByUsername(username);
-        System.out.println("12");
-        List<HistoryTest> historyTests = answers.stream().map(answer -> {
-            HistoryTest history = new HistoryTest();
-            history.setUsername(answer.getUsername());
-            history.setSkill("reading");
-            history.setTestID(answer.getTestId());
-            return history;
-        }).collect(Collectors.toList());
-        return historyTests;
     }
 }

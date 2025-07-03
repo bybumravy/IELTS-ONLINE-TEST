@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import {customFetch} from "@/components/sections/customFetch";
+
 export interface Question {
     question: string | null;
     answer: string | null;
@@ -69,7 +69,7 @@ export default function ReadingTest() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await customFetch(`http://localhost:8080/verify/reading/${testId}`);
+                const res = await fetch(`http://localhost:8080/verify/reading/${testId}`, { credentials: "include" });
                 const data: ReadingTest = await res.json();
 
                 let questionId = 1;
@@ -151,25 +151,31 @@ export default function ReadingTest() {
 
     const handleSubmit = async () => {
         if (!readingTest) return;
+
+        const dataToSend = structuredClone(readingTest);
+        if (user?.username) dataToSend.username = user.username;
+        dataToSend.skill = "reading";
+
+        dataToSend.tasks.forEach((task) => {
+            delete (task as any).title;
+
+            task.sections.forEach((section) => {
+                delete (section as any).introduction;
+                delete (section as any).imageUrl;
+
+                section.questions.forEach((q) => {
+                    const question = q as QuestionWithStudentAnswer;
+                    question.studentAnswer = question.studentAnswer || null;
+
+                    delete (question as any).explanation;
+                    delete (question as any).options;
+                });
+            });
+        });
+
         setIsSubmitted(true);
 
         try {
-            const dataToSend = {
-                username: user?.username || null,
-                skill: "reading",
-                ...readingTest,
-                tasks: readingTest.tasks.map((task) => ({
-                    ...task,
-                    sections: task.sections.map((section) => ({
-                        ...section,
-                        questions: section.questions.map((question) => ({
-                            ...question,
-                            studentAnswer: (question as QuestionWithStudentAnswer).studentAnswer || null,
-                        })),
-                    })),
-                })),
-            };
-
             const response = await fetch("http://localhost:8080/verify/reading/submit", {
                 method: "POST",
                 credentials: "include",
@@ -182,7 +188,7 @@ export default function ReadingTest() {
             const result = await response.json();
             console.log("Saved:", result);
             alert("🎉 Submitted successfully!");
-            navigate("/result");
+            navigate(`/reading-result/${result.id}`);
         } catch (error) {
             console.error(error);
             alert("❌ Error submitting");
@@ -190,6 +196,8 @@ export default function ReadingTest() {
             setIsSubmitted(false);
         }
     };
+
+
 
     const handleAnswerChange = (questionId: number, answer: string) => {
         setAnswers((prev) => ({ ...prev, [questionId]: answer }));
