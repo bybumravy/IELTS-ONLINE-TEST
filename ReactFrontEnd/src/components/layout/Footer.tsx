@@ -13,7 +13,7 @@ export function Footer() {
                             </div>
                             <span className="text-xl font-bold">LANGUAGES</span>
                         </div>
-                        <p className="text-gray-400">Your comprehensive platform for IELTS test preparation and practice.</p>
+                        <p className="text-gray-400">Your comprehensive platform for language test preparation and practice.</p>
                     </div>
                     <div>
                         <h3 className="font-semibold mb-4">Tests</h3>
@@ -92,7 +92,7 @@ export function Footer() {
                     </div>
                 </div>
                 <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                    <p>&copy; 2024 IELTS Master. All rights reserved.</p>
+                    <p>&copy; 2024 LANGUAGES. All rights reserved.</p>
                 </div>
             </div>
         </footer>

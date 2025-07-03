@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "composite": true,                             // ✅ Bắt buộc khi dùng "references"
+    "composite": true,
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "ES2022",
@@ -13,8 +13,9 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "noEmit": true,                               // ✅ PHẢI bật emit
-    "outDir": "dist-node",                         // ✅ Nên có thư mục xuất
+    "noEmit": false,                             // ✅ Đã sửa: cho phép emit
+    "emitDeclarationOnly": true,                 // ✅ Chỉ tạo file .d.ts
+    "outDir": "dist-node",                       // ✅ Nơi lưu output
 
     /* Linting */
     "strict": true,

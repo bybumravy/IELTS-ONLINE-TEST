@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect, useRef} from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,6 +41,12 @@ export default function WritingTest() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showGradingDialog, setShowGradingDialog] = useState(false);
     const navigate = useNavigate();
+    const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
+    const [isHighlightMode, setIsHighlightMode] = useState(false);
+    const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
+    const toggleHighlightMode = () => setIsHighlightMode((prev) => !prev);
+    const containerRef = useRef<HTMLDivElement>(null);
+
 
     useEffect(() => {
         fetch(`${API_URL}/verify/writing/${testId}`, {
@@ -135,9 +141,24 @@ export default function WritingTest() {
         }
     };
 
+    const handleFullscreen = () => {
+        if (!containerRef.current) return;
+        if (!document.fullscreenElement) {
+            containerRef.current.requestFullscreen().catch((err) => console.error(err));
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
-            <DoTestHeader initialTime={60 * 60} onSubmit={handleSubmitClick} />
+            <DoTestHeader initialTime={60 * 60}
+                          onSubmit={handleSubmitClick}
+                          isDarkMode={isDarkMode}
+                          toggleDarkMode={toggleDarkMode}
+                          onFullscreenToggle={handleFullscreen}
+                          isHighlightMode={isHighlightMode}
+                          toggleHighlightMode={toggleHighlightMode} />
 
             <Dialog open={showGradingDialog} onOpenChange={setShowGradingDialog}>
                 <DialogContent className="sm:max-w-[425px]">

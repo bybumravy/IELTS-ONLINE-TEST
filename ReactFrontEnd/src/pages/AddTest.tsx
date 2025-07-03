@@ -267,6 +267,7 @@ const handleSave = async () => {
 
     const response = await fetch(`${API_URL}/api/teacher/request-test`, {
       method: 'POST',
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json'
       },

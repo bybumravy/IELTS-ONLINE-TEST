@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Monitor, Lightbulb } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 

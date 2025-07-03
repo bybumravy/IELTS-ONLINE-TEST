@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "composite": true,                         // ✅ BẮT BUỘC
     "incremental": true,
     "tsBuildInfoFile": "./.tscache/tsconfig.app.tsbuildinfo",
     "target": "ES2020",
@@ -18,6 +17,8 @@
     "moduleDetection": "force",
     "noEmit": true,                           // ✅ PHẢI CHO PHÉP EMIT
     "outDir": "dist",                          // ✅ Nên chỉ định thư mục output
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "jsx": "react-jsx",
 
     /* Linting */
@@ -26,5 +27,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src/**/*"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
