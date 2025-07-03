@@ -11,10 +11,7 @@ import web.ielts.Test.dto.HistoryTest;
 import web.ielts.Test.model.*;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
-import web.ielts.Test.model.answer.speaking.SpeakingAnswer;
-import web.ielts.Test.model.answer.speaking.SpeakingAnswerPart13;
-import web.ielts.Test.model.answer.speaking.SpeakingAnswerPart2;
-import web.ielts.Test.model.answer.speaking.SpeakingAnswerQuestion;
+import web.ielts.Test.model.answer.speaking.*;
 import web.ielts.Test.model.answer.writing.WritingAIResponse;
 import web.ielts.Test.model.answer.writing.WritingAnswer;
 import web.ielts.Test.repository.*;
@@ -27,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +59,10 @@ public class DoTestService {
     private SpeakingRepository speakingRepository;
     @Autowired
     private S3Client s3Client;
-
+    @Autowired
+    private  WhisperService whisper;
+    @Autowired
+    private AiSpeakingService aiSpeakingService;
     @Value("${aws.s3.bucket}")
     private String bucket;
 
@@ -183,43 +184,116 @@ public class DoTestService {
 
     public void updateAnswerUrls(SpeakingAnswer submission, Map<String, String> fileUrlMap) {
         // ✅ Debug log
-        for (Map.Entry<String, String> entry : fileUrlMap.entrySet()) {
-            String filename = entry.getKey();
-            String s3Url = entry.getValue();
-            System.out.println("File: " + filename + " → S3 URL: " + s3Url);
-        }
 
+
+        // 🔹 Part 1
         // 🔹 Part 1
         SpeakingAnswerPart13 part1 = submission.getPart1();
         if (part1 != null && part1.getQuestions() != null) {
+            List<EvaluationResult> evaluationResultsPart1 = new ArrayList<>();
+            double totalScore = 0;
+            int validQuestionCount = 0;
+
             for (SpeakingAnswerQuestion qa : part1.getQuestions()) {
-                String blob = qa.getStudentAnswer(); // blob:http://localhost/...
+                String blob = qa.getStudentAnswer();
                 String filename = extractFileName(blob);
-                String s3Url = fileUrlMap.getOrDefault(filename, blob); // dùng filename
-                System.out.println("Blob: " + blob + " → Filename: " + filename + " → S3: " + s3Url);
+                String s3Url = fileUrlMap.getOrDefault(filename, blob);
+                String s3UrlNotEncrypt = s3Url;
+
+                if (s3UrlNotEncrypt == null || s3UrlNotEncrypt.trim().isEmpty() || !s3UrlNotEncrypt.startsWith("http")) {
+
+                    continue;
+                }
+
+                s3Url = UrlEncryptor.encodeUrl(s3Url);
                 qa.setStudentAnswer(s3Url);
+
+                try {
+                    String transcript = whisper.transcribe(s3UrlNotEncrypt);
+
+                     EvaluationResult eval = aiSpeakingService.evaluateSpeakingPart1(transcript, qa.getQuestion());
+                     evaluationResultsPart1.add(eval);
+                     System.out.println(eval.toString());
+                     totalScore += eval.getOverallBand();
+                     validQuestionCount++;
+                } catch (Exception e) {
+                    System.err.println("❌ Lỗi khi chấm câu hỏi: " + qa.getQuestion());
+                    e.printStackTrace();
+                }
             }
+
+            double avgScore = validQuestionCount > 0 ? totalScore / validQuestionCount : 0.0;
+            System.out.println("✅ Average Part 1 Score: " + avgScore);
+            part1.setAverageScore(avgScore);
         }
 
-        // 🔹 Part 2
+// 🔹 Part 2
         SpeakingAnswerPart2 part2 = submission.getPart2();
         if (part2 != null) {
             String blob = part2.getStudentAnswer();
             String filename = extractFileName(blob);
             String s3Url = fileUrlMap.getOrDefault(filename, blob);
-            part2.setStudentAnswer(s3Url);
+            String s3UrlNotEncrypt = s3Url;
+
+            if (s3UrlNotEncrypt == null) {
+                System.out.println("⚠️ Bỏ qua Part 2 do URL không hợp lệ: " + s3UrlNotEncrypt);
+            } else {
+                s3Url = UrlEncryptor.encodeUrl(s3Url);
+                part2.setStudentAnswer(s3Url);
+
+                try {
+                    String transcript = whisper.transcribe(s3UrlNotEncrypt);
+
+                    // EvaluationResult eval = aiSpeakingService.evaluateSpeakingPart2(transcript, part2.getQuestion());
+                    // evaluationResultsPart2.add(eval);
+                    // totalScore += eval.getOverallBand();
+                    // validQuestionCount++;
+                } catch (Exception e) {
+                    System.err.println("❌ Lỗi khi chấm Part 2");
+                    e.printStackTrace();
+                }
+            }
         }
 
-        // 🔹 Part 3
+// 🔹 Part 3
         SpeakingAnswerPart13 part3 = submission.getPart3();
         if (part3 != null && part3.getQuestions() != null) {
+            List<EvaluationResult> evaluationResultsPart3 = new ArrayList<>();
+            double totalScore = 0;
+            int validQuestionCount = 0;
+
             for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
                 String blob = qa.getStudentAnswer();
                 String filename = extractFileName(blob);
                 String s3Url = fileUrlMap.getOrDefault(filename, blob);
+                String s3UrlNotEncrypt = s3Url;
+
+                if (s3UrlNotEncrypt == null || s3UrlNotEncrypt.trim().isEmpty() || !s3UrlNotEncrypt.startsWith("http")) {
+
+                    continue;
+                }
+
+                s3Url = UrlEncryptor.encodeUrl(s3Url);
                 qa.setStudentAnswer(s3Url);
+
+                try {
+                    String transcript = whisper.transcribe(s3UrlNotEncrypt);
+
+                    // EvaluationResult eval = aiSpeakingService.evaluateSpeakingPart3(transcript, qa.getQuestion());
+                    // evaluationResultsPart3.add(eval);
+                    // totalScore += eval.getOverallBand();
+                    // validQuestionCount++;
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+                }
             }
+
+            double avgScore = validQuestionCount > 0 ? totalScore / validQuestionCount : 0.0;
+            System.out.println("✅ Average Part 3 Score: " + avgScore);
+            part3.setAverageScore(avgScore);
         }
+
     }
     private String extractFileName(String blobUrl) {
         // Ví dụ input: blob:http://localhost:5173/cd13919f-ec76-4e5e-a348-95e5c3f1265c

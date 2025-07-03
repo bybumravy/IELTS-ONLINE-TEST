@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 
 @Service
 public class WhisperService {
@@ -77,10 +78,30 @@ public class WhisperService {
         return mapper.readTree(response.getBody());
     }
     private File downloadAudioFile(String url) throws IOException {
-        File file = Files.createTempFile("audio-", ".mp3").toFile();
-        try (InputStream in = new URL(url).openStream(); OutputStream out = new FileOutputStream(file)) {
-            in.transferTo(out);
+        System.out.println("============== [DEBUG: downloadAudioFile] ==============");
+        System.out.println("🔗 Raw URL: '" + url + "'");
+        System.out.println("📏 URL length: " + (url == null ? "null" : url.length()));
+        System.out.println("📌 Starts with 'http': " + (url != null && url.startsWith("http")));
+        System.out.println("========================================================");
+
+        // ✅ Kiểm tra và báo lỗi nếu URL không hợp lệ
+        if (url == null || url.trim().isEmpty() || !url.startsWith("http")) {
+            throw new IllegalArgumentException("❌ Invalid or empty URL: " + url);
         }
+
+        File file = File.createTempFile("audio-", ".mp3");
+        file.deleteOnExit();
+
+        try (InputStream in = new URL(url).openStream();
+             OutputStream out = new FileOutputStream(file)) {
+            in.transferTo(out);
+            System.out.println("✅ Audio file downloaded to: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("❌ Error downloading file from URL: " + url);
+            e.printStackTrace();
+            throw e; // vẫn ném ra để xử lý bên trên nếu cần
+        }
+
         return file;
     }
 }

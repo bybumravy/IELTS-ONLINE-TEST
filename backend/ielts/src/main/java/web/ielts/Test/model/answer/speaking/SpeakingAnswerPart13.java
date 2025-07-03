@@ -8,7 +8,25 @@ public class SpeakingAnswerPart13 {
     private String title;
     private String instruction;
     private List<SpeakingAnswerQuestion> questions;
+    private List<EvaluationResult> evaluationResults;
+    private double averageScore;
 
+
+    public List<EvaluationResult> getEvaluationResults() {
+        return evaluationResults;
+    }
+
+    public void setEvaluationResults(List<EvaluationResult> evaluationResults) {
+        this.evaluationResults = evaluationResults;
+    }
+
+    public double getAverageScore() {
+        return averageScore;
+    }
+
+    public void setAverageScore(double averageScore) {
+        this.averageScore = averageScore;
+    }
 
     public SpeakingAnswerPart13(int partNumber, String title, String instruction, List<SpeakingAnswerQuestion> questions) {
         this.partNumber = partNumber;

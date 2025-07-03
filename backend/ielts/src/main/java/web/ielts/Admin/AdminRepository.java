@@ -12,6 +12,6 @@ public interface AdminRepository extends MongoRepository<UserDTO, String> {
     List<UserDTO> findByRole(String role);
     boolean existsByEmail(String email);
 
-    Optional<UserDTO> findByEmail(String email);
+    UserDTO findByEmail(String email);
     void deleteByEmail(String email);
 }

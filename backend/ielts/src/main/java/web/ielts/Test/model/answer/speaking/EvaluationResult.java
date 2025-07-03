@@ -1,4 +1,4 @@
-package web.ielts.Test.model;
+package web.ielts.Test.model.answer.speaking;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -10,7 +10,9 @@ public class EvaluationResult {
     private double grammar;
     private double vocabulary;
     private double pronunciation;
-    private double overallBand;
+    private double score;
+    private Feedback feedback;
+
 
     public String getTranscript() {
         return transcript;
@@ -60,15 +62,26 @@ public class EvaluationResult {
         this.overallBand = overallBand;
     }
 
-    public String getFeedback() {
+    @Override
+    public String toString() {
+        return "EvaluationResult{" +
+                "transcript='" + transcript + '\'' +
+                ", fluency=" + fluency +
+                ", grammar=" + grammar +
+                ", vocabulary=" + vocabulary +
+                ", pronunciation=" + pronunciation +
+                ", overallBand=" + overallBand +
+                ", feedback=" + feedback +
+                '}';
+    }
+
+    public Feedback getFeedback() {
         return feedback;
     }
 
-    public void setFeedback(String feedback) {
+    public void setFeedback(Feedback feedback) {
         this.feedback = feedback;
     }
-
-    private String feedback;
 
     // ✅ Constructor mặc định để Jackson có thể deserialize
     public EvaluationResult() {}

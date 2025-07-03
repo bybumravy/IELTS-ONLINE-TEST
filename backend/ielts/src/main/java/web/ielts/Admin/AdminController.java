@@ -34,49 +34,15 @@ public class AdminController {
 
 
 
-    @PostMapping("/createuser")
-    public ResponseEntity<Object> createUser(@RequestBody UserDTO user) {
-        try {
-            UserDTO createdUser = adminService.createUser(user);
-            return ResponseEntity.ok(createdUser);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Failed to create user: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(error);
-        }
-    }
 
     @PutMapping("updateuser")
     public ResponseEntity<?> updateUser(@RequestBody Map<String, Object> data) {
-        String originalEmail = (String) data.get("originalEmail");
-
+        String email = (String) data.get("email");
+        String role =  (String) data.get("role");
         // Map sang UserDTO
-        UserDTO user = new UserDTO();
-        user.setEmail((String) data.get("email"));
-        user.setFirstName((String) data.get("firstName"));
-        user.setLastName((String) data.get("lastName"));
-        user.setPhone((String) data.get("phone"));
-        user.setGender((String) data.get("gender"));
-        user.setCountry((String) data.get("country"));
-        user.setTimeZone((String) data.get("timeZone"));
-        user.setCuurency((String) data.get("cuurency"));
-        user.setPremium(Boolean.parseBoolean(data.get("premium").toString()));
-        user.setBirthDate((String) data.get("birthDate"));
-        user.setRole((String) data.get("role"));
-
-        // Gọi service
-        adminService.updateUser(originalEmail, user);
+         adminService.updateUser(email,role);
 
         return ResponseEntity.ok("Updated");
     }
-    @DeleteMapping("/deleteuser/{email}")
-    public ResponseEntity<?> deleteUser(@PathVariable String email) {
-        try {
-            adminService.deleteUserByEmail(email);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to delete user: " + e.getMessage());
-        }
-    }
+
 }
