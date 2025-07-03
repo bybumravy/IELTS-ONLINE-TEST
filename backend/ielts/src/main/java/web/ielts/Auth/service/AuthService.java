@@ -43,7 +43,7 @@ public class AuthService {
     /**
      * Register a new user and send a verification email
      */
-    public ResponseEntity<?> register(User newUser) { //Unit Test 1
+    public ResponseEntity<?> register(User newUser) { //Unit Test register
 
         // Branch 1: Check if email is empty
         if (newUser.getEmail() == null || newUser.getEmail().trim().isEmpty()) {
@@ -87,7 +87,7 @@ public class AuthService {
     /**
      * Verify the user's email based on a verification token
      */
-    public ResponseEntity<?> verifyEmail(String token) { //Unit Test 2
+    public ResponseEntity<?> verifyEmail(String token) { //Unit Test verifyEmail
         // Find the token in the database
         VerificationToken verificationToken = tokenRepository.findByToken(token);
         System.out.println(verificationToken.toString());
@@ -108,11 +108,6 @@ public class AuthService {
                 verificationToken.getPassword(),
                 verificationToken.getRole()
         );
-
-        // Branch 3: Just in case, although unnecessary (user is freshly created above)
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found");
-        }
 
         // Hash the password before saving
         user.setPassword(encoder.encode(user.getPassword()));
@@ -140,7 +135,7 @@ public class AuthService {
     /**
      * Login a user with email and password
      */
-    public ResponseEntity<Map<String, Object>> login(String email, String password) { //Unit Test 3
+    public ResponseEntity<Map<String, Object>> login(String email, String password) { //Unit Test login
         Map<String, Object> response = new HashMap<>();
 
         // Branch 1: Check if email or password is empty

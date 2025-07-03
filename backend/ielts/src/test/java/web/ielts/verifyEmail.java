@@ -109,4 +109,6 @@ class verifyEmail {
 
         verify(authRepository, times(1)).save(any(User.class));
     }
+
+    //Cần 3 TestCase để phủ tất cả các nhánh (TC-01, TC-02, TC-03)
 }

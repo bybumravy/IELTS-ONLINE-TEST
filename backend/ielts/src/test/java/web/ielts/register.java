@@ -108,7 +108,7 @@ class register {
     void testRegister_PasswordTooShort() {
         User user = new User();
         user.setEmail("new@example.com");
-        user.setPassword("123");
+        user.setPassword("12345");
 
         when(authRepository.findByEmail("new@example.com")).thenReturn(null);
 
@@ -136,7 +136,7 @@ class register {
     void testRegister_Success() {
         User user = new User();
         user.setEmail("new@example.com");
-        user.setPassword("password123");
+        user.setPassword("123456");
 
         when(authRepository.findByEmail("new@example.com")).thenReturn(null);
 
@@ -148,4 +148,6 @@ class register {
         verify(tokenRepository, times(1)).save(any(VerificationToken.class));
         verify(emailConfig, times(1)).sendVerificationEmail(eq("new@example.com"), anyString());
     }
+
+    //Cần 5 testcase để phủ tát cả các nhánh (TC-01, TC-02, TC-03, TC-04, TC-05)
 }

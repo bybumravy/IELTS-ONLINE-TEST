@@ -98,4 +98,6 @@ public class mapToDTO {
         });
         assertTrue(exception.getMessage().contains("Unsupported tip type"));
     }
+
+    //Cần 5 testcase để phủ tất cả các nhánh
 }

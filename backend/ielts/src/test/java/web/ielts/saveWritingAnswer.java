@@ -191,4 +191,7 @@ public class saveWritingAnswer {
         verify(aiService).WritingTask2(any(), any());
     }
 
+
+    //Cần 5 testcase để phủ tất cả cá nhánh
+
 }

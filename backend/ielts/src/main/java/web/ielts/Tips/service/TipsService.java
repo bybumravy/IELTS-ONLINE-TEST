@@ -38,7 +38,7 @@ public class TipsService {
      * @param tip the tip object (can be one of 4 types)
      * @return TipDTO object containing id, skill, type, and description
      */
-    public TipDTO mapToDTO(Object tip) { //Unit Test 4
+    public TipDTO mapToDTO(Object tip) { //Unit Test mapToDTO
         if (tip instanceof ListeningTips) {
             ListeningTips t = (ListeningTips) tip;
             return new TipDTO(t.getId(), t.getSkill(), t.getType(), t.getDescription());
