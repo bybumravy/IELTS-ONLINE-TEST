@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
+import web.ielts.Test.model.answer.reading.ReadingAnswer;
 import web.ielts.Test.service.ResultService;
 
 import java.util.Optional;
@@ -24,4 +25,12 @@ public class ResultController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
     // TODO: Thêm các endpoint cho Reading, Writing, Speaking tương tự
+
+
+    @GetMapping("/reading")
+    public ResponseEntity<?> getReadingResult(@RequestParam String testId, @RequestParam String username) {
+        Optional<ReadingAnswer> answer = resultService.getReadingResult(testId, username);
+        return answer.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 } 

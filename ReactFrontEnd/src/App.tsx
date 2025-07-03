@@ -61,6 +61,7 @@ import ReviewReport from "@/pages/ReviewReport.tsx";
 import SoftProtectedLayout from "@/components/sections/SoftProtectedLayout"
 import ProtectedLayout from "@/components/sections/ProtectedLayout"
 import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
+import ReadingResult from "@/pages/Result/ReadingResult.tsx";
 
 
 export default function App() {
@@ -155,6 +156,11 @@ export default function App() {
                                 <MainLayout><ListeningResult /></MainLayout>
                             </ProtectedLayout>
                         } />
+                        <Route path="/reading-result/:resultId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><ReadingResult /></MainLayout>
+                            </ProtectedLayout>
+                        } />
                         <Route path="/test-history" element={
                             <ProtectedLayout allowRoles={["student"]}>
                                 <MainLayout><HistoryPage /></MainLayout>
@@ -178,7 +184,7 @@ export default function App() {
                         <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />
                         <Route path="/request-test-detail" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><RequestTestDetailPage /></StaffLayout></ProtectedLayout>} />
                         <Route path="/add-vocabulary" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><Vocabulary /></StaffLayout></ProtectedLayout>} />
-                        <Route path="/review-report" element={<MainLayout><ReviewReport /></MainLayout>} />
+                        <Route path="/review-report" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><ReviewReport /></StaffLayout></ProtectedLayout>} />
                         {/* ========== Error Pages ========== */}
                         <Route path="/error" element={<ErrorPage />} />
 

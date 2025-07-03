@@ -13,7 +13,7 @@ interface HistoryFilterProps {
 }
 
 const HistoryFilter: React.FC<HistoryFilterProps> = ({ selectedSkill, onSkillChange }) => {
-  const handleSkillChange = (event: React.MouseEvent<HTMLElement>, newSkill: string | null) => {
+  const handleSkillChange = (_event: React.MouseEvent<HTMLElement>, newSkill: string | null) => {
     if (newSkill !== null) {
       onSkillChange(newSkill);
     }

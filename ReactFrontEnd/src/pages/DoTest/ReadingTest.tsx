@@ -153,6 +153,28 @@ export default function ReadingTest() {
 
     const handleSubmit = async () => {
         if (!readingTest) return;
+
+        const dataToSend = structuredClone(readingTest);
+        if (user?.username) dataToSend.username = user.username;
+        dataToSend.skill = "reading";
+
+        dataToSend.tasks.forEach((task) => {
+            delete (task as any).title;
+
+            task.sections.forEach((section) => {
+                delete (section as any).introduction;
+                delete (section as any).imageUrl;
+
+                section.questions.forEach((q) => {
+                    const question = q as QuestionWithStudentAnswer;
+                    question.studentAnswer = question.studentAnswer || null;
+
+                    delete (question as any).explanation;
+                    delete (question as any).options;
+                });
+            });
+        });
+
         setIsSubmitted(true);
 
         try {
@@ -184,7 +206,7 @@ export default function ReadingTest() {
             const result = await response.json();
             console.log("Saved:", result);
             alert("🎉 Submitted successfully!");
-            navigate("/result");
+            navigate(`/reading-result/${result.id}`);
         } catch (error) {
             console.error(error);
             alert("❌ Error submitting");
@@ -192,6 +214,8 @@ export default function ReadingTest() {
             setIsSubmitted(false);
         }
     };
+
+
 
     const handleAnswerChange = (questionId: number, answer: string) => {
         setAnswers((prev) => ({ ...prev, [questionId]: answer }));

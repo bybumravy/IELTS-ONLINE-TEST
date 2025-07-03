@@ -76,7 +76,7 @@ export const AddReading: FC<AddReadingProps> = ({ onDataChange }) => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadImageError, setUploadImageError] = useState<string | null>(null);
   const [currentSection, setCurrentSection] = useState<{ taskNum: number; sectionNum: number } | null>(null);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [_selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Auto save sections
   useEffect(() => {
@@ -105,7 +105,7 @@ export const AddReading: FC<AddReadingProps> = ({ onDataChange }) => {
       [taskNum]: [
         ...currentSections,
         { sectionNumber: newSectionNumber, introduction: '', questions: [], type: '' }
-      ]
+      ] as Section[]
     });
   };
 

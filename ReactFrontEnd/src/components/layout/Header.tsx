@@ -6,7 +6,7 @@ import { UserMenu } from "@/components/layout/UserMenu"
 import { useAuth } from "@/contexts/AuthContext"
 
 export function Header() {
-    const { user, login, logout } = useAuth()
+    const { user, logout } = useAuth()
 
     return (
         <nav className="sticky top-0 z-50 bg-white shadow-sm border-b">

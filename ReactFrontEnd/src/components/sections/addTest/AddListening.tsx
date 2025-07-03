@@ -72,7 +72,7 @@ export const AddListening: FC<AddListeningProps> = ({ onDataChange }) => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadImageError, setUploadImageError] = useState<string | null>(null);
   const [currentSection, setCurrentSection] = useState<{ taskNum: number; sectionNum: number } | null>(null);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [_selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Auto-save effect
   useEffect(() => {
@@ -96,7 +96,7 @@ export const AddListening: FC<AddListeningProps> = ({ onDataChange }) => {
       [taskNum]: [
         ...currentSections,
         { sectionNumber: newSectionNumber, introduction: '', questions: [], type: '', imageUrl: '' },
-      ],
+      ] as Section[],
     });
   };
 
@@ -231,10 +231,10 @@ export const AddListening: FC<AddListeningProps> = ({ onDataChange }) => {
     }
   };
 
-  const handleCancelUpload = () => {
-    setShowConfirmation(false);
-    setAudioFile(null);
-  };
+  // const handleCancelUpload = () => {
+  //   setShowConfirmation(false);
+  //   setAudioFile(null);
+  // };
 
   const handleImageChange = (taskNum: number, sectionNum: number, file: File | null) => {
     if (file) {
