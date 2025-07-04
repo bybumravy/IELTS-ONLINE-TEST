@@ -8,28 +8,28 @@ import {customFetch} from "@/components/sections/customFetch";
 export type Question = {
     question: string;
     answer: string;
-    options: string[];
-    explanation: string;
+    options?: string[];
+    explanation?: string;
 };
 
 export type Section = {
     sectionNumber: number;
     type: string;
-    imageUrl: string;
-    introduction: string;
+    imageUrl?: string;
+    introduction?: string;
     questions: Question[];
 };
 
 export type TaskListening = {
     taskNumber: number;
-    title: string;
-    audioIntroduction: string;
+    title?: string;
+    audioIntroduction?: string;
     sections: Section[];
 };
 
 export type ListeningTest = {
     testId: string;
-    audioUrl: string;
+    audioUrl?: string;
     tasks: TaskListening[];
     username: string;
     skill: string;
@@ -84,9 +84,9 @@ export default function ListeningTest() {
                 if (!data) return;
                 let questionId = 1;
                 const updated = structuredClone(data);
-                updated.tasks.forEach((task) => {
-                    task.sections.forEach((section) => {
-                        section.questions.forEach((q) => {
+                updated.tasks.forEach((task: TaskListening) => {
+                    task.sections.forEach((section: Section) => {
+                        section.questions.forEach((q: QuestionWithStudentAnswer) => {
                             (q as QuestionWithStudentAnswer).questionId = questionId++;
                         });
                     });
@@ -196,15 +196,15 @@ export default function ListeningTest() {
         dataToSend.skill = "listening";
         delete dataToSend.audioUrl;
 
-        dataToSend.tasks.forEach((task) => {
+        dataToSend.tasks.forEach((task: TaskListening) => {
             delete task.title;
             delete task.audioIntroduction;
 
-            task.sections.forEach((section) => {
+            task.sections.forEach((section: Section) => {
                 delete section.introduction;
                 delete section.imageUrl;
 
-                section.questions.forEach((q) => {
+                section.questions.forEach((q: QuestionWithStudentAnswer) => {
                     const question = q as QuestionWithStudentAnswer;
                     const qid = question.questionId!;
                     question.studentAnswer = answers[qid] || null;

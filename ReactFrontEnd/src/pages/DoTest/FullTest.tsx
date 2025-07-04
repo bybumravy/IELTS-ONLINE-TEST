@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {Lightbulb, Monitor} from "lucide-react";
+import type { Test } from "@/types/apiTypes";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -15,7 +16,7 @@ export default function FullTest() {
     const { testId } = useParams();
     const navigate = useNavigate();
 
-    const [test, setTest] = useState(null);
+    const [test, setTest] = useState<Test | null>(null);
     const [loading, setLoading] = useState(true);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -72,7 +73,7 @@ export default function FullTest() {
             >
                 <DialogContent className="max-w-lg w-full mx-auto bg-white rounded-3xl p-8 shadow-2xl border-0">
                     <VisuallyHidden>
-                        <DialogTitle>{test?.testTitle ?? "Full Test"}</DialogTitle>
+                        <DialogTitle>{test?.title ?? "Full Test"}</DialogTitle>
                     </VisuallyHidden>
 
                     <div className="text-center space-y-6">

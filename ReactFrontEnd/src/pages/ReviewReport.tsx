@@ -26,13 +26,14 @@ interface Report {
     relatedLesson?: string
 }
 
-const typeColors = {
+type TypeColors = { [key: string]: string };
+const typeColors: TypeColors = {
     suggestion: "bg-yellow-100 text-yellow-800",
     complaint: "bg-red-100 text-red-800",
     compliment: "bg-green-100 text-green-800",
     question: "bg-blue-100 text-blue-800",
     other: "bg-gray-100 text-gray-800",
-}
+};
 
 export default function ReviewReport() {
     const [reports, setReports] = useState<Report[]>([])
@@ -41,8 +42,8 @@ export default function ReviewReport() {
     const [selectedReport, setSelectedReport] = useState<Report | null>(null)
     const [searchTerm, setSearchTerm] = useState("")
     const [typeFilter, setTypeFilter] = useState("all")
-    const [dateFrom, setDateFrom] = useState(null)
-    const [dateTo, setDateTo] = useState(null)
+    const [dateFrom, setDateFrom] = useState<Date | null>(null)
+    const [dateTo, setDateTo] = useState<Date | null>(null)
     const [newNote, setNewNote] = useState("")
     const [responseMessage, setResponseMessage] = useState("")
     const [dailyStats, setDailyStats] = useState<{ date: string; count: number }[]>([])
@@ -70,7 +71,7 @@ export default function ReviewReport() {
     }
 
     // Add note to report
-    const addNoteToReport = (reportId, note) => {
+    const addNoteToReport = (reportId: string, note: string) => {
         setReports((prev) =>
             prev.map((report) => (report.id === reportId ? { ...report, notes: [...report.notes, note] } : report)),
         )
@@ -207,10 +208,10 @@ export default function ReviewReport() {
                                         <PopoverContent className="w-auto p-0" align="start">
                                             <Calendar
                                                 mode="range"
-                                                selected={{ from: dateFrom, to: dateTo }}
+                                                selected={{ from: dateFrom ?? undefined, to: dateTo ?? undefined }}
                                                 onSelect={(range) => {
-                                                    setDateFrom(range?.from)
-                                                    setDateTo(range?.to)
+                                                    setDateFrom(range?.from ?? null)
+                                                    setDateTo(range?.to ?? null)
                                                 }}
                                                 locale={vi}
                                             />
