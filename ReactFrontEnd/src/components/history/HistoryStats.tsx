@@ -12,8 +12,8 @@ interface HistoryStatsProps {
 
 const HistoryStats: React.FC<HistoryStatsProps> = ({ items }) => {
   const totalTests = items.length;
-  const averageScore = items.reduce((acc, item) => acc + (item.score / item.maxScore) * 100, 0) / totalTests || 0;
-  const highestScore = Math.max(...items.map(item => (item.score / item.maxScore) * 100), 0);
+  const averageBand = items.reduce((acc, item) => acc + item.band, 0) / totalTests || 0;
+  const highestBand = Math.max(...items.map(item => item.band), 0);
 
   const StatCard = ({ title, value, icon, color }: {
     title: string;
@@ -37,14 +37,14 @@ const HistoryStats: React.FC<HistoryStatsProps> = ({ items }) => {
         color="#2196f3"
       />
       <StatCard
-        title="Average Score"
-        value={`${averageScore.toFixed(1)}%`}
+        title="Average Band"
+        value={averageBand.toFixed(1)}
         icon={<TrendingIcon />}
         color="#4caf50"
       />
       <StatCard
-        title="Highest Score"
-        value={`${highestScore.toFixed(1)}%`}
+        title="Highest Band"
+        value={highestBand.toFixed(1)}
         icon={<StarIcon />}
         color="#ff9800"
       />

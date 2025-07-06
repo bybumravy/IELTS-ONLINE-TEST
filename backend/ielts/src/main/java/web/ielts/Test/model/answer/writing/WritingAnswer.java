@@ -3,6 +3,8 @@ package web.ielts.Test.model.answer.writing;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Document(collection = "WritingAnswer")
 public class WritingAnswer {
     @Id
@@ -11,6 +13,9 @@ public class WritingAnswer {
     private String testId;
     private TaskWritingAnswer task1;
     private TaskWritingAnswer task2;
+    private String gradingMethod;
+    private double band;
+    private LocalDateTime submittedAt;
 
     public String getGradingMethod() {
         return gradingMethod;
@@ -25,6 +30,8 @@ public class WritingAnswer {
                 ", task1=" + task1 +
                 ", task2=" + task2 +
                 ", gradingMethod='" + gradingMethod + '\'' +
+                ", band=" + band +
+                ", submittedAt=" + submittedAt +
                 '}';
     }
 
@@ -32,7 +39,6 @@ public class WritingAnswer {
         this.gradingMethod = gradingMethod;
     }
 
-    private String gradingMethod;
     public String getUsername() {
         return username;
     }
@@ -73,4 +79,19 @@ public class WritingAnswer {
         this.task2 = task2;
     }
 
+    public double getBand() {
+        return band;
+    }
+
+    public void setBand(double band) {
+        this.band = band;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
+    }
 }
