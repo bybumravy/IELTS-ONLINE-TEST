@@ -166,3 +166,6 @@
   color: #fff !important;
   border-color: #059669 !important;
 }
+body.modal-open {
+  overflow: hidden;
+}
