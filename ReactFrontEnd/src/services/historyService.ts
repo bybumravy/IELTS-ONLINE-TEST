@@ -8,7 +8,7 @@ export interface TestHistory {
   band: number;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_URL = import.meta.env.VITE_API_URL || 'VITE_API_URL=http://api.languages.io.vn:8080';
 
 export const getStudentTestHistory = async (studentId: string, skill?: string): Promise<TestHistory[]> => {
   try {
