@@ -77,5 +77,9 @@ public class TestsController {
     public int volumeOfTest() {
         return (int) addTestRepo.count();
     }
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("OK");
+    }
 
 }
