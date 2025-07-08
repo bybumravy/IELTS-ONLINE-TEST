@@ -110,7 +110,8 @@ public class TestsController {
         }
 
         String url = "https://swpieltsbucket.s3.ap-southeast-1.amazonaws.com/audio/user/phamhoangviet05052005@gmail.com/T001_68610f3022439e341eda8a14/part1-1.mp3";
-        Map<String, Object> prosodyFeatures = prosody.analyze(url,transcript);
+        Map<String, Object> prosodyFeatures = prosody.analyze(url, transcript);
+        System.out.println(prosodyFeatures);
     }
 
 }
