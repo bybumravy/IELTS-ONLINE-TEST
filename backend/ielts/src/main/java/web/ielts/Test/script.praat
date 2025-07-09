@@ -6,58 +6,50 @@ form AnalyzeProsody
     sentence outputFile
 endform
 
-# Debug: thông báo bắt đầu
-printline "Praat script start running"
+# Debug: thông báo bắt đầu (dùng writeInfo thay cho printline)
+writeInfoLine: "Praat script start running"
 
 # Load Sound
-Read from file... 'soundFile$'
+Read from file: soundFile$
 sound = selected("Sound")
-
-# Giữ ID Sound để select lại sau
 soundID = sound
 
 # Load TextGrid
-Read from file... 'textGridFile$'
+Read from file: textGridFile$
 textgrid = selected("TextGrid")
 
-# Chuyển lại select Sound để xử lý
+# Tính Pitch
 selectObject: soundID
-
-# Lấy duration
-duration = Get total duration
-
-# Tính pitch (FIXED: added time step parameter as first argument)
-To Pitch... 0 75 500
+To Pitch: 0, 75, 500
 meanPitch = Get mean: 0, 0, "Hertz"
 minPitch = Get minimum: 0, 0, "Hertz", "Parabolic"
 maxPitch = Get maximum: 0, 0, "Hertz", "Parabolic"
 Remove
 
-# Chuyển lại select Sound để tính Intensity
+# Tính Intensity
 selectObject: soundID
-To Intensity... 75 0
+To Intensity: 75, 0
 meanIntensity = Get mean: 0, 0, "energy"
 Remove
 
-# Chuyển lại select TextGrid để đếm pause
+# Đếm pause trong TextGrid
 selectObject: textgrid
 pauseCount = Get number of intervals: 1
 
-# Debug: in ra console
-printline "meanPitch = " + string$(meanPitch)
-printline "minPitch  = " + string$(minPitch)
-printline "maxPitch  = " + string$(maxPitch)
-printline "meanIntensity = " + string$(meanIntensity)
-printline "pauseCount = " + string$(pauseCount)
+# Debug: in ra console (dùng writeInfo)
+writeInfoLine: "meanPitch = ", meanPitch
+writeInfoLine: "minPitch = ", minPitch
+writeInfoLine: "maxPitch = ", maxPitch
+writeInfoLine: "meanIntensity = ", meanIntensity
+writeInfoLine: "pauseCount = ", pauseCount
 
-# Ghi ra file output
-filedelete 'outputFile$'
-fileappend 'outputFile$' "meanPitch=" + string$(meanPitch) + newline$
-fileappend 'outputFile$' "minPitch=" + string$(minPitch) + newline$
-fileappend 'outputFile$' "maxPitch=" + string$(maxPitch) + newline$
-fileappend 'outputFile$' "meanIntensity=" + string$(meanIntensity) + newline$
-fileappend 'outputFile$' "pauseCount=" + string$(pauseCount) + newline$
+# Ghi ra file (dùng writeFile và appendFile)
+writeFile: outputFile$, "meanPitch=", string$(meanPitch), newline$
+appendFile: outputFile$, "minPitch=", string$(minPitch), newline$
+appendFile: outputFile$, "maxPitch=", string$(maxPitch), newline$
+appendFile: outputFile$, "meanIntensity=", string$(meanIntensity), newline$
+appendFile: outputFile$, "pauseCount=", string$(pauseCount), newline$
 
-# Debug: thông báo xong
-printline "Have written: " + 'outputFile$'
-printline "Praat script end"
+# Debug: thông báo kết thúc
+writeInfoLine: "Have written: ", outputFile$
+writeInfoLine: "Praat script end"

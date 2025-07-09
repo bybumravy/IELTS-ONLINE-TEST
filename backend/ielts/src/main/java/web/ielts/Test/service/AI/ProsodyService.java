@@ -1,10 +1,4 @@
     package web.ielts.Test.service.AI;
-
-    import be.tarsos.dsp.AudioDispatcher;
-    import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
-    import be.tarsos.dsp.pitch.PitchDetectionResult;
-    import be.tarsos.dsp.pitch.PitchProcessor;
-    import be.tarsos.dsp.AudioEvent;
     import com.fasterxml.jackson.databind.JsonNode;
     import org.springframework.stereotype.Service;
 
@@ -19,7 +13,8 @@
 
             private final String PRAAT_PATH = "C:\\Users\\LAPTOP24H\\Downloads\\praat6438_win-intel64\\Praat.exe";
             private final String PRAAT_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script.praat"; // Script Praat
-        private double praatGetAudioDuration(File wavFile) throws IOException {
+            private final String STRESS_ANALYSIS_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\stressAnalysis.praat";
+            private double praatGetAudioDuration(File wavFile) throws IOException {
             // Lấy đường dẫn tuyệt đối cho script Praat
             String scriptPath = new File("D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\getDuration.praat").getAbsolutePath();
             System.out.println("Praat path: " + PRAAT_PATH);
@@ -70,6 +65,143 @@
 
         }
 
+        public Map<String, Object> analyzePronunciation(String audioUrl, JsonNode root) {
+            Map<String, Object> result = new HashMap<>();
+            try {
+                // 1. Download and convert audio
+                File mp3File = downloadAudioFile(audioUrl);
+                File wavFile = convertMp3ToWav(mp3File);
+
+                // 2. Generate TextGrid from transcript
+                File textGridFile = generateTextGridFromJson(root, wavFile);
+
+                // 3. Run Praat analysis
+                Map<String, Double> praatResults = runPraatAnalysis(wavFile, textGridFile);
+
+                // 4. Calculate pronunciation score
+                double pronunciationScore = calculatePronunciationScore(praatResults);
+
+                // 5. Prepare results
+                result.put("pronunciationScore", pronunciationScore);
+                result.putAll(praatResults);
+
+                System.out.println("📊 Pronunciation analysis results:");
+                result.forEach((key, value) -> System.out.println(key + ": " + value));
+
+                return result;
+            } catch (Exception e) {
+                return Map.of("error", e.getMessage());
+            }
+        }
+
+        private double calculatePronunciationScore(Map<String, Double> praatResults) {
+            // Các trọng số cho từng tiêu chí
+            final double WEIGHT_PAUSE = 0.15;
+            final double WEIGHT_SPEECH_RATE = 0.15;
+            final double WEIGHT_PITCH_VARIABILITY = 0.25;
+            final double WEIGHT_INTENSITY_VARIABILITY = 0.25;
+            final double WEIGHT_CONNECTED_SPEECH = 0.20;
+
+            // Tính điểm cho từng tiêu chí (thang điểm 0-9)
+            double pauseScore = calculatePauseScore(
+                    praatResults.get("pauseCount"),
+                    praatResults.get("totalPauseDuration"),
+                    praatResults.get("speakingDuration")
+            );
+
+            double speechRateScore = calculateSpeechRateScore(
+                    praatResults.get("speechRate")
+            );
+
+            double pitchVariabilityScore = calculatePitchVariabilityScore(
+                    praatResults.get("pitchSD")
+            );
+
+            double intensityVariabilityScore = calculateIntensityVariabilityScore(
+                    praatResults.get("intensitySD")
+            );
+
+            double connectedSpeechScore = calculateConnectedSpeechScore(
+                    praatResults.get("totalPauseDuration"),
+                    praatResults.get("speakingDuration")
+            );
+
+            // Tổng hợp điểm tổng
+            return (pauseScore * WEIGHT_PAUSE) +
+                    (speechRateScore * WEIGHT_SPEECH_RATE) +
+                    (pitchVariabilityScore * WEIGHT_PITCH_VARIABILITY) +
+                    (intensityVariabilityScore * WEIGHT_INTENSITY_VARIABILITY) +
+                    (connectedSpeechScore * WEIGHT_CONNECTED_SPEECH);
+        }
+
+        private double calculatePauseScore(double pauseCount, double totalPauseDuration, double speakingDuration) {
+            double pauseRatio = totalPauseDuration / speakingDuration;
+
+            // Band 9: Tạm dừng tối thiểu (<5% thời gian nói)
+            if (pauseRatio < 0.05 && pauseCount < 3) return 9.0;
+            // Band 8: Tạm dừng ít (5-10%)
+            if (pauseRatio < 0.10 && pauseCount < 5) return 8.0;
+            // Band 7: Tạm dừng vừa phải (10-15%)
+            if (pauseRatio < 0.15) return 7.0;
+            // Band 6: Tạm dừng nhiều (15-20%)
+            if (pauseRatio < 0.20) return 6.0;
+            // Band 5: Tạm dừng quá nhiều (>20%)
+            return 5.0;
+        }
+
+        private double calculateSpeechRateScore(double speechRate) {
+            // Band 9: Tốc độ tự nhiên (140-160 wpm)
+            if (speechRate >= 140 && speechRate <= 160) return 9.0;
+            // Band 8: Tốc độ tốt (130-140 hoặc 160-170 wpm)
+            if ((speechRate >= 130 && speechRate < 140) || (speechRate > 160 && speechRate <= 170)) return 8.0;
+            // Band 7: Tốc độ chấp nhận được (120-130 hoặc 170-180 wpm)
+            if ((speechRate >= 120 && speechRate < 130) || (speechRate > 170 && speechRate <= 180)) return 7.0;
+            // Band 6: Tốc độ không đều (110-120 hoặc 180-190 wpm)
+            if ((speechRate >= 110 && speechRate < 120) || (speechRate > 180 && speechRate <= 190)) return 6.0;
+            // Band 5: Tốc độ quá chậm/nhanh (<110 hoặc >190 wpm)
+            return 5.0;
+        }
+
+        private double calculatePitchVariabilityScore(double pitchSD) {
+            // Band 9: Ngữ điệu tự nhiên (SD > 25 Hz)
+            if (pitchSD > 25) return 9.0;
+            // Band 8: Ngữ điệu tốt (20-25 Hz)
+            if (pitchSD >= 20) return 8.0;
+            // Band 7: Ngữ điệu chấp nhận được (15-20 Hz)
+            if (pitchSD >= 15) return 7.0;
+            // Band 6: Ngữ điệu hạn chế (10-15 Hz)
+            if (pitchSD >= 10) return 6.0;
+            // Band 5: Ngữ điệu đơn điệu (<10 Hz)
+            return 5.0;
+        }
+
+        private double calculateIntensityVariabilityScore(double intensitySD) {
+            // Band 9: Nhấn âm xuất sắc (SD > 8 dB)
+            if (intensitySD > 8) return 9.0;
+            // Band 8: Nhấn âm tốt (6-8 dB)
+            if (intensitySD >= 6) return 8.0;
+            // Band 7: Nhấn âm chấp nhận được (4-6 dB)
+            if (intensitySD >= 4) return 7.0;
+            // Band 6: Nhấn âm hạn chế (2-4 dB)
+            if (intensitySD >= 2) return 6.0;
+            // Band 5: Nhấn âm kém (<2 dB)
+            return 5.0;
+        }
+
+        private double calculateConnectedSpeechScore(double totalPauseDuration, double speakingDuration) {
+            double speechRatio = speakingDuration / (speakingDuration + totalPauseDuration);
+
+            // Band 9: Nối âm liền mạch (>95% thời gian nói)
+            if (speechRatio > 0.95) return 9.0;
+            // Band 8: Nối âm tốt (90-95%)
+            if (speechRatio > 0.90) return 8.0;
+            // Band 7: Nối âm chấp nhận được (85-90%)
+            if (speechRatio > 0.85) return 7.0;
+            // Band 6: Nối âm hạn chế (80-85%)
+            if (speechRatio > 0.80) return 6.0;
+            // Band 5: Nối âm kém (<80%)
+            return 5.0;
+        }
 
         private File generateTextGridFromJson(JsonNode root, File audioFile) throws IOException {
             File textGridFile = new File(audioFile.getParent(), audioFile.getName().replace(".wav", ".TextGrid"));
@@ -154,29 +286,146 @@
 
                     // 2. Gọi Praat để phân tích
                     File textGridFile = generateTextGridFromJson(root, wavFile);
+                    // 1. Basic prosody analysis
                     Map<String, Double> praatResults = runPraatAnalysis(wavFile, textGridFile);
 
+                    // 2. Stress analysis
+                    Map<String, Object> stressResults = analyzeWordStress(wavFile, textGridFile, root);
 
-                    // 3. Xử lý kết quả từ Praat
-                    double avgPitch = praatResults.get("meanPitch");
-                    double intonationRange = praatResults.get("maxPitch") - praatResults.get("minPitch");
-                    int pauseCount = praatResults.get("pauseCount").intValue();
+                    // 3. Pronunciation scoring
+                    Map<String, Object> pronunciationScore = evaluatePronunciation(praatResults, stressResults);
 
-                    // 4. Phân tích từng từ (sử dụng timestamps từ Praat nếu cần)
-                    List<String> emphasizedWords = analyzeWordEmphasis(root, praatResults);
+                    result.putAll(pronunciationScore);
+                    result.put("detailedStress", stressResults.get("wordStress"));
+                    result.put("prosodyFeatures", praatResults);
 
-                    // 5. Tổng hợp kết quả
-                    result.put("avgPitch", avgPitch);
-                    result.put("intonationRange", intonationRange);
-                    result.put("pauseCount", pauseCount);
-                    result.put("emphasizedWords", emphasizedWords);
-                    System.out.println("📊 Kết quả phân tích prosody:");
-                    result.forEach((key, value) -> System.out.println(key + ": " + value));
                     return result;
                 } catch (Exception e) {
                     return Map.of("error", e.getMessage());
                 }
             }
+
+        private double calculateIntonationScore(Map<String, Double> praatResults) {
+            double pitchRange = praatResults.get("maxPitch") - praatResults.get("minPitch");
+            double optimalRange = 100; // Hz
+
+            // Score based on how close the pitch range is to optimal
+            double rangeScore = 1 - Math.min(1, Math.abs(pitchRange - optimalRange) / optimalRange);
+
+            // Also consider pitch variability (standard deviation would be better)
+            double variabilityScore = praatResults.get("meanPitch") > 0 ? 0.7 : 0.5;
+
+            return (rangeScore * 0.6 + variabilityScore * 0.4);
+        }
+        private Map<String, Object> evaluatePronunciation(Map<String, Double> praatResults, Map<String, Object> stressResults) {
+            Map<String, Object> evaluation = new HashMap<>();
+
+            // 1. Phoneme accuracy (simplified - would need phoneme-level analysis)
+            evaluation.put("phonemeAccuracy", 0.85); // Placeholder
+
+            // 2. Word stress
+            evaluation.put("wordStressScore", stressResults.get("stressAccuracy"));
+
+            // 3. Sentence stress and intonation
+            double intonationScore = calculateIntonationScore(praatResults);
+            evaluation.put("intonationScore", intonationScore);
+
+            // 4. Connected speech features
+            evaluation.put("connectedSpeechScore", 0.8); // Placeholder
+
+            // 5. Overall comprehensibility
+            double overallScore = (
+                    (double) evaluation.get("phonemeAccuracy") * 0.3 +
+                            (double) evaluation.get("wordStressScore") * 0.25 +
+                            (double) evaluation.get("intonationScore") * 0.25 +
+                            (double) evaluation.get("connectedSpeechScore") * 0.2
+            );
+
+            // Convert to IELTS band score (simplified mapping)
+            double bandScore = overallScore * 4 + 1; // Maps 0-1 to 1-5 scale
+            if (bandScore > 9) bandScore = 9;
+
+            evaluation.put("pronunciationBandScore", Math.round(bandScore * 2) / 2.0); // Round to nearest 0.5
+
+            return evaluation;
+        }
+
+
+        private Map<String, Object> analyzeWordStress(File wavFile, File textGridFile, JsonNode root) throws IOException, InterruptedException {
+            File outputFile = File.createTempFile("stress-output", ".txt");
+
+            ProcessBuilder pb = new ProcessBuilder(
+                    PRAAT_PATH, "--run", STRESS_ANALYSIS_SCRIPT_PATH,
+                    wavFile.getAbsolutePath(),
+                    textGridFile.getAbsolutePath(),
+                    outputFile.getAbsolutePath()
+            );
+            pb.redirectErrorStream(true);
+
+            Process process = pb.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                reader.lines().forEach(System.out::println);
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new RuntimeException("Stress analysis failed with exit code: " + exitCode);
+            }
+
+            return parseStressOutput(outputFile, root);
+        }
+
+        private Map<String, Object> parseStressOutput(File outputFile, JsonNode root) throws IOException {
+            Map<String, Object> results = new HashMap<>();
+            List<Map<String, Object>> wordStressList = new ArrayList<>();
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(outputFile))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("WORD_STRESS")) {
+                        String[] parts = line.split(":");
+                        if (parts.length == 3) {
+                            String word = parts[1].trim();
+                            double stressLevel = Double.parseDouble(parts[2].trim());
+
+                            Map<String, Object> wordStress = new HashMap<>();
+                            wordStress.put("word", word);
+                            wordStress.put("stressLevel", stressLevel);
+                            wordStress.put("isStressed", stressLevel > 1.5); // Threshold for stress
+
+                            wordStressList.add(wordStress);
+                        }
+                    }
+                }
+            }
+
+            results.put("wordStress", wordStressList);
+
+            // Calculate stress accuracy score
+            int correctStresses = 0;
+            int totalStressedWords = 0;
+
+            for (Map<String, Object> wordStress : wordStressList) {
+                String word = (String) wordStress.get("word");
+                boolean isStressed = (boolean) wordStress.get("isStressed");
+
+                // Here you would compare with expected stress patterns
+                // This is simplified - in reality you'd need a dictionary of word stresses
+                boolean expectedStress = word.length() > 5; // Simple heuristic
+
+                if (isStressed == expectedStress) {
+                    correctStresses++;
+                }
+                if (expectedStress) {
+                    totalStressedWords++;
+                }
+            }
+
+            double stressAccuracy = totalStressedWords > 0 ? (double) correctStresses / totalStressedWords : 1.0;
+            results.put("stressAccuracy", stressAccuracy);
+
+            return results;
+        }
 
         private Map<String, Double> runPraatAnalysis(File wavFile, File textGridFile) throws IOException, InterruptedException {
             File outputFile = File.createTempFile("praat-output", ".txt");
