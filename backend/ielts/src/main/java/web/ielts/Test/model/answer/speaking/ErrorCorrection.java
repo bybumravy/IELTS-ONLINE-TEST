@@ -43,6 +43,17 @@ public class ErrorCorrection {
         this.explanation = explanation;
     }
 
+    @Override
+    public String toString() {
+        return "ErrorCorrection{" +
+                "originalText='" + originalText + '\'' +
+                ", correctedText='" + correctedText + '\'' +
+                ", errorType='" + errorType + '\'' +
+                ", explanation='" + explanation + '\'' +
+                ", sentenceContext='" + sentenceContext + '\'' +
+                '}';
+    }
+
     public String getSentenceContext() {
         return sentenceContext;
     }

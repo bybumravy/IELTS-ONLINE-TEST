@@ -1,10 +1,31 @@
 package web.ielts.Test.model.answer.speaking;
 
-public class Evaluation {
-    private ScoreReview lexicalResource;
-    private ScoreReview grammar;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    public Evaluation() {
+public class Evaluation {
+    @JsonProperty("LexicalResource")
+    private LexicalResource lexicalResource;
+
+    @JsonProperty("Grammar")
+    private Grammar grammar;
+
+    public Evaluation() {}
+
+
+    public LexicalResource getLexicalResource() {
+        return lexicalResource;
+    }
+
+    public void setLexicalResource(LexicalResource lexicalResource) {
+        this.lexicalResource = lexicalResource;
+    }
+
+    public Grammar getGrammar() {
+        return grammar;
+    }
+
+    public void setGrammar(Grammar grammar) {
+        this.grammar = grammar;
     }
 
     @Override
@@ -13,21 +34,5 @@ public class Evaluation {
                 "lexicalResource=" + lexicalResource +
                 ", grammar=" + grammar +
                 '}';
-    }
-
-    public ScoreReview getLexicalResource() {
-        return lexicalResource;
-    }
-
-    public void setLexicalResource(ScoreReview lexicalResource) {
-        this.lexicalResource = lexicalResource;
-    }
-
-    public ScoreReview getGrammar() {
-        return grammar;
-    }
-
-    public void setGrammar(ScoreReview grammar) {
-        this.grammar = grammar;
     }
 }

@@ -42,7 +42,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         String role = user.getRole();
 
 // Tạo JWT với role user vừa lấy (hoặc mới tạo)
-        String token = JwtToken.generateToken(email,role );
+        String token = JwtToken.generateAccessToken(email,role );
 
 
         // Tạo Cookie
@@ -56,6 +56,17 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
 
         // Gửi cookie về trình duyệt
         response.addHeader("Set-Cookie", cookie.toString());
+        String refreshToken = JwtToken.generateRefreshToken(email, role);
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60) // 7 ngày
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader("Set-Cookie", refreshCookie.toString());
         if(user.getRole().equalsIgnoreCase("STUDENT")){
             response.sendRedirect("http://localhost:5173");
         }

@@ -1,12 +1,18 @@
 package web.ielts.Test.model.answer.speaking;
 
-public class ScoreReview {
+public class LexicalResource {
     private String scoreEva;
     private String reviewEva;
 
-    public ScoreReview() {
+    public LexicalResource(String scoreEva, String reviewEva) {
+        this.scoreEva = scoreEva;
+        this.reviewEva = reviewEva;
     }
 
+    public LexicalResource() {
+    }
+
+    // Getters and setters
     public String getScoreEva() {
         return scoreEva;
     }
@@ -25,7 +31,7 @@ public class ScoreReview {
 
     @Override
     public String toString() {
-        return "ScoreReview{" +
+        return "LexicalResource{" +
                 "scoreEva='" + scoreEva + '\'' +
                 ", reviewEva='" + reviewEva + '\'' +
                 '}';

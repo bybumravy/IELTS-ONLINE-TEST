@@ -7,6 +7,9 @@ public class SpeakingAnswerPart2 {
     private int partNumber;
     private String title;
     private String question;
+    private EvaluationResult evaluationResults;
+
+    private double averageScore;
 
     public SpeakingAnswerPart2() {
     }
@@ -27,6 +30,14 @@ public class SpeakingAnswerPart2 {
         return studentAnswer;
     }
 
+    public EvaluationResult getEvaluationResults() {
+        return evaluationResults;
+    }
+
+    public void setEvaluationResults(EvaluationResult evaluationResults) {
+        this.evaluationResults = evaluationResults;
+    }
+
     public void setStudentAnswer(String studentAnswer) {
         this.studentAnswer = studentAnswer;
     }
@@ -38,6 +49,14 @@ public class SpeakingAnswerPart2 {
         this.instruction = instruction;
         this.cueCards = cueCards;
         this.studentAnswer = studentAnswer;
+    }
+
+    public double getAverageScore() {
+        return averageScore;
+    }
+
+    public void setAverageScore(double averageScore) {
+        this.averageScore = averageScore;
     }
 
     public int getPartNumber() {
@@ -74,11 +93,15 @@ public class SpeakingAnswerPart2 {
 
     @Override
     public String toString() {
-        return "Part2{" +
+        return "SpeakingAnswerPart2{" +
                 "partNumber=" + partNumber +
                 ", title='" + title + '\'' +
                 ", question='" + question + '\'' +
+                ", evaluationResults=" + evaluationResults +
+                ", averageScore=" + averageScore +
+                ", instruction='" + instruction + '\'' +
                 ", cueCards=" + cueCards +
+                ", studentAnswer='" + studentAnswer + '\'' +
                 '}';
     }
 }

@@ -200,6 +200,18 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             throw new RuntimeException("OpenAI API error: " + e.getMessage());
         }
     }
+    public String buildSpeakingPrompt(int partNumber, String question, String transcript) {
+        switch (partNumber) {
+            case 1:
+                return buildSpeakingPart1Prompt(question, transcript);
+            case 2:
+                return buildSpeakingPart2Prompt(question, transcript);
+            case 3:
+                return buildSpeakingPart3Prompt(question, transcript);
+            default:
+                throw new IllegalArgumentException("Invalid part number: " + partNumber);
+        }
+    }
     private static final String IELTS_PUBLIC_DESCRIPTORSLexicalResource =
             "  - IELTS Public Descriptors:\n" +
                     "    • Band 9: Total flexibility and precise use in all contexts. Sustained use of accurate and idiomatic language.\n" +
@@ -211,20 +223,59 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                     "    • Band 8: Wide range of structures, flexibly used. The majority of sentences are error free. Occasional inappropriacies and non-systematic errors occur.\n" +
                     "    • Band 7: A range of structures flexibly used. Error-free sentences are frequent. Some errors persist.\n" +
                     "    • Band 6: Produces a mix of short and complex sentence forms with limited flexibility. Frequent errors in complex structures but communication is maintained.\n" +
-                    "    • Band 5: Mostly basic sentence forms. Complex structures are attempted but often contain errors that may reduce clarity.\n"
+                    "    • Band 5: Mostly basic sentence forms. Complex structures are attempted but often contain errors that may reduce clarity.\n"+
+                    "    • Band 4: Resource sufficient for familiar topics but only basic meaning can be conveyed on unfamiliar topics. Frequent inappropriateness and errors in word choice. Rarely attempts paraphrase.\n" +
+                    "    • Band 3: Resource limited to simple vocabulary used primarily to convey personal information. Vocabulary inadequate for unfamiliar topics.\n" +
+                    "    • Band 2: Very limited resource. Utterances consist of isolated words or memorised utterances. Little communication possible without the support of mime or gesture.\n" +
+                    "    • Band 1: No resource bar a few isolated words. No communication possible.\n"
                                        ;
+
     private static final String IELTS_PUBLIC_DESCRIPTORS_GRAMMAR =
             "- IELTS Public Descriptors:\n" +
                     "    • Band 9: Structures are precise and accurate at all times, apart from ‘mistakes’ characteristic of native speaker speech.\n" +
                     "    • Band 8: Wide range of structures, flexibly used. The majority of sentences are error free. Occasional inappropriacies and non-systematic errors occur.\n" +
                     "    • Band 7: A range of structures flexibly used. Error-free sentences are frequent. Some errors persist.\n" +
                     "    • Band 6: Produces a mix of short and complex sentence forms with limited flexibility. Frequent errors in complex structures but communication is maintained.\n" +
-                    "    • Band 5: Mostly basic sentence forms. Complex structures are attempted but often contain errors that may reduce clarity.\n";
-    public String buildSpeakingPart1Promot(String questions,String answer){
+                    "    • Band 5: Mostly basic sentence forms. Complex structures are attempted but often contain errors that may reduce clarity.\n"+
+                    "    • Band 4: Can produce basic sentence forms and some short utterances are error-free. Subordinate clauses are rare and, overall, turns are short, structures are repetitive and errors are frequent.\n" +
+                    "    • Band 3: Basic sentence forms are attempted but grammatical errors are numerous except in apparently memorised utterances.\n" +
+                    "    • Band 2: No evidence of basic sentence forms.\n" +
+                    "    • Band 1: No rateable language unless memorised.\n";
+    private static final String errorType = "• Grammar-related:\n" +
+            "- Grammar: tense\n" +
+            "- Grammar: subject-verb agreement\n" +
+            "- Grammar: article usage\n" +
+            "- Grammar: preposition\n" +
+            "- Grammar: word form\n" +
+            "- Grammar: clause structure\n" +
+            "- Grammar: pronoun usage\n" +
+            "- Grammar: modal verb\n" +
+            "- Grammar: sentence structure\n" +
+            "- Grammar: conditional\n" +
+            "\n" +
+            "• Vocabulary-related:\n" +
+            "- Vocabulary: limited range\n" +
+            "- Vocabulary: awkward phrasing\n" +
+            "- Vocabulary: incorrect word\n" +
+            "- Vocabulary: word choice\n" +
+            "- Vocabulary: informal expression\n" +
+            "- Vocabulary: vague expression\n" +
+            "- Vocabulary: repetition\n" +
+            "\n" +
+            "• Coherence / Logic:\n" +
+            "- Coherence: unclear meaning\n" +
+            "- Coherence: repetition of ideas\n" +
+            "- Coherence: poor connection\n" +
+            "- Coherence: off-topic\n" +
+            "- Coherence: abrupt transition";
+    public String buildSpeakingPart1Prompt(String questions,String answer){
         String speakingPart1 =
                 "You must return response strictly in JSON format.\n" +
                       "Note: For simple factual questions in Part 1 (e.g., “What is your name?”), brief but relevant answers are acceptable. Do not penalize short responses if they clearly address the question.\n" +
-                        "\n" +
+
+                       "Note: Spoken responses do not contain punctuation. You must IGNORE all punctuation marks such as commas, periods, question marks, or missing capital letters. \\n\" +\n" +
+                        "  Do NOT mark answers down due to missing or incorrect punctuation." +
+                        "  Do NOT suggest corrections just to add commas or punctuation"+
                         "If the answer is clearly unrelated or no attempt is made to respond to the question at all,\n" +
                         "→ assign Band 3.0.\n" +
                         "\n" +
@@ -236,48 +287,52 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "2. The full transcript of the user's response (content, grammar, vocabulary)\n" +
                         "3. You must evaluate whether the response is relevant to the question and does not go off-topic.\n" +
 
-                        "Once fully understood, proceed to scoring using official IELTS Band Descriptors.\n\n" +
+                        "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
+                        +errorType+
+
+
+                        "Once fully understood, proceed to scoring using official IELTS Band Descriptors and apply the detailed evaluation criteria provided below.\n" +
                         "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
                         "\n" +
                         "• Lexical Resource (25%):\n" +
-                        "- Reward clear and natural use of topic-appropriate vocabulary related to daily life, hobbies, routines, etc.\n" +
-                        "- Reward varied vocabulary when appropriate, even if it includes informal or slightly awkward expressions.\n" +
-                        "- Use of basic idiomatic expressions (e.g., 'kill time', 'hang out') is encouraged but not required.\n" +
-                        "- Do not penalize casual or conversational vocabulary if it fits the context.\n" +
-                        "- Repetition of simple words (e.g., 'good', 'nice') more than 3 times may suggest limited range and cap the score at around Band 6.5.\n" +
-                        "- Deduct points for frequent lexical errors or limitations:\n" +
-                        "  * Using incorrect or confusing words more than 3 times: deduct 0.5 points per additional instance.\n" +
-                        "  * Repeating very basic words (e.g., 'good', 'happy') more than 3 times: deduct 0.5 points per extra occurrence.\n" +
-                        "  * Lack of variety in vocabulary across answers (especially when describing likes/dislikes, routines, etc.): consider overall impact.\n" +
-                        "  * Incorrect word forms (e.g., 'beauty' instead of 'beautiful'): if more than 3 times, deduct 0.5 per extra occurrence.\n" +
-                        "  * Over-reliance on vague expressions ('stuff', 'things') without specificity: deduct if meaning becomes unclear or overused.\n" +
-                        "- Minor awkwardness or non-native phrasing is acceptable as long as the message remains clear.\n" +
-                        "- Excessively formal vocabulary (e.g., 'a plethora of') is acceptable if meaning is clear, but not necessary for a high score in Part 1.\n"+
+                        "+0.25 if the candidate uses 2 or more correct, natural collocations\n" +
+                        "(e.g., “make a living”, “strong bond”)\n" +
+                        "→ ✅ Only add once, even if more than 2 collocations are used.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses 1 or more idioms or phrasal verbs appropriately\n" +
+                        "(e.g., “over the moon”, “give up”)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if there's clear lexical variety (e.g., appropriate use of synonyms, no repetition of basic words)\n" +
+                        "→ ✅ Add only once, even if lexical variety is shown throughout.\n" +
+                        "\n" +
+                        "+0.25 if the candidate successfully paraphrases the question instead of repeating it\n" +
+                        "→ ✅ Only add once even if paraphrasing appears in multiple responses."+
+                        " If any single errorType occurs more than 3 times,\n" +
+                        "→ Deduct 0.5 point in total for that error type (only once)"+
+                        " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_DESCRIPTORSLexicalResource + "\n" +
                         "• Grammatical Range and Accuracy (25%):\n" +
-                        "- Accept a mix of simple and complex structures.\n" +
-                        "- Occasional grammar errors about 3 times are expected and acceptable. \n" +
-                        "- Reward efforts to use conditionals, modals, passive voice, or inversion even if imperfect.\n" +
-                        "- Do not penalize non-critical mistakes like article or tense shifts if communication is successful.\n" +
-                        "- Prioritize overall clarity and natural delivery over perfect grammar.\n" +
+                        "+0.25 if the candidate uses at least 2 different complex structures correctly\n" +
+                        "(e.g., conditionals, passives, relative clauses)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate maintains grammatical variety and accuracy throughout\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate attempts advanced grammar (e.g., modal verbs, inversion, past perfect), even if imperfect\n" +
+                        "→ ✅ Only add once."+
                         "Deduct points for frequent grammar errors that affect understanding:\n\n" +
-                        "- Errors such as incorrect tense, wrong verb forms, missing subjects or verbs, or incorrect sentence structures that confuse meaning.\n" +
-                        "  → If any of these errors occur 3 times or more, deduct 0.5 points (only once). [-0.5 one-time deduction]\n\n" +
-                        "- Lack of variety in sentence structures (e.g., using only simple sentences):\n" +
-                        "  → If this happens 3 times or more, deduct 0.5 points (only once). [-0.5]\n\n" +
-                        "- Unclear or confusing sentences:\n" +
-                        "  → If 3 or more unclear sentences are found, deduct 0.5 points (only once). [-0.5]\n"+
+                        " If any single errorType occurs more than 3 times,\n" +
+                        "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                        IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
                         "   - Deduct 0.5 band per 2 major errors\n" +
-                        " For every error listed in errorCorrections, suggest a corresponding sentence improvement in sentenceImprovements that rewrites the full sentence correctly and more appropriately — in a way that would raise the band score. These improvements should demonstrate better grammar, vocabulary, or fluency.\\n\" +\n" +
-                        "Even if the sentence is understandable, rewrite it using stronger collocations, cohesive devices, or more precise phrasing to show how the candidate could improve their band.\\n\" +\n" +
-                        "Make sure each sentenceImprovement refers to a real sentence from the response and clearly shows how to improve it."+
-                        "For sentence improvements,refer explicitly to the public band descriptors:  "+IELTS_PUBLIC_DESCRIPTORSLexicalResource +"and"+IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+". For example, if you assign the answer Band 6.0, you must suggest sentence improvements that elevate it to Band 7.0"+
                         "RESPONSE FORMAT:\n" +
                         "- score: decimal (overall band score, e.g. 6.5)\n" +
+                        "- transcript: string (full transcript of the original answer)\n" +
                         "- feedback: {\n" +
                         "    errorCorrections: [{\n" +
                         "      originalText: string,\n" +
@@ -285,26 +340,20 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "      errorType: string,\n" +
                         "      explanation: string,\n" +
                         "      sentenceContext: string\n" +
-                        "    }],\n" +
-                        "    sentenceImprovements: [{\n" +
-                        "      originalSentence: string,\n" +
-                        "      improvedSentence: string,\n" +
-                        "      techniquesUsed: [string],\n" +
-                        "      bandBoost: string\n" +
-                        "    }],\n" +
+                        "    }],\n" +  // ✅ Đóng đúng mảng
                         "    overallComment: string\n" +
-                        "}\n" +
+                        "},\n" + // ✅ Đóng đúng object feedback
                         "- evaluation: {\n" +
                         "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
                         "    Grammar: {scoreEva: string, reviewEva: string}\n" +
-                        "}\n" +
-                        "sampleAnswer: string (Optional band 9 model)\n" +
+                        "},\n" +
+                        "- sampleAnswer: string (Optional band 9 model)\n" +
                         "Question:\n" + questions + "\n" +
                         "Original Answer:\n" + answer;
         return speakingPart1;
     }
 
-    public String buildSpeakingPart2Promot(String question,String answer){
+    public String buildSpeakingPart2Prompt(String question,String answer){
         String speakingPart2 =
                 "You must return response strictly in JSON format.\n" +
                         "You are an official IELTS Speaking examiner. You are evaluating a real IELTS Part 2 speaking response. Extremely strict grading.\n" +
@@ -369,12 +418,6 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "      errorType: string,\n" +
                         "      explanation: string,\n" +
                         "      sentenceContext: string\n" +
-                        "    }],\n" +
-                        "    sentenceImprovements: [{\n" +
-                        "      originalSentence: string,\n" +
-                        "      improvedSentence: string,\n" +
-                        "      techniquesUsed: [string],\n" +
-                        "      bandBoost: string\n" +
                         "    }],\n" +
                         "    overallComment: string\n" +
                         "}\n" +
@@ -454,12 +497,6 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "      errorType: string,\n" +
                         "      explanation: string,\n" +
                         "      sentenceContext: string\n" +
-                        "    }],\n" +
-                        "    sentenceImprovements: [{\n" +
-                        "      originalSentence: string,\n" +
-                        "      improvedSentence: string,\n" +
-                        "      techniquesUsed: [string],\n" +
-                        "      bandBoost: string\n" +
                         "    }],\n" +
                         "    overallComment: string\n" +
                         "}\n" +

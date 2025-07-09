@@ -25,7 +25,11 @@ public class AuthController {
 
     @Autowired
     private AuthService authservice;
-
+    @PostMapping("/refreshtoken")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("helllo refresh token");
+        return authservice.refreshToken(request, response);
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User newUser) {

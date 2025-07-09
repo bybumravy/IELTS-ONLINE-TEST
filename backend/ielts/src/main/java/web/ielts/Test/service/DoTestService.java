@@ -1,5 +1,6 @@
 package web.ielts.Test.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -188,11 +189,12 @@ public class DoTestService {
 
         // 🔹 Part 1
         // 🔹 Part 1
+        String gradingMethod = submission.getGradingMethod();
         SpeakingAnswerPart13 part1 = submission.getPart1();
         if (part1 != null && part1.getQuestions() != null) {
-            List<EvaluationResult> evaluationResultsPart1 = new ArrayList<>();
+
             double totalScore = 0;
-            int validQuestionCount = 0;
+            int validQuestionCount = part1.getQuestions().size();
 
             for (SpeakingAnswerQuestion qa : part1.getQuestions()) {
                 String blob = qa.getStudentAnswer();
@@ -207,24 +209,27 @@ public class DoTestService {
 
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
                 qa.setStudentAnswer(s3Url);
+                if(gradingMethod.equalsIgnoreCase("ai")){
+                    try {
+                       String transcript = whisper.transcribe(s3UrlNotEncrypt);
+                       System.out.println(transcript);
+//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1);
+//                     qa.setEvaluationResults(eval);
+//
+//                     totalScore += eval.getScore();
 
-                try {
-                    String transcript = whisper.transcribe(s3UrlNotEncrypt);
-
-                     EvaluationResult eval = aiSpeakingService.evaluateSpeakingPart1(transcript, qa.getQuestion());
-                     evaluationResultsPart1.add(eval);
-                     System.out.println(eval.toString());
-                     totalScore += eval.getOverallBand();
-                     validQuestionCount++;
-                } catch (Exception e) {
-                    System.err.println("❌ Lỗi khi chấm câu hỏi: " + qa.getQuestion());
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        System.err.println("❌ Lỗi khi chấm câu hỏi: " + qa.getQuestion());
+                        e.printStackTrace();
+                    }
                 }
             }
+            if(gradingMethod.equalsIgnoreCase("ai")) {
+                double avgScore = totalScore/validQuestionCount;
+                System.out.println("✅ Average Part 1 Score: " + avgScore);
+                part1.setAverageScore(avgScore);
+            }
 
-            double avgScore = validQuestionCount > 0 ? totalScore / validQuestionCount : 0.0;
-            System.out.println("✅ Average Part 1 Score: " + avgScore);
-            part1.setAverageScore(avgScore);
         }
 
 // 🔹 Part 2
@@ -235,32 +240,39 @@ public class DoTestService {
             String s3Url = fileUrlMap.getOrDefault(filename, blob);
             String s3UrlNotEncrypt = s3Url;
 
+
             if (s3UrlNotEncrypt == null) {
                 System.out.println("⚠️ Bỏ qua Part 2 do URL không hợp lệ: " + s3UrlNotEncrypt);
             } else {
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
                 part2.setStudentAnswer(s3Url);
+                if(gradingMethod.equalsIgnoreCase("ai")) {
+                    try {
+                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
 
-                try {
-                    String transcript = whisper.transcribe(s3UrlNotEncrypt);
+//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2);
+//                     part2.setEvaluationResults(eval);
+//                   part2.setAverageScore(eval.getScore());
 
-                    // EvaluationResult eval = aiSpeakingService.evaluateSpeakingPart2(transcript, part2.getQuestion());
-                    // evaluationResultsPart2.add(eval);
-                    // totalScore += eval.getOverallBand();
-                    // validQuestionCount++;
-                } catch (Exception e) {
-                    System.err.println("❌ Lỗi khi chấm Part 2");
-                    e.printStackTrace();
+                        // validQuestionCount++;
+                    } catch (Exception e) {
+                        System.err.println("❌ Lỗi khi chấm Part 2");
+                        e.printStackTrace();
+                    }
                 }
+
+
+
             }
+
         }
 
-// 🔹 Part 3
-        SpeakingAnswerPart13 part3 = submission.getPart3();
+  //Part 3
+       SpeakingAnswerPart13 part3 = submission.getPart3();
         if (part3 != null && part3.getQuestions() != null) {
-            List<EvaluationResult> evaluationResultsPart3 = new ArrayList<>();
+
             double totalScore = 0;
-            int validQuestionCount = 0;
+            int validQuestionCount = part3.getQuestions().size();
 
             for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
                 String blob = qa.getStudentAnswer();
@@ -275,23 +287,27 @@ public class DoTestService {
 
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
                 qa.setStudentAnswer(s3Url);
+                if(gradingMethod.equalsIgnoreCase("ai")) {
+                    try {
+//                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
+//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3);
+//                   qa.setEvaluationResults(eval);
+//                    totalScore += eval.getScore();
 
-                try {
-                    String transcript = whisper.transcribe(s3UrlNotEncrypt);
+                    } catch (Exception e) {
 
-                    // EvaluationResult eval = aiSpeakingService.evaluateSpeakingPart3(transcript, qa.getQuestion());
-                    // evaluationResultsPart3.add(eval);
-                    // totalScore += eval.getOverallBand();
-                    // validQuestionCount++;
-                } catch (Exception e) {
-
-                    e.printStackTrace();
+                        e.printStackTrace();
+                    }
                 }
+
+
+            }
+            if(gradingMethod.equalsIgnoreCase("ai")) {
+                double avgScore = totalScore/validQuestionCount;
+                System.out.println("✅ Average Part 3 Score: " + avgScore);
+                part3.setAverageScore(avgScore);
             }
 
-            double avgScore = validQuestionCount > 0 ? totalScore / validQuestionCount : 0.0;
-            System.out.println("✅ Average Part 3 Score: " + avgScore);
-            part3.setAverageScore(avgScore);
         }
 
     }

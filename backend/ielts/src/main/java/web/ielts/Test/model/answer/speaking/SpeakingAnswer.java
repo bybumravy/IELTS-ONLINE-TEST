@@ -16,6 +16,15 @@ public class SpeakingAnswer {
     private SpeakingAnswerPart13 part1;
     private SpeakingAnswerPart2 part2;
     private SpeakingAnswerPart13 part3;
+    private String gradingMethod;
+
+    public String getGradingMethod() {
+        return gradingMethod;
+    }
+
+    public void setGradingMethod(String gradingMethod) {
+        this.gradingMethod = gradingMethod;
+    }
 
     public SpeakingAnswer(String testId) {
         this.testId = testId;
