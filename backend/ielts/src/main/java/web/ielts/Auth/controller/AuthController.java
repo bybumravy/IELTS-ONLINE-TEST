@@ -58,7 +58,7 @@ public class AuthController {
     }
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO loginRequest) {
-        System.out.println("From page: " + loginRequest.getFromPath());  // in ra /loginadmin
+       // in ra /loginadmin
         return authservice.login(
                 loginRequest.getEmail(),
                 loginRequest.getPassword()
@@ -71,9 +71,11 @@ public class AuthController {
         try {
             String username = authservice.getUsernameFromToken(token);
             String role = authservice.getRoleFromToken(token);
+            boolean isPremium = authservice.isPremium(token);
             return ResponseEntity.ok(Map.of(
                     "username", username,
-                    "role", role
+                    "role", role,
+                       "isPremium",isPremium
             ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");

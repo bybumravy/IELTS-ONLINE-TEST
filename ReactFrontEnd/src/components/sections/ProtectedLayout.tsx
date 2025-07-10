@@ -4,7 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProtectedLayoutRole({
                                                 children,
-                                                allowRoles
+                                                allowRoles,
+                                                requirePremium = false
                                             }: {
     children: React.ReactNode;
     allowRoles: string[];
@@ -29,6 +30,12 @@ export default function ProtectedLayoutRole({
             navigate("/error", {
                 replace: true,
                 state: { code: 403 }
+            });
+        }
+        if (requirePremium && !user.isPremium) {
+            navigate("/premium", {
+                replace: true,
+                state: { message: "Chức năng này chỉ dành cho người dùng Premium." }
             });
         }
     }, [user, isLoading, allowRoles, navigate, location.pathname]);

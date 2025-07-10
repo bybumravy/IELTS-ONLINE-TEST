@@ -50,6 +50,7 @@ type Part = "part1" | "part2" | "part3"
 const SpeakingTest = () => {
     const { testId } = useParams<{ testId: string }>()
     const { user } = useAuth()
+    const {isPremium} = useAuth()
     const TOTAL_TEST_TIME = 600 // 10 phút (600 giây)
     const [speaking, setSpeaking] = useState<Speaking | null>(null)
     const [loading, setLoading] = useState(true)

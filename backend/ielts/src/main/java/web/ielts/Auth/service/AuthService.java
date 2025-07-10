@@ -112,8 +112,8 @@ public class AuthService {
             }
 
             // Tạo access token và refresh token mới
-            ResponseCookie cookie = createJwtCookie(user.getEmail(), user.getRole());
-            ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), user.getRole());
+            ResponseCookie cookie = createJwtCookie(user.getEmail(), user.getRole(),user.isPremium());
+            ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), user.getRole(),user.isPremium());
 
             response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
             response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
@@ -152,8 +152,8 @@ public class AuthService {
 
         return ResponseEntity.ok(response);
     }
-    public ResponseCookie createJwtCookie(String email, String role) {
-        String tokenJwt = generateAccessToken(email, role);
+    public ResponseCookie createJwtCookie(String email, String role,boolean isPremium) {
+        String tokenJwt = generateAccessToken(email, role,isPremium);
 
         return ResponseCookie.from("jwt_token", tokenJwt)
                 .httpOnly(true)
@@ -163,8 +163,8 @@ public class AuthService {
                 .sameSite("Lax")
                 .build();
     }
-    public ResponseCookie createRefreshTokenCookie(String email, String role) {
-        String refreshToken = generateRefreshToken(email, role);
+    public ResponseCookie createRefreshTokenCookie(String email, String role,boolean isPremium) {
+        String refreshToken = generateRefreshToken(email, role,isPremium);
         return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(false)
@@ -191,13 +191,14 @@ public class AuthService {
         user.setPassword(encoder.encode(user.getPassword()));
 
         authRepository.save(user);
-        ResponseCookie cookie = createJwtCookie(user.getEmail(), user.getRole());
-        ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), user.getRole());
-
+        ResponseCookie cookie = createJwtCookie(user.getEmail(), user.getRole(),user.isPremium());
+        ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), user.getRole(),user.isPremium());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .headers(headers)
                 .body("Xác thực email thành công! Bạn có thể đăng nhập.");
     }
 
@@ -208,18 +209,21 @@ public class AuthService {
         String role = user.getRole();
 
 
-        System.out.println(user);
+
         if (user != null && encoder.matches(password, user.getPassword()) ) {
-            ResponseCookie cookie = createJwtCookie(user.getEmail(), role);
-            ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), role);
+            ResponseCookie cookie = createJwtCookie(user.getEmail(), role,user.isPremium());
+            ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), role,user.isPremium());
             response.put("status", "success");
             response.put("message", "Login successful");
-            System.err.println(response);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
+            headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                    .headers(headers)
                     .body(response);
+
         } else {
             response.put("status", "fail");
             response.put("message", "Invalid email/account or password");
@@ -241,7 +245,13 @@ public class AuthService {
 
         return JwtToken.extractRole(token);
     }
+    public boolean isPremium(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("Missing token");
+        }
 
+        return JwtToken.extractIsPremium(token);
+    }
    public List<ResponseCookie> logout(HttpServletRequest request) {
     // Xoá session
    
@@ -276,5 +286,8 @@ public class AuthService {
     public User getUserByEmail(String email) {
         return authRepository.findByEmail(email);
     }
+
+
+
 }
 

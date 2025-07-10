@@ -33,6 +33,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
             user.setRole("student");
             user.setPassword(null);
             user.setGoogleID(googleId);
+            user.setPremium(false);
         } else {
             if (user.getRole() == null) {
                 user.setRole("student");
@@ -40,9 +41,10 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         }
         user = loginRepository.save(user);
         String role = user.getRole();
-
+        boolean isPremium = user.isPremium();
+        System.out.println(isPremium);
 // Tạo JWT với role user vừa lấy (hoặc mới tạo)
-        String token = JwtToken.generateAccessToken(email,role );
+        String token = JwtToken.generateAccessToken(email,role,isPremium );
 
 
         // Tạo Cookie
@@ -56,7 +58,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
 
         // Gửi cookie về trình duyệt
         response.addHeader("Set-Cookie", cookie.toString());
-        String refreshToken = JwtToken.generateRefreshToken(email, role);
+        String refreshToken = JwtToken.generateRefreshToken(email, role,isPremium);
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)

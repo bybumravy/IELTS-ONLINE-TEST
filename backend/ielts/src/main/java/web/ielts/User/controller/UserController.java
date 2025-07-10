@@ -78,27 +78,7 @@ public class UserController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @PostMapping("/upgrade-premium")
-    public ResponseEntity<?> upgradePremium(@CookieValue(value = "jwt_token", required = false) String token) {
-        if (token == null || token.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing token");
-        }
 
-        try {
-            String username = authService.getUsernameFromToken(token);
-            User user = authRepository.findByEmail(username);
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-            }
-
-            user.setPremium(true);
-            authRepository.save(user);
-
-            return ResponseEntity.ok("Premium status updated");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        }
-    }
 
 
 }

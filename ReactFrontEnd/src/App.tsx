@@ -130,20 +130,20 @@ export default function App() {
                     } />
 
                     <Route path="/test/writing/:testId" element={
-                        <ProtectedLayout allowRoles={["student"]}>
+                        <ProtectedLayout allowRoles={["student"]} requirePremium={true}>
                             <WritingTest />
                         </ProtectedLayout>
                     } />
 
-                    <Route path="/test/full/:testId" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <FulllTest />
+                    <Route path="/test/speaking/:testId" element={
+                        <ProtectedLayout allowRoles={["student"]} requirePremium={true}>
+                            <VoiceRecorder />
                         </ProtectedLayout>
                     } />
 
-                    <Route path="/test/speaking/:testId" element={
-                        <ProtectedLayout allowRoles={["student"]}>
-                            <VoiceRecorder />
+                    <Route path="/checkMic/:testId" element={
+                        <ProtectedLayout allowRoles={["student"]} requirePremium={true}>
+                            <SpeakingTest />
                         </ProtectedLayout>
                     } />
 

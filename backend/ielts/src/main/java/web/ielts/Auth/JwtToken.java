@@ -25,7 +25,7 @@ public class JwtToken {
     private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 ngày
 
     // Hàm private dùng chung để tạo token
-    private static String generateToken(String email, String role, long expirationTime) {
+    private static String generateToken(String email, String role, long expirationTime,boolean isPremium) {
         long now = System.currentTimeMillis();
         Date issuedAt = new Date(now);
         Date expiration = new Date(now + expirationTime);
@@ -40,6 +40,7 @@ public class JwtToken {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
+                .claim("isPremium", isPremium)
                 .claim("issuedAtLocal", issuedAtLocal)
                 .claim("expiresAtLocal", expirationLocal)
                 .setIssuedAt(issuedAt)
@@ -49,13 +50,13 @@ public class JwtToken {
     }
 
     // Tạo Access Token
-    public static String generateAccessToken(String email, String role) {
-        return generateToken(email, role, ACCESS_TOKEN_EXPIRATION);
+    public static String generateAccessToken(String email, String role,boolean isPremium) {
+        return generateToken(email, role, ACCESS_TOKEN_EXPIRATION, isPremium);
     }
 
     // Tạo Refresh Token
-    public static String generateRefreshToken(String email, String role) {
-        return generateToken(email, role, REFRESH_TOKEN_EXPIRATION);
+    public static String generateRefreshToken(String email, String role,boolean isPremium) {
+        return generateToken(email, role, REFRESH_TOKEN_EXPIRATION,isPremium);
     }
 
     public static String extractUsername(String token) {
@@ -65,7 +66,9 @@ public class JwtToken {
     public static String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }
-
+    public static Boolean extractIsPremium(String token) {
+        return extractAllClaims(token).get("isPremium", Boolean.class);
+    }
     private static Claims extractAllClaims(String token) {
         try {
             return Jwts.parserBuilder()
