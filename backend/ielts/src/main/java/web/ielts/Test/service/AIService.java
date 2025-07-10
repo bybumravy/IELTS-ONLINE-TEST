@@ -200,12 +200,12 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             throw new RuntimeException("OpenAI API error: " + e.getMessage());
         }
     }
-    public String buildSpeakingPrompt(int partNumber, String question, String transcript) {
+    public String buildSpeakingPrompt(int partNumber, String question, String transcript,List<String> cueCard) {
         switch (partNumber) {
             case 1:
                 return buildSpeakingPart1Prompt(question, transcript);
             case 2:
-                return buildSpeakingPart2Prompt(question, transcript);
+                return buildSpeakingPart2Prompt(question, transcript,cueCard);
             case 3:
                 return buildSpeakingPart3Prompt(question, transcript);
             default:
@@ -241,6 +241,17 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                     "    • Band 3: Basic sentence forms are attempted but grammatical errors are numerous except in apparently memorised utterances.\n" +
                     "    • Band 2: No evidence of basic sentence forms.\n" +
                     "    • Band 1: No rateable language unless memorised.\n";
+    private static final String IELTS_PUBLIC_FLUENCY_AND_COHERENCE =
+            "- IELTS Public Descriptors:\n" +
+                    "Band 9: Fluent with only very occasional repetition or self-correction. Any hesitation that occurs is used only to prepare the content of the next utterance and not to find words or grammar. Speech is situationally appropriate and cohesive features are fully acceptable. Topic development is fully coherent and appropriately extended.\n" +
+                    "Band 8: Fluent with only very occasional repetition or self-correction. Hesitation may occasionally be used to find words or grammar, but most will be content related. Topic development is coherent, appropriate and relevant.\n" +
+                    "Band 7: Able to keep going and readily produce long turns without noticeable effort. Some hesitation, repetition and/or self-correction may occur, often mid-sentence and indicate problems with accessing appropriate language. However, these will not affect coherence. Flexible use of spoken discourse markers, connectives and cohesive features.\n" +
+                    "Band 6: Able to keep going and demonstrates a willingness to produce long turns. Coherence may be lost at times as a result of hesitation, repetition and/or self-correction. Uses a range of spoken discourse markers, connectives and cohesive features though not always appropriately.\n" +
+                    "Band 5: Usually able to keep going, but relies on repetition and self-correction to do so and/or on slow speech. Hesitations are often associated with mid-sentence searches for fairly basic lexis and grammar. Overuse of certain discourse markers, connectives and other cohesive features. More complex speech usually causes disfluency but simpler language may be produced fluently.\n" +
+                    "Band 4: Unable to keep going without noticeable pauses. Speech may be slow with frequent repetition. Often self-corrects. Can link simple sentences but often with repetitious use of connectives. Some breakdowns in coherence.\n" +
+                    "Band 3: Frequent, sometimes long, pauses occur while candidate searches for words. Limited ability to link simple sentences and go beyond simple responses to questions. Frequently unable to convey basic message.\n" +
+                    "Band 2: Lengthy pauses before nearly every word. Isolated words may be recognisable but speech is of virtually no communicative significance.\n" +
+                    "Band 1: Essentially none. Speech is totally incoherent.\n";
     private static final String errorType = "• Grammar-related:\n" +
             "- Grammar: tense\n" +
             "- Grammar: subject-verb agreement\n" +
@@ -267,7 +278,17 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             "- Coherence: repetition of ideas\n" +
             "- Coherence: poor connection\n" +
             "- Coherence: off-topic\n" +
-            "- Coherence: abrupt transition";
+            "- Coherence: abrupt transition\n" +
+            "- Coherence: lack of cohesion devices\n" +
+            "- Coherence: disorganized idea structure\n" +
+            "- Coherence: unsupported point\n" +
+            "\n" +
+            "• Fluency-related:\n" +
+            "- Fluency: frequent hesitation\n" +
+            "- Fluency: excessive self-correction\n" +
+            "- Fluency: unnatural pause\n" +
+            "- Fluency: slow delivery\n" +
+            "- Fluency: choppy rhythm\n";
     public String buildSpeakingPart1Prompt(String questions,String answer){
         String speakingPart1 =
                 "You must return response strictly in JSON format.\n" +
@@ -276,8 +297,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                        "Note: Spoken responses do not contain punctuation. You must IGNORE all punctuation marks such as commas, periods, question marks, or missing capital letters. \\n\" +\n" +
                         "  Do NOT mark answers down due to missing or incorrect punctuation." +
                         "  Do NOT suggest corrections just to add commas or punctuation"+
-                        "If the answer is clearly unrelated or no attempt is made to respond to the question at all,\n" +
-                        "→ assign Band 3.0.\n" +
+                        "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
                         "\n" +
                         "However, if the answer is short but still directly addresses the question (e.g., “My name is John”), \n" +
                         "→ proceed with full evaluation based on content, grammar, and vocabulary. Do not mark it as off-topic."+
@@ -308,6 +328,10 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "\n" +
                         "+0.25 if the candidate successfully paraphrases the question instead of repeating it\n" +
                         "→ ✅ Only add once even if paraphrasing appears in multiple responses."+
+                        "+0.5 if the candidate uses advanced or topic-specific vocabulary naturally and correctly\n" +
+                        "\n" +
+                        "E.g., “onsen”, “scenic town”, “black eggs” (for the topic of travel in Japan)\n" +
+                        "✅ Only add once, regardless of how many topic-specific terms are used."+
                         " If any single errorType occurs more than 3 times,\n" +
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
@@ -327,9 +351,23 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                        IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
+                        "• Fluency and coherence (25%):\n" +
+                        "+0.25 if the candidate maintains smooth flow of speech with minimal hesitation (Fluency)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses natural pausing and appropriate pacing (Fluency)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if ideas are logically ordered and connected clearly (Coherence)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if discourse markers / cohesive devices are used appropriately (Coherence)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "→ Deduct 0.5 point in total for that error type (only once)"+
+                        " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
+                        IELTS_PUBLIC_FLUENCY_AND_COHERENCE+
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
-                        "   - Deduct 0.5 band per 2 major errors\n" +
                         "RESPONSE FORMAT:\n" +
                         "- score: decimal (overall band score, e.g. 6.5)\n" +
                         "- transcript: string (full transcript of the original answer)\n" +
@@ -353,7 +391,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
         return speakingPart1;
     }
 
-    public String buildSpeakingPart2Prompt(String question,String answer){
+    public String buildSpeakingPart2Prompt(String question,String answer,List<String> cueCards){
         String speakingPart2 =
                 "You must return response strictly in JSON format.\n" +
                         "You are an official IELTS Speaking examiner. You are evaluating a real IELTS Part 2 speaking response. Extremely strict grading.\n" +
@@ -361,54 +399,90 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "1. The question being asked (context and requirements)\n" +
                         "2. The full transcript of the user's response (content, grammar, vocabulary)\n" +
                         "3. You must evaluate whether the response is relevant to the question and does not go off-topic.\n" +
-                        "If the response is completely off-topic, you must give Band 3.0 regardless of other factors.\n" +
+                        "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
+                        "4. You must strictly check if the candidate addresses **all bullet points** in the cue card:\n" +
+                        cueCards.toString() +
+                        " For **each bullet point that is ignored or insufficiently developed**, deduct **0.5 Band** from **Fluency & Coherence**.\n" +
+                        "\n" +
                         "You must also check whether the response answers **all bullet points** in the cue card. For **each missing or ignored point**, deduct **0.5 Band** from Fluency & Coherence.\n"+
-                        "Once fully understood, proceed to scoring using official IELTS Band Descriptors.\n\n" +
+                        "Once fully understood, proceed to scoring using official IELTS Band Descriptors.\n" +
+                        "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
+                        +errorType+
                         "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
                         "\n" +
                         "• Lexical Resource (25%):\n" +
-                        "- Advanced vocabulary must include topic-specific academic collocations.\n" +
-                        "  (If vocabulary remains general and safe, cap at Band 6.)\n" +
-                        "  - Academic vocabulary (Band 9 requires ≥8 advanced terms,Band 8 >=6,Band 7 >= 4 )\n" +
-                        "  - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
-                        "  - Spelling (3 errors = -0.5 band)\n" +
-                        "  - Word Choice:\n  • Misuse of formal/informal words, or awkward word forms → -0.25 per issue\n  • ≥3 major word choice issues → cap Band 6.5\n"+
-                        "- Deduct points for frequent lexical errors that affect meaning or variety:\n" +
-                        "  * Using wrong words or inappropriate vocabulary that confuses meaning: if this occurs more than 3 times, deduct 0.5 points per additional instance.\n" +
-                        "  * Repeating simple words or phrases (e.g., 'good', 'nice') more than 3 times: deduct 0.5 points for each repetition beyond the third.\n" +
-                        "  * Limited vocabulary range that restricts the ability to express ideas: assess overall impact and deduct accordingly.\n" +
-                        "  * Incorrect word forms (e.g., using a verb instead of a noun): if more than 3 instances, deduct 0.5 per extra occurrence.\n" +
-                        "  * Overuse of very simple words when better alternatives are possible: if overused excessively (e.g., more than 3 distinct cases), deduct accordingly.\n"+
+                        "+0.25 if the candidate uses 4 or more correct, natural collocations  \n" +
+                        "(e.g., “make a living”, “strong bond”)  \n" +
+                        "→ ✅ Only add once, even if more than 4 are used.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses 2 or more idiomatic expressions appropriately  \n" +
+                        "(e.g., “hit the road”, “over the moon”)  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses 2 or more phrasal verbs appropriately  \n" +
+                        "(e.g., “give up”, “carry on”)  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if there's clear lexical variety  \n" +
+                        "(e.g., appropriate use of synonyms, avoiding repetition of basic words)  \n" +
+                        "→ ✅ Only add once, even if lexical variety is shown throughout.\n" +
+                        "\n" +
+                        "+0.25 if the candidate successfully paraphrases the question  \n" +
+                        "(e.g., rephrasing the prompt naturally instead of repeating it)  \n" +
+                        "→ ✅ Only add once, even if it appears in multiple parts.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses 2 or more topic-specific vocabulary correctly and naturally  \n" +
+                        "(e.g., “onsen”, “black eggs”, “scenic town” for travel in Japan)  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses 2 or more advanced academic vocabulary naturally and correctly  \n" +
+                        "(e.g., “infrastructure”, “inequality”, “preservation”)  \n" +
+                        "→ ✅ Only add once."+
+                        " If any single errorType occurs more than 3 times,\n" +
+                        "→ Deduct 0.5 point in total for that error type (only once)"+
+
                         "Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation: "+
                         "  - IELTS Public Descriptors:\n" +
                       IELTS_PUBLIC_DESCRIPTORSLexicalResource+
 
                         "• Grammatical Range and Accuracy (25%):\n" +
-                        "- Must demonstrate a range of sentence structures, including at least 3 complex sentences throughout the response.\n" +
-                        "  (If the majority of structures are basic/simple, cap at Band 6.)\n" +
-                        "- Tense accuracy: Correct use of verb tenses in context (e.g., past experiences, future plans). Frequent tense errors or tense switching → band deduction.\n" +
-                        "- Complex structures: Band 7+ requires the candidate to naturally use structures such as:\n" +
-                        "    • Relative clauses (\"which I really enjoy...\")\n" +
-                        "    • Conditionals (\"If I had more time...\")\n" +
-                        "    • Passive voice (\"It is often said that...\")\n" +
-                        "    • Subordinating conjunctions (\"Although, Even though, As soon as...\")\n" +
+                       "+0.25 if the candidate uses at least 2 different complex structures correctly  \n" +
+                        "(e.g., conditionals, passive voice, relative clauses)  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate maintains grammatical variety and overall accuracy throughout  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate attempts at least 2 advanced grammar forms, even if imperfect  \n" +
+                        "(e.g., modal verbs, inversion, past perfect, cleft sentences)  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses at least 2 different verb tenses correctly and appropriately  \n" +
+                        "(e.g., past + present perfect)  \n" +
+                        "→ ✅ Only add once."+
                         "Deduct points for frequent grammar errors that affect understanding:\n\n" +
-                        "- Errors such as incorrect tense, wrong verb forms, missing subjects or verbs, or incorrect sentence structures that confuse meaning.\n" +
-                        "  → If any of these errors occur 3 times or more, deduct 0.5 points (only once). [-0.5 one-time deduction]\n\n" +
-                        "- Lack of variety in sentence structures (e.g., using only simple sentences):\n" +
-                        "  → If this happens 3 times or more, deduct 0.5 points (only once). [-0.5]\n\n" +
-                        "- Unclear or confusing sentences:\n" +
-                        "  → If 3 or more unclear sentences are found, deduct 0.5 points (only once). [-0.5]\n"+
-                        " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:"+
+                        " If any single errorType occurs more than 3 times,\n" +
+                        "→ Deduct 0.5 point in total for that error type (only once)"+
                         "Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation: "+
                       IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
-
+                        "• Fluency and coherence (25%):\n" +
+                        "+0.25 if the candidate maintains smooth flow of speech with minimal hesitation (Fluency)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses natural pausing and appropriate pacing (Fluency)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if ideas are logically ordered and connected clearly (Coherence)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if discourse markers / cohesive devices are used appropriately (Coherence)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "→ Deduct 0.5 point in total for that error type (only once)"+
+                        " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
+                        IELTS_PUBLIC_FLUENCY_AND_COHERENCE+
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
                         "   - Deduct 0.5 band per 2 major errors\n" +
-                        "Even if the sentence is understandable, rewrite it using stronger collocations, cohesive devices, or more precise phrasing to show how the candidate could improve their band.\\n\" +\n" +
-                        "Make sure each sentenceImprovement refers to a real sentence from the response and clearly shows how to improve it."+
-                        "For sentence improvements,refer explicitly to the public band descriptors:  "+IELTS_PUBLIC_DESCRIPTORSLexicalResource +"and"+IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+". For example, if you assign the answer Band 6.0, you must suggest sentence improvements that elevate it to Band 7.0"+
                         "RESPONSE FORMAT:\n" +
                         "- score: decimal (overall band score, e.g. 6.5)\n" +
                         "- feedback: {\n" +
@@ -439,44 +513,74 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "Before evaluation, make sure to:\n" +
                         "1. Understand the context of the question.\n" +
                         "2. Read the full transcript of the user's response.\n" +
-                        "3. Check whether the response addresses the question clearly and appropriately.\n" +
-                        "⚠️ If the response is completely off-topic, give Band 3.0 regardless of other factors.\n\n" +
+                        "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
+                        "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
+                        +errorType+
 
-                        "====================\n" +
-                        "1. EVALUATION CRITERIA \n" +
-                        "====================\n\n" +
-
+                        "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
+                        "\n" +
                         "• Lexical Resource (25%):\n" +
-                        "- Reward topic-specific and varied vocabulary, even if slightly awkward.\n" +
-                        "- Academic or idiomatic vocabulary is a plus and should be rewarded when used correctly.\n" +
-                        "- Do not penalize formal or uncommon phrases (e.g., 'a plethora of') if meaning is clear.\n" +
-                        "- Accept repetition and minor word choice issues as long as the message remains clear.\n" +
-                        "- Minor idiomatic misuse or over-formality should not lower the score unless it confuses meaning.\n" +
-                        "-However, frequent repetition of very simple words (e.g., 'good') more than 3 times limits the maximum band to around 6.5, even if other criteria are met."+
-                        "- Deduct points for frequent lexical errors that affect meaning or variety:\n" +
-                        "  * Using wrong words or inappropriate vocabulary that confuses meaning: if this occurs more than 3 times, deduct 0.5 points per additional instance.\n" +
-                        "  * Repeating simple words or phrases (e.g., 'good', 'nice') more than 3 times: deduct 0.5 points for each repetition beyond the third.\n" +
-                        "  * Limited vocabulary range that restricts the ability to express ideas: assess overall impact and deduct accordingly.\n" +
-                        "  * Incorrect word forms (e.g., using a verb instead of a noun): if more than 3 instances, deduct 0.5 per extra occurrence.\n" +
-                        "  * Overuse of very simple words when better alternatives are possible: if overused excessively (e.g., more than 3 distinct cases), deduct accordingly.\n"+
+                        "+0.25 if the candidate uses 4 or more correct, natural collocations  \n" +
+                        "(e.g., “make a living”, “strong bond”)  \n" +
+                        "→ ✅ Only add once, even if more than 4 are used.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses 2 or more idiomatic expressions appropriately  \n" +
+                        "(e.g., “hit the road”, “over the moon”)  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses 2 or more phrasal verbs appropriately  \n" +
+                        "(e.g., “give up”, “carry on”)  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if there's clear lexical variety  \n" +
+                        "(e.g., appropriate use of synonyms, avoiding repetition of basic words)  \n" +
+                        "→ ✅ Only add once, even if lexical variety is shown throughout.\n" +
+                        "\n" +
+                        "+0.25 if the candidate successfully paraphrases the question  \n" +
+                        "(e.g., rephrasing the prompt naturally instead of repeating it)  \n" +
+                        "→ ✅ Only add once, even if it appears in multiple parts.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses 2 or more topic-specific vocabulary correctly and naturally  \n" +
+                        "(e.g., “onsen”, “black eggs”, “scenic town” for travel in Japan)  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses 2 or more advanced academic vocabulary naturally and correctly  \n" +
+                        "(e.g., “infrastructure”, “inequality”, “preservation”)  \n" +
+                        "→ ✅ Only add once."+
+                        "+0.25 if the candidate uses 2 or more abstract or conceptual terms naturally, appropriately, and relevant to the topic  \n" +
+                        "(e.g., “globalization”, “social norms”, “freedom of expression” in a discussion about cultural changes)  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses 2 or more logical or argumentation linking devices correctly, naturally, and in a way that supports topic development  \n" +
+                        "(e.g., “as a result”, “from my perspective”, “what’s more” in a discussion about social problems)  \n" +
+                        "→ ✅ Only add once."+
+                        " If any single errorType occurs more than 2 times,\n" +
+                        "→ Deduct 0.5 point in total for that error type (only once)"+
+
                         "Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation: "+
-                        IELTS_PUBLIC_DESCRIPTORSLexicalResource + "\n\n" +
+                        "  - IELTS Public Descriptors:\n" +
+                        IELTS_PUBLIC_DESCRIPTORSLexicalResource+
 
                         "• Grammatical Range and Accuracy (25%):\n" +
-                        "- Accept a mix of simple and complex structures.\n" +
-                        "- Occasional grammar errors are expected and acceptable.\n" +
-                        "- Reward efforts to use conditionals, modals, passive voice, or inversion even if imperfect.\n" +
-                        "- Do not penalize non-critical mistakes like article or tense shifts if communication is successful.\n" +
-                        "- Prioritize overall clarity and natural delivery over perfect grammar.\n" +
+                        "+0.25 if the candidate uses at least 2 different complex structures correctly  \n" +
+                        "(e.g., conditionals, passive voice, relative clauses)  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate maintains grammatical variety and overall accuracy throughout  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate attempts at least 2 advanced grammar forms, even if imperfect  \n" +
+                        "(e.g., modal verbs, inversion, past perfect, cleft sentences)  \n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses at least 2 different verb tenses correctly and appropriately  \n" +
+                        "(e.g., past + present perfect)  \n" +
+                        "→ ✅ Only add once."+
                         "Deduct points for frequent grammar errors that affect understanding:\n\n" +
-                        "- Errors such as incorrect tense, wrong verb forms, missing subjects or verbs, or incorrect sentence structures that confuse meaning.\n" +
-                        "  → If any of these errors occur 3 times or more, deduct 0.5 points (only once). [-0.5 one-time deduction]\n\n" +
-                        "- Lack of variety in sentence structures (e.g., using only simple sentences):\n" +
-                        "  → If this happens 3 times or more, deduct 0.5 points (only once). [-0.5]\n\n" +
-                        "- Unclear or confusing sentences:\n" +
-                        "  → If 3 or more unclear sentences are found, deduct 0.5 points (only once). [-0.5]\n"+
-                        " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:"+
-                        IELTS_PUBLIC_DESCRIPTORS_GRAMMAR + "\n\n" +
+                        " If any single errorType occurs more than 3 times,\n" +
+                        "→ Deduct 0.5 point in total for that error type (only once)"+
+                        "Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation: "+
+                        IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
 
                         "====================\n" +
                         "2. SCORING SYSTEM\n" +

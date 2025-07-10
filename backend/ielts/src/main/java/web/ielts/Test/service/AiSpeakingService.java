@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import web.ielts.Test.model.answer.speaking.EvaluationResult;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -15,11 +16,11 @@ public class AiSpeakingService {
     @Autowired WhisperService whisperService;
     @Autowired
     private AIService aiService;
-    public EvaluationResult evaluateSpeaking(String transcriptText, String question, int partNumber)  {
+    public EvaluationResult evaluateSpeaking(String transcriptText, String question, int partNumber, List<String> cueCard)  {
 
 
         // ✅ 1. Tạo prompt đúng cho từng part
-        String prompt = aiService.buildSpeakingPrompt(partNumber, question, transcriptText);
+        String prompt = aiService.buildSpeakingPrompt(partNumber, question, transcriptText,cueCard);
 
 
         // ✅ 2. Gọi GPT

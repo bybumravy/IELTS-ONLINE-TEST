@@ -189,6 +189,8 @@ public class DoTestService {
 
         // 🔹 Part 1
         // 🔹 Part 1
+
+
         String gradingMethod = submission.getGradingMethod();
         SpeakingAnswerPart13 part1 = submission.getPart1();
         if (part1 != null && part1.getQuestions() != null) {
@@ -213,10 +215,10 @@ public class DoTestService {
                     try {
                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
                        System.out.println(transcript);
-//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1);
-//                     qa.setEvaluationResults(eval);
-//
-//                     totalScore += eval.getScore();
+                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,null);
+                     qa.setEvaluationResults(eval);
+
+                     totalScore += eval.getScore();
 
                     } catch (Exception e) {
                         System.err.println("❌ Lỗi khi chấm câu hỏi: " + qa.getQuestion());
@@ -233,6 +235,7 @@ public class DoTestService {
         }
 
 // 🔹 Part 2
+        List<String> cuecards = submission.getPart2().getCueCards();
         SpeakingAnswerPart2 part2 = submission.getPart2();
         if (part2 != null) {
             String blob = part2.getStudentAnswer();
@@ -250,9 +253,9 @@ public class DoTestService {
                     try {
                         String transcript = whisper.transcribe(s3UrlNotEncrypt);
 
-//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2);
-//                     part2.setEvaluationResults(eval);
-//                   part2.setAverageScore(eval.getScore());
+                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2,cuecards);
+                     part2.setEvaluationResults(eval);
+                  part2.setAverageScore(eval.getScore());
 
                         // validQuestionCount++;
                     } catch (Exception e) {
@@ -289,10 +292,10 @@ public class DoTestService {
                 qa.setStudentAnswer(s3Url);
                 if(gradingMethod.equalsIgnoreCase("ai")) {
                     try {
-//                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
-//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3);
-//                   qa.setEvaluationResults(eval);
-//                    totalScore += eval.getScore();
+                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
+                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,null);
+                   qa.setEvaluationResults(eval);
+                    totalScore += eval.getScore();
 
                     } catch (Exception e) {
 

@@ -9,8 +9,8 @@ public class SpeakingAnswerPart2 {
     private String question;
     private EvaluationResult evaluationResults;
 
-    private double averageScore;
 
+    private double averageScore;
     public SpeakingAnswerPart2() {
     }
 

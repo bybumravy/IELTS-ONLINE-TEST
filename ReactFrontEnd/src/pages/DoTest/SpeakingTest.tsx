@@ -362,6 +362,9 @@ const SpeakingTest = () => {
         }))
 
         cloned.part2.studentAnswer = audioUrls["part2"] ? "part2.webm" : ""
+        if (speaking) {
+            cloned.part2.cueCards = speaking.part2.cueCards;
+        }
         cloned.part2.duration = recordingTimes["part2"] || 0
 
         cloned.part3.questions = cloned.part3.questions.map((q: any, i: number) => ({
