@@ -31,13 +31,13 @@ function TipDetail() {
                 console.error("Lỗi khi gọi API chi tiết tip:", error);
                 setDetail(null);
             });
-        console.log("Dât ne:" + data);
+        console.log("Data ne:" + data);
     }, [id, skill]);
 
     if (!detail) {
         return (
             <div className="min-h-screen flex items-center justify-center text-red-500">
-                Không tìm thấy dữ liệu.
+                {/*Không tìm thấy dữ liệu.*/}
             </div>
         );
     }

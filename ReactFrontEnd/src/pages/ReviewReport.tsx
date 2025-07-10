@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react"
+import {useEffect, useMemo, useState} from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -68,6 +68,10 @@ export default function ReviewReport() {
 
         setFilteredReports(filtered)
     }
+    useEffect(() => {
+        applyFilters()
+    }, [searchTerm, typeFilter, dateFrom, dateTo])
+
 
     // Add note to report
     const addNoteToReport = (reportId, note) => {
@@ -169,6 +173,7 @@ export default function ReviewReport() {
                                     <div className="relative">
                                         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                         <Input
+                                            type="search"
                                             placeholder="Name, subject..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
