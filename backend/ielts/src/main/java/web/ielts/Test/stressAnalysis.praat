@@ -31,7 +31,7 @@
             Extract part: start, end, "rectangular", 1, "no"
             soundPart = selected("Sound")
 
-            To Intensity: 100, 0, "yes"
+                To Intensity: 100, 0, "yes"
             intensity = selected("Intensity")
 
             maxIntensity = Get maximum: 0, 0, "Parabolic"

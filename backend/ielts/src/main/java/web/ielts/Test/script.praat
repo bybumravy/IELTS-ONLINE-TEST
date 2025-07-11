@@ -1,55 +1,63 @@
-Text writing preferences: "UTF-8"
-
 form AnalyzeProsody
     sentence soundFile
     sentence textGridFile
     sentence outputFile
 endform
 
-# Debug: thông báo bắt đầu (dùng writeInfo thay cho printline)
 writeInfoLine: "Praat script start running"
 
 # Load Sound
 Read from file: soundFile$
 sound = selected("Sound")
-soundID = sound
+
+# Tính Mean Intensity
+selectObject: sound
+To Intensity: 75, 0
+meanIntensity = Get mean: 0, 0, "energy"
+Remove
 
 # Load TextGrid
 Read from file: textGridFile$
 textgrid = selected("TextGrid")
 
-# Tính Pitch
-selectObject: soundID
-To Pitch: 0, 75, 500
-meanPitch = Get mean: 0, 0, "Hertz"
-minPitch = Get minimum: 0, 0, "Hertz", "Parabolic"
-maxPitch = Get maximum: 0, 0, "Hertz", "Parabolic"
-Remove
-
-# Tính Intensity
-selectObject: soundID
-To Intensity: 75, 0
-meanIntensity = Get mean: 0, 0, "energy"
-Remove
-
-# Đếm pause trong TextGrid
+# Chọn tier số 1 (words)
 selectObject: textgrid
-pauseCount = Get number of intervals: 1
+totalDuration = Get total duration
+numIntervals = Get number of intervals: 1  ; dùng trực tiếp tier số 1
 
-# Debug: in ra console (dùng writeInfo)
-writeInfoLine: "meanPitch = ", meanPitch
-writeInfoLine: "minPitch = ", minPitch
-writeInfoLine: "maxPitch = ", maxPitch
+wordCount = 0
+pauseCount = 0
+previousXmax = 0.0
+
+for i from 1 to numIntervals
+    text$ = Get label of interval: 1, i  ; tier số 1
+    xmin = Get start time of interval: 1, i
+    xmax = Get end time of interval: 1, i
+
+    if text$ <> ""  ; nếu interval có chữ thì tính là một từ
+        wordCount = wordCount + 1
+    endif
+
+    if i > 1
+        if xmin > previousXmax
+            pauseCount = pauseCount + 1
+        endif
+    endif
+
+    previousXmax = xmax
+endfor
+
+# Tính speech rate (số từ trên tổng thời lượng đoạn âm thanh)
+speechRate = wordCount / totalDuration
+
+# In kết quả ra Info window (debug)
 writeInfoLine: "meanIntensity = ", meanIntensity
 writeInfoLine: "pauseCount = ", pauseCount
+writeInfoLine: "speechRate = ", speechRate
 
-# Ghi ra file (dùng writeFile và appendFile)
-writeFile: outputFile$, "meanPitch=", string$(meanPitch), newline$
-appendFile: outputFile$, "minPitch=", string$(minPitch), newline$
-appendFile: outputFile$, "maxPitch=", string$(maxPitch), newline$
-appendFile: outputFile$, "meanIntensity=", string$(meanIntensity), newline$
+# Ghi kết quả vào file output
+writeFile: outputFile$, "meanIntensity=", string$(meanIntensity), newline$
 appendFile: outputFile$, "pauseCount=", string$(pauseCount), newline$
+appendFile: outputFile$, "speechRate=", string$(speechRate), newline$
 
-# Debug: thông báo kết thúc
-writeInfoLine: "Have written: ", outputFile$
 writeInfoLine: "Praat script end"

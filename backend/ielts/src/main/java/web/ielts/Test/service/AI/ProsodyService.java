@@ -7,7 +7,7 @@
     import java.nio.file.Files;
     import java.time.Instant;
     import java.util.*;
-    import java.util.concurrent.atomic.AtomicInteger;
+
 
     @Service
     public class ProsodyService {
@@ -15,6 +15,7 @@
             private final String PRAAT_PATH = "C:\\Users\\LAPTOP24H\\Downloads\\praat6438_win-intel64\\Praat.exe";
             private final String PRAAT_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script.praat"; // Script Praat
             private final String STRESS_ANALYSIS_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\stressAnalysis.praat";
+        private final String INTONATION_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script_intonation.praat";
             private double praatGetAudioDuration(File wavFile) throws IOException {
             // Lấy đường dẫn tuyệt đối cho script Praat
             String scriptPath = new File("D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\getDuration.praat").getAbsolutePath();
@@ -188,14 +189,8 @@
                 Map<String, Object> intonationResults = analyzeSentenceIntonation(wavFile, textGridFile);
 
                 // 6. Tính điểm tổng hợp
-                Map<String, Object> pronunciationScore = evaluatePronunciation(
-                        praatResults,
-                        stressResults,
-                        intonationResults
-                );
 
                 // 7. Tổng hợp kết quả
-                result.putAll(pronunciationScore);
                 result.put("wordStressDetails", stressResults.get("wordStressDetails"));
                 result.put("intonation", intonationResults);
                 result.put("prosodyFeatures", praatResults);
@@ -210,57 +205,6 @@
                 return Map.of("error", e.getMessage(), "stackTrace", Arrays.toString(e.getStackTrace()));
             }
         }
-
-
-        private double calculateStressScore(Map<String, Object> stressResults) {
-            List<Map<String, Object>> words = (List<Map<String, Object>>) stressResults.get("wordStressDetails");
-            if (words == null) return 0;
-
-            // Đơn giản: tính tỷ lệ từ có intensity > ngưỡng
-            long stressedWords = words.stream()
-                    .filter(w -> (double)w.get("maxIntensity") > 70)
-                    .count();
-
-            return (double)stressedWords / words.size() * 9; // Scale to 0-9
-        }
-
-        private double calculateIntonationScore(Map<String, Object> intonationResults) {
-            String type = (String) intonationResults.get("intonationType");
-            switch (type) {
-                case "rising": return 8.0; // Ngữ điệu lên tốt cho câu hỏi
-                case "falling": return 9.0; // Ngữ điệu xuống tốt cho câu trần thuật
-                default: return 6.0; // Ngữ điệu bằng
-            }
-        }
-        private Map<String, Object> evaluatePronunciation(
-                Map<String, Double> praatResults,
-                Map<String, Object> stressResults,
-                Map<String, Object> intonationResults) {
-
-            Map<String, Object> evaluation = new HashMap<>();
-
-            // 1. Đánh giá trọng âm từ
-            System.out.println("TinhtoanDiemTrongAM");
-            double stressScore = calculateStressScore(stressResults);
-            evaluation.put("stressScore", stressScore);
-
-            // 2. Đánh giá ngữ điệu câu
-            System.out.println("TinhtoanDiemNguDieu");
-            double intonationScore = calculateIntonationScore(intonationResults);
-            evaluation.put("intonationScore", intonationScore);
-
-            // 3. Tính điểm tổng hợp
-            double overallScore = (
-                    stressScore * 0.4 +
-                            intonationScore * 0.4 +
-                            praatResults.get("speechRate") * 0.2
-            );
-
-            evaluation.put("pronunciationBandScore", Math.round(overallScore * 2) / 2.0);
-            return evaluation;
-        }
-
-
 
         private Map<String, Object> analyzeWordStress(File wavFile, File textGridFile, JsonNode root)
                 throws IOException, InterruptedException {
@@ -314,11 +258,12 @@
 
                 ProcessBuilder pb = new ProcessBuilder(
                         PRAAT_PATH, "--run",
-                        PRAAT_SCRIPT_PATH.replace(".praat", "_intonation.praat"),
+                        INTONATION_SCRIPT_PATH,
                         wavFile.getAbsolutePath(),
                         textGridFile.getAbsolutePath(),
                         outputFile.getAbsolutePath()
                 );
+                System.out.println("Running intonation analysis command: " + String.join(" ", pb.command()));
                 pb.redirectErrorStream(true);
 
                 Process process = pb.start();
@@ -329,35 +274,31 @@
                         new InputStreamReader(process.getInputStream()))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
-                        praatOutput.append(line).append("\n");
                         System.out.println("   [PRAAT] " + line);
                     }
                 }
 
                 int exitCode = process.waitFor();
-                if (exitCode != 0 || !outputFile.exists()) {
-                    System.err.println("❌ Intonation analysis failed");
-                    System.err.println("   Exit code: " + exitCode);
-                    System.err.println("   Output:\n" + praatOutput);
-                    return Map.of("error", "Intonation analysis failed");
+                if (exitCode != 0) {
+                    throw new IOException("Intonation analysis failed with exit code: " + exitCode);
                 }
 
                 // Parse the output file with sentence-level results
                 try (BufferedReader reader = new BufferedReader(new FileReader(outputFile))) {
                     String line;
-                    while ((line = reader.readLine()) != null) {
-                        if (line.startsWith("SENTENCE")) {
-                            Map<String, Object> sentenceData = new HashMap<>();
-                            String[] parts = line.split("\\|");
+                    reader.readLine(); // Bỏ qua header
 
-                            // Example line format:
-                            // SENTENCE 1|start=1.23|end=3.45|pitchStart=120|pitchEnd=110|type=falling
-                            sentenceData.put("sentenceNumber", Integer.parseInt(parts[0].split(" ")[1]));
-                            sentenceData.put("start", Double.parseDouble(parts[1].split("=")[1]));
-                            sentenceData.put("end", Double.parseDouble(parts[2].split("=")[1]));
-                            sentenceData.put("pitchStart", Double.parseDouble(parts[3].split("=")[1]));
-                            sentenceData.put("pitchEnd", Double.parseDouble(parts[4].split("=")[1]));
-                            sentenceData.put("intonationType", parts[5].split("=")[1]);
+                    while ((line = reader.readLine()) != null) {
+                        String[] parts = line.split("\\|");
+                        if (parts.length >= 6) {
+                            Map<String, Object> sentenceData = new HashMap<>();
+
+                            sentenceData.put("sentenceNumber", parts[0].split(" ")[1]);
+                            sentenceData.put("start", Double.parseDouble(parts[1]));
+                            sentenceData.put("end", Double.parseDouble(parts[2]));
+                            sentenceData.put("pitchStart", Double.parseDouble(parts[3]));
+                            sentenceData.put("pitchEnd", Double.parseDouble(parts[4]));
+                            sentenceData.put("intonationType", parts[5]);
 
                             sentenceIntonations.add(sentenceData);
                         }
@@ -372,57 +313,6 @@
                 results.put("error", e.getMessage());
                 results.put("analysisSuccess", false);
             }
-
-            return results;
-        }
-
-
-        private Map<String, Object> parseIntonationOutput(File outputFile) throws IOException {
-            Map<String, Object> results = new HashMap<>();
-            System.out.println("🔎 [INTONATION] Reading output file: " + outputFile.getAbsolutePath());
-
-            try (BufferedReader reader = new BufferedReader(new FileReader(outputFile))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println("   Processing line: " + line); // Log từng dòng
-
-                    if (line.startsWith("PITCH_START=")) {
-                        double pitchStart = Double.parseDouble(line.split("=")[1]);
-                        results.put("pitchStart", pitchStart);
-                        System.out.println("   Detected pitch start: " + pitchStart);
-
-                    } else if (line.startsWith("PITCH_END=")) {
-                        double pitchEnd = Double.parseDouble(line.split("=")[1]);
-                        results.put("pitchEnd", pitchEnd);
-                        System.out.println("   Detected pitch end: " + pitchEnd);
-
-                    } else if (line.startsWith("PITCH_DIFF=")) {
-                        double pitchDiff = Double.parseDouble(line.split("=")[1]);
-                        results.put("pitchDifference", pitchDiff);
-                        System.out.println("   Pitch difference: " + pitchDiff);
-                    }
-                }
-            }
-
-            // Xác định loại ngữ điệu
-            double pitchDiff = (double)results.getOrDefault("pitchDifference",
-                    (double)results.get("pitchEnd") - (double)results.get("pitchStart"));
-
-            String intonationType;
-            if (pitchDiff > 20) {
-                intonationType = "rising";
-            } else if (pitchDiff < -20) {
-                intonationType = "falling";
-            } else {
-                intonationType = "flat";
-            }
-
-            results.put("intonationType", intonationType);
-            System.out.println("🎙️ Detected intonation type: " + intonationType);
-
-            // Thêm thông tin metadata
-            results.put("analysisTime", Instant.now().toString());
-            results.put("outputFile", outputFile.getAbsolutePath());
 
             return results;
         }
