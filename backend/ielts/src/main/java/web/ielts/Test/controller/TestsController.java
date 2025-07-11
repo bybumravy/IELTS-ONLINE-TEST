@@ -69,67 +69,78 @@ public class TestsController {
     public void evaluate() throws IOException {
         String jsonString = """
         {
-           "task": "transcribe",
-           "language": "english",
-           "duration": 5.34,
-           "text": "Hello, my name Gustavo, but you can call me Gus.",
-           "words": [
-             {
-               "word": "Hello",
-               "start": 0.0,
-               "end": 0.82
-             },
-             {
-               "word": "my",
-               "start": 1.26,
-               "end": 1.34
-             },
-             {
-               "word": "name",
-               "start": 1.34,
-               "end": 1.56
-             },
-             {
-               "word": "Gustavo",
-               "start": 1.56,
-               "end": 2.12
-             },
-             {
-               "word": "but",
-               "start": 2.68,
-               "end": 2.68
-             },
-             {
-               "word": "you",
-               "start": 2.68,
-               "end": 2.78
-             },
-             {
-               "word": "can",
-               "start": 2.78,
-               "end": 3.0
-             },
-             {
-               "word": "call",
-               "start": 3.0,
-               "end": 3.16
-             },
-             {
-               "word": "me",
-               "start": 3.16,
-               "end": 3.32
-             },
-             {
-               "word": "Gus",
-               "start": 3.32,
-               "end": 3.52
-             }
-           ],
-           "usage": {
-             "type": "duration",
-             "seconds": 6
-           }
-         }
+            "task": "transcribe",
+            "language": "english",
+            "duration": 5.34,
+            "text": "Hello, my name Gustavo, but you can call me Gus.",
+            "words": [
+              {
+                "word": "Hello",
+                "syllable": 2,
+                "start": 0.0,
+                "end": 0.82
+              },
+              {
+                "word": "my",
+                "syllable": 1,
+                "start": 1.26,
+                "end": 1.34
+              },
+              {
+                "word": "name",
+                "syllable": 1,
+                "start": 1.34,
+                "end": 1.56
+              },
+              {
+                "word": "Gustavo",
+                "syllable": 3,
+                "start": 1.56,
+                "end": 2.12
+              },
+              {
+                "word": "but",
+                "syllable": 1,
+                "start": 2.68,
+                "end": 2.68
+              },
+              {
+                "word": "you",
+                "syllable": 1,
+                "start": 2.68,
+                "end": 2.78
+              },
+              {
+                "word": "can",
+                "syllable": 1,
+                "start": 2.78,
+                "end": 3.0
+              },
+              {
+                "word": "call",
+                "syllable": 1,
+                "start": 3.0,
+                "end": 3.16
+              },
+              {
+                "word": "me",
+                "syllable": 1,
+                "start": 3.16,
+                "end": 3.32
+              },
+              {
+                "word": "Gus",
+                "syllable": 1,
+                "start": 3.32,
+                "end": 3.52
+              }
+            ],
+            "usage": {
+              "type": "duration",
+              "seconds": 6
+            }
+          }
+          
         """;
 
         JsonNode transcript = null;

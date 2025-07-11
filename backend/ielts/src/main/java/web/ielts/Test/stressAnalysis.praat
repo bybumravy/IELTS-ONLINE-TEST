@@ -1,48 +1,78 @@
-    form Analyze Stress
-        sentence wavFile
-        sentence textGridFile
-        sentence outputFile
-    endform
+form Analyze Word Stress with Syllables
+    sentence wav_file
+    sentence textGridFile
+    sentence output_file
+endform
 
-    # Xóa file output cũ nếu tồn tại
-    if fileReadable(outputFile$)
-        deleteFile: outputFile$
-    endif
+# Read input files
+sound = Read from file: wav_file$
+textGrid = Read from file: textGridFile$
 
-    # Tạo file output mới
-    writeFile: outputFile$, "ANALYSIS_START"
+# Create intensity object
+selectObject: sound
+intensity = To Intensity: 100, 0.0, "yes"
 
-    # Đọc file input
-    sound = Read from file: wavFile$
-    textGrid = Read from file: textGridFile$
+# Tier numbers (adjust if needed)
+selectObject: textGrid
+wordTier = 1
+syllableTier = 3
 
+# Create output file header
+writeFileLine: output_file$, "WORD_STRESS_ANALYSIS_WITH_SYLLABLES"
+writeFileLine: output_file$, "Format: WORD_STRESS:word:syllableCount:stressedSyllable:maxIntensity:stressPosition:start:end"
+
+# Analysis parameters
+minIntensity = 50  ; minimum intensity (dB)
+timeStep = 0.01    ; analysis step (s)
+
+selectObject: textGrid
+numWords = Get number of intervals: wordTier
+numSyllables = Get number of intervals: syllableTier
+
+for wordInterval to numWords
     selectObject: textGrid
-    numberOfIntervals = Get number of intervals: 1
+    wordLabel$ = Get label of interval: wordTier, wordInterval
 
-    for interval from 1 to numberOfIntervals
-        selectObject: textGrid
-        label$ = Get label of interval: 1, interval
+    if wordLabel$ <> "" and wordLabel$ <> "sp" and wordLabel$ <> "sil"
+        wordStart = Get start time of interval: wordTier, wordInterval
+        wordEnd = Get end time of interval: wordTier, wordInterval
 
-        if label$ != ""
-            start = Get start time of interval: 1, interval
-            end = Get end time of interval: 1, interval
+        syllableCount = 0
+        maxIntensity = -1000
+        stressedSyllable = 1
+        stressPosition = 0.5
 
-            selectObject: sound
-            Extract part: start, end, "rectangular", 1, "no"
-            soundPart = selected("Sound")
+        # Duyệt tất cả syllable intervals để tìm syllable thuộc về word này
+        for s from 1 to numSyllables
+            selectObject: textGrid
+            syllableLabel$ = Get label of interval: syllableTier, s
+            syllableStart = Get start time of interval: syllableTier, s
+            syllableEnd = Get end time of interval: syllableTier, s
 
-                To Intensity: 100, 0, "yes"
-            intensity = selected("Intensity")
+            if syllableStart >= wordStart and syllableEnd <= wordEnd and syllableLabel$ <> ""
+                syllableCount = syllableCount + 1
 
-            maxIntensity = Get maximum: 0, 0, "Parabolic"
-            maxIntensityTime = Get time of maximum: 0, 0, "Parabolic"
+                selectObject: intensity
+                syllableIntensity = Get maximum: syllableStart, syllableEnd, "Parabolic"
 
-            # Ghi dữ liệu từng dòng
-            line$ = "WORD_STRESS:" + label$ + ":" + string$(maxIntensity) + ":" + string$(maxIntensityTime) + ":" + string$(start) + ":" + string$(end)
-            appendFileLine: outputFile$, line$
+                if syllableIntensity > maxIntensity
+                    maxIntensity = syllableIntensity
+                    stressedSyllable = syllableCount
+                    stressPosition = (syllableStart + syllableEnd) / 2 - wordStart
+                endif
+            endif
+        endfor
 
-            removeObject: soundPart, intensity
+
+        if syllableCount > 0
+            stressPosition = stressPosition / (wordEnd - wordStart)
+            resultLine$ = "WORD_STRESS:" + wordLabel$ + ":" + string$(syllableCount) + ":" + string$(stressedSyllable) + ":" + string$(maxIntensity) + ":" + string$(stressPosition) + ":" + string$(wordStart) + ":" + string$(wordEnd)
+
+            appendFileLine: output_file$, resultLine$
         endif
-    endfor
 
-    appendFileLine: outputFile$, "ANALYSIS_END"
+    endif
+endfor
+
+# Clean up
+removeObject: sound, textGrid, intensity

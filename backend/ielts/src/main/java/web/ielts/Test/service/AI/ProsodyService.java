@@ -80,10 +80,10 @@
                 writer.println("xmin = 0");
                 writer.println("xmax = " + audioDuration);
                 writer.println("tiers? <exists>");
-                writer.println("size = 2"); // Now we have 2 tiers: words and sentences
+                writer.println("size = 3"); // Now 3 tiers: words, sentences, syllables
                 writer.println("item []:");
 
-                // Word tier (same as before)
+                // Word tier
                 writer.println("    item [1]:");
                 writer.println("        class = \"IntervalTier\"");
                 writer.println("        name = \"words\"");
@@ -112,32 +112,54 @@
                     writer.println("            text = \"" + wordText + "\"");
                 }
 
-                // New: Sentence tier
+                // Sentence tier
                 writer.println("    item [2]:");
                 writer.println("        class = \"IntervalTier\"");
                 writer.println("        name = \"sentences\"");
                 writer.println("        xmin = 0");
                 writer.println("        xmax = " + audioDuration);
 
-                // Group words into sentences (simple implementation - you may need to adjust)
                 List<List<JsonNode>> sentences = groupWordsIntoSentences(wordNodes);
                 writer.println("        intervals: size = " + sentences.size());
 
                 for (int i = 0; i < sentences.size(); i++) {
                     List<JsonNode> sentenceWords = sentences.get(i);
                     double sentenceStart = sentenceWords.get(0).get("start").asDouble();
-                    double sentenceEnd = sentenceWords.get(sentenceWords.size()-1).get("end").asDouble();
+                    double sentenceEnd = sentenceWords.get(sentenceWords.size() - 1).get("end").asDouble();
 
                     writer.println("        intervals [" + (i + 1) + "]:");
                     writer.println("            xmin = " + sentenceStart);
                     writer.println("            xmax = " + sentenceEnd);
-                    writer.println("            text = \"Sentence " + (i+1) + "\"");
+                    writer.println("            text = \"Sentence " + (i + 1) + "\"");
+                }
+
+                // Syllable tier
+                writer.println("    item [3]:");
+                writer.println("        class = \"IntervalTier\"");
+                writer.println("        name = \"syllables\"");
+                writer.println("        xmin = 0");
+                writer.println("        xmax = " + audioDuration);
+                writer.println("        intervals: size = " + wordNodes.size());
+
+                for (int i = 0; i < wordNodes.size(); i++) {
+                    JsonNode word = wordNodes.get(i);
+                    double start = word.get("start").asDouble();
+                    double end = word.get("end").asDouble();
+
+                    // Lấy syllable count từ JSON
+                    String syllableCount = word.has("syllables") ? word.get("syllables").asText() : "1"; // mặc định 1 nếu không có
+
+                    writer.println("        intervals [" + (i + 1) + "]:");
+                    writer.println("            xmin = " + start);
+                    writer.println("            xmax = " + end);
+                    writer.println("            text = \"" + syllableCount + "\"");
                 }
 
                 System.out.println("✅ Ghi file TextGrid thành công: " + textGridFile.getAbsolutePath());
             }
             return textGridFile;
         }
+
         private List<List<JsonNode>> groupWordsIntoSentences(List<JsonNode> words) {
             List<List<JsonNode>> sentences = new ArrayList<>();
             List<JsonNode> currentSentence = new ArrayList<>();
@@ -182,7 +204,7 @@
 
                 // 4. Phân tích trọng âm từ (CHI TIẾT VỊ TRÍ)
                 System.out.println("Trong am");
-                Map<String, Object> stressResults = analyzeWordStress(wavFile, textGridFile, root);
+                Map<String, Object> stressResults = analyzeWordStress(wavFile, textGridFile);
 
                 // 5. Phân tích ngữ điệu câu (MỚI)
                 System.out.println("Ngu dieu cau");
@@ -206,13 +228,23 @@
             }
         }
 
-        private Map<String, Object> analyzeWordStress(File wavFile, File textGridFile, JsonNode root)
+        private Map<String, Object> analyzeWordStress(File wavFile, File textGridFile)
                 throws IOException, InterruptedException {
 
-            // Tạo file output trong thư mục cùng với input files
-            File outputFile = new File(textGridFile.getParent(), "stress_output_" + System.currentTimeMillis() + ".txt");
-            System.out.println("\n🎯 [STRESS ANALYSIS] Starting word stress analysis...");
-            System.out.println("   Output file: " + outputFile.getAbsolutePath());
+            // 1. Chuẩn bị output file
+            File outputFile = new File(textGridFile.getParent(),
+                    "stress_output_" + Instant.now().toEpochMilli() + ".txt");
+
+            System.out.println("\n🎯 [STRESS ANALYSIS] Starting analysis...");
+            System.out.println("   WAV File: " + wavFile.getAbsolutePath());
+            System.out.println("   TextGrid: " + textGridFile.getAbsolutePath());
+            System.out.println("   Output: " + outputFile.getAbsolutePath());
+
+            // 2. Verify input files
+            if (!wavFile.exists()) throw new FileNotFoundException("WAV file not found");
+            if (!textGridFile.exists()) throw new FileNotFoundException("TextGrid not found");
+
+            // 3. Run Praat process
             ProcessBuilder pb = new ProcessBuilder(
                     PRAAT_PATH, "--run",
                     STRESS_ANALYSIS_SCRIPT_PATH,
@@ -220,33 +252,47 @@
                     textGridFile.getAbsolutePath(),
                     outputFile.getAbsolutePath()
             );
-            System.out.println("⚡ [STRESS] Command: " + String.join(" ", pb.command()));
+
+            System.out.println("⚡ Command: " + String.join(" ", pb.command()));
+
             Process process = pb.start();
 
-            System.out.println("🔍 [STRESS OUTPUT] Real-time output:");
-            // Đọc output để debug
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            // 4. Capture output streams
+            StringBuilder output = new StringBuilder();
+            StringBuilder errors = new StringBuilder();
+
+            try (BufferedReader outReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                 BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+
                 String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println("[PRAAT OUTPUT] " + line);
+                while ((line = outReader.readLine()) != null) {
+                    output.append(line).append("\n");
+                    System.out.println("[PRAAT] " + line);
+                }
+
+                while ((line = errReader.readLine()) != null) {
+                    errors.append(line).append("\n");
+                    System.err.println("[PRAAT ERROR] " + line);
                 }
             }
 
+            // 5. Check process result
             int exitCode = process.waitFor();
-            System.out.println("✅ [STRESS] Process exited with code: " + exitCode);
-
             if (exitCode != 0) {
-                System.err.println("❌ [ERROR] Stress analysis failed!");
-                // Đọc nội dung file output nếu có để debug
-                if (outputFile.exists()) {
-                    System.err.println("📜 [ERROR DETAILS] Output file content:");
-                    Files.lines(outputFile.toPath()).forEach(line -> System.err.println("   " + line));
-                }
-                throw new RuntimeException("Stress analysis failed with exit code: " + exitCode);
+                String errorMsg = String.format(
+                        "Stress analysis failed (exit code %d)\nErrors:\n%s\nOutput:\n%s",
+                        exitCode, errors.toString(), output.toString());
+                throw new RuntimeException(errorMsg);
             }
-            System.out.println("📊 [STRESS] Parsing results...");
-            return parseStressOutput(outputFile, root);
+
+            // 6. Parse results
+            if (!outputFile.exists()) {
+                throw new IOException("Output file not created: " + outputFile.getAbsolutePath());
+            }
+
+            return parseStressOutput(outputFile);
         }
+
 
         private Map<String, Object> analyzeSentenceIntonation(File wavFile, File textGridFile) {
             Map<String, Object> results = new HashMap<>();
@@ -317,7 +363,7 @@
             return results;
         }
 
-        private Map<String, Object> parseStressOutput(File outputFile, JsonNode root) throws IOException {
+        private Map<String, Object> parseStressOutput(File outputFile) throws IOException {
             Map<String, Object> results = new HashMap<>();
             List<Map<String, Object>> wordStressList = new ArrayList<>();
 
