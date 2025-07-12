@@ -16,9 +16,6 @@ intensity = To Intensity: 100, 0, "yes"
 wordsTier = 1
 syllablesTier = 3
 
-# Create output file
-writeFileLine: output_file$, "WORD_STRESS_ANALYSIS_RESULTS"
-
 # Analysis parameters
 minIntensity = 50
 
@@ -59,8 +56,8 @@ for word from 1 to numWords
             endif
         endfor
 
-        # Write result (QUAN TRỌNG: cả dòng phải viết liền)
-        resultLine$ = "WORD_STRESS:" + wordLabel$ + ":" + string$(syllableCount) + ":" + string$(stressedSyllable) + ":" + string$(maxIntensity) + ":" + string$(wordStart) + ":" + string$(wordEnd)
+        # Write result: chỉ wordLabel và stressedSyllable
+        resultLine$ = wordLabel$ + ":" + string$(stressedSyllable)
         appendFileLine: output_file$, resultLine$
     endif
 endfor

@@ -14,7 +14,6 @@ selectObject: textGrid
 numSentences = Get number of intervals: 2
 writeInfoLine: "Num sentences: ", numSentences
 
-writeFileLine: output_file$, "SENTENCE|START|END|INTONATION_TYPE"
 
 threshold = 50.0   ; cường độ tối thiểu tính là active speech (dB)
 step = 0.01        ; bước lấy mẫu (s)
@@ -93,7 +92,7 @@ for i to numSentences
                     intonation$ = "flat"
                 endif
 
-                appendFileLine: output_file$, "SENTENCE|", string$(i), "|", fixed$(start, 3), "|", fixed$(end, 3), "|", intonation$
+appendFileLine: output_file$, "Sentence ", string$(i), " | Start: ", fixed$(start, 3), "s | End: ", fixed$(end, 3), "s | Intonation: ", intonation$
             else
                 writeInfoLine: "Too few points to compute slope in sentence ", i
             endif
