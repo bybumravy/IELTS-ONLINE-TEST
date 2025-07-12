@@ -76,61 +76,61 @@ public class TestsController {
             "words": [
               {
                 "word": "Hello",
-                "syllable": 2,
+                "syllables": 2,
                 "start": 0.0,
                 "end": 0.82
               },
               {
                 "word": "my",
-                "syllable": 1,
+                "syllables": 1,
                 "start": 1.26,
                 "end": 1.34
               },
               {
                 "word": "name",
-                "syllable": 1,
+                "syllables": 1,
                 "start": 1.34,
                 "end": 1.56
               },
               {
                 "word": "Gustavo",
-                "syllable": 3,
+                "syllables": 3,
                 "start": 1.56,
                 "end": 2.12
               },
               {
                 "word": "but",
-                "syllable": 1,
+                "syllables": 1,
                 "start": 2.68,
                 "end": 2.68
               },
               {
                 "word": "you",
-                "syllable": 1,
+                "syllables": 1,
                 "start": 2.68,
                 "end": 2.78
               },
               {
                 "word": "can",
-                "syllable": 1,
+                "syllables": 1,
                 "start": 2.78,
                 "end": 3.0
               },
               {
                 "word": "call",
-                "syllable": 1,
+                "syllables": 1,
                 "start": 3.0,
                 "end": 3.16
               },
               {
                 "word": "me",
-                "syllable": 1,
+                "syllables": 1,
                 "start": 3.16,
                 "end": 3.32
               },
               {
                 "word": "Gus",
-                "syllable": 1,
+                "syllables": 1,
                 "start": 3.32,
                 "end": 3.52
               }

@@ -1,4 +1,4 @@
-form Analyze Word Stress with Syllables
+form Analyze Word Stress
     sentence wav_file
     sentence textGridFile
     sentence output_file
@@ -10,67 +10,58 @@ textGrid = Read from file: textGridFile$
 
 # Create intensity object
 selectObject: sound
-intensity = To Intensity: 100, 0.0, "yes"
+intensity = To Intensity: 100, 0, "yes"
 
-# Tier numbers (adjust if needed)
-selectObject: textGrid
-wordTier = 1
-syllableTier = 3
+# Tier numbers
+wordsTier = 1
+syllablesTier = 3
 
-# Create output file header
-writeFileLine: output_file$, "WORD_STRESS_ANALYSIS_WITH_SYLLABLES"
-writeFileLine: output_file$, "Format: WORD_STRESS:word:syllableCount:stressedSyllable:maxIntensity:stressPosition:start:end"
+# Create output file
+writeFileLine: output_file$, "WORD_STRESS_ANALYSIS_RESULTS"
 
 # Analysis parameters
-minIntensity = 50  ; minimum intensity (dB)
-timeStep = 0.01    ; analysis step (s)
+minIntensity = 50
 
 selectObject: textGrid
-numWords = Get number of intervals: wordTier
-numSyllables = Get number of intervals: syllableTier
+numWords = Get number of intervals: wordsTier
 
-for wordInterval to numWords
+for word from 1 to numWords
     selectObject: textGrid
-    wordLabel$ = Get label of interval: wordTier, wordInterval
+    wordLabel$ = Get label of interval: wordsTier, word
 
-    if wordLabel$ <> "" and wordLabel$ <> "sp" and wordLabel$ <> "sil"
-        wordStart = Get start time of interval: wordTier, wordInterval
-        wordEnd = Get end time of interval: wordTier, wordInterval
+    if wordLabel$ != "" and wordLabel$ != "sp" and wordLabel$ != "sil"
+        wordStart = Get start time of interval: wordsTier, word
+        wordEnd = Get end time of interval: wordsTier, word
 
-        syllableCount = 0
-        maxIntensity = -1000
+        # Get syllable count
+        syllableInterval = Get interval at time: syllablesTier, wordStart
+        syllableCount$ = Get label of interval: syllablesTier, syllableInterval
+        syllableCount = number(syllableCount$)
+        if syllableCount == undefined
+            syllableCount = 1
+        endif
+
+        # Analyze syllables
+        maxIntensity = 0
         stressedSyllable = 1
-        stressPosition = 0.5
+        syllableDuration = (wordEnd - wordStart)/syllableCount
 
-        # Duyệt tất cả syllable intervals để tìm syllable thuộc về word này
-        for s from 1 to numSyllables
-            selectObject: textGrid
-            syllableLabel$ = Get label of interval: syllableTier, s
-            syllableStart = Get start time of interval: syllableTier, s
-            syllableEnd = Get end time of interval: syllableTier, s
+        for s from 1 to syllableCount
+            sStart = wordStart + (s-1)*syllableDuration
+            sEnd = wordStart + s*syllableDuration
 
-            if syllableStart >= wordStart and syllableEnd <= wordEnd and syllableLabel$ <> ""
-                syllableCount = syllableCount + 1
+            selectObject: intensity
+            sIntensity = Get maximum: sStart, sEnd, "Parabolic"
 
-                selectObject: intensity
-                syllableIntensity = Get maximum: syllableStart, syllableEnd, "Parabolic"
-
-                if syllableIntensity > maxIntensity
-                    maxIntensity = syllableIntensity
-                    stressedSyllable = syllableCount
-                    stressPosition = (syllableStart + syllableEnd) / 2 - wordStart
-                endif
+            if sIntensity > maxIntensity
+                maxIntensity = sIntensity
+                stressedSyllable = s
             endif
         endfor
 
-
-        if syllableCount > 0
-            stressPosition = stressPosition / (wordEnd - wordStart)
-            resultLine$ = "WORD_STRESS:" + wordLabel$ + ":" + string$(syllableCount) + ":" + string$(stressedSyllable) + ":" + string$(maxIntensity) + ":" + string$(stressPosition) + ":" + string$(wordStart) + ":" + string$(wordEnd)
-
-            appendFileLine: output_file$, resultLine$
-        endif
-
+        # Write result (QUAN TRỌNG: cả dòng phải viết liền)
+        resultLine$ = "WORD_STRESS:" + wordLabel$ + ":" + string$(syllableCount) + ":" + string$(stressedSyllable) + ":" + string$(maxIntensity) + ":" + string$(wordStart) + ":" + string$(wordEnd)
+        appendFileLine: output_file$, resultLine$
     endif
 endfor
 
