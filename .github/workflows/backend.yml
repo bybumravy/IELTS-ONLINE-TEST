@@ -45,3 +45,4 @@ jobs:
 
             echo "Checking status..."
             sudo systemctl status backend --no-pager
+
