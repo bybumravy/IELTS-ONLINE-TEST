@@ -34,6 +34,9 @@ import java.util.stream.Collectors;
 @Service
 public class DoTestService {
     @Autowired
+    private ProsodyService prosodyService;
+
+    @Autowired
     private WritingRepository writingRepository;
 
     @Autowired
@@ -213,12 +216,13 @@ public class DoTestService {
                 qa.setStudentAnswer(s3Url);
                 if(gradingMethod.equalsIgnoreCase("ai")){
                     try {
-                       String transcript = whisper.transcribe(s3UrlNotEncrypt);
-                       System.out.println(transcript);
-                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,null);
-                     qa.setEvaluationResults(eval);
-
-                     totalScore += eval.getScore();
+                        JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
+                      //  System.out.println(transcript);
+                        Map<String, Object> prosodyFeatures = prosodyService.analyze(s3UrlNotEncrypt, transcript);
+//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,null);
+//                    qa.setEvaluationResults(eval);
+//
+//                     totalScore += eval.getScore();
 
                     } catch (Exception e) {
                         System.err.println("❌ Lỗi khi chấm câu hỏi: " + qa.getQuestion());
@@ -251,11 +255,11 @@ public class DoTestService {
                 part2.setStudentAnswer(s3Url);
                 if(gradingMethod.equalsIgnoreCase("ai")) {
                     try {
-                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
-
-                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2,cuecards);
-                     part2.setEvaluationResults(eval);
-                  part2.setAverageScore(eval.getScore());
+//                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
+//
+//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2,cuecards);
+//                     part2.setEvaluationResults(eval);
+//                  part2.setAverageScore(eval.getScore());
 
                         // validQuestionCount++;
                     } catch (Exception e) {
@@ -292,10 +296,10 @@ public class DoTestService {
                 qa.setStudentAnswer(s3Url);
                 if(gradingMethod.equalsIgnoreCase("ai")) {
                     try {
-                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
-                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,null);
-                   qa.setEvaluationResults(eval);
-                    totalScore += eval.getScore();
+//                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
+//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,null);
+//                   qa.setEvaluationResults(eval);
+//                    totalScore += eval.getScore();
 
                     } catch (Exception e) {
 

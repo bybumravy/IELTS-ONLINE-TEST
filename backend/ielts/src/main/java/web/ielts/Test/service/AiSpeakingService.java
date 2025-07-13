@@ -16,7 +16,7 @@ public class AiSpeakingService {
     @Autowired WhisperService whisperService;
     @Autowired
     private AIService aiService;
-    public EvaluationResult evaluateSpeaking(String transcriptText, String question, int partNumber, List<String> cueCard)  {
+    public EvaluationResult evaluateSpeaking(JsonNode transcriptText, String question, int partNumber, List<String> cueCard)  {
 
 
         // ✅ 1. Tạo prompt đúng cho từng part

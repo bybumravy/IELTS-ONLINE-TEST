@@ -200,7 +200,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             throw new RuntimeException("OpenAI API error: " + e.getMessage());
         }
     }
-    public String buildSpeakingPrompt(int partNumber, String question, String transcript,List<String> cueCard) {
+    public String buildSpeakingPrompt(int partNumber, String question, JsonNode transcript,List<String> cueCard) {
         switch (partNumber) {
             case 1:
                 return buildSpeakingPart1Prompt(question, transcript);
@@ -289,7 +289,9 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             "- Fluency: unnatural pause\n" +
             "- Fluency: slow delivery\n" +
             "- Fluency: choppy rhythm\n";
-    public String buildSpeakingPart1Prompt(String questions,String answer){
+
+    public String buildSpeakingPart1Prompt(String questions,JsonNode transcript){
+
         String speakingPart1 =
                 "You must return response strictly in JSON format.\n" +
                       "Note: For simple factual questions in Part 1 (e.g., “What is your name?”), brief but relevant answers are acceptable. Do not penalize short responses if they clearly address the question.\n" +
@@ -372,6 +374,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "- score: decimal (overall band score, e.g. 6.5)\n" +
                         "- transcript: string (full transcript of the original answer)\n" +
                         "- feedback: {\n" +
+                        "    (In errorCorrections, include only short phrases or words that are clearly incorrect. The correctedText should be the fixed version based on grammar, fluency, or lexical issues. )\n" +
                         "    errorCorrections: [{\n" +
                         "      originalText: string,\n" +
                         "      correctedText: string,\n" +
@@ -384,14 +387,16 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "- evaluation: {\n" +
                         "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
                         "    Grammar: {scoreEva: string, reviewEva: string}\n" +
+                        "Fluency and coherence: {scoreEva: string, reviewEva: string}\n"+
+                        "Pronunciation: {scoreEva: string, reviewEva: string}\n"+
                         "},\n" +
                         "- sampleAnswer: string (Optional band 9 model)\n" +
                         "Question:\n" + questions + "\n" +
-                        "Original Answer:\n" + answer;
+                        "Original Answer:\n" + transcript;
         return speakingPart1;
     }
 
-    public String buildSpeakingPart2Prompt(String question,String answer,List<String> cueCards){
+    public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards){
         String speakingPart2 =
                 "You must return response strictly in JSON format.\n" +
                         "You are an official IELTS Speaking examiner. You are evaluating a real IELTS Part 2 speaking response. Extremely strict grading.\n" +
@@ -401,7 +406,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "3. You must evaluate whether the response is relevant to the question and does not go off-topic.\n" +
                         "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
                         "4. You must strictly check if the candidate addresses **all bullet points** in the cue card:\n" +
-                        cueCards.toString() +
+
                         " For **each bullet point that is ignored or insufficiently developed**, deduct **0.5 Band** from **Fluency & Coherence**.\n" +
                         "\n" +
                         "You must also check whether the response answers **all bullet points** in the cue card. For **each missing or ignored point**, deduct **0.5 Band** from Fluency & Coherence.\n"+
@@ -439,7 +444,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "(e.g., “infrastructure”, “inequality”, “preservation”)  \n" +
                         "→ ✅ Only add once."+
                         " If any single errorType occurs more than 3 times,\n" +
-                        "→ Deduct 0.5 point in total for that error type (only once)"+
+                        "→ Deduct 0.5 point in total for that error type about Lexical Resource (only once)"+
 
                         "Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation: "+
                         "  - IELTS Public Descriptors:\n" +
@@ -462,7 +467,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "→ ✅ Only add once."+
                         "Deduct points for frequent grammar errors that affect understanding:\n\n" +
                         " If any single errorType occurs more than 3 times,\n" +
-                        "→ Deduct 0.5 point in total for that error type (only once)"+
+                        "→ Deduct 0.5 point in total for that error type about grammar (only once)"+
                         "Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation: "+
                       IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
                         "• Fluency and coherence (25%):\n" +
@@ -477,7 +482,8 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "\n" +
                         "+0.25 if discourse markers / cohesive devices are used appropriately (Coherence)\n" +
                         "→ ✅ Only add once.\n" +
-                        "→ Deduct 0.5 point in total for that error type (only once)"+
+                        "→ Deduct 0.5 point in total for that error type about Fluency and coherence  (only once)"+
+                        "If the response does not include a clear structure with an introduction, body, and conclusion, deduct 0.5 point."+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_FLUENCY_AND_COHERENCE+
                         "2. SCORING SYSTEM:\n" +
@@ -498,13 +504,15 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "- evaluation: {\n" +
                         "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
                         "    Grammar: {scoreEva: string, reviewEva: string}\n" +
+                        "    Fluency and coherence: {scoreEva: string, reviewEva: string}\n" +
                         "}\n" +
                         "sampleAnswer: string (Optional band 9 model)\n" +
                         "Question:\n" + question + "\n" +
-                        "Original Answer:\n" + answer;
+                        "CueCard:\n" + cueCards.toString() + "\n" +
+                        "Original Answer:\n" + transcipt;
         return speakingPart2;
     }
-    public String buildSpeakingPart3Prompt(String questions, String answer) {
+    public String buildSpeakingPart3Prompt(String questions, JsonNode transcipt) {
         String speakingPart3 =
                 "You must return response strictly in JSON format only — do not include any explanation or extra text.\n\n" +
 
@@ -581,6 +589,22 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         "Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation: "+
                         IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
+                        "• Fluency and coherence (25%):\n" +
+                        "+0.25 if the candidate maintains smooth flow of speech with minimal hesitation (Fluency)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if the candidate uses natural pausing and appropriate pacing (Fluency)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if ideas are logically ordered and connected clearly (Coherence)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "\n" +
+                        "+0.25 if discourse markers / cohesive devices are used appropriately (Coherence)\n" +
+                        "→ ✅ Only add once.\n" +
+                        "→ Deduct 0.5 point in total for that error type about Fluency and coherence  (only once)"+
+                        "If the response does not include a clear structure with an introduction, body, and conclusion, deduct 0.5 point."+
+                        " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
+                        IELTS_PUBLIC_FLUENCY_AND_COHERENCE+
 
                         "====================\n" +
                         "2. SCORING SYSTEM\n" +
@@ -595,6 +619,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "RESPONSE FORMAT:\n" +
                         "- score: decimal (overall band score, e.g. 6.5)\n" +
                         "- feedback: {\n" +
+                        "    (In errorCorrections, only include corrections where the originalText is clearly incorrect in terms of LexicalResource,grammar or fluency/coherence)\n" +
                         "    errorCorrections: [{\n" +
                         "      originalText: string,\n" +
                         "      correctedText: string,\n" +
@@ -607,10 +632,11 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "- evaluation: {\n" +
                         "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
                         "    Grammar: {scoreEva: string, reviewEva: string}\n" +
+                        "    Fluency and coherence: {scoreEva: string, reviewEva: string}\n" +
                         "}\n" +
                         "sampleAnswer: string (Optional band 9 model)\n" +
                         "Question:\n" + questions + "\n" +
-                        "Original Answer:\n" + answer;
+                        "Original Answer:\n" + transcipt;
 
         return speakingPart3;
     }
