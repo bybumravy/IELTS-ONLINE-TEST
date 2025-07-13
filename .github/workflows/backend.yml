@@ -31,17 +31,17 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           source: "backend/ielts/target/*.jar"
-          target: "/opt/ielts-app/"
+          target: "/home/ubuntu/backend"
 
-      - name: SSH to EC2 and run JAR
+      - name: SSH to EC2 and restart backend
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            echo "Killing old app if running..."
-            pkill -f 'java -jar' || true
-            
-            echo "Running new version..."
-            nohup java -jar /opt/ielts-app/*.jar > /opt/ielts-app/backend.log 2>&1 &
+            echo "Restarting backend service..."
+            sudo systemctl restart backend
+
+            echo "Checking status..."
+            sudo systemctl status backend --no-pager
