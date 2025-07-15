@@ -56,3 +56,10 @@ export interface ListeningTest {
     duration: number;
     parts: ListeningPart[];
 }
+export interface Vocabulary {
+    id: string;
+    word: string;
+    translate: string;
+    partOfSpeech?: string;
+    pronunciation?: string;
+}
