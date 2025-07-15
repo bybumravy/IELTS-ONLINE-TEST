@@ -16,6 +16,8 @@ import VoiceRecorder from "@/pages/DoTest/checkMic";
 import SpeakingTest from "@/pages/DoTest/SpeakingTest";
 import Vocabulary from "@/pages/practice/Vocabulary.tsx";
 import VocabularyList from "@/pages/student/VocabularyList.tsx";
+import VocabularyGame from "@/pages/student/VocabularyGame";
+
 
 
 export default function App() {
@@ -40,6 +42,7 @@ export default function App() {
                     <Route path="/checkMic/:testId" element={<MainLayout><SpeakingTest/></MainLayout>} />
                     <Route path="/practice/vocabulary" element={<MainLayout><Vocabulary /></MainLayout>} />
                     <Route path="/student/vocabulary" element={<MainLayout><VocabularyList /></MainLayout>} />
+                    <Route path="/student/vocabulary-game" element={<MainLayout><VocabularyGame /></MainLayout>} />
                 </Routes>
             </Router>
         </AuthProvider>

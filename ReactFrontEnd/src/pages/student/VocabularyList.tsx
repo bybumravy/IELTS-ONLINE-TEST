@@ -5,6 +5,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { VocabularyItemStudent } from '@/components/ui/vocabulary/VocabularyItemStudent.tsx';
+import { useNavigate } from 'react-router-dom';
+
 
 const VocabularyList: React.FC = () => {
     const { user } = useAuth();
@@ -26,6 +28,16 @@ const VocabularyList: React.FC = () => {
     const [selectedVocab, setSelectedVocab] = useState<VocabularyType | null>(null);
 
     const API_BASE = "http://localhost:8080/api/practice";
+    const navigate = useNavigate();
+
+    const goToGame = () => {
+        navigate('/student/vocabulary-game', {
+            state: {
+                vocabList: vocabularies
+            }
+        });
+    };
+
 
     // --- NEW: State for topics/bands fetched from backend ---
     const [topics, setTopics] = useState<{ value: string, label: string }[]>([{ value: '', label: 'All Topics' }]);
@@ -159,6 +171,7 @@ const VocabularyList: React.FC = () => {
                                 className="hover:bg-emerald-600 hover:text-white">Apply Filters</Button>
                         <Button onClick={resetFilters} variant="outline"
                                 className="hover:bg-emerald-600 hover:text-white">Reset</Button>
+                        <Button onClick={goToGame} variant="outline" className="hover:bg-blue-600 hover:text-white">🎮 Play Game</Button>
                     </div>
                 </div>
             </Card>
