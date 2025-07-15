@@ -30,44 +30,35 @@ public class ProsodyService {
 
     private Map<String, Object> evaluatePronunciation(
             String transcript,
-            Map<String, Double> prosodyFeatures,
-            Map<String, Object> intonationAnalysis,
-            List<Map<String, Object>> wordStressDetails
+            String intonationAnalysis,
+            String wordStressDetails
     ) {
         System.out.println("\n🔊 [PRONUNCIATION] Starting AI evaluation...");
 
-        // 1. Xây dựng prompt chi tiết
-        String prompt = buildPronunciationPrompt(transcript, prosodyFeatures, intonationAnalysis, wordStressDetails);
+        try {
 
-        // Log prompt gửi đến AI
-        System.out.println("\n===== PROMPT SENT TO AI =====");
-        System.out.println(prompt);
-        System.out.println("=============================\n");
+            // 2. Xây dựng prompt chi tiết với dữ liệu đã parse
+            String prompt = buildPronunciationPrompt(transcript, intonationAnalysis, wordStressDetails);
 
-        // 2. Gọi API OpenAI
-        String aiResponse = callOpenAIPronunciation(prompt);
+            // 3. Gọi API OpenAI
+            String aiResponse = callOpenAIPronunciation(prompt);
 
-        // Log phản hồi thô từ AI
-        System.out.println("\n===== RAW RESPONSE FROM AI =====");
-        System.out.println(aiResponse);
-        System.out.println("===============================\n");
-
-        // 3. Phân tích kết quả
-        Map<String, Object> parsedResponse = parsePronunciationResponse(aiResponse);
-
-        // Log kết quả đã phân tích
-        System.out.println("\n===== PARSED PRONUNCIATION EVALUATION =====");
-        System.out.println(parsedResponse);
-        System.out.println("==========================================\n");
-
-        return parsedResponse;
+            // 4. Parse và trả về kết quả
+            return parsePronunciationResponse(aiResponse);
+        } catch (Exception e) {
+            System.err.println("❌ Error in pronunciation evaluation: " + e.getMessage());
+            e.printStackTrace();
+            return Map.of(
+                    "error", "Pronunciation evaluation failed",
+                    "details", e.getMessage()
+            );
+        }
     }
 
     private String buildPronunciationPrompt(
             String transcript,
-            Map<String, Double> prosodyFeatures,
-            Map<String, Object> intonationAnalysis,
-            List<Map<String, Object>> wordStressDetails
+            String intonationAnalysis,
+            String wordStressDetails
     ) {
         StringBuilder prompt = new StringBuilder();
         prompt.append("You are a certified IELTS Speaking examiner. Your task is to evaluate the PRONUNCIATION skill ONLY based on both human and technical perspectives.\n\n");
@@ -81,26 +72,12 @@ public class ProsodyService {
 
         prompt.append("=== Technical Analysis ===\n");
 
-        prompt.append("1. Prosody Features (e.g. pitch variation, speech rate, rhythm):\n");
-        prosodyFeatures.forEach((k, v) -> prompt.append("   - ").append(k).append(": ").append(v).append("\n"));
 
         prompt.append("\n2. Intonation Patterns:\n");
-        List<Map<String, Object>> sentences = (List<Map<String, Object>>) intonationAnalysis.get("sentences");
-        if (sentences != null) {
-            for (Map<String, Object> sentence : sentences) {
-                prompt.append("   - Sentence ").append(sentence.get("sentenceNumber"))
-                        .append(": ").append(sentence.get("intonationType"))
-                        .append(" (from ").append(sentence.get("start")).append("s to ").append(sentence.get("end")).append("s)\n");
-            }
-        }
+        prompt.append(intonationAnalysis);
 
         prompt.append("\n3. Word Stress Details:\n");
-        if (wordStressDetails != null) {
-            for (Map<String, Object> wordStress : wordStressDetails) {
-                prompt.append("   - Word: ").append(wordStress.get("word"))
-                        .append(", Stressed Syllable: ").append(wordStress.get("stressedSyllable")).append("\n");
-            }
-        }
+        prompt.append(wordStressDetails);
 
         prompt.append("\n=== Candidate Transcript ===\n");
         prompt.append(transcript).append("\n\n");
@@ -118,62 +95,44 @@ public class ProsodyService {
         prompt.append("  \"weaknesses\": [\"Flat intonation in statements\", \"Stress placed on the wrong syllables in multisyllabic words\"],\n");
         prompt.append("  \"recommendations\": [\"Practice using sentence stress to highlight key information\", \"Use shadowing technique with native speakers to improve intonation\"]\n");
         prompt.append("}\n");
-
+        System.out.println(prompt.toString());
         return prompt.toString();
     }
 
-    private String callOpenAIPronunciation(String prompt) {
+
+    private String callOpenAIPronunciation(String jsonPrompt) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(openaiApiKey);
 
             Map<String, Object> requestBody = Map.of(
-                    "model", "gpt-3.5-turbo",
+                    "model", "gpt-4",
                     "messages", List.of(
-                            Map.of("role", "system", "content", "You are an IELTS pronunciation expert. Respond in strict JSON format only."),
-                            Map.of("role", "user", "content", prompt)
+                            Map.of("role", "system", "content", "You are an IELTS pronunciation expert. Respond in STRICT JSON format ONLY."),
+                            Map.of("role", "user", "content", jsonPrompt)
                     ),
-                    "temperature", 0.1,
-                    "max_tokens", 1500
+                    "temperature", 0.2
             );
 
-            System.out.println("\n===== OPENAI API REQUEST =====");
-            System.out.println("Model: gpt-3.5-turbo");
-            System.out.println("Temperature: 0.1");
-            System.out.println("Max Tokens: 1500");
-            System.out.println("System Message: " + requestBody.get("messages").toString().substring(0, 100) + "...");
-            System.out.println("User Message Length: " + prompt.length() + " characters");
-            System.out.println("==============================\n");
-
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-
-            long startTime = System.currentTimeMillis();
             ResponseEntity<String> response = restTemplate.postForEntity(
                     "https://api.openai.com/v1/chat/completions",
                     entity,
                     String.class
             );
-            long duration = System.currentTimeMillis() - startTime;
-
-            System.out.println("\n===== OPENAI API RESPONSE METADATA =====");
-            System.out.println("Status Code: " + response.getStatusCode());
-            System.out.println("Response Time: " + duration + " ms");
-            System.out.println("Response Length: " + (response.getBody() != null ? response.getBody().length() : 0) + " characters");
-            System.out.println("========================================\n");
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 JsonNode root = objectMapper.readTree(response.getBody());
                 return root.path("choices").get(0).path("message").path("content").asText();
             } else {
-                String errorMsg = "OpenAI API error: " + response.getStatusCode() + " - " + response.getBody();
-                System.err.println(errorMsg);
-                throw new RuntimeException(errorMsg);
+                throw new RuntimeException("OpenAI API error: " + response.getStatusCode());
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to call OpenAI API", e);
         }
     }
+
 
     private Map<String, Object> parsePronunciationResponse(String aiResponse) {
         try {
@@ -385,21 +344,21 @@ public class ProsodyService {
 
             // 3. Phân tích prosody cơ bản
             System.out.println("Thong so co ban");
-            Map<String, Double> praatResults = runPraatAnalysis(wavFile, textGridFile);
+            String praatResults = runPraatAnalysis(wavFile, textGridFile);
 
             // 4. Phân tích trọng âm từ (CHI TIẾT VỊ TRÍ)
             System.out.println("Trong am");
-            Map<String, Object> stressResults = analyzeWordStress(wavFile, textGridFile);
+            String stressResults = analyzeWordStress(wavFile, textGridFile);
 
             // 5. Phân tích ngữ điệu câu (MỚI)
             System.out.println("Ngu dieu cau");
-            Map<String, Object> intonationResults = analyzeSentenceIntonation(wavFile, textGridFile);
+            String intonationResults = analyzeSentenceIntonation(wavFile, textGridFile);
 
             // 6. Tính điểm tổng hợp
 
             // 7. Tổng hợp kết quả
             // Trong phương thức analyze()
-            result.put("wordStressDetails", stressResults.get("wordStressDetails"));
+            result.put("wordStressDetails", stressResults);
             result.put("prosodyFeatures", praatResults);
             result.put("intonationAnalysis", intonationResults); // Sửa tên key thành "intonationAnalysis"
             System.out.println("\n=======================================");
@@ -407,14 +366,13 @@ public class ProsodyService {
             System.out.println("   Final result: " + result);
             System.out.println("=======================================");
 
-            // 8. Phân tích và chấm điểm Pronunciation bằng AI
+//                 8. Phân tích và chấm điểm Pronunciation bằng AI
             if (root.has("text")) {
                 String transcript = root.get("text").asText();
                 Map<String, Object> pronunciationEvaluation = evaluatePronunciation(
                         transcript,
-                        praatResults,
                         intonationResults,
-                        (List<Map<String, Object>>) stressResults.get("wordStressDetails")
+                        stressResults
                 );
                 result.put("pronunciationEvaluation", pronunciationEvaluation);
             }
@@ -427,7 +385,7 @@ public class ProsodyService {
         }
     }
 
-    private Map<String, Object> analyzeWordStress(File wavFile, File textGridFile)
+    private String analyzeWordStress(File wavFile, File textGridFile)
             throws IOException, InterruptedException {
 
         // 1. Chuẩn bị output file
@@ -493,9 +451,10 @@ public class ProsodyService {
     }
 
 
-    private Map<String, Object> analyzeSentenceIntonation(File wavFile, File textGridFile) {
+    private String analyzeSentenceIntonation(File wavFile, File textGridFile) {
         Map<String, Object> results = new HashMap<>();
-        List<Map<String, Object>> sentenceIntonations = new ArrayList<>();
+        List<Map<String, Object>> sentencesInfo = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
 
         try {
             File outputFile = new File(textGridFile.getParent(),
@@ -533,48 +492,57 @@ public class ProsodyService {
             System.out.println("📊 [INTONATION] Parsing results from: " + outputFile.getAbsolutePath());
             try (BufferedReader reader = new BufferedReader(new FileReader(outputFile))) {
                 String line;
+                Map<String, Object> currentSentence = null;
+                List<Map<String, Object>> emphasizedWords = new ArrayList<>();
+
                 while ((line = reader.readLine()) != null) {
-                    // Bỏ qua các dòng debug
-                    if (line.contains("No valid active speech") || line.contains("Too few points")) {
-                        System.out.println("   [DEBUG] " + line);
-                        continue;
-                    }
-
-                    // Xử lý dòng kết quả
                     if (line.startsWith("Sentence ")) {
-                        Map<String, Object> sentenceData = new HashMap<>();
-
-                        // Tách các phần của kết quả
-                        String[] parts = line.split("\\|");
-                        if (parts.length >= 4) {
-                            // Sentence number
-                            String numPart = parts[0].trim();
-                            int sentenceNum = Integer.parseInt(numPart.split(" ")[1]);
-                            sentenceData.put("sentenceNumber", sentenceNum);
-
-                            // Start time
-                            String startPart = parts[1].trim().replace("Start:", "").replace("s", "").trim();
-                            sentenceData.put("start", Double.parseDouble(startPart));
-
-                            // End time
-                            String endPart = parts[2].trim().replace("End:", "").replace("s", "").trim();
-                            sentenceData.put("end", Double.parseDouble(endPart));
-
-                            // Intonation type
-                            String intonationPart = parts[3].trim().replace("Intonation:", "").trim();
-                            sentenceData.put("intonationType", intonationPart);
-
-                            sentenceIntonations.add(sentenceData);
-
-                            System.out.println("   ✅ Processed sentence: " + sentenceNum + " - " + intonationPart);
+                        // Kết thúc câu trước đó nếu có
+                        if (currentSentence != null) {
+                            currentSentence.put("emphasizedWords", emphasizedWords);
+                            sentencesInfo.add(currentSentence);
+                            emphasizedWords = new ArrayList<>();
                         }
+
+                        // Bắt đầu câu mới
+                        currentSentence = new HashMap<>();
+                        String[] parts = line.split("\\|");
+
+                        // Xử lý thông tin câu
+                        String sentenceNum = parts[0].replace("Sentence", "").trim();
+                        currentSentence.put("sentenceNumber", Integer.parseInt(sentenceNum));
+
+                        String startTime = parts[1].replace("Start:", "").replace("s", "").trim();
+                        currentSentence.put("start", Double.parseDouble(startTime));
+
+                        String endTime = parts[2].replace("End:", "").replace("s", "").trim();
+                        currentSentence.put("end", Double.parseDouble(endTime));
+
+                        String meanIntensity = parts[3].replace("Mean Intensity:", "").replace("dB", "").trim();
+                        currentSentence.put("meanIntensity", Double.parseDouble(meanIntensity));
+
+                    } else if (line.contains("Emphasized word:")) {
+                        // Xử lý từ được nhấn mạnh
+                        String word = line.split("'")[1];
+                        String intensity = line.split("\\|")[1].replace("dB", "").trim();
+
+                        Map<String, Object> wordInfo = new HashMap<>();
+                        wordInfo.put("word", word);
+                        wordInfo.put("intensity", Double.parseDouble(intensity));
+                        emphasizedWords.add(wordInfo);
                     }
+                }
+
+                // Thêm câu cuối cùng
+                if (currentSentence != null) {
+                    currentSentence.put("emphasizedWords", emphasizedWords);
+                    sentencesInfo.add(currentSentence);
                 }
             }
 
-            results.put("sentences", sentenceIntonations);
+            results.put("sentences", sentencesInfo);
             results.put("analysisSuccess", true);
-            results.put("totalSentences", sentenceIntonations.size());
+            results.put("totalSentences", sentencesInfo.size());
 
         } catch (Exception e) {
             System.err.println("💥 Sentence intonation analysis error: " + e.getMessage());
@@ -583,10 +551,25 @@ public class ProsodyService {
             results.put("analysisSuccess", false);
         }
 
-        return results;
+        try {
+            // Chuyển Map sang JSON string
+            String jsonResult = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(results);
+
+            // In JSON ra terminal
+            System.out.println("📤 JSON Result:\n" + jsonResult);
+
+            // Trả về JSON string
+            return jsonResult;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "{\"error\":\"Failed to convert result to JSON.\"}";
+        }
+
     }
 
-    private Map<String, Object> parseStressOutput(File outputFile) throws IOException {
+
+    private String parseStressOutput(File outputFile) throws IOException {
         Map<String, Object> results = new HashMap<>();
         List<Map<String, Object>> wordStressList = new ArrayList<>();
 
@@ -594,7 +577,6 @@ public class ProsodyService {
             String line;
 
             while ((line = reader.readLine()) != null) {
-
                 String[] parts = line.split(":");
                 if (parts.length == 2) {
                     Map<String, Object> wordStress = new HashMap<>();
@@ -607,9 +589,18 @@ public class ProsodyService {
         }
 
         results.put("wordStressDetails", wordStressList);
-        return results;
+
+        // Chuyển Map sang JSON string
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResult = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(results);
+
+        // In JSON ra terminal
+        System.out.println("📤 JSON Stress Analysis Result:\n" + jsonResult);
+
+        return jsonResult;
     }
-    private Map<String, Double> runPraatAnalysis(File wavFile, File textGridFile) throws IOException, InterruptedException {
+
+    private String runPraatAnalysis(File wavFile, File textGridFile) throws IOException, InterruptedException {
         File outputFile = File.createTempFile("praat-output", ".txt");
         System.out.println("▶️ [PRAAT ANALYSIS] Starting analysis...");
         System.out.println("   Input WAV: " + wavFile.getAbsolutePath());
@@ -622,13 +613,12 @@ public class ProsodyService {
                 textGridFile.getAbsolutePath(),
                 outputFile.getAbsolutePath()
         );
-        pb.redirectErrorStream(true);  // Gom stderr và stdout vào cùng 1 stream
+        pb.redirectErrorStream(true);
         System.out.println("⚡ [PRAAT] Command: " + String.join(" ", pb.command()));
 
         Process process = pb.start();
         System.out.println("🔍 [PRAAT OUTPUT] Real-time output:");
 
-        // Đọc toàn bộ stdout/stderr của Praat ra console
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -647,11 +637,13 @@ public class ProsodyService {
         System.out.println("📊 [PRAAT] Parsing results from: " + outputFile.getAbsolutePath());
         System.out.println("✅ Praat process hoàn tất. Bắt đầu đọc file output...");
 
+        // Trả về JSON string từ parsePraatOutput
         return parsePraatOutput(outputFile);
     }
 
 
-    private Map<String, Double> parsePraatOutput(File outputFile) throws IOException {
+
+    private String parsePraatOutput(File outputFile) throws IOException {
         Map<String, Double> results = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(outputFile))) {
             String line;
@@ -672,8 +664,17 @@ public class ProsodyService {
                 }
             }
         }
-        return results;
+
+        // Chuyển Map sang JSON string
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResult = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(results);
+
+        // In JSON ra terminal
+        System.out.println("📤 JSON Parsed Result:\n" + jsonResult);
+
+        return jsonResult;
     }
+
 
 
 

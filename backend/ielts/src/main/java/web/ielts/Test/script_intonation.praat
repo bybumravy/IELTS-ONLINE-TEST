@@ -1,4 +1,4 @@
-form Analyze Intonation by Intensity (30% cuối câu)
+form Analyze Intensity and Emphasized Words
     sentence wav_file
     sentence textGridFile
     sentence output_file
@@ -10,23 +10,29 @@ textGrid = Read from file: textGridFile$
 selectObject: sound
 intensity = To Intensity: 75, 0.0, "yes"
 
+; Tier numbers (fixed numbers)
+sentencesTier = 2
+wordsTier = 1
+
 selectObject: textGrid
-numSentences = Get number of intervals: 2
+numSentences = Get number of intervals: sentencesTier
 writeInfoLine: "Num sentences: ", numSentences
 
-
-threshold = 50.0   ; cường độ tối thiểu tính là active speech (dB)
-step = 0.01        ; bước lấy mẫu (s)
+threshold = 50.0
+step = 0.01
 
 for i to numSentences
-    label$ = Get label of interval: 2, i
-    if label$ <> ""
-        start = Get start time of interval: 2, i
-        end = Get end time of interval: 2, i
+     selectObject: textGrid
+     label$ = Get label of interval: sentencesTier, i
+     if label$ <> ""
+         selectObject: textGrid
+         start = Get start time of interval: sentencesTier, i
+         selectObject: textGrid
+         end   = Get end time of interval: sentencesTier, i
 
-        selectObject: intensity
+         selectObject: intensity
 
-        ; Tìm activeStart: thời điểm đầu tiên vượt ngưỡng
+        ; Find activeStart
         activeStart = start
         found = 0
         t = start
@@ -39,7 +45,7 @@ for i to numSentences
             t = t + step
         endwhile
 
-        ; Tìm activeEnd: thời điểm cuối cùng vượt ngưỡng
+        ; Find activeEnd
         activeEnd = end
         found = 0
         t = end
@@ -52,51 +58,52 @@ for i to numSentences
             t = t - step
         endwhile
 
-        ; Nếu đoạn thoại dài tối thiểu 50ms thì mới tính
         if activeEnd - activeStart > 0.05
+            ; Calculate sentence mean intensity
+            sumIntensity = 0
+            numSamples = 0
+            t = activeStart
+            while t <= activeEnd
+                value = Get value at time: t, "linear"
+                sumIntensity = sumIntensity + value
+                numSamples = numSamples + 1
+                t = t + step
+            endwhile
+            meanIntensity = sumIntensity / numSamples
 
-            ; Tính khoảng tính slope: 30% cuối đoạn active speech
-            slopeEnd = activeEnd
-            slopeStart = activeEnd - 0.3 * (activeEnd - activeStart)
-            if slopeStart < activeStart
-                slopeStart = activeStart
-            endif
+            ; Write sentence info
+            appendFileLine: output_file$, "Sentence ", string$(i), " | Start: ", fixed$(start,3), "s | End: ", fixed$(end,3), "s | Mean Intensity: ", fixed$(meanIntensity,2), " dB"
 
-            numSteps = floor ((slopeEnd - slopeStart) / step)
-            n = numSteps + 1
-            if n >= 2
-                sumX = 0
-                sumY = 0
-                sumXY = 0
-                sumXX = 0
+            ; Process each word in "words" tier
+            selectObject: textGrid
+            numWords = Get number of intervals: wordsTier
+            for j to numWords
+            selectObject: textGrid
+                word$ = Get label of interval: wordsTier, j
+                wordStart = Get start time of interval: wordsTier, j
+                wordEnd   = Get end time of interval: wordsTier, j
 
-                j = 0
-                while j <= numSteps
-                    t = slopeStart + j * step
-                    value = Get value at time: t, "linear"
-                    sumX = sumX + t
-                    sumY = sumY + value
-                    sumXY = sumXY + t * value
-                    sumXX = sumXX + t * t
-                    j = j + 1
-                endwhile
+                if word$ <> "" and wordStart >= activeStart and wordEnd <= activeEnd
+                    ; Calculate word mean intensity
+                    sumWordIntensity = 0
+                    numWordSamples = 0
+                    t = wordStart
+                    while t <= wordEnd
+                        selectObject: intensity
+                        value = Get value at time: t, "linear"
+                        sumWordIntensity = sumWordIntensity + value
+                        numWordSamples = numWordSamples + 1
+                        t = t + step
+                    endwhile
 
-                slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX)
+                    meanWordIntensity = sumWordIntensity / numWordSamples
 
-                ; Gán nhãn intonation theo độ dốc:
-                if slope > 0.5
-                    intonation$ = "falling"
-                elsif slope < -0.5
-                    intonation$ = "rising"
-                else
-                    intonation$ = "flat"
+                    ; Compare with sentence mean
+                    if meanWordIntensity > meanIntensity
+                        appendFileLine: output_file$, "    Emphasized word: '", word$, "' | ", fixed$(meanWordIntensity,2), " dB"
+                    endif
                 endif
-
-appendFileLine: output_file$, "Sentence ", string$(i), " | Start: ", fixed$(start, 3), "s | End: ", fixed$(end, 3), "s | Intonation: ", intonation$
-            else
-                writeInfoLine: "Too few points to compute slope in sentence ", i
-            endif
-
+            endfor
         else
             writeInfoLine: "No valid active speech in sentence ", i
         endif

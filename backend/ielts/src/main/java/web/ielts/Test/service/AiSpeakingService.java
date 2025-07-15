@@ -16,12 +16,22 @@ public class AiSpeakingService {
     @Autowired WhisperService whisperService;
     @Autowired
     private AIService aiService;
-    public EvaluationResult evaluateSpeaking(JsonNode transcriptText, String question, int partNumber, List<String> cueCard)  {
-
-
+    public EvaluationResult evaluateSpeaking(
+            JsonNode transcriptText,
+            String question,
+            int partNumber,
+            Map<String, Object> analyzeVoice,
+            List<String> cueCard
+    ) {
         // ✅ 1. Tạo prompt đúng cho từng part
-        String prompt = aiService.buildSpeakingPrompt(partNumber, question, transcriptText,cueCard);
+        String prompt = aiService.buildSpeakingPrompt(
+                partNumber,
+                question,
+                transcriptText,
+                 analyzeVoice,
+                cueCard
 
+        );
 
         // ✅ 2. Gọi GPT
         String gptResponse = aiService.callSpeakingPart(prompt);

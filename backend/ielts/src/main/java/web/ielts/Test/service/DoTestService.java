@@ -217,12 +217,12 @@ public class DoTestService {
                 if(gradingMethod.equalsIgnoreCase("ai")){
                     try {
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
-                      //  System.out.println(transcript);
-                        Map<String, Object> prosodyFeatures = prosodyService.analyze(s3UrlNotEncrypt, transcript);
-//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,null);
-//                    qa.setEvaluationResults(eval);
-//
-//                     totalScore += eval.getScore();
+                        System.out.println(transcript);
+                        Map<String, Object> analyze = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,analyze,null);
+                    qa.setEvaluationResults(eval);
+
+                     totalScore += eval.getScore();
 
                     } catch (Exception e) {
                         System.err.println("❌ Lỗi khi chấm câu hỏi: " + qa.getQuestion());

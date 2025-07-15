@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class AIService {
@@ -52,7 +53,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
 """;
 
         Map<String, Object> requestBody = Map.of(
-                "model", "gpt-3.5-turbo",
+                "model", "gpt-4o",
                 "messages", List.of(
                         Map.of("role", "system", "content", systemMessage),
                         Map.of("role", "user", "content", prompt)
@@ -200,12 +201,25 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             throw new RuntimeException("OpenAI API error: " + e.getMessage());
         }
     }
-    public String buildSpeakingPrompt(int partNumber, String question, JsonNode transcript,List<String> cueCard) {
+    public String buildSpeakingPrompt(
+            int partNumber,
+            String question,
+            JsonNode transcript,
+
+            Map<String, Object> analyzeVoice,
+
+            List<String> cueCard
+    ) {
         switch (partNumber) {
             case 1:
-                return buildSpeakingPart1Prompt(question, transcript);
+                return buildSpeakingPart1Prompt(
+                        question,
+                        transcript,
+                        analyzeVoice
+
+                );
             case 2:
-                return buildSpeakingPart2Prompt(question, transcript,cueCard);
+                return buildSpeakingPart2Prompt(question, transcript, cueCard);
             case 3:
                 return buildSpeakingPart3Prompt(question, transcript);
             default:
@@ -252,6 +266,18 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                     "Band 3: Frequent, sometimes long, pauses occur while candidate searches for words. Limited ability to link simple sentences and go beyond simple responses to questions. Frequently unable to convey basic message.\n" +
                     "Band 2: Lengthy pauses before nearly every word. Isolated words may be recognisable but speech is of virtually no communicative significance.\n" +
                     "Band 1: Essentially none. Speech is totally incoherent.\n";
+    private static final String IELTS_PUBLIC_Pronunciation =
+            "- IELTS Public Descriptors:\n" +
+                    "Band 9: Uses a full range of phonological features to convey precise and/or subtle meaning. Flexible use of features of connected speech is sustained throughout. Can be effortlessly understood throughout. Accent has no effect on intelligibility.\n" +
+                    "Band 8: Uses a wide range of phonological features to convey precise and/or subtle meaning. Can sustain appropriate rhythm. Flexible use of stress and intonation across long utterances, despite occasional lapses. Can be easily understood throughout. Accent has minimal effect on intelligibility.\n" +
+                    "Band 7: Displays all the positive features of band 6, and some, but not all, of the positive features of band 8.\n" +
+                    "Band 6: Uses a range of phonological features, but control is variable. Chunking is generally appropriate, but rhythm may be affected by a lack of stress-timing and/or a rapid speech rate. Some effective use of intonation and stress, but this is not sustained. Individual words or phonemes may be mispronounced but this causes only occasional lack of clarity. Can generally be understood throughout without much effort.\n" +
+                    "Band 5: Displays all the positive features of band 4, and some, but not all, of the positive features of band 6.\n" +
+                    "Band 4: Uses some acceptable phonological features, but the range is limited. Produces some acceptable chunking, but there are frequent lapses in overall rhythm. Attempts to use intonation and stress, but control is limited. Individual words or phonemes are frequently mispronounced, causing lack of clarity. Understanding requires some effort and there may be patches of speech that cannot be understood.\n" +
+                    "Band 3: Displays some features of band 2, and some, but not all, of the positive features of band 4.\n" +
+                    "Band 2: Uses few acceptable phonological features (possibly because sample is insufficient). Overall problems with delivery impair attempts at connected speech. Individual words and phonemes are mainly mispronounced and little meaning is conveyed. Often unintelligible.\n" +
+                    "Band 1: Can produce occasional individual words and phonemes that are recognisable, but no overall meaning is conveyed. Unintelligible.\n";
+
     private static final String errorType = "• Grammar-related:\n" +
             "- Grammar: tense\n" +
             "- Grammar: subject-verb agreement\n" +
@@ -288,20 +314,34 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             "- Fluency: excessive self-correction\n" +
             "- Fluency: unnatural pause\n" +
             "- Fluency: slow delivery\n" +
-            "- Fluency: choppy rhythm\n";
+            "- Fluency: choppy rhythm\n"+
+            "\n"+
+            "• Pronunciation-related:\n" +
+            "- Pronunciation: incorrect word stress\n" +
+            "- Pronunciation: incorrect intonation pattern\n"
+            ;
 
-    public String buildSpeakingPart1Prompt(String questions,JsonNode transcript){
+    public String buildSpeakingPart1Prompt(
+            String questions,
+            JsonNode transcript,
+            Map<String, Object> analyzeVoice
+
+    ) {
+        System.out.println("hello");
+        String praatResults = (String) analyzeVoice.get("prosodyFeatures");
+
+        System.out.println(praatResults);
 
         String speakingPart1 =
                 "You must return response strictly in JSON format.\n" +
-                      "Note: For simple factual questions in Part 1 (e.g., “What is your name?”), brief but relevant answers are acceptable. Do not penalize short responses if they clearly address the question.\n" +
+                        "Note: For simple factual questions in Part 1 (e.g., “What is your name?”), brief but relevant answers are acceptable. Do not penalize short responses if they clearly address the question.\n" +
 
-                       "Note: Spoken responses do not contain punctuation. You must IGNORE all punctuation marks such as commas, periods, question marks, or missing capital letters. \\n\" +\n" +
+                        "Note: Spoken responses do not contain punctuation. You must IGNORE all punctuation marks such as commas, periods, question marks, or missing capital letters. \\n\" +\n" +
                         "  Do NOT mark answers down due to missing or incorrect punctuation." +
                         "  Do NOT suggest corrections just to add commas or punctuation"+
                         "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
                         "\n" +
-                        "However, if the answer is short but still directly addresses the question (e.g., “My name is John”), \n" +
+                        "However, if the answer is short but still directly addresses the question  \n" +
                         "→ proceed with full evaluation based on content, grammar, and vocabulary. Do not mark it as off-topic."+
                         "Before evaluation, you must first carefully understand:\n" +
 
@@ -352,49 +392,84 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         " If any single errorType occurs more than 3 times,\n" +
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
-                       IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
-                        "• Fluency and coherence (25%):\n" +
-                        "+0.25 if the candidate maintains smooth flow of speech with minimal hesitation (Fluency)\n" +
-                        "→ ✅ Only add once.\n" +
+                        IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
+                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + praatResults+
                         "\n" +
-                        "+0.25 if the candidate uses natural pausing and appropriate pacing (Fluency)\n" +
-                        "→ ✅ Only add once.\n" +
+                        "Scoring rules:\n" +
+                        "- +0.5 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +
+                        "- +0.25 if meanIntensity is between 60–65 dB (slightly strong but acceptable).\n Only add once." +
+                        "- -0.5 if meanIntensity < 45 dB (voice too weak).\n Only add once." +
+                        "- +0.5 if speechRate is between 2.0–3.0 words/sec (smooth and fluent).\n Only add once." +
+                        "- -0.5 if speechRate < 1.5 words/sec (slow, hesitant).\n Only add once." +
+                        "- +0.5 if pauseCount == 0.0 (no unnatural hesitation).\n Only add once." +
+                        "- -0.5 if pauseCount > 2 (frequent unnatural pauses).Only add once."+
+                        "Coherence  "+
+                        "+0.5 if the speaker presents ideas in a clear logical sequence (with an introduction, development, and conclusion).\n Only add once." +
                         "\n" +
-                        "+0.25 if ideas are logically ordered and connected clearly (Coherence)\n" +
-                        "→ ✅ Only add once.\n" +
+                        "+0.25 if cohesive devices (e.g., “however”, “as a result”, “on the other hand”) are used effectively and appropriately.\n Only add once." +
                         "\n" +
-                        "+0.25 if discourse markers / cohesive devices are used appropriately (Coherence)\n" +
-                        "→ ✅ Only add once.\n" +
-                        "→ Deduct 0.5 point in total for that error type (only once)"+
+                        "+0.25 if the speaker avoids repeating ideas or overemphasizing a single point.\n Only add once." +
+                        "\n" +
+                        "+0.25 if each sentence connects clearly to the previous one (no abrupt transitions).\n Only add once." +
+                        "\n" +
+                        "+0.25 if each argument or point is supported with examples, explanations, or reasons.\n Only add once." +
+                        "\n" +
+                        "+0.5 if the entire response does not contain any coherence-related errors listed below. Only add once."+
+                        "→ Deduct 0.5 point in total for that error type (only once) for Coherence"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_FLUENCY_AND_COHERENCE+
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
                         "RESPONSE FORMAT:\n" +
                         "- score: decimal (overall band score, e.g. 6.5)\n" +
-                        "- transcript: string (full transcript of the original answer)\n" +
+                        "- transcript: string ( transcript of the original answer)\n" +
                         "- feedback: {\n" +
-                        "    (In errorCorrections, include only short phrases or words that are clearly incorrect. The correctedText should be the fixed version based on grammar, fluency, or lexical issues. )\n" +
-                        "    errorCorrections: [{\n" +
-                        "      originalText: string,\n" +
-                        "      correctedText: string,\n" +
-                        "      errorType: string,\n" +
-                        "      explanation: string,\n" +
-                        "      sentenceContext: string\n" +
-                        "    }],\n" +  // ✅ Đóng đúng mảng
-                        "    overallComment: string\n" +
+                       "\"(In `errorCorrections`, include only short phrases or words that are clearly incorrect due to **grammar** or **lexical resource** problems. \" +\n" +
+                        "\"Do NOT include any issues related to **fluency**, **coherence**, or **pronunciation** such as hesitations, pauses, repetition, unnatural phrasing, or unclear idea progression.)\\n\\n\" +\n" +
+                        "\n" +
+                        "\"Each entry in the `errorCorrections` array must follow this format:\\n\" +\n" +
+                        "\"errorCorrections: [{\\n\" +\n" +
+                        "\"  originalText: string,            // The incorrect word or phrase\\n\" +\n" +
+                        "\"  correctedText: string,           // The corrected version\\n\" +\n" +
+                        "\"  errorType: string,               // Only 'Grammar' or 'Lexical' allowed\\n\" +\n" +
+                        "\"  explanation: string,             // Why it was incorrect (e.g., wrong tense, article usage, word choice)\\n\" +\n" +
+                        "\"  sentenceContext: string          // The full sentence where the error occurred\\n\" +\n" +
+                        "\"}]\\n\\n\" +\n" +
+                        "\n" +
+                        "\"\uD83D\uDEAB Do NOT include:\\n\" +\n" +
+                        "\"- Pauses, repetitions, fillers like 'uh', 'um'\\n\" +\n" +
+                        "\"- Vague or disorganized sentence structure\\n\" +\n" +
+                        "\"- Cohesion or logic issues (these go in Fluency and Coherence section)\\n\\n\" +\n" +
+                        "\n" +
+                        "\"✅ Only include:\\n\" +\n" +
+                        "\"- Grammar errors (e.g., subject-verb agreement, tense, preposition, article)\\n\" +\n" +
+                        "\"- Lexical errors (e.g., wrong word choice, inappropriate collocation)\\n\";"+
+
                         "},\n" + // ✅ Đóng đúng object feedback
-                        "- evaluation: {\n" +
-                        "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
-                        "    Grammar: {scoreEva: string, reviewEva: string}\n" +
+                        "\"For Fluency and Coherence, provide detailed feedback only after assigning the score. This feedback must be strictly based on the actual fluency and coherence performance observed in Part 1 of the candidate’s response.\n" +
+                        "\n" +
+                        "Do NOT provide generic or vague comments.\n" +
+                        "\n" +
+                        "Your feedback must explicitly mention and evaluate the following:\n" +
+                        "\n" +
+                        "meanIntensity"+
+                        "- **Speech rate**: Was the candidate’s speech fast, slow, or appropriately paced?\n" +
+                        "- **Number and nature of pauses**: Were there frequent unnatural pauses or hesitations?\n" +
+                        "- **Logical progression of ideas**: Did the candidate present ideas in a logical and connected manner?\n" +
+                        "- **Use of cohesive devices**: Were linking words (e.g., however, because, so) used correctly and naturally?\n" +
+                        "- **Overall clarity**: Was the response easy to follow and understand?"+
+                        "LexicalResource: {scoreEva: string, reviewEva: string},\n" +
+                        "Grammar: {scoreEva: string, reviewEva: string}\n" +
                         "Fluency and coherence: {scoreEva: string, reviewEva: string}\n"+
                         "Pronunciation: {scoreEva: string, reviewEva: string}\n"+
                         "},\n" +
                         "- sampleAnswer: string (Optional band 9 model)\n" +
                         "Question:\n" + questions + "\n" +
                         "Original Answer:\n" + transcript;
+
         return speakingPart1;
     }
+
 
     public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards){
         String speakingPart2 =
@@ -640,6 +715,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
 
         return speakingPart3;
     }
+
     //Prompt cho Writing 1
     private String buildTask1Prompt(String question, String answer) {
         String promptBuilder1 =
@@ -649,7 +725,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                 "   - Cross-check ALL data points/trends between image and student's answer\n" +
                 "   - Flag ANY discrepancies\n" +
                 "   - Verify ALL numerical values/percentages against visual data (tolerance: 0% error)\n" +
-                "   - Missing key features = automatic Band 5 cap"+
+
                 "\n" +
                 "2. EVALUATION (Official IELTS Criteria):\n" +
                         "• Task Achievement (25%):\n" +
@@ -743,11 +819,113 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
 
         return promptBuilder1;
     }
+    private static final String IELTS_PUBLIC_DESCRIPTORSLexicalResourceWrtingTask2 =
+            "  - IELTS Public Descriptors:\n" +
+                     "• Band 9: Full flexibility and precise use are widely evident. A wide range of vocabulary is used accurately and appropriately with very natural and sophisticated control of lexical features. Minor errors in spelling and word formation are extremely rare and have minimal impact on communication.\n" +
+                    "\n" +
+                    "• Band 8: A wide resource is fluently and flexibly used to convey precise meanings. There is skilful use of uncommon and/or idiomatic items when appropriate, despite occasional inaccuracies in word choice and collocation. Occasional errors in spelling and/or word formation may occur, but have minimal impact on communication.\n" +
+                    "\n" +
+                    "• Band 7: The resource is sufficient to allow some flexibility and precision. There is some ability to use less common and/or idiomatic items. An awareness of style and collocation is evident, though inappropriacies occur. There are only a few errors in spelling and/or word formation and they do not detract from overall clarity.\n" +
+                    "\n" +
+                    "• Band 6: The resource is generally adequate and appropriate for the task. The meaning is generally clear in spite of a rather restricted range or a lack of precision in word choice. If the writer is a risk-taker, there will be a wider range of vocabulary used but higher degrees of inaccuracy or inappropriacy. There are some errors in spelling and/or word formation, but these do not impede communication.\n" +
+                    "\n" +
+                    "• Band 5: The resource is limited but minimally adequate for the task. Simple vocabulary may be used accurately but the range does not permit much variation in expression. There may be frequent lapses in the appropriacy of word choice and a lack of flexibility is apparent in frequent simplifications and/or repetitions. Errors in spelling and/or word formation may be noticeable and may cause some difficulty for the reader.\n" +
+                    "\n" +
+                    "• Band 4: The resource is limited and inadequate for or unrelated to the task. Vocabulary is basic and may be used repetitively. There may be inappropriate use of lexical chunks (e.g., memorised phrases, formulaic language and/or language from the input material). Inappropriate word choice and/or errors in word formation and/or in spelling may impede meaning.\n" +
+                    "\n" +
+                    "• Band 3: The resource is inadequate (which may be due to the response being significantly under-length). Possible over-dependence on input material or memorised language. Control of word choice and/or spelling is very limited, and errors predominate. These errors may severely impede meaning.\n" +
+                    "\n" +
+                    "• Band 2: The resource is extremely limited with few recognisable strings, apart from memorised phrases. There is no apparent control of word choice or spelling.\n" +
+                    "\n" +
+                    "• Band 1: Responses of 20 words or fewer are rated at Band 1. No resource is apparent, except for a few isolated words."
+            ;
+    private static final String IELTS_PUBLIC_DESCRIPTORSGrammarWrtingTask2 =
+            "  - IELTS Public Descriptors: " +
+                    "• Band 9: A wide range of structures is used with full flexibility and control. " +
+                    "Punctuation and grammar are used appropriately throughout. " +
+                    "Minor errors are extremely rare and have minimal impact on communication. " +
+
+                    "• Band 8: A wide resource is fluently and flexibly used to convey precise meanings. " +
+                    "There is skilfully use of uncommon and/or idiomatic items when appropriate, despite occasional inaccuracies in word choice and collocation. " +
+                    "Occasional errors in spelling and/or word formation may occur, but have minimal impact on communication. " +
+
+                    "• Band 7: A variety of complex structures is used with some flexibility and accuracy. " +
+                    "Grammar and punctuation are generally well controlled, and error-free sentences are frequent. " +
+                    "A few errors in grammar may persist, but these do not impede communication. " +
+
+                    "• Band 6: A mix of simple and complex sentence forms is used but flexibility is limited. " +
+                    "Examples of more complex structures are not marked by the same level of accuracy as in simple structures. " +
+                    "Errors in grammar and punctuation occur, but rarely impede communication. " +
+
+                    "• Band 5: The range of structures is limited and rather repetitive. " +
+                    "Although complex sentences are attempted, they tend to be faulty, and the greatest accuracy is achieved on simple sentences. " +
+                    "Grammatical errors may be frequent and cause some difficulty for the reader. " +
+                    "Punctuation may be faulty. " +
+
+                    "• Band 4: A very limited range of structures is used. " +
+                    "Subordinate clauses are rare and simple sentences predominate. " +
+                    "Some structures are produced accurately but grammatical errors are frequent and may impede meaning. " +
+                    "Punctuation is often faulty or inadequate. " +
+
+                    "• Band 3: Sentence forms are attempted, but errors in grammar and punctuation predominate (except in memorised phrases or those taken from the input material). " +
+                    "This prevents most meaning from coming through. " +
+                    "Length may be insufficient to provide evidence of control of sentence forms. " +
+
+                    "• Band 2: There is little or no evidence of sentence forms (except in memorised phrases). " +
+
+                    "• Band 1: Responses of 20 words or fewer are rated at Band 1. " +
+                    "No rateable language is evident.";
+    private static final String IELTS_PUBLIC_DESCRIPTORSTaskResponseTask2 =
+            "  - IELTS Public Descriptors: " +
+                    "• Band 9: The prompt is appropriately addressed and explored in depth.\n" +
+                    "A clear and fully developed position is presented which directly\n" +
+                    "answers the question/s.\n" +
+                    "Ideas are relevant, fully extended and well supported.\n" +
+                    "Any lapses in content or support are extremely rare. " +
+
+                    "• Band 8: The prompt is appropriately and sufficiently addressed.\n" +
+                    "A clear and well-developed position is presented in response to the\n" +
+                    "question" +
+                    "Ideas are relevant, well extended and supported.\n" +
+                    "There may be occasional omissions or lapses in content.\n " +
+
+                    "• Band 7: A variety of complex structures is used with some flexibility and accuracy. " +
+                    "Grammar and punctuation are generally well controlled, and error-free sentences are frequent. " +
+                    "A few errors in grammar may persist, but these do not impede communication. " +
+
+                    "• Band 6: A mix of simple and complex sentence forms is used but flexibility is limited. " +
+                    "Examples of more complex structures are not marked by the same level of accuracy as in simple structures. " +
+                    "Errors in grammar and punctuation occur, but rarely impede communication. " +
+
+                    "• Band 5: The range of structures is limited and rather repetitive. " +
+                    "Although complex sentences are attempted, they tend to be faulty, and the greatest accuracy is achieved on simple sentences. " +
+                    "Grammatical errors may be frequent and cause some difficulty for the reader. " +
+                    "Punctuation may be faulty. " +
+
+                    "• Band 4: A very limited range of structures is used. " +
+                    "Subordinate clauses are rare and simple sentences predominate. " +
+                    "Some structures are produced accurately but grammatical errors are frequent and may impede meaning. " +
+                    "Punctuation is often faulty or inadequate. " +
+
+                    "• Band 3: Sentence forms are attempted, but errors in grammar and punctuation predominate (except in memorised phrases or those taken from the input material). " +
+                    "This prevents most meaning from coming through. " +
+                    "Length may be insufficient to provide evidence of control of sentence forms. " +
+
+                    "• Band 2: There is little or no evidence of sentence forms (except in memorised phrases). " +
+
+                    "• Band 1: Responses of 20 words or fewer are rated at Band 1. " +
+                    "No rateable language is evident.";
 
     private String buildTask2Prompt(String question, String answer) {
         String promptBuilder2 =
                 "You must return response strictly in JSON format.\n" +
                         "You are an IELTS examiner analyzing Writing Task 2. Extremely strict grading" +
+                        "Before evaluation, you must first carefully understand:\n" +
+                        "1. The question being asked (context and requirements)\n" +
+                        "2. The full transcript of the user's response (content, grammar, vocabulary)\n" +
+                        "3. You must evaluate whether the response is relevant to the question and does not go off-topic.\n" +
+                        "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
+                        "4. You must strictly check if the candidate addresses **all bullet points** in the cue card:\n" +
                         "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
                         "\n" +
                         "• Task Achievement (25%):\n" +
@@ -779,31 +957,41 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "     • Band 5: Presents information with some organisation but lacks overall progression. Inadequate, inaccurate or over-use of cohesive devices. Poor paragraphing.\n" +
                         "\n" +
                         "• Lexical Resource (25%):\n"+
-                        "- Advanced vocabulary must include topic-specific academic collocations. \n" +
-                        "  (If vocabulary remains general and safe, cap at Band 6.)\n"+
-                        "   - Academic vocabulary (Band 9 requires ≥8 advanced terms)\n" +
-                        "   - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
-                        "   - Spelling (3 errors = -0.5 band)\n" +
-                        "   - IELTS Public Descriptors:\n" +
-                        "     • Band 9: Uses wide range of vocabulary naturally and precisely. Sophisticated control. Rare minor slips.\n" +
-                        "     • Band 8: Uses wide range fluently and flexibly. Skilfully uses uncommon items with rare inaccuracies.\n" +
-                        "     • Band 7: Uses sufficient range with flexibility. Attempts less common items with some errors.\n" +
-                        "     • Band 6: Uses adequate range. Attempts less common terms but with inaccuracy.\n" +
-                        "     • Band 5: Limited range. Noticeable spelling/word formation errors. May cause difficulty for the reader.\n" +
+                        "✅ +0.25 bonus to the Lexical Resource score if the candidate fulfills at least one of the following:\n" +
+                        "Accurate use of academic vocabulary\n" +
+                        "e.g., mitigate, infrastructure, sustainability\n" +
                         "\n" +
+                        "Correct use of academic collocations\n" +
+                        "e.g., “pose a threat,” “play a crucial role,” “bring about change”\n" +
+                        "\n" +
+                        "Use of idiomatic expressions that are appropriate for formal writing\n" +
+                        "e.g., “a double-edged sword,” “a stepping stone to success”\n" +
+                        "\n" +
+                        "Effective paraphrasing of key task terms\n" +
+                        "e.g., “young people” → “the younger generation,” “adolescents”\n" +
+                        "\n" +
+                        "Consistently appropriate word choice, with no significant vocabulary errors throughout the essay\n" +
+                        "\n"+
+                        " Deduct 0.5 point in total for that error type about Lexical Resource  (only once)\"+\n" +
+                        " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:\" +"+
+                        IELTS_PUBLIC_DESCRIPTORSLexicalResourceWrtingTask2+
                         "• Grammar (25%):\n" +
-                        "- Minimum of 3 complex structures per body paragraph.\n" +
-                        "  (If majority are simple or compound sentences, cap at Band 6.)\n"+
-                        "   - Tense accuracy (graph data must use past tense if historical)\n" +
-                        "   - Complex structures (Band 7+ needs ≥3 complex sentences)\n" +
-                        "   - Punctuation (comma errors = -0.5 band)\n" +
-                        "   - IELTS Public Descriptors:\n" +
-                        "     • Band 9: Uses wide range of structures with full flexibility and accuracy. Rare minor slips.\n" +
-                        "     • Band 8: Uses wide range of structures. Majority of sentences are error-free.\n" +
-                        "     • Band 7: Uses variety of complex structures. Frequent error-free sentences.\n" +
-                        "     • Band 6: Mix of simple/complex forms. Some errors but rarely reduce communication.\n" +
-                        "     • Band 5: Limited range. Frequent grammatical and punctuation errors. Errors can cause difficulty for the reader."+
-                        "\n" +
+                       " +0.25 point\n" +
+                        "The candidate demonstrates a wide range of complex grammatical structures (e.g., conditionals, inversion, cleft sentences, relative clauses…) with high accuracy, and the remaining errors do not affect meaning.\n" +
+                        "→ Apply this if the candidate is around Band 6–7 but shows strong evidence of reaching Band 8:\n" +
+                        "Several complex or uncommon structures are used\n" +
+                        "These structures are mostly accurate\n" +
+                        "Remaining grammatical errors are minor and do not hinder understanding\n" +
+                        " Deduct 0.5 point in total for that error type about Grammar  (only once)\"+\n" +
+                        " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:\" +"+
+                        IELTS_PUBLIC_DESCRIPTORSGrammarWrtingTask2+
+                        " +0.25 point\n" +
+                        "Over 80% of all sentences are compound or complex, and most of them are grammatically and punctuation accurate.\n" +
+                        "→ Apply this when there is clear evidence of control over a variety of clauses such as: Relative clauses,Adverbial clauses,Noun clauses,Correct usage of punctuation (commas, semicolons, etc.)" +
+                        " +0.25 point\n" +
+                        "There are no serious grammar errors throughout the essay, and the proportion of error-free sentences is ≥ 60%.\n" +
+                        "→ Apply this if the overall accuracy is high, even if the grammatical range is not very wide."+
+
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
                         "   - Deduct 0.5 band per 2 major errors\n" +
