@@ -21,6 +21,8 @@ import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
 // import IeltsResult from "@/pages/IeltsResult";
 import FullTest from "@/pages/DoTest/FullTest";
 import ListeningResult from "@/pages/Result/ListeningResult";
+import LoginAdmin from "@/components/sections/admin/LoginAdmin";
+import AdminPage from "@/pages/AdminPage";
 export default function App() {
     return (
         <AuthProvider>
@@ -71,6 +73,11 @@ export default function App() {
                     {/*<Route path="/api/payment/create" element={<MainLayout><PaymentPage/></MainLayout>} />*/}
                     {/*<Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />*/}
 
+
+                    <Route path="/loginAdmin" element={<LoginAdmin />} />
+                    <Route path="/adminPage" element={
+                            <AdminPage />
+                    } />
                 </Routes>
             </Router>
         </AuthProvider>

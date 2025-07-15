@@ -35,7 +35,7 @@ public class UserController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             UserDTO dto = new UserDTO();
-            dto.setUsername(user.getEmail());
+            dto.setUserName(user.getEmail());
             dto.setFirstName(user.getFirstName());
             dto.setLastName(user.getLastName());
             dto.setBirthDate(user.getBirthDate());
@@ -68,7 +68,7 @@ public class UserController {
 
         // Trả về DTO
         UserDTO responseDto = new UserDTO();
-        responseDto.setUsername(existingUser.getEmail());
+        responseDto.setUserName(existingUser.getEmail());
         responseDto.setFirstName(existingUser.getFirstName());
         responseDto.setLastName(existingUser.getLastName());
         responseDto.setBirthDate(existingUser.getBirthDate());
