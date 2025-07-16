@@ -503,9 +503,6 @@ The data suggests that government policies and economic factors significantly in
                             if (isWhitespace) {
                               return <span key={index}>{word}</span>
                             }
-                            if (!error) {
-                              return <span key={index}>{word}</span>
-                            }
                             if (error) {
                               return (
                                 <Dialog key={index}>
