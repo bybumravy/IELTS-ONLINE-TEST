@@ -76,7 +76,7 @@ public class TestsController {
             "words": [
               {
                 "word": "Hello",
-                "syllables": 2,
+                "syllables": 1,
                 "start": 0.0,
                 "end": 0.82
               },
