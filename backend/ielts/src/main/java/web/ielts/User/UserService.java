@@ -18,6 +18,7 @@ public class UserService {
 
     public User resetPremiumIfExpired(User user) {
         if (user.isPremiumActive()) {
+            user.setPremium(false);
             user.setPremiumExpiry(null);
             userRepository.save(user);
         }
@@ -27,6 +28,7 @@ public class UserService {
 
     public void upgradeToPremium(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setPremium(true);
         user.setPremiumExpiry(LocalDate.now(ZoneOffset.UTC).plusDays(1));
         userRepository.save(user);
     }

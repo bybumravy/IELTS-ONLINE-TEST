@@ -83,6 +83,12 @@ export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
                     {(skill === "Listening" || skill === "Reading") &&
                         exercises.map((exercise, idx) => (
                             <div key={idx} className="mb-12">
+                                {/* Hiển thị đoạn paragraph với html */}
+                                <div className="mb-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: exercise.paragraph ?? "" }} />
+
+                                {/* Hiển thị instruction */}
+                                <p className="mb-6 font-semibold italic" dangerouslySetInnerHTML={{ __html: exercise.instruction}}/>
+
                                 {/* Hiển thị hình ảnh */}
                                 {exercise.imageUrl && (
                                     <div className="mb-4">
@@ -93,11 +99,6 @@ export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
                                         />
                                     </div>
                                 )}
-                                {/* Hiển thị đoạn paragraph với html */}
-                                <div className="mb-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: exercise.paragraph ?? "" }} />
-
-                                {/* Hiển thị instruction */}
-                                <p className="mb-6 font-semibold italic" dangerouslySetInnerHTML={{ __html: exercise.instruction}}/>
 
                                 {exercise.audioUrl && (
                                     <div className="mb-6">

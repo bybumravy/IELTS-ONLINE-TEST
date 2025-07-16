@@ -26,6 +26,7 @@ public class User implements UserDetails {
     private String email;
     private String password;
     private String role;
+    private boolean premium;
     private LocalDate premiumExpiry;
     private String googleID;
 
@@ -37,7 +38,7 @@ public class User implements UserDetails {
     }
 
     public boolean isPremiumActive() {
-        return premiumExpiry != null && premiumExpiry.isAfter(LocalDate.now());
+        return premiumExpiry != null && premiumExpiry.isBefore(LocalDate.now());
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
