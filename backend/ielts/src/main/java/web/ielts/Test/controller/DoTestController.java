@@ -72,7 +72,7 @@ public class DoTestController {
 
     @PostMapping("/writing/submit")
     public ResponseEntity<WritingAnswer> saveWritingAnswer(@RequestBody WritingAnswer answer) {
-        System.out.println("sadfsadfdsfdsafjasdklfklasdjfkasjdflaskjdflkasdjflkasjdfasfasfasfasdfasdfasdfa");
+
         System.out.println(answer.toString());
         return ResponseEntity.ok(doTestService.saveWritingAnswer(answer));
     }
@@ -109,7 +109,7 @@ public class DoTestController {
 
             saved = doTestService.saveSubmission(submission);
             System.out.println(saved);
-            System.out.println("Saved initial submission with _id: " + saved.getId());
+
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Lỗi khi đọc hoặc lưu metadata JSON: " + e.getMessage());
         }

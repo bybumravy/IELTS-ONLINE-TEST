@@ -30,7 +30,7 @@ import ListeningTest from "@/pages/DoTest/ListeningTest"
 import ReadingTest from "@/pages/DoTest/ReadingTest"
 import WritingTest from "@/pages/DoTest/WritingTest"
 import SpeakingTest from "@/pages/DoTest/SpeakingTest"
-import VoiceRecorder from "@/pages/DoTest/checkMic"
+
 import FulllTest from "@/pages/DoTest/FullTest"
 
 //Vocab
@@ -127,13 +127,13 @@ export default function App() {
                             </ProtectedLayout>
                         } />
                         <Route path="/test/writing/:testId" element={
-                            <ProtectedLayout allowRoles={["student"]}>
+                            <ProtectedLayout allowRoles={["student"]} requirePremium={true}>
                                 <WritingTest />
                             </ProtectedLayout>
                         } />
                         <Route path="/test/speaking/:testId" element={
-                            <ProtectedLayout allowRoles={["student"]}>
-                                <VoiceRecorder />
+                            <ProtectedLayout allowRoles={["student"]} requirePremium={true}>
+                                <SpeakingTest/>
                             </ProtectedLayout>
                         } />
                         <Route path="/checkMic/:testId" element={

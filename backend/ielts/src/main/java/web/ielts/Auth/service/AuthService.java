@@ -4,6 +4,8 @@ package web.ielts.Auth.service;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +23,8 @@ import web.ielts.Auth.repository.AuthRepository;
 import web.ielts.Config.EmailConfig;
 import web.ielts.Config.EmailForgetPasswordConfig;
 import web.ielts.User.User;
+
+import static web.ielts.Auth.JwtToken.*;
 
 @Component
 public class AuthService {
@@ -71,11 +75,53 @@ public class AuthService {
         );// giả định tìm theo token hoặc email
         tokenRepository.save(verificationToken);
 
-        // Token hợp lệ
-        // Thực hiện reset password hoặc gửi email xác nhận
-        emailForgetPasswordConfig.sendResetPasswordEmail(verificationToken.getUserEmail(), token);
+                // Token hợp lệ
+                // Thực hiện reset password hoặc gửi email xác nhận
+                emailForgetPasswordConfig.sendResetPasswordEmail(verificationToken.getUserEmail(), token);
 
-        return ResponseEntity.ok("Gửi email thành công, vui lòng kiểm tra email.");
+                return ResponseEntity.ok("Gửi email thành công, vui lòng kiểm tra email.");
+            }
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token missing");
+        }
+
+        String refreshToken = null;
+        for (Cookie cookie : cookies) {
+            if ("refreshToken".equals(cookie.getName())) {
+                refreshToken = cookie.getValue();
+                break;
+            }
+        }
+
+        if (refreshToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token missing");
+        }
+
+        try {
+            // Kiểm tra token
+            String email = getUsernameFromToken(refreshToken);
+            User user = authRepository.findByEmail(email);
+
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            }
+            if (isTokenExpired(refreshToken)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token expired");
+            }
+
+            // Tạo access token và refresh token mới
+            ResponseCookie cookie = createJwtCookie(user.getEmail(), user.getRole(),user.isPremium());
+            ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), user.getRole(),user.isPremium());
+
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+            return ResponseEntity.ok(Map.of("status", "success"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+        }
     }
 
 
@@ -106,8 +152,8 @@ public class AuthService {
 
         return ResponseEntity.ok(response);
     }
-    public ResponseCookie createJwtCookie(String email, String role) {
-        String tokenJwt = JwtToken.generateToken(email, role);
+    public ResponseCookie createJwtCookie(String email, String role,boolean isPremium) {
+        String tokenJwt = generateAccessToken(email, role,isPremium);
 
         return ResponseCookie.from("jwt_token", tokenJwt)
                 .httpOnly(true)
@@ -115,6 +161,16 @@ public class AuthService {
                 .path("/")
                 .maxAge(24 * 60 * 60)
                 .sameSite("Lax")
+                .build();
+    }
+    public ResponseCookie createRefreshTokenCookie(String email, String role,boolean isPremium) {
+        String refreshToken = generateRefreshToken(email, role,isPremium);
+        return ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60) // 7 ngày
+                .sameSite("Strict")
                 .build();
     }
     public ResponseEntity<?> verifyEmail(String token) {
@@ -135,12 +191,14 @@ public class AuthService {
         user.setPassword(encoder.encode(user.getPassword()));
 
         authRepository.save(user);
-        ResponseCookie cookie = createJwtCookie(user.getEmail(), user.getRole());
-
-
+        ResponseCookie cookie = createJwtCookie(user.getEmail(), user.getRole(),user.isPremium());
+        ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), user.getRole(),user.isPremium());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .headers(headers)
                 .body("Xác thực email thành công! Bạn có thể đăng nhập.");
     }
 
@@ -150,26 +208,20 @@ public class AuthService {
         User user = authRepository.findByEmail(email);
         String role = user.getRole();
 
-        // ✅ Nếu login từ "/login" → chỉ cho STUDENT login
-        if (path.equalsIgnoreCase("/login") && !role.equalsIgnoreCase("STUDENT")) {
-            response.put("status", "fail");
-            response.put("message", "Only STUDENT accounts can login here");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-        }
-        if (path.equalsIgnoreCase("/loginadmin") && !role.equalsIgnoreCase("ADMIN")) {
-            response.put("status", "fail");
-            response.put("message", "Only admin accounts can login here");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-        }
-        System.out.println(user);
-        if (user != null && encoder.matches(password, user.getPassword()) ) {
-            ResponseCookie cookie = createJwtCookie(user.getEmail(), role);
 
+
+        if (user != null && encoder.matches(password, user.getPassword()) ) {
+            ResponseCookie cookie = createJwtCookie(user.getEmail(), role,user.isPremium());
+            ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), role,user.isPremium());
             response.put("status", "success");
             response.put("message", "Login successful");
-            System.err.println(response);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
+            headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .headers(headers)
                     .body(response);
         } else {
             response.put("status", "fail");
@@ -192,28 +244,40 @@ public class AuthService {
 
         return JwtToken.extractRole(token);
     }
+    public boolean isPremium(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("Missing token");
+        }
 
-    public List<ResponseCookie> logout(HttpServletRequest request) {
-        // Xoá session
-
-
-        // Xoá jwt_token
-        ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", "")
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(0)
-                .sameSite("Lax")
-                .build();
-
-        // Xoá JSESSIONID
-        ResponseCookie jsessionidCookie = ResponseCookie.from("JSESSIONID", "")
-                .path("/")
-                .maxAge(0)
-                .build();
-
-        return List.of(jwtCookie, jsessionidCookie);
+        return JwtToken.extractIsPremium(token);
     }
+   public List<ResponseCookie> logout(HttpServletRequest request) {
+    // Xoá session
+   
+
+    // Xoá jwt_token
+    ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", "")
+            .httpOnly(true)
+            .secure(false)
+            .path("/")
+            .maxAge(0)
+            .sameSite("Lax")
+            .build();
+       ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", "")
+               .httpOnly(true)
+               .secure(false)
+               .path("/")
+               .maxAge(0)
+               .sameSite("Strict")
+               .build();
+    // Xoá JSESSIONID
+    ResponseCookie jsessionidCookie = ResponseCookie.from("JSESSIONID", "")
+            .path("/")
+            .maxAge(0)
+            .build();
+
+    return List.of(jwtCookie, jsessionidCookie,refreshTokenCookie);
+}
 
 
 
@@ -221,4 +285,7 @@ public class AuthService {
     public User getUserByEmail(String email) {
         return authRepository.findByEmail(email);
     }
+
+
+
 }

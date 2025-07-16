@@ -9,6 +9,19 @@ public class SpeakingAnswerPart13 {
     private String instruction;
     private List<SpeakingAnswerQuestion> questions;
 
+    private double averageScore;
+
+
+
+
+
+    public double getAverageScore() {
+        return averageScore;
+    }
+
+    public void setAverageScore(double averageScore) {
+        this.averageScore = averageScore;
+    }
 
     public SpeakingAnswerPart13(int partNumber, String title, String instruction, List<SpeakingAnswerQuestion> questions) {
         this.partNumber = partNumber;

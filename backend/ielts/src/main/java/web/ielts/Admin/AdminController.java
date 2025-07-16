@@ -35,14 +35,14 @@ public class AdminController {
 
 
 
-
     @PutMapping("updateuser")
     public ResponseEntity<?> updateUser(@RequestBody Map<String, Object> data) {
         String email = (String) data.get("email");
         String role =  (String) data.get("role");
         // Map sang UserDTO
-        adminService.updateUser(email,role);
+         adminService.updateUser(email,role);
 
         return ResponseEntity.ok("Updated");
     }
+
 }

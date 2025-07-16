@@ -1,13 +1,24 @@
 package web.ielts.Test.model.answer.speaking;
 
 
+import java.util.List;
+
 public class SpeakingAnswerQuestion {
     private String question;
     private String studentAnswer;
+    private EvaluationResult evaluationResults;
 
     public SpeakingAnswerQuestion(String question, String studentAnswer) {
         this.question = question;
         this.studentAnswer = studentAnswer;
+    }
+
+    public EvaluationResult getEvaluationResults() {
+        return evaluationResults;
+    }
+
+    public void setEvaluationResults(EvaluationResult evaluationResults) {
+        this.evaluationResults = evaluationResults;
     }
 
     public String getQuestion() {
@@ -35,6 +46,7 @@ public class SpeakingAnswerQuestion {
         return "SpeakingAnswerQuestion{" +
                 "question='" + question + '\'' +
                 ", studentAnswer='" + studentAnswer + '\'' +
+                ", evaluationResults=" + evaluationResults +
                 '}';
     }
 }

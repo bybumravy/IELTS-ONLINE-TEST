@@ -9,6 +9,18 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 import { customFetch } from "@/components/sections/customFetch"
 import { DoTestSpeakingHeader } from "@/components/layout/doTest/DoTestSpeakingHeader"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from "@/components/ui/dialog";
+import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
+import {Label} from "@/components/ui/label";
+
+const API_URL = import.meta.env.VITE_API_URL || 'VITE_API_URL=http://api.languages.io.vn:8080';
 
 type Speaking = {
     _id: string
@@ -40,6 +52,7 @@ type Part = "part1" | "part2" | "part3"
 const SpeakingTest = () => {
     const { testId } = useParams<{ testId: string }>()
     const { user } = useAuth()
+    const {isPremium} = useAuth()
     const TOTAL_TEST_TIME = 600 // 10 phút (600 giây)
     const [speaking, setSpeaking] = useState<Speaking | null>(null)
     const [loading, setLoading] = useState(true)
@@ -57,7 +70,11 @@ const SpeakingTest = () => {
     const timerRef = useRef<number | null>(null)
     const mediaRecorderRef = useRef<MediaRecorder | null>(null)
     const audioChunksRef = useRef<Blob[]>([])
-    const [_recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
+    const [liveTranscript, setLiveTranscript] = useState<string>("");
+    const recognitionRef = useRef<any>(null); // dùng any nếu TS báo lỗi SpeechRecognition
+    const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
+    const [gradingMethod, setGradingMethod] = useState<"ai" | "teacher">("ai");
+    const [showGradingDialog, setShowGradingDialog] = useState(false);
     const [totalRecordingTime, setTotalRecordingTime] = useState<{ [key in Part]: number }>({
         part1: 0,
         part2: 0,
@@ -76,8 +93,6 @@ const SpeakingTest = () => {
         part2: 1,
         part3: 1,
     }
-
-    const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -235,7 +250,29 @@ const SpeakingTest = () => {
 
                 reader.readAsArrayBuffer(audioBlob)
             }
+            if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+                const SpeechRecognition =
+                    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = "en-US"; // hoặc "vi-VN"
 
+                recognition.onresult = (event: any) => {
+                    let transcript = "";
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                    setLiveTranscript(transcript);
+                };
+
+                recognition.onerror = (e: any) => {
+                    console.error("Speech recognition error:", e);
+                };
+
+                recognition.start();
+                recognitionRef.current = recognition;
+            }
             mediaRecorder.start()
         } catch (error) {
             console.error("Error accessing microphone:", error)
@@ -245,9 +282,16 @@ const SpeakingTest = () => {
 
     const stopRecording = () => {
         if (mediaRecorderRef.current) {
-            mediaRecorderRef.current.stop()
+            mediaRecorderRef.current.stop();
         }
-    }
+
+        if (recognitionRef.current) {
+            recognitionRef.current.stop();
+            recognitionRef.current = null;
+        }
+
+        setLiveTranscript(""); // Xoá transcript hiển thị
+    };
 
     const nextQuestion = async () => {
         if (timeUp) return // Kiểm tra hết giờ tổng trước
@@ -321,6 +365,9 @@ const SpeakingTest = () => {
         }))
 
         cloned.part2.studentAnswer = audioUrls["part2"] ? "part2.webm" : ""
+        if (speaking) {
+            cloned.part2.cueCards = speaking.part2.cueCards;
+        }
         cloned.part2.duration = recordingTimes["part2"] || 0
 
         cloned.part3.questions = cloned.part3.questions.map((q: any, i: number) => ({
@@ -328,11 +375,10 @@ const SpeakingTest = () => {
             studentAnswer: audioUrls[`part3-${i + 1}`] ? `part3-${i + 1}.webm` : "",
             duration: recordingTimes[`part3-${i + 1}`] || 0,
         }))
-
+        cloned.gradingMethod = gradingMethod
         return cloned
     }
-
-    const handleSubmit = async () => {
+    const handleSubmitClick = async () => {
         if (recordingKey) {
             stopRecording()
             await new Promise((resolve) => {
@@ -343,14 +389,25 @@ const SpeakingTest = () => {
                 check()
             })
         }
+
+        // Kiểm tra điều kiện tối thiểu trước khi hiển thị dialog
         if (!timeUp && totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3) {
             setMinRecordingWarningMsg(
                 `Bạn cần ghi âm tổng cộng ít nhất ${MIN_RECORDING_TIMES.part3} giây cho PART3 trước khi nộp bài. Hiện tại: ${Math.floor(totalRecordingTime.part3)} giây`,
-            )
-            setShowMinRecordingWarning(true)
-            setIsSubmitting(false)
-            return
+            );
+            setShowMinRecordingWarning(true);
+            return; // Dừng lại nếu không đủ điều kiện
         }
+
+        // Chỉ hiển thị dialog khi đủ điều kiện
+        setShowGradingDialog(true);
+    }
+
+    const handleSubmit = async () => {
+        setIsSubmitting(true); // Bây giờ mới set submitting
+        setShowGradingDialog(false);
+
+
 
         const submissionData = prepareSubmissionData()
         if (!submissionData) return
@@ -374,10 +431,19 @@ const SpeakingTest = () => {
                 method: "POST",
                 body: formData,
             })
+            if (gradingMethod === "ai") {
+                // Nếu chọn AI: chuyển đến trang kết quả ngay
+                navigate(`/`);
+                alert("Bài viết đã được chấm bằng AI!.Your essay has been submitted successfully!");
+            } else {
+                // Nếu chọn giáo viên: hiển thị thông báo chờ
+                alert("Bài viết đã gửi đến giáo viên. Bạn sẽ nhận kết quả trong vòng 3-5 ngày tới.Your essay has been submitted successfully!");
+                navigate("/"); // Hoặc trang nào đó phù hợp
+            }
 
             if (!res.ok) throw new Error("Lỗi khi gửi bài!")
             alert("✅ Bài đã được nộp!")
-            navigate("/result")
+
         } catch (err) {
             console.error(err)
             alert("❌ Gửi bài thất bại!")
@@ -408,6 +474,11 @@ const SpeakingTest = () => {
     const getQuestionNumber = () => {
         if (currentPart === "part2") return ""
         return currentQuestionIndex + 1
+    }
+
+    const getPartTitle = () => {
+        if (!speaking) return ""
+        return `PART ${speaking[currentPart].partNumber} ${speaking[currentPart].title.toUpperCase()}`
     }
 
     if (loading) {
@@ -482,45 +553,7 @@ const SpeakingTest = () => {
     }
 
     // Show submission confirmation
-    if (isSubmitting) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-                <Card className="max-w-md shadow-xl border-0">
-                    <CardContent className="p-8 text-center">
-                        <div className="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <CheckCircle className="w-8 h-8 text-white" />
-                        </div>
-                        <h3 className="text-2xl font-bold mb-3 text-gray-900">Ready to Submit?</h3>
-                        <p className="text-gray-600 mb-6 text-sm">
-                            {timeUp
-                                ? "Time's up! Your test will be submitted automatically."
-                                : "Once submitted, you cannot make any changes to your responses."}
-                        </p>
-                        <div className="flex gap-3 justify-center">
-                            <Button
-                                onClick={handleSubmit}
-                                size="sm"
-                                className="px-6 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200 rounded-full"
-                            >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                {timeUp ? "Submit Now" : "Yes, Submit"}
-                            </Button>
-                            {!timeUp && (
-                                <Button
-                                    onClick={() => setIsSubmitting(false)}
-                                    variant="outline"
-                                    size="sm"
-                                    className="px-6 py-2 rounded-full"
-                                >
-                                    Cancel
-                                </Button>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        )
-    }
+
 
     if (showConfirmNextPart) {
         return (
@@ -596,7 +629,47 @@ const SpeakingTest = () => {
             <div className="flex-shrink-0">
                 <DoTestSpeakingHeader initialTime={testTimeLeft} />
             </div>
+            {/* Dialog chọn phương thức chấm bài */}
+            <Dialog open={showGradingDialog} onOpenChange={setShowGradingDialog}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Chọn phương thức chấm bài</DialogTitle>
+                        <DialogDescription>
+                            Vui lòng chọn cách bạn muốn bài viết của mình được chấm điểm
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <RadioGroup
+                            defaultValue="ai"
+                            onValueChange={(value) => setGradingMethod(value as "ai" | "teacher")}
+                        >
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="ai" id="ai" />
+                                <Label htmlFor="ai">Chấm bằng AI (Nhanh chóng)</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="teacher" id="human" />
+                                <Label htmlFor="teacher">Chấm bởi giáo viên (Chính xác hơn)</Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowGradingDialog(false)}
+                        >
+                            Hủy
+                        </Button>
+                        <Button
 
+                            onClick={handleSubmit}
+
+                        >
+                            {isSubmitting ? "Đang gửi..." : "Xác nhận"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             {/*/!* Part Header - Compact *!/*/}
             <div className="max-w-6xl mx-auto">
                 <div className="">
@@ -670,7 +743,14 @@ const SpeakingTest = () => {
                                         ) : (
                                             <p className="text-gray-600">⏱️ You have {formatTime(testTimeLeft)} minutes to speak</p>
                                         )}
+
                                     </div>
+                                    {recordingKey && (
+                                        <div className="bg-yellow-50 p-3 border border-yellow-400 rounded mt-2">
+                                            <strong>🗣 Script:</strong>
+                                            <p className="mt-1 text-gray-800">{liveTranscript || <em>Đang nghe...</em>}</p>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>
@@ -782,7 +862,7 @@ const SpeakingTest = () => {
 
                         {currentPart === "part3" && (
                             <Button
-                                onClick={() => setIsSubmitting(true)}
+                                onClick={handleSubmitClick}
                                 size="sm"
                                 disabled={timeUp}
                                 className="px-4 py-2 bg-red-600 hover:bg-red-800 shadow-lg hover:shadow-xl transition-all duration-200 rounded-full"

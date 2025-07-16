@@ -3,30 +3,52 @@ import type { AuthContextType, User } from "@/types/apiTypes";
 import * as authService from "@/services/authService";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
+const API_URL = import.meta.env.VITE_API_URL || 'VITE_API_URL=http://api.languages.io.vn:8080';
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true); // Trạng thái loading ban đầu
 
+    // ✅ Gọi refresh-token 1 lần khi khởi động
+    useEffect(() => {
+        const init = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/refreshtoken`, {
+                    method: "POST",
+                    credentials: "include",
+                });
+
+                if (res.ok) {
+                    // ✅ Sau khi refresh thành công, lấy thông tin user từ backend
+                    await fetchUser();
+                } else {
+                    setUser(null);
+                    setIsLoading(false);
+                }
+            } catch {
+                setUser(null);
+                setIsLoading(false);
+            }
+        };
+
+        init();
+    }, []);
+
+    // ✅ Hàm gọi API getMe
     const fetchUser = async () => {
-        setIsLoading(true);
         try {
             const data = await authService.getMe();
+            console.log(data)
             if (data) {
-                setUser({ username: data.username, role: data.role });
+                setUser({ username: data.username, role: data.role ,isPremium : data.isPremium});
             } else {
                 setUser(null);
             }
         } catch {
             setUser(null);
         } finally {
-            setIsLoading(false);
+            setIsLoading(false); // Kết thúc loading sau khi fetch xong
         }
     };
-
-    useEffect(() => {
-        fetchUser();
-    }, []);
 
     const login = async (email: string, password: string) => {
         await authService.login(email, password);
@@ -44,14 +66,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{
-            user,
-            isLoading, // Cung cấp trạng thái loading
-            login,
-            logout,
-            register,
-            fetchUser
-        }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                isLoading,
+                login,
+                logout,
+                register,
+                fetchUser,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

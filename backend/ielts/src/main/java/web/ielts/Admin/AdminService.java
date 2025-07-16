@@ -18,10 +18,18 @@ public class AdminService {
         return adminRepository.findByRole(role);
     }
 
+
+
     public void updateUser(String email, String role) {
         UserDTO userDTO = adminRepository.findByEmail(email);
         userDTO.setRole(role);
         // 4. Lưu lại
-        adminRepository.save(userDTO);
+         adminRepository.save(userDTO);
+    }
+    public void deleteUserByEmail(String email) {
+        adminRepository.deleteByEmail(email);
+    }
+    public boolean existsByEmail(String email) {
+        return adminRepository.existsByEmail(email);
     }
 }

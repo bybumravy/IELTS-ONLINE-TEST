@@ -86,6 +86,7 @@ public class UserController {
     ) {
         try {
             if (user != null) {
+                System.out.println("de bug em hoat dong ko");
                 userService.upgradeToPremium(user.getEmail());
                 return ResponseEntity.ok("Đã nâng cấp premium thành công (qua authentication principal)");
             }

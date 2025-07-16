@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -26,9 +26,8 @@ public class User implements UserDetails {
     private String password;
     private String role;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private LocalDateTime premiumExpiry;
+
+    private LocalDate premiumExpiry;
 
     private boolean premium;
 
@@ -48,7 +47,7 @@ public class User implements UserDetails {
     }
 
     public User(String firstName, String lastName, String email, String password, String role,
-                LocalDateTime premiumExpiry, boolean premium, String googleID,
+                LocalDate premiumExpiry, boolean premium, String googleID,
                 String createdAt, String birthDate, String gender, String phone) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -65,7 +64,7 @@ public class User implements UserDetails {
     }
 
     public boolean isPremiumActive() {
-        return premiumExpiry != null && premiumExpiry.isAfter(LocalDateTime.now());
+        return premiumExpiry != null && premiumExpiry.isBefore(LocalDate.now());
     }
 
     // --- Getters & Setters ---
@@ -111,11 +110,11 @@ public class User implements UserDetails {
         this.role = role;
     }
 
-    public LocalDateTime getPremiumExpiry() {
+    public LocalDate getPremiumExpiry() {
         return premiumExpiry;
     }
 
-    public void setPremiumExpiry(LocalDateTime premiumExpiry) {
+    public void setPremiumExpiry(LocalDate premiumExpiry) {
         this.premiumExpiry = premiumExpiry;
     }
 
@@ -192,6 +191,24 @@ public class User implements UserDetails {
     @Override
     public boolean isCredentialsNonExpired() {
         return true; // Kiểm soát thời hạn password
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", role='" + role + '\'' +
+                ", premiumExpiry=" + premiumExpiry +
+                ", premium=" + premium +
+                ", googleID='" + googleID + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                ", birthDate='" + birthDate + '\'' +
+                ", gender='" + gender + '\'' +
+                ", phone='" + phone + '\'' +
+                '}';
     }
 
     @Override

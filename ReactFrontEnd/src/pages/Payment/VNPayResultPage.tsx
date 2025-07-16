@@ -10,22 +10,42 @@ export default function VnPayResultPage() {
 
     useEffect(() => {
         const responseCode = searchParams.get("vnp_ResponseCode");
+
         if (responseCode === "00") {
             setStatus("success");
 
-            // Gọi API nâng cấp premium
+            // 1. Gọi upgrade API
             fetch(`${API_URL}/api/user/upgrade-premium`, {
                 method: "POST",
-                credentials: "include", // QUAN TRỌNG để gửi cookie JWT
+                credentials: "include",
             })
                 .then(res => {
                     if (!res.ok) throw new Error("Failed to upgrade premium");
                     return res.text();
                 })
-                .then(msg => console.log(msg))
-                .catch(err => console.error(err));
+                .then(msg => {
+                    console.log("Upgrade success:", msg);
 
-            // Redirect sau 3 giây
+                    // 2. Gọi getUserInfo
+                    return fetch(`${API_URL}/api/user-info`, {
+                        method: "GET",
+                        credentials: "include",
+                    });
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error("Failed to get user info");
+                    return res.json();
+                })
+                .then(userInfo => {
+                    console.log("User info updated:", userInfo);
+
+                    // TODO: Nếu bạn có AuthContext → có thể setUser(userInfo) ở đây
+                })
+                .catch(err => {
+                    console.error("Lỗi khi upgrade hoặc lấy user info:", err);
+                });
+
+            // 3. Chuyển hướng sau 3 giây
             setTimeout(() => {
                 window.location.href = "/";
             }, 3000);

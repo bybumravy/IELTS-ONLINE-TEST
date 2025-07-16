@@ -53,7 +53,7 @@ export interface User {
     birthDate?: string
     gender?: string
     phone?: string
-    premium?: boolean
+    isPremium?: boolean
 }
 
 export interface AuthContextType {

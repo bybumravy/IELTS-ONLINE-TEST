@@ -25,7 +25,11 @@ public class AuthController {
 
     @Autowired
     private AuthService authservice;
-
+    @PostMapping("/refreshtoken")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("helllo refresh token");
+        return authservice.refreshToken(request, response);
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User newUser) {
@@ -35,6 +39,7 @@ public class AuthController {
     @PostMapping("/forgotpassword")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
          String email = request.get("email");
+         System.out.println(email);
         return authservice.forgotpassword(email);
 
     }
@@ -53,7 +58,7 @@ public class AuthController {
     }
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO loginRequest) {
-        System.out.println("From page: " + loginRequest.getFromPath());  // in ra /loginadmin
+       // in ra /loginadmin
         return authservice.login(
                 loginRequest.getEmail(),
                 loginRequest.getPassword()
@@ -66,9 +71,11 @@ public class AuthController {
         try {
             String username = authservice.getUsernameFromToken(token);
             String role = authservice.getRoleFromToken(token);
+            boolean isPremium = authservice.isPremium(token);
             return ResponseEntity.ok(Map.of(
                     "username", username,
-                    "role", role
+                    "role", role,
+                       "isPremium",isPremium
             ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");

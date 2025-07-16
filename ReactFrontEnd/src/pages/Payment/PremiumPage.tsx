@@ -81,7 +81,7 @@ export default function PremiumPage() {
     }, [])
 
     useEffect(() => {
-        fetch('${API_URL}/api/user/me', {
+        fetch(`${API_URL}/api/user/me`, { // ✅ dùng ` thay vì '
             method: "GET",
             credentials: "include",
         })
@@ -90,14 +90,14 @@ export default function PremiumPage() {
                 const expiry = data.premiumExpiry || null;
                 setPremiumExpiry(expiry);
 
-                // 👉 Chuyển sang giờ Việt Nam (nếu expiry tồn tại)
                 if (expiry) {
                     const utcDate = new Date(expiry);
                     const vietnamTime = new Date(utcDate.getTime() + 7 * 60 * 60 * 1000);
                     console.log("⏰ Giờ hết hạn Premium (giờ VN):", vietnamTime.toLocaleString());
                 }
             })
-            .catch(() => {
+            .catch((err) => {
+                console.error("Lỗi khi lấy thông tin user:", err);
                 setPremiumExpiry(null);
             });
     }, []);
