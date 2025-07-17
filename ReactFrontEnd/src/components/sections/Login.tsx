@@ -162,7 +162,7 @@ const LoginPage = () => {
                   className="w-full border-2"
                   onClick={handleGoogleLogin}
               >
-                <img src="/google.svg" alt="Google" className="mr-2 h-4 w-4" />
+                <img src="/src/assets/google.png" alt="Google" className="mr-2 h-4 w-4" />
                 Google
               </Button>
             </form>

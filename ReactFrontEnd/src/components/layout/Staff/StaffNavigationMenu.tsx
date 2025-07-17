@@ -29,7 +29,7 @@ export function StaffNavigationMenu({ role, onLogout }: StaffNavigationMenuProps
         <NavigationMenuList className="space-x-2">
           <NavigationMenuItem>
             <Link to="/staff-page">
-              <Button variant="link" className="text-lg font-semibold text-indigo-600 hover:text-indigo-700">
+              <Button variant="link" className="text-lg font-semibold text-emerald-600 hover:text-emerald-700">
                 LANGUAGES
               </Button>
             </Link>

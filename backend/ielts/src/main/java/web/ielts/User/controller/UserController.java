@@ -12,7 +12,9 @@ import web.ielts.User.UserDTO;
 import web.ielts.User.UserService;
 import web.ielts.User.repository.UserRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @RestController
@@ -113,5 +115,52 @@ public class UserController {
     @GetMapping("/me")
     public User getCurrentUser(@AuthenticationPrincipal User user) {
         return userService.resetPremiumIfExpired(user);
+    }
+
+    // Lấy danh sách tất cả user (cho manager)
+    @GetMapping("/all")
+    public List<UserDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream().map(user -> {
+            UserDTO dto = new UserDTO();
+            dto.setUserName(user.getEmail());
+            dto.setFirstName(user.getFirstName());
+            dto.setLastName(user.getLastName());
+            dto.setBirthDate(user.getBirthDate());
+            dto.setGender(user.getGender());
+            dto.setPhone(user.getPhone());
+            dto.setRole(user.getRole());
+            dto.setPremium(user.isPremium());
+            dto.setCreatedAt(user.getCreatedAt());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    // Lấy danh sách user theo role (cho manager)
+    @GetMapping("/role/{role}")
+    public List<UserDTO> getUsersByRole(@PathVariable String role) {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+            .filter(user -> user.getRole() != null && user.getRole().equalsIgnoreCase(role))
+            .map(user -> {
+                UserDTO dto = new UserDTO();
+                dto.setUserName(user.getEmail());
+                dto.setFirstName(user.getFirstName());
+                dto.setLastName(user.getLastName());
+                dto.setBirthDate(user.getBirthDate());
+                dto.setGender(user.getGender());
+                dto.setPhone(user.getPhone());
+                dto.setRole(user.getRole());
+                dto.setPremium(user.isPremium());
+                dto.setCreatedAt(user.getCreatedAt());
+                return dto;
+            }).collect(Collectors.toList());
+    }
+
+    // Xóa user theo email (cho manager)
+    @DeleteMapping("/{username}")
+    public ResponseEntity<?> deleteUser(@PathVariable String username) {
+        userRepository.deleteById(username);
+        return ResponseEntity.ok().build();
     }
 }
