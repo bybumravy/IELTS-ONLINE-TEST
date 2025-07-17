@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
+import web.ielts.Test.model.answer.speaking.SpeakingAnswer;
 import web.ielts.Test.model.answer.writing.WritingAnswer;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
 import web.ielts.Test.service.ResultService;
@@ -22,6 +23,13 @@ public class ResultTestController {
     @GetMapping("/{id}")
     public ResponseEntity<WritingAnswer> getWritingById(@PathVariable String id) {
         return writingAnswerRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/speaking/{id}")
+    public ResponseEntity<SpeakingAnswer> getSpeakingAnswerById(@PathVariable String id) {
+        return resultService.findSpeakingById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -58,5 +66,7 @@ public class ResultTestController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+
 
 }

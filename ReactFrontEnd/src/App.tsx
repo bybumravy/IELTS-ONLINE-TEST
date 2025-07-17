@@ -66,7 +66,7 @@ import ReadingResult from "@/pages/Result/ReadingResult.tsx";
 
 export default function App() {
     return (
-        <ErrorBoundary>
+
             <AuthProvider>
                 <Router>
                     <Routes>
@@ -161,6 +161,11 @@ export default function App() {
                                 <MainLayout><ReadingResult /></MainLayout>
                             </ProtectedLayout>
                         } />
+                        <Route path="/speaking-result/:resultId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><SpeakingResult /></MainLayout>
+                            </ProtectedLayout>
+                        } />
                         <Route path="/test-history" element={
                             <ProtectedLayout allowRoles={["student"]}>
                                 <MainLayout><HistoryPage /></MainLayout>
@@ -188,14 +193,12 @@ export default function App() {
                         {/* ========== Error Pages ========== */}
                         <Route path="/error" element={<ErrorPage />} />
 
-                        <Route path="/speakingResult" element={<SpeakingResult />} />
-
                         {/* ========== 404 Not Found (Catch-all) ========== */}
                         <Route path="*" element={<NotFoundPage />} />
 
                     </Routes>
                 </Router>
             </AuthProvider>
-        </ErrorBoundary>
+
     )
 }
