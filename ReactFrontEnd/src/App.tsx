@@ -23,6 +23,7 @@ import FullTest from "@/pages/DoTest/FullTest";
 import ListeningResult from "@/pages/Result/ListeningResult";
 import LoginAdmin from "@/components/sections/admin/LoginAdmin";
 import AdminPage from "@/pages/AdminPage";
+import SpeakingResult from "@/pages/Result/SpeakingResult";
 export default function App() {
     return (
         <AuthProvider>
@@ -72,7 +73,7 @@ export default function App() {
                     {/*Premium*/}
                     {/*<Route path="/api/payment/create" element={<MainLayout><PaymentPage/></MainLayout>} />*/}
                     {/*<Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />*/}
-
+                    <Route path="/speakingResult" element={<SpeakingResult />} />
 
                     <Route path="/loginAdmin" element={<LoginAdmin />} />
                     <Route path="/adminPage" element={

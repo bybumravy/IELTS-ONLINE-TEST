@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import web.ielts.Test.dto.ListTest;
 import web.ielts.Test.model.AI.EvaluationResult;
+import web.ielts.Test.model.AI.ProsodyAnalysisResult;
 import web.ielts.Test.model.Test;
 import web.ielts.Test.repository.TestRepository;
 import web.ielts.Test.service.AI.AISpeakingService;
@@ -160,7 +161,8 @@ public class TestsController {
 
         String url = "https://swpieltsbucket.s3.ap-southeast-1.amazonaws.com/audio/user/phamhoangviet05052005%40gmail.com/T002_686e3b5c5f452736dfdd9a9e/part1-1.mp3";
 //        Map<String, Object> pronunciationAnalysis = prosodyService.analyzePronunciation(url, transcript);
-        Map<String, Object> prosodyFeatures = prosodyService.analyze(url, transcript);
+        ProsodyAnalysisResult prosodyFeatures = prosodyService.analyze(url, transcript);
+        System.out.println(prosodyFeatures);
     }
 
 }

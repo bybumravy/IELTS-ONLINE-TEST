@@ -1,4 +1,5 @@
     package web.ielts.Test.service.AI;
+    import com.fasterxml.jackson.core.type.TypeReference;
     import com.fasterxml.jackson.databind.JsonNode;
     import com.fasterxml.jackson.databind.ObjectMapper;
     import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +9,9 @@
     import org.springframework.http.ResponseEntity;
     import org.springframework.stereotype.Service;
     import org.springframework.web.client.RestTemplate;
+    import web.ielts.Test.model.answer.speaking.PronunciationEvaluation;
+    import web.ielts.Test.model.AI.ProsodyAnalysisResult;
+    import web.ielts.Test.model.answer.speaking.StressMismatch;
 
     import java.io.*;
     import java.net.URL;
@@ -16,6 +20,9 @@
     import java.nio.file.Paths;
     import java.time.Instant;
     import java.util.*;
+    import java.util.regex.Matcher;
+    import java.util.regex.Pattern;
+    import java.util.stream.Collectors;
 
 
     @Service
@@ -70,12 +77,34 @@
             }
         }
 
-        private Map<String, Object> evaluatePronunciation(
+        private List<PronunciationEvaluation> parsePronunciationResponseToList(String aiResponse) {
+            try {
+                Pattern pattern = Pattern.compile("\\[.*?\\]", Pattern.DOTALL);
+                Matcher matcher = pattern.matcher(aiResponse);
+                if (matcher.find()) {
+                    String jsonStr = matcher.group();
+                    System.out.println("🔍 Extracted JSON: " + jsonStr);
+                    return objectMapper.readValue(
+                            jsonStr,
+                            new TypeReference<List<PronunciationEvaluation>>() {}
+                    );
+                } else {
+                    System.err.println("❌ No JSON array found in AI response:\n" + aiResponse);
+                    return new ArrayList<>();
+                }
+            } catch (Exception e) {
+                System.err.println("❌ Error parsing JSON:\n" + e.getMessage());
+                return new ArrayList<>();
+            }
+        }
+
+
+
+        private List<PronunciationEvaluation> evaluatePronunciation(
                 String transcript,
                 String intonationAnalysis
         ) {
             System.out.println("\n🔊 [PRONUNCIATION] Starting AI evaluation...");
-
             try {
 
                 // 2. Xây dựng prompt chi tiết với dữ liệu đã parse
@@ -85,14 +114,11 @@
                 String aiResponse = callOpenAIPronunciation(prompt);
                 System.out.println(aiResponse);
                 // 4. Parse và trả về kết quả
-                return parsePronunciationResponse(aiResponse);
+                return parsePronunciationResponseToList(aiResponse);
             } catch (Exception e) {
                 System.err.println("❌ Error in pronunciation evaluation: " + e.getMessage());
                 e.printStackTrace();
-                return Map.of(
-                        "error", "Pronunciation evaluation failed",
-                        "details", e.getMessage()
-                );
+                return new ArrayList<>();
             }
         }
 
@@ -184,33 +210,6 @@
             }
         }
 
-
-        private Map<String, Object> parsePronunciationResponse(String aiResponse) {
-            try {
-                // Tìm JSON trong response
-                int startIdx = aiResponse.indexOf("{");
-                int endIdx = aiResponse.lastIndexOf("}");
-
-                if (startIdx != -1 && endIdx != -1 && startIdx < endIdx) {
-                    String jsonStr = aiResponse.substring(startIdx, endIdx + 1);
-
-                    // Log JSON trước khi parse
-                    System.out.println("\n===== JSON TO PARSE =====");
-                    System.out.println(jsonStr);
-                    System.out.println("========================\n");
-
-                    return objectMapper.readValue(jsonStr, Map.class);
-                } else {
-                    String errorMsg = "No JSON found in AI response: " + aiResponse;
-                    System.err.println(errorMsg);
-                    return Map.of("error", errorMsg);
-                }
-            } catch (Exception e) {
-                String errorMsg = "Error parsing pronunciation response: " + e.getMessage();
-                System.err.println(errorMsg);
-                return Map.of("error", errorMsg);
-            }
-        }
             private double praatGetAudioDuration(File wavFile) throws IOException {
             // Lấy đường dẫn tuyệt đối cho script Praat
             String scriptPath = new File("D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\getDuration.praat").getAbsolutePath();
@@ -378,7 +377,7 @@
 
 
 
-        public Map<String, Object> analyze(String audioUrl, JsonNode root) {
+        public ProsodyAnalysisResult analyze(String audioUrl, JsonNode root) {
             System.out.println("\n=======================================");
             System.out.println("🚀 STARTING PROSODY ANALYSIS");
             System.out.println("   Audio URL: " + audioUrl);
@@ -387,7 +386,8 @@
             stressMismatches.clear();
             List<Map<String, Object>> stressMismatchesDetailed = new ArrayList<>();
             List<Map<String, Object>> pronunciationEvaluationList = new ArrayList<>();
-            Map<String, Object> result = new HashMap<>();
+            ProsodyAnalysisResult result = new ProsodyAnalysisResult();
+
             try {
                 // 1. Tải và chuyển đổi file âm thanh
                 File mp3File = downloadAudioFile(audioUrl);
@@ -398,7 +398,7 @@
 
                 // 3. Phân tích prosody cơ bản
                 System.out.println("Thong so co ban");
-                String praatResults = runPraatAnalysis(wavFile, textGridFile);
+                Map<String, Double> praatResults = runPraatAnalysis(wavFile, textGridFile);
 
                 // 4. Phân tích trọng âm từ (CHI TIẾT VỊ TRÍ)
                 System.out.println("Trong am");
@@ -455,7 +455,7 @@
                 System.out.println("=====================================");
                 // 5. Phân tích ngữ điệu câu (MỚI)
                 System.out.println("Ngu dieu cau");
-                String intonationResults = analyzeSentenceIntonation(wavFile, textGridFile);
+                List<PronunciationEvaluation> intonationResults = analyzeSentenceIntonation(wavFile, textGridFile);
 
                 // 6. Tính điểm tổng hợp
 
@@ -463,37 +463,50 @@
                 // 8. Phân tích và chấm điểm Pronunciation bằng AI
                 if (root.has("text")) {
                     String transcript = root.get("text").asText();
-                    Map<String, Object> pronunciationEvaluation = evaluatePronunciation(
+                    List<PronunciationEvaluation> pronunciationEvaluation = evaluatePronunciation(
                             transcript,
-                            intonationResults
+                            intonationResults.toString()
                     );
-                    // Nếu kết quả là Map, chuyển thành list chứa 1 object
                     if (pronunciationEvaluation != null) {
-                        if (pronunciationEvaluation instanceof Map) {
-                            pronunciationEvaluationList.add(pronunciationEvaluation);
+                        for (PronunciationEvaluation p : pronunciationEvaluation) {
+                            Map<String, Object> item = new HashMap<>();
+                            item.put("text", p.getText());
+                            item.put("sentenceText", p.getSentenceText());
+                            pronunciationEvaluationList.add(item);
                         }
                     }
                 }
-                result.put("stressMismatchesDetailed", stressMismatchesDetailed);
-                result.put("pronunciationEvaluation", pronunciationEvaluationList);
+
+                result.setStressMismatchesDetailed(stressMismatchesDetailed
+                        .stream()
+                        .map(map -> new StressMismatch(
+                                (String) map.get("word"),
+                                (Integer) map.get("detectedPosition"),
+                                (Integer) map.get("standardPosition"),
+                                (Double) map.get("start"),
+                                (Double) map.get("end"),
+                                (Integer) map.get("index")
+                        )).collect(Collectors.toList())
+                );
+
+                result.setPronunciationEvaluation(
+                        pronunciationEvaluationList.stream()
+                                .map(map -> new PronunciationEvaluation(
+                                        (String) map.get("text"),
+                                        (String) map.get("sentenceText")
+                                ))
+                                .collect(Collectors.toList())
+                );
+
                 System.out.println("\n=======================================");
                 System.out.println("🎉 ANALYSIS COMPLETED SUCCESSFULLY");
                 System.out.println("   Final result: " + result);
                 System.out.println("=======================================");
                 return result;
             } catch (Exception e) {
-                System.err.println("❌ ANALYSIS ERROR: " + e.getMessage());
-                e.printStackTrace();
-                Map<String, Object> errorObj = new HashMap<>();
-                errorObj.put("error", e.getMessage());
-                errorObj.put("stackTrace", Arrays.toString(e.getStackTrace()));
-                // Trả về cả hai trường đều là list chứa 1 object lỗi
-                List<Map<String, Object>> errorList = new ArrayList<>();
-                errorList.add(errorObj);
-                Map<String, Object> errorResult = new HashMap<>();
-                errorResult.put("stressMismatchesDetailed", errorList);
-                errorResult.put("pronunciationEvaluation", errorList);
+                ProsodyAnalysisResult errorResult = new ProsodyAnalysisResult();
                 return errorResult;
+
             }
         }
 
@@ -630,11 +643,8 @@
         }
 
 
-        private String analyzeSentenceIntonation(File wavFile, File textGridFile) {
-            Map<String, Object> results = new HashMap<>();
-            List<Map<String, Object>> sentencesInfo = new ArrayList<>();
-            ObjectMapper objectMapper = new ObjectMapper();
-
+        private List<PronunciationEvaluation> analyzeSentenceIntonation(File wavFile, File textGridFile) {
+            List<PronunciationEvaluation> resultList = new ArrayList<>();
             try {
                 File outputFile = new File(textGridFile.getParent(),
                         "intonation_output_" + System.currentTimeMillis() + ".txt");
@@ -652,12 +662,10 @@
                 Process process = pb.start();
 
                 // Đọc và log output của Praat
-                StringBuilder praatOutput = new StringBuilder();
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(process.getInputStream()))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
-                        praatOutput.append(line).append("\n");
                         System.out.println("   [PRAAT] " + line);
                     }
                 }
@@ -671,80 +679,29 @@
                 System.out.println("📊 [INTONATION] Parsing results from: " + outputFile.getAbsolutePath());
                 try (BufferedReader reader = new BufferedReader(new FileReader(outputFile))) {
                     String line;
-                    Map<String, Object> currentSentence = null;
-                    List<Map<String, Object>> emphasizedWords = new ArrayList<>();
-
+                    String currentSentence = null;
                     while ((line = reader.readLine()) != null) {
                         if (line.startsWith("Sentence ")) {
-                            // Kết thúc câu trước đó nếu có
-                            if (currentSentence != null) {
-                                currentSentence.put("emphasizedWords", emphasizedWords);
-                                sentencesInfo.add(currentSentence);
-                                emphasizedWords = new ArrayList<>();
-                            }
-
-                            // Bắt đầu câu mới
-                            currentSentence = new HashMap<>();
+                            // Lấy nội dung câu
                             String[] parts = line.split("\\|");
-
-                            // Xử lý thông tin câu
-                            String sentenceNum = parts[0].replace("Sentence", "").trim();
-                            currentSentence.put("sentenceNumber", Integer.parseInt(sentenceNum));
-
-                            String startTime = parts[1].replace("Start:", "").replace("s", "").trim();
-                            currentSentence.put("start", Double.parseDouble(startTime));
-
-                            String endTime = parts[2].replace("End:", "").replace("s", "").trim();
-                            currentSentence.put("end", Double.parseDouble(endTime));
-
-                            String meanIntensity = parts[3].replace("Mean Intensity:", "").replace("dB", "").trim();
-                            currentSentence.put("meanIntensity", Double.parseDouble(meanIntensity));
-
+                            if (parts.length > 0) {
+                                currentSentence = null;
+                                // Không có nội dung câu thực tế, chỉ số thứ tự và thời gian
+                            }
                         } else if (line.contains("Emphasized word:")) {
                             // Xử lý từ được nhấn mạnh
                             String word = line.split("'")[1];
-                            String intensity = line.split("\\|")[1].replace("dB", "").trim();
-
-                            Map<String, Object> wordInfo = new HashMap<>();
-                            wordInfo.put("word", word);
-                            wordInfo.put("intensity", Double.parseDouble(intensity));
-                            emphasizedWords.add(wordInfo);
+                            // Tìm câu chứa từ này (nếu có thể lấy được)
+                            // Ở đây không có nội dung câu thực tế, nên chỉ set text và sentenceText giống nhau
+                            resultList.add(new PronunciationEvaluation(word, ""));
                         }
                     }
-
-                    // Thêm câu cuối cùng
-                    if (currentSentence != null) {
-                        currentSentence.put("emphasizedWords", emphasizedWords);
-                        sentencesInfo.add(currentSentence);
-                    }
                 }
-
-                results.put("sentences", sentencesInfo);
-                results.put("analysisSuccess", true);
-                results.put("totalSentences", sentencesInfo.size());
-
             } catch (Exception e) {
                 System.err.println("💥 Sentence intonation analysis error: " + e.getMessage());
                 e.printStackTrace();
-                results.put("error", e.getMessage());
-                results.put("analysisSuccess", false);
             }
-
-            try {
-                // Chuyển Map sang JSON string
-                String jsonResult = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(results);
-
-                // In JSON ra terminal
-                System.out.println("📤 JSON Result:\n" + jsonResult);
-
-                // Trả về JSON string
-                return jsonResult;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return "{\"error\":\"Failed to convert result to JSON.\"}";
-            }
-
+            return resultList;
         }
 
         private String parseStressOutput(File outputFile) throws IOException {
@@ -833,7 +790,7 @@
         }
 
 
-        private String runPraatAnalysis(File wavFile, File textGridFile) throws IOException, InterruptedException {
+        private Map<String, Double> runPraatAnalysis(File wavFile, File textGridFile) throws IOException, InterruptedException {
             File outputFile = File.createTempFile("praat-output", ".txt");
             System.out.println("▶️ [PRAAT ANALYSIS] Starting analysis...");
             System.out.println("   Input WAV: " + wavFile.getAbsolutePath());
@@ -870,13 +827,13 @@
             System.out.println("📊 [PRAAT] Parsing results from: " + outputFile.getAbsolutePath());
             System.out.println("✅ Praat process hoàn tất. Bắt đầu đọc file output...");
 
-            // Trả về JSON string từ parsePraatOutput
+            // Trả về Map từ parsePraatOutput
             return parsePraatOutput(outputFile);
         }
 
 
 
-        private String parsePraatOutput(File outputFile) throws IOException {
+        private Map<String, Double> parsePraatOutput(File outputFile) throws IOException {
             Map<String, Double> results = new HashMap<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(outputFile))) {
                 String line;
@@ -897,15 +854,9 @@
                     }
                 }
             }
-
-            // Chuyển Map sang JSON string
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonResult = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(results);
-
-            // In JSON ra terminal
-            System.out.println("📤 JSON Parsed Result:\n" + jsonResult);
-
-            return jsonResult;
+            // In Map ra terminal
+            System.out.println("📤 Parsed Result Map:\n" + results);
+            return results;
         }
 
 
