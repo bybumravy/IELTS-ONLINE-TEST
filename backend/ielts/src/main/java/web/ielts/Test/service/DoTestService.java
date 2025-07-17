@@ -9,7 +9,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import web.ielts.Test.model.*;
-import web.ielts.Test.model.AI.ProsodyAnalysisResult;
+
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
 import web.ielts.Test.model.answer.speaking.*;
@@ -20,13 +20,13 @@ import web.ielts.Test.repository.answer.ListeningAnswerRepository;
 import web.ielts.Test.repository.answer.ReadingAnswerRepository;
 import web.ielts.Test.repository.answer.SpeakingAnswerRepository;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
+import web.ielts.Test.service.AI.AIService;
 import web.ielts.Test.service.AI.ProsodyService;
-import web.ielts.Test.service.AIService;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -222,14 +222,6 @@ public class DoTestService {
     }
 
     public void updateAnswerUrls(SpeakingAnswer submission, Map<String, String> fileUrlMap) {
-        // ✅ Debug log
-
-
-        // 🔹 Part 1
-        // 🔹 Part 1
-
-
-        String gradingMethod = submission.getGradingMethod();
         SpeakingAnswerPart13 part1 = submission.getPart1();
         if (part1 != null && part1.getQuestions() != null) {
 
@@ -237,39 +229,32 @@ public class DoTestService {
             int validQuestionCount = part1.getQuestions().size();
 
             for (SpeakingAnswerQuestion qa : part1.getQuestions()) {
-                String blob = qa.getStudentAnswer();
+                String blob = qa.getAudioAnswer();
                 String filename = extractFileName(blob);
                 String s3Url = fileUrlMap.getOrDefault(filename, blob);
                 String s3UrlNotEncrypt = s3Url;
 
                 if (s3UrlNotEncrypt == null || s3UrlNotEncrypt.trim().isEmpty() || !s3UrlNotEncrypt.startsWith("http")) {
-
                     continue;
                 }
-
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
                 qa.setStudentAnswer(s3Url);
-                if(gradingMethod.equalsIgnoreCase("ai")){
                     try {
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
                         System.out.println(transcript);
-                        ProsodyAnalysisResult analyze = prosodyService.analyze(s3UrlNotEncrypt,transcript);
-                     //EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,analyze,null);
+                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
+                        SpeakingAnswerQuestion eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,null);
 
                      //totalScore += eval.getScore();
 
                     } catch (Exception e) {
-                        System.err.println("❌ Lỗi khi chấm câu hỏi: " + qa.getQuestion());
+                        System.err.println("Lỗi khi chấm câu hỏi: " + qa.getQuestion());
                         e.printStackTrace();
                     }
-                }
             }
-            if(gradingMethod.equalsIgnoreCase("ai")) {
                 double avgScore = totalScore/validQuestionCount;
-                System.out.println("✅ Average Part 1 Score: " + avgScore);
+                System.out.println("Average Part 1 Score: " + avgScore);
                 part1.setAverageScore(avgScore);
-            }
-
         }
 
         // 🔹 Part 2
@@ -286,7 +271,6 @@ public class DoTestService {
             } else {
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
                 part2.setStudentAnswer(s3Url);
-                if(gradingMethod.equalsIgnoreCase("ai")) {
                     try {
 //                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
 //
@@ -299,7 +283,7 @@ public class DoTestService {
                         System.err.println("❌ Lỗi khi chấm Part 2");
                         e.printStackTrace();
                     }
-                }
+
 
 
 
@@ -327,7 +311,6 @@ public class DoTestService {
 
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
                 qa.setStudentAnswer(s3Url);
-                if(gradingMethod.equalsIgnoreCase("ai")) {
                     try {
 //                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
 //                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,null);
@@ -338,15 +321,14 @@ public class DoTestService {
 
                         e.printStackTrace();
                     }
-                }
+
 
 
             }
-            if(gradingMethod.equalsIgnoreCase("ai")) {
                 double avgScore = totalScore/validQuestionCount;
                 System.out.println("✅ Average Part 3 Score: " + avgScore);
                 part3.setAverageScore(avgScore);
-            }
+
 
         }
 

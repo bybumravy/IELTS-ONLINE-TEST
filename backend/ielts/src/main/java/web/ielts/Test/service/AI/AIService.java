@@ -1,4 +1,4 @@
-package web.ielts.Test.service;
+package web.ielts.Test.service.AI;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,14 +11,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+
+import web.ielts.Test.model.answer.speaking.FleCohAnswer;
 import web.ielts.Test.model.answer.writing.WritingAIResponse;
 
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
 
 @Service
 public class AIService {
@@ -206,7 +207,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             String question,
             JsonNode transcript,
 
-            Map<String, Object> analyzeVoice,
+            FleCohAnswer analyzeVoice,
 
             List<String> cueCard
     ) {
@@ -324,13 +325,13 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
     public String buildSpeakingPart1Prompt(
             String questions,
             JsonNode transcript,
-            Map<String, Object> analyzeVoice
+            FleCohAnswer analyzeVoice
 
     ) {
-        System.out.println("hello");
-        String praatResults = (String) analyzeVoice.get("prosodyFeatures");
-
-        System.out.println(praatResults);
+//        System.out.println("hello");
+//        String praatResults = (String) analyzeVoice.get("prosodyFeatures");
+//
+//        System.out.println(praatResults);
 
         String speakingPart1 =
                 "You must return response strictly in JSON format.\n" +
@@ -393,7 +394,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
-                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + praatResults+
+//                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + praatResults+
                         "\n" +
                         "Scoring rules:\n" +
                         "- +0.5 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +

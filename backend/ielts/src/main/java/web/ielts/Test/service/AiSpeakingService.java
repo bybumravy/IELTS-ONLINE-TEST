@@ -5,22 +5,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import web.ielts.Test.model.answer.speaking.EvaluationResult;
+import web.ielts.Test.model.answer.speaking.FleCohAnswer;
+import web.ielts.Test.model.answer.speaking.SpeakingAnswerQuestion;
+import web.ielts.Test.service.AI.AIService;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class AiSpeakingService {
     @Autowired WhisperService whisperService;
     @Autowired
     private AIService aiService;
-    public EvaluationResult evaluateSpeaking(
+    public SpeakingAnswerQuestion evaluateSpeaking(
             JsonNode transcriptText,
             String question,
             int partNumber,
-            Map<String, Object> analyzeVoice,
+            FleCohAnswer analyzeVoice,
             List<String> cueCard
     ) {
         // ✅ 1. Tạo prompt đúng cho từng part
@@ -42,7 +42,7 @@ public class AiSpeakingService {
         // ✅ 3. Parse JSON
         try {
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(gptResponse, EvaluationResult.class);
+            return mapper.readValue(gptResponse, SpeakingAnswerQuestion.class);
         } catch (JsonProcessingException e) {
             System.err.println("❌ Lỗi khi parse GPT response thành EvaluationResult:");
             e.printStackTrace();

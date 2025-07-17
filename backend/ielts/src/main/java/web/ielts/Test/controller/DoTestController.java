@@ -135,7 +135,6 @@ public class DoTestController {
 
         doTestService.updateAnswerUrls(saved, fileUrlMap);
         doTestService.saveSubmission(saved);
-
         return ResponseEntity.ok("✅ Upload và cập nhật thành công!");
     }
 

@@ -9,9 +9,11 @@
     import org.springframework.http.ResponseEntity;
     import org.springframework.stereotype.Service;
     import org.springframework.web.client.RestTemplate;
+    import web.ielts.Test.model.answer.speaking.FleCohAnswer;
+    import web.ielts.Test.model.answer.speaking.PronunciationAnswer;
     import web.ielts.Test.model.answer.speaking.PronunciationEvaluation;
-    import web.ielts.Test.model.AI.ProsodyAnalysisResult;
     import web.ielts.Test.model.answer.speaking.StressMismatch;
+
 
     import java.io.*;
     import java.net.URL;
@@ -28,15 +30,15 @@
     @Service
     public class ProsodyService {
 
-            private final String PRAAT_PATH = "C:\\Users\\LAPTOP24H\\Downloads\\praat6438_win-intel64\\Praat.exe";
-            private final String PRAAT_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script.praat"; // Script Praat
-            private final String STRESS_ANALYSIS_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\stressAnalysis.praat";
-            private final String INTONATION_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script_intonation.praat";
-            private final String CMU_DICT_PATH = "C:\\Users\\LAPTOP24H\\Downloads\\cmudict-0.7b.txt";
-            @Value("${openai.api.key}")
-            private String openaiApiKey;
-            private final RestTemplate restTemplate = new RestTemplate();
-            private final ObjectMapper objectMapper = new ObjectMapper();
+        private final String PRAAT_PATH = "C:\\Users\\LAPTOP24H\\Downloads\\praat6438_win-intel64\\Praat.exe";
+        private final String PRAAT_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script.praat"; // Script Praat
+        private final String STRESS_ANALYSIS_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\stressAnalysis.praat";
+        private final String INTONATION_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script_intonation.praat";
+        private final String CMU_DICT_PATH = "C:\\Users\\LAPTOP24H\\Downloads\\cmudict-0.7b.txt";
+        @Value("${openai.api.key}")
+        private String openaiApiKey;
+        private final RestTemplate restTemplate = new RestTemplate();
+        private final ObjectMapper objectMapper = new ObjectMapper();
         private final List<String> stressMismatches = new ArrayList<>();
 
         private final Map<String, String> cmuDictMap = new HashMap<>(); // Lưu trữ CMU Dict
@@ -349,7 +351,7 @@
                     writer.println("            text = \"" + syllableCount + "\"");
                 }
 
-                System.out.println("✅ Ghi file TextGrid thành công: " + textGridFile.getAbsolutePath());
+                System.out.println("Ghi file TextGrid thành công: " + textGridFile.getAbsolutePath());
             }
             return textGridFile;
         }
@@ -374,10 +376,20 @@
 
             return sentences;
         }
+        public FleCohAnswer analyzeProsodyFeatures(String audioUrl, JsonNode root) {
+            try {
+                File mp3File = downloadAudioFile(audioUrl);
+                File wavFile = convertMp3ToWav(mp3File);
+                File textGridFile = generateTextGridFromJson(root, wavFile);
+                return runPraatAnalysis(wavFile, textGridFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
 
 
-
-        public ProsodyAnalysisResult analyze(String audioUrl, JsonNode root) {
+        public PronunciationAnswer analyze(String audioUrl, JsonNode root) {
             System.out.println("\n=======================================");
             System.out.println("🚀 STARTING PROSODY ANALYSIS");
             System.out.println("   Audio URL: " + audioUrl);
@@ -386,7 +398,7 @@
             stressMismatches.clear();
             List<Map<String, Object>> stressMismatchesDetailed = new ArrayList<>();
             List<Map<String, Object>> pronunciationEvaluationList = new ArrayList<>();
-            ProsodyAnalysisResult result = new ProsodyAnalysisResult();
+            PronunciationAnswer result = new PronunciationAnswer();
 
             try {
                 // 1. Tải và chuyển đổi file âm thanh
@@ -395,10 +407,6 @@
 
                 // 2. Tạo TextGrid
                 File textGridFile = generateTextGridFromJson(root, wavFile);
-
-                // 3. Phân tích prosody cơ bản
-                System.out.println("Thong so co ban");
-                Map<String, Double> praatResults = runPraatAnalysis(wavFile, textGridFile);
 
                 // 4. Phân tích trọng âm từ (CHI TIẾT VỊ TRÍ)
                 System.out.println("Trong am");
@@ -504,7 +512,7 @@
                 System.out.println("=======================================");
                 return result;
             } catch (Exception e) {
-                ProsodyAnalysisResult errorResult = new ProsodyAnalysisResult();
+                PronunciationAnswer errorResult = new PronunciationAnswer();
                 return errorResult;
 
             }
@@ -790,7 +798,7 @@
         }
 
 
-        private Map<String, Double> runPraatAnalysis(File wavFile, File textGridFile) throws IOException, InterruptedException {
+        private FleCohAnswer runPraatAnalysis(File wavFile, File textGridFile) throws IOException, InterruptedException {
             File outputFile = File.createTempFile("praat-output", ".txt");
             System.out.println("▶️ [PRAAT ANALYSIS] Starting analysis...");
             System.out.println("   Input WAV: " + wavFile.getAbsolutePath());
@@ -827,36 +835,41 @@
             System.out.println("📊 [PRAAT] Parsing results from: " + outputFile.getAbsolutePath());
             System.out.println("✅ Praat process hoàn tất. Bắt đầu đọc file output...");
 
-            // Trả về Map từ parsePraatOutput
+            // Trả về FleCohAnswer từ parsePraatOutput
             return parsePraatOutput(outputFile);
         }
 
 
 
-        private Map<String, Double> parsePraatOutput(File outputFile) throws IOException {
-            Map<String, Double> results = new HashMap<>();
+        private FleCohAnswer parsePraatOutput(File outputFile) throws IOException {
+            FleCohAnswer answer = new FleCohAnswer();
             try (BufferedReader reader = new BufferedReader(new FileReader(outputFile))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     if (!line.contains("=")) continue;
-
                     String[] parts = line.split("=");
                     if (parts.length != 2) continue;
-
                     String key = parts[0].trim();
                     String valueStr = parts[1].trim();
-
-                    try {
-                        double value = Double.parseDouble(valueStr);
-                        results.put(key, value);
-                    } catch (NumberFormatException e) {
-                        System.err.println("⚠️ Không thể parse value: '" + valueStr + "' cho key: " + key);
+                    switch (key) {
+                        case "meanIntensity":
+                            answer.setMeanIntensity(valueStr);
+                            break;
+                        case "pauseCount":
+                            answer.setPauseCount(valueStr);
+                            break;
+                        case "speechRate":
+                            answer.setSpeechRate(valueStr);
+                            break;
                     }
                 }
             }
-            // In Map ra terminal
-            System.out.println("📤 Parsed Result Map:\n" + results);
-            return results;
+            // Set default values for score and comment
+            answer.setScore(0);
+            answer.setComment(null);
+            System.out.println("📤 Parsed FleCohAnswer:\n" +
+                    "meanIntensity=" + answer.getMeanIntensity() + ", pauseCount=" + answer.getPauseCount() + ", speechRate=" + answer.getSpeechRate());
+            return answer;
         }
 
 
