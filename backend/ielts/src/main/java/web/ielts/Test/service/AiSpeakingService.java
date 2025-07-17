@@ -16,7 +16,8 @@ public class AiSpeakingService {
     @Autowired WhisperService whisperService;
     @Autowired
     private AIService aiService;
-    public SpeakingAnswerQuestion evaluateSpeaking(
+    public void evaluateSpeaking(
+            String Ob_id,
             JsonNode transcriptText,
             String question,
             int partNumber,
@@ -39,14 +40,5 @@ public class AiSpeakingService {
         System.out.println("=== GPT RESPONSE ===");
         System.out.println(gptResponse);
 
-        // ✅ 3. Parse JSON
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(gptResponse, SpeakingAnswerQuestion.class);
-        } catch (JsonProcessingException e) {
-            System.err.println("❌ Lỗi khi parse GPT response thành EvaluationResult:");
-            e.printStackTrace();
-            return null;
-        }
     }
 }

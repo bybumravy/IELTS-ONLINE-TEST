@@ -389,7 +389,7 @@
         }
 
 
-        public PronunciationAnswer analyze(String audioUrl, JsonNode root) {
+        public void analyze(String Ob_id, String audioUrl, JsonNode root) throws IOException, InterruptedException {
             System.out.println("\n=======================================");
             System.out.println("🚀 STARTING PROSODY ANALYSIS");
             System.out.println("   Audio URL: " + audioUrl);
@@ -399,8 +399,6 @@
             List<Map<String, Object>> stressMismatchesDetailed = new ArrayList<>();
             List<Map<String, Object>> pronunciationEvaluationList = new ArrayList<>();
             PronunciationAnswer result = new PronunciationAnswer();
-
-            try {
                 // 1. Tải và chuyển đổi file âm thanh
                 File mp3File = downloadAudioFile(audioUrl);
                 File wavFile = convertMp3ToWav(mp3File);
@@ -510,12 +508,7 @@
                 System.out.println("🎉 ANALYSIS COMPLETED SUCCESSFULLY");
                 System.out.println("   Final result: " + result);
                 System.out.println("=======================================");
-                return result;
-            } catch (Exception e) {
-                PronunciationAnswer errorResult = new PronunciationAnswer();
-                return errorResult;
 
-            }
         }
 
         // Helper class for word info

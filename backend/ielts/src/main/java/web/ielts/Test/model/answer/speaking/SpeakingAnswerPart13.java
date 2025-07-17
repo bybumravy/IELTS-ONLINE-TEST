@@ -8,12 +8,7 @@ public class SpeakingAnswerPart13 {
     private String title;
     private String instruction;
     private List<SpeakingAnswerQuestion> questions;
-
     private double averageScore;
-
-
-
-
 
     public double getAverageScore() {
         return averageScore;
