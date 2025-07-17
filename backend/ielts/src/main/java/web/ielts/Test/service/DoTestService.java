@@ -221,8 +221,8 @@ public class DoTestService {
         return writingAnswerRepository.save(savedAnswer);
     }
 
-    public void updateAnswerUrls(SpeakingAnswer submission, Map<String, String> fileUrlMap) {
-        SpeakingAnswerPart13 part1 = submission.getPart1();
+    public void updateAnswerUrls(SpeakingAnswer speakingAnswer, Map<String, String> fileUrlMap) {
+        SpeakingAnswerPart13 part1 = speakingAnswer.getPart1();
         if (part1 != null && part1.getQuestions() != null) {
 
             double totalScore = 0;
@@ -243,8 +243,12 @@ public class DoTestService {
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
                         System.out.println(transcript);
                         FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
-                        SpeakingAnswerQuestion eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,null);
-
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,null);
+                        PronunciationAnswer pa = prosodyService.analyze(blob,transcript);
+                        qa.setGrammarAnswer(sp.getGrammarAnswer());
+                        qa.setLexicalAnswer(sp.getLexicalAnswer());
+                        qa.setFluencyCohAnswer(sp.getFluencyCohAnswer());
+                        qa.setPronunciationAnswer(pa);
                      //totalScore += eval.getScore();
 
                     } catch (Exception e) {
@@ -258,79 +262,79 @@ public class DoTestService {
         }
 
         // 🔹 Part 2
-        SpeakingAnswerPart2 part2 = submission.getPart2();
-        if (part2 != null) {
-            String blob = part2.getStudentAnswer();
-            String filename = extractFileName(blob);
-            String s3Url = fileUrlMap.getOrDefault(filename, blob);
-            String s3UrlNotEncrypt = s3Url;
-
-
-            if (s3UrlNotEncrypt == null) {
-                System.out.println("⚠️ Bỏ qua Part 2 do URL không hợp lệ: " + s3UrlNotEncrypt);
-            } else {
-                s3Url = UrlEncryptor.encodeUrl(s3Url);
-                part2.setStudentAnswer(s3Url);
-                    try {
-//                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
+//        SpeakingAnswerPart2 part2 = submission.getPart2();
+//        if (part2 != null) {
+//            String blob = part2.getStudentAnswer();
+//            String filename = extractFileName(blob);
+//            String s3Url = fileUrlMap.getOrDefault(filename, blob);
+//            String s3UrlNotEncrypt = s3Url;
 //
-//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2,cuecards);
-//                     part2.setEvaluationResults(eval);
-//                  part2.setAverageScore(eval.getScore());
+//
+//            if (s3UrlNotEncrypt == null) {
+//                System.out.println("⚠️ Bỏ qua Part 2 do URL không hợp lệ: " + s3UrlNotEncrypt);
+//            } else {
+//                s3Url = UrlEncryptor.encodeUrl(s3Url);
+//                part2.setStudentAnswer(s3Url);
+//                    try {
+////                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
+////
+////                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2,cuecards);
+////                     part2.setEvaluationResults(eval);
+////                  part2.setAverageScore(eval.getScore());
+//
+//                        // validQuestionCount++;
+//                    } catch (Exception e) {
+//                        System.err.println("❌ Lỗi khi chấm Part 2");
+//                        e.printStackTrace();
+//                    }
+//
+//
+//
+//
+//            }
+//
+//        }
+//
+//  //Part 3
+//       SpeakingAnswerPart13 part3 = submission.getPart3();
+//        if (part3 != null && part3.getQuestions() != null) {
+//
+//            double totalScore = 0;
+//            int validQuestionCount = part3.getQuestions().size();
+//
+//            for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
+//                String blob = qa.getStudentAnswer();
+//                String filename = extractFileName(blob);
+//                String s3Url = fileUrlMap.getOrDefault(filename, blob);
+//                String s3UrlNotEncrypt = s3Url;
+//
+//                if (s3UrlNotEncrypt == null || s3UrlNotEncrypt.trim().isEmpty() || !s3UrlNotEncrypt.startsWith("http")) {
+//
+//                    continue;
+//                }
+//
+//                s3Url = UrlEncryptor.encodeUrl(s3Url);
+//                qa.setStudentAnswer(s3Url);
+//                    try {
+////                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
+////                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,null);
+////                   qa.setEvaluationResults(eval);
+////                    totalScore += eval.getScore();
+//
+//                    } catch (Exception e) {
+//
+//                        e.printStackTrace();
+//                    }
+//
+//
+//
+//            }
+//                double avgScore = totalScore/validQuestionCount;
+//                System.out.println("✅ Average Part 3 Score: " + avgScore);
+//                part3.setAverageScore(avgScore);
+//
 
-                        // validQuestionCount++;
-                    } catch (Exception e) {
-                        System.err.println("❌ Lỗi khi chấm Part 2");
-                        e.printStackTrace();
-                    }
-
-
-
-
-            }
-
-        }
-
-  //Part 3
-       SpeakingAnswerPart13 part3 = submission.getPart3();
-        if (part3 != null && part3.getQuestions() != null) {
-
-            double totalScore = 0;
-            int validQuestionCount = part3.getQuestions().size();
-
-            for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
-                String blob = qa.getStudentAnswer();
-                String filename = extractFileName(blob);
-                String s3Url = fileUrlMap.getOrDefault(filename, blob);
-                String s3UrlNotEncrypt = s3Url;
-
-                if (s3UrlNotEncrypt == null || s3UrlNotEncrypt.trim().isEmpty() || !s3UrlNotEncrypt.startsWith("http")) {
-
-                    continue;
-                }
-
-                s3Url = UrlEncryptor.encodeUrl(s3Url);
-                qa.setStudentAnswer(s3Url);
-                    try {
-//                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
-//                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,null);
-//                   qa.setEvaluationResults(eval);
-//                    totalScore += eval.getScore();
-
-                    } catch (Exception e) {
-
-                        e.printStackTrace();
-                    }
-
-
-
-            }
-                double avgScore = totalScore/validQuestionCount;
-                System.out.println("✅ Average Part 3 Score: " + avgScore);
-                part3.setAverageScore(avgScore);
-
-
-        }
+//        }
 
     }
     private String extractFileName(String blobUrl) {

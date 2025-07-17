@@ -38,7 +38,6 @@ public class AiSpeakingService {
 
         System.out.println("=== GPT RESPONSE ===");
         System.out.println(gptResponse);
-
         // ✅ 3. Parse JSON
         try {
             ObjectMapper mapper = new ObjectMapper();
