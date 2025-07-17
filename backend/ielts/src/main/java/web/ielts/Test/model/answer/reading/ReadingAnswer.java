@@ -1,15 +1,11 @@
 package web.ielts.Test.model.answer.reading;
 
-import lombok.*;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 
 @Document(collection = "ReadingAnswer")
 public class ReadingAnswer {
@@ -24,5 +20,90 @@ public class ReadingAnswer {
     private double band;
     private LocalDateTime submittedAt;
 
+    public ReadingAnswer(String id, String testId, List<TaskReadingAnswer> taskReadingAnswers, String username, String skill, int totalQuestions, int totalCorrect, double band, LocalDateTime submittedAt) {
+        this.id = id;
+        this.testId = testId;
+        this.taskReadingAnswers = taskReadingAnswers;
+        this.username = username;
+        this.skill = skill;
+        this.totalQuestions = totalQuestions;
+        this.totalCorrect = totalCorrect;
+        this.band = band;
+        this.submittedAt = submittedAt;
+    }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getTestId() {
+        return testId;
+    }
+
+    public void setTestId(String testId) {
+        this.testId = testId;
+    }
+
+    public List<TaskReadingAnswer> getTaskReadingAnswers() {
+        return taskReadingAnswers;
+    }
+
+    public void setTaskReadingAnswers(List<TaskReadingAnswer> taskReadingAnswers) {
+        this.taskReadingAnswers = taskReadingAnswers;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getSkill() {
+        return skill;
+    }
+
+    public void setSkill(String skill) {
+        this.skill = skill;
+    }
+
+    public int getTotalQuestions() {
+        return totalQuestions;
+    }
+
+    public void setTotalQuestions(int totalQuestions) {
+        this.totalQuestions = totalQuestions;
+    }
+
+    public int getTotalCorrect() {
+        return totalCorrect;
+    }
+
+    public void setTotalCorrect(int totalCorrect) {
+        this.totalCorrect = totalCorrect;
+    }
+
+    public double getBand() {
+        return band;
+    }
+
+    public void setBand(double band) {
+        this.band = band;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
+    }
+
+    public ReadingAnswer() {
+    }
 }
