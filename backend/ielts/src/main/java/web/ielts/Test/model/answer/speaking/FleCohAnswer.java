@@ -1,9 +1,15 @@
 package web.ielts.Test.model.answer.speaking;
 
+import net.minidev.json.annotate.JsonIgnore;
+
 public class FleCohAnswer {
+
     private double score;
+    @JsonIgnore
     private String meanIntensity;
+    @JsonIgnore
     private String pauseCount;
+    @JsonIgnore
     private String speechRate;
     private String comment;
 

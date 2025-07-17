@@ -7,7 +7,7 @@ public class SpeakingAnswerPart2 {
     private int partNumber;
     private String title;
     private String question;
-    private String studentAnswer;
+    private String transcript;
     private String audioAnswer;
     private double score;
     private GrammarAnswer grammarAnswer;
@@ -43,12 +43,13 @@ public class SpeakingAnswerPart2 {
         this.question = question;
     }
 
-    public String getStudentAnswer() {
-        return studentAnswer;
+
+    public String getTranscript() {
+        return transcript;
     }
 
-    public void setStudentAnswer(String studentAnswer) {
-        this.studentAnswer = studentAnswer;
+    public void setTranscript(String transcript) {
+        this.transcript = transcript;
     }
 
     public String getAudioAnswer() {

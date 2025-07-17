@@ -1,15 +1,35 @@
 package web.ielts.Test.model.answer.speaking;
 
 
+import net.minidev.json.annotate.JsonIgnore;
+
 public class SpeakingAnswerQuestion {
     private String question;
     private String transcript;
     private String audioAnswer;
+    @JsonIgnore
     private double score;
     private GrammarAnswer grammarAnswer;
     private GrammarAnswer lexicalAnswer;
+    @JsonIgnore
     private PronunciationAnswer pronunciationAnswer;
     private FleCohAnswer fluencyCohAnswer;
+
+    public String getTranscript() {
+        return transcript;
+    }
+
+    public void setTranscript(String transcript) {
+        this.transcript = transcript;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
 
     public SpeakingAnswerQuestion() {
     }
@@ -41,21 +61,9 @@ public class SpeakingAnswerQuestion {
         this.question = question;
     }
 
-    public String getStudentAnswer() {
-        return transcript;
-    }
 
-    public void setStudentAnswer(String transcript) {
-        this.transcript = transcript;
-    }
 
-    public double getScore() {
-        return score;
-    }
 
-    public void setScore(double score) {
-        this.score = score;
-    }
 
     public GrammarAnswer getGrammarAnswer() {
         return grammarAnswer;
@@ -79,6 +87,20 @@ public class SpeakingAnswerQuestion {
 
     public void setPronunciationAnswer(PronunciationAnswer pronunciationAnswer) {
         this.pronunciationAnswer = pronunciationAnswer;
+    }
+
+    @Override
+    public String toString() {
+        return "SpeakingAnswerQuestion{" +
+                "question='" + question + '\'' +
+                ", transcript='" + transcript + '\'' +
+                ", audioAnswer='" + audioAnswer + '\'' +
+                ", score=" + score +
+                ", grammarAnswer=" + grammarAnswer +
+                ", lexicalAnswer=" + lexicalAnswer +
+                ", pronunciationAnswer=" + pronunciationAnswer +
+                ", fluencyCohAnswer=" + fluencyCohAnswer +
+                '}';
     }
 
     public FleCohAnswer getFluencyCohAnswer() {

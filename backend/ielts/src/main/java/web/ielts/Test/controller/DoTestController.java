@@ -104,7 +104,7 @@ public class DoTestController {
             testId = root.get("testId").asText();
             submission = mapper.readValue(jsonString, SpeakingAnswer.class);
             submission.setUsername(studentUsername);
-
+             System.out.println(submission.toString());
             saved = doTestService.saveSubmission(submission);
             System.out.println(saved);
 

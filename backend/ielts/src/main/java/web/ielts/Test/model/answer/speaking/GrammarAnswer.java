@@ -2,6 +2,7 @@ package web.ielts.Test.model.answer.speaking;
 
 public class GrammarAnswer {
 
+
     private double score;
     private String errorText;
     private String correctText;
