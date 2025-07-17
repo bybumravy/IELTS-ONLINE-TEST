@@ -394,7 +394,9 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
-//                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + praatResults+
+                        "Fluency and Coherence 25%"+
+                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
+//
                         "\n" +
                         "Scoring rules:\n" +
                         "- +0.5 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +
@@ -430,18 +432,17 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "\n" +
                         "\"Each entry in the `errorCorrections` array must follow this format:\\n\" +\n" +
                         "\"errorCorrections: [{\\n\" +\n" +
-                        "\"  originalText: string,            // The incorrect word or phrase\\n\" +\n" +
-                        "\"  correctedText: string,           // The corrected version\\n\" +\n" +
+                        "\"  errorText: string,            // The incorrect word or phrase\\n\" +\n" +
+                        "\"  correctText: string,           // The corrected version\\n\" +\n" +
                         "\"  errorType: string,               // Only 'Grammar' or 'Lexical' allowed\\n\" +\n" +
                         "\"  explanation: string,             // Why it was incorrect (e.g., wrong tense, article usage, word choice)\\n\" +\n" +
                         "\"  sentenceContext: string          // The full sentence where the error occurred\\n\" +\n" +
-                        "\"}]\\n\\n\" +\n" +
                         "\n" +
-                        "\"\uD83D\uDEAB Do NOT include:\\n\" +\n" +
-                        "\"- Pauses, repetitions, fillers like 'uh', 'um'\\n\" +\n" +
-                        "\"- Vague or disorganized sentence structure\\n\" +\n" +
-                        "\"- Cohesion or logic issues (these go in Fluency and Coherence section)\\n\\n\" +\n" +
-                        "\n" +
+                        "Do NOT include: " +
+                        "- Pauses, repetitions, fillers like 'uh', 'um'\\n\" +\n" +
+                        "- Vague or disorganized sentence structure\\n\" +\n" +
+                        "- Cohesion or logic issues (these go in Fluency and Coherence section)\\n\\n\" +\n" +
+                        "" +
                         "\"✅ Only include:\\n\" +\n" +
                         "\"- Grammar errors (e.g., subject-verb agreement, tense, preposition, article)\\n\" +\n" +
                         "\"- Lexical errors (e.g., wrong word choice, inappropriate collocation)\\n\";"+
@@ -569,8 +570,8 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "- score: decimal (overall band score, e.g. 6.5)\n" +
                         "- feedback: {\n" +
                         "    errorCorrections: [{\n" +
-                        "      originalText: string,\n" +
-                        "      correctedText: string,\n" +
+                        "      errorText: string,\n" +
+                        "      correctText: string,\n" +
                         "      errorType: string,\n" +
                         "      explanation: string,\n" +
                         "      sentenceContext: string\n" +

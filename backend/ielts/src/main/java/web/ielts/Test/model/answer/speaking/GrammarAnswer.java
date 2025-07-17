@@ -7,7 +7,15 @@ public class GrammarAnswer {
     private String correctText;
     private String errorType;
     private String explanation;
+    private String sentenceContext;
 
+    public String getSentenceContext() {
+        return sentenceContext;
+    }
+
+    public void setSentenceContext(String sentenceContext) {
+        this.sentenceContext = sentenceContext;
+    }
 
     public double getScore() {
         return score;
