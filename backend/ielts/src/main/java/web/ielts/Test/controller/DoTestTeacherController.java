@@ -18,4 +18,11 @@ public class DoTestTeacherController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/writingteachersubmit")
+    public ResponseEntity<WritingAnswer> saveWritingAnswer(@RequestBody WritingAnswer answer) {
+
+        return ResponseEntity.ok(doTestTeacherService.saveWritingAnswer(answer));
+        //return ResponseEntity.ok(doTestTeacherService.saveWritingAnswer(answer));
+    }
 }

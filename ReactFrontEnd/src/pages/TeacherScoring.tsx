@@ -25,6 +25,7 @@ import {
     Type,
     RefreshCw,
 } from "lucide-react"
+import {customFetch} from "@/components/sections/customFetch";
 interface WritingAnswer {
     _id: string;
     username: string;
@@ -40,7 +41,6 @@ interface WritingTask {
     answer: string;
     wordCount: string;
     score: string;
-    sampleAnswer: string;
     feedback: WritingFeedback;
 }
 interface WritingFeedback {
@@ -61,7 +61,7 @@ interface SentenceImprovement {
     originalSentence: string;
     improvedSentence: string;
     techniquesUsed: string[]; // e.g., ["enhanced vocabulary", "complex sentence structure"]
-
+    explanation : String
 }
 
 interface WritingEvaluation {
@@ -109,7 +109,7 @@ export default function Component() {
             .then((res) => res.json())
             .then((data) => {
                 console.log("✅ WritingAnswer by ID:");
-                console.log(JSON.stringify(data, null, 2));
+
                 setTaskData(data)
             })
             .catch((err) => console.error("❌ Error fetching writing data:", err));
@@ -187,8 +187,8 @@ export default function Component() {
     const convertSentenceCorrection = (correction: SentenceCorrection): SentenceImprovement => ({
         originalSentence: correction.original,
         improvedSentence: correction.correction,
-        techniquesUsed: [correction.type]// hoặc phân tích thêm từ comment
-      // bạn có thể cho người dùng nhập hoặc tính tự động
+        techniquesUsed: [correction.type],
+        explanation: correction.comment
     });
     const errors = allErrors[selectedTask]
 
@@ -221,16 +221,21 @@ export default function Component() {
         comment: "",
     })
 
-    const calculateOverallScore = () => {
-        const scoreValues = Object.values(scores)
-            .filter((score) => score !== "")
-            .map(Number)
-        if (scoreValues.length === 4) {
-            return (scoreValues.reduce((a, b) => a + b, 0) / 4).toFixed(1)
-        }
-        return "N/A"
-    }
+    const calculateOverallScoreByTask = (taskKey: "task1" | "task2") => {
+        const taskScores = allScores[taskKey];
+        if (!taskScores) return "N/A";
 
+        const scoreValues = Object.values(taskScores)
+            .filter((score) => score !== "" && !isNaN(Number(score)))
+            .map(Number);
+
+        if (scoreValues.length === 4) {
+            const avg = scoreValues.reduce((a, b) => a + b, 0) / 4;
+            return avg.toFixed(1);
+        }
+
+        return "N/A";
+    };
     const sampleEssay = taskData?.[selectedTask]?.answer ?? ""
 
     const sentences = sampleEssay.split(/(?<=[.!?])\s+/).filter((s) => s.trim().length > 0)
@@ -429,6 +434,88 @@ export default function Component() {
             }
         }))
     }
+    const handleSubmit = async () => {
+        const dataSubmit = JSON.parse(JSON.stringify(taskData));
+
+        // Convert annotations & corrections
+        const task1ErrorCorrections = allErrors.task1.map(convertAnnotationToCorrection);
+        const task2ErrorCorrections = allErrors.task2.map(convertAnnotationToCorrection);
+        const task1SentenceImprovements = allSentenceCorrections.task1.map(convertSentenceCorrection);
+        const task2SentenceImprovements = allSentenceCorrections.task2.map(convertSentenceCorrection);
+
+        // Task 1
+        dataSubmit.task1.score = calculateOverallScoreByTask("task1"); // nếu bạn dùng điểm tổng
+        dataSubmit.task1.feedback = {
+            errorCorrections: task1ErrorCorrections,
+            sentenceImprovements: task1SentenceImprovements,
+            overallComment: allComments.task1.overall,
+            evaluation: {
+                TaskAchievement: {
+                    scoreEva: allScores.task1.taskResponse,
+                    reviewEva: allComments.task1.taskResponse,
+                },
+                CoherenceCohesion: {
+                    scoreEva: allScores.task1.coherenceCohesion,
+                    reviewEva: allComments.task1.coherenceCohesion,
+                },
+                LexicalResource: {
+                    scoreEva: allScores.task1.lexicalResource,
+                    reviewEva: allComments.task1.lexicalResource,
+                },
+                Grammar: {
+                    scoreEva: allScores.task1.grammaticalRange,
+                    reviewEva: allComments.task1.grammaticalRange,
+                }
+            }
+
+        };
+
+        // Task 2
+        dataSubmit.task2.score = calculateOverallScoreByTask("task2"); // ✅ tính đúng cho task2
+        dataSubmit.task2.feedback = {
+            errorCorrections: task2ErrorCorrections,
+            sentenceImprovements: task2SentenceImprovements,
+            overallComment: allComments.task2.overall,
+            evaluation: {
+                TaskAchievement: {
+                    scoreEva: allScores.task2.taskResponse,
+                    reviewEva: allComments.task2.taskResponse,
+                },
+                CoherenceCohesion: {
+                    scoreEva: allScores.task2.coherenceCohesion,
+                    reviewEva: allComments.task2.coherenceCohesion,
+                },
+                LexicalResource: {
+                    scoreEva: allScores.task2.lexicalResource,
+                    reviewEva: allComments.task2.lexicalResource,
+                },
+                Grammar: {
+                    scoreEva: allScores.task2.grammaticalRange,
+                    reviewEva: allComments.task2.grammaticalRange,
+                }
+            }
+
+        };
+        dataSubmit.band = (parseFloat(calculateOverallScoreByTask("task1"))+ parseFloat(calculateOverallScoreByTask("task2")))/2
+        try {
+            const response = await fetch(`${API_URL}/verify/writingteachersubmit`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(dataSubmit),
+            });
+
+            if (!response.ok) throw new Error("Gửi thất bại");
+
+            const result = await response.json();
+            console.log("Gửi thành công:", result);
+        } catch (error) {
+            console.error("Lỗi khi gửi:", error);
+        }
+        console.log(JSON.stringify(dataSubmit, null, 2));
+
+    };
     return (
 
         <div className="min-h-screen bg-gray-50 p-4">
@@ -1084,7 +1171,7 @@ export default function Component() {
                             <CardContent className="space-y-4">
                                 <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4">
                                     <span className="font-medium">Điểm tổng kết:</span>
-                                    <span className="text-2xl font-bold text-blue-600">{calculateOverallScore()}</span>
+                                    <span className="text-2xl font-bold text-blue-600">{calculateOverallScoreByTask(selectedTask)}</span>
                                 </div>
 
                                 <div className="space-y-2">
@@ -1109,7 +1196,7 @@ export default function Component() {
 
                         {/* Action Buttons */}
                         <div className="flex gap-3">
-                            <Button className="flex-1">
+                            <Button className="flex-1" onClick={handleSubmit}>
                                 <Send className="mr-2 h-4 w-4" />
                                 Hoàn thành chấm
                             </Button>

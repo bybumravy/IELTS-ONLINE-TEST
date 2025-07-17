@@ -82,4 +82,19 @@ public class TaskWritingAnswer {
     public void setSampleAnswer(String sampleAnswer) {
         this.sampleAnswer = sampleAnswer;
     }
+
+    @Override
+    public String toString() {
+        return "TaskWritingAnswer{" +
+                "type='" + type + '\'' +
+                ", question='" + question + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", answer='" + answer + '\'' +
+                ", wordCount='" + wordCount + '\'' +
+                ", score='" + score + '\'' +
+                ", feedback=" + feedback +
+                ", evaluation=" + evaluation +
+                ", sampleAnswer='" + sampleAnswer + '\'' +
+                '}';
+    }
 }

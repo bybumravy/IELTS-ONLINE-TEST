@@ -14,4 +14,8 @@ public class DoTestTeacherService {
         System.out.println(writingAnswerRepository.findById(testId).toString());
         return writingAnswerRepository.findById(testId);
     }
+    public WritingAnswer saveWritingAnswer(WritingAnswer writingAnswer) {
+        System.out.println(writingAnswerRepository.save(writingAnswer));
+        return writingAnswerRepository.save(writingAnswer);
+    }
 }
