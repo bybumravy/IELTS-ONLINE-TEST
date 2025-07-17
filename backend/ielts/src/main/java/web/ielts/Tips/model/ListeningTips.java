@@ -16,6 +16,13 @@ public class ListeningTips {
 
     private List<Exercise> exercises;
 
+    public ListeningTips(String id, String type, String description, String skill) {
+        this.id = id;
+        this.type = type;
+        this.description = description;
+        this.skill = skill;
+    }
+
     public static class Exercise {
         private String audioUrl;
         private String instruction;

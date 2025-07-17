@@ -42,11 +42,11 @@ import ResetPassword from "@/components/sections/ResetPassword";
 import WritingResult from "@/pages/Result/WritingResult"
 import ListeningResult from "./pages/Result/ListeningResult"
 import HistoryPage from "@/pages/HistoryPage"
-
+import SpeakingResult from "@/pages/Result/SpeakingResult.tsx";
 // Admin
 
 import LoginAdmin from "@/components/sections/LoginAdmin"
-import Adminpage from "@/pages/Adminpage"
+import AdminPage from "./pages/AdminPage"
 
 // Staff
 import StaffLogin from "@/components/sections/StaffLogin"
@@ -173,7 +173,7 @@ export default function App() {
                         <Route path="/loginadmin" element={<LoginAdmin />} />
                         <Route path="/adminpage" element={
                             <ProtectedLayoutRole allowRoles={["admin"]}>
-                                <Adminpage />
+                                <AdminPage />
                             </ProtectedLayoutRole>
                         } />
 
@@ -187,6 +187,8 @@ export default function App() {
                         <Route path="/review-report" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><ReviewReport /></StaffLayout></ProtectedLayout>} />
                         {/* ========== Error Pages ========== */}
                         <Route path="/error" element={<ErrorPage />} />
+
+                        <Route path="/speakingResult" element={<SpeakingResult />} />
 
                         {/* ========== 404 Not Found (Catch-all) ========== */}
                         <Route path="*" element={<NotFoundPage />} />

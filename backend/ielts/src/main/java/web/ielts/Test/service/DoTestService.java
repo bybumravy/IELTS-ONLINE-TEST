@@ -9,6 +9,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import web.ielts.Test.model.*;
+import web.ielts.Test.model.AI.ProsodyAnalysisResult;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
 import web.ielts.Test.model.answer.speaking.*;
@@ -19,7 +20,8 @@ import web.ielts.Test.repository.answer.ListeningAnswerRepository;
 import web.ielts.Test.repository.answer.ReadingAnswerRepository;
 import web.ielts.Test.repository.answer.SpeakingAnswerRepository;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
-
+import web.ielts.Test.service.AI.ProsodyService;
+import web.ielts.Test.service.AIService;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -251,11 +253,10 @@ public class DoTestService {
                     try {
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
                         System.out.println(transcript);
-                        Map<String, Object> analyze = prosodyService.analyze(s3UrlNotEncrypt,transcript);
-                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,analyze,null);
-                    qa.setEvaluationResults(eval);
+                        ProsodyAnalysisResult analyze = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+                     //EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,analyze,null);
 
-                     totalScore += eval.getScore();
+                     //totalScore += eval.getScore();
 
                     } catch (Exception e) {
                         System.err.println("❌ Lỗi khi chấm câu hỏi: " + qa.getQuestion());

@@ -24,8 +24,9 @@ public class AdminService {
         UserDTO userDTO = adminRepository.findByEmail(email);
         userDTO.setRole(role);
         // 4. Lưu lại
-         adminRepository.save(userDTO);
+        adminRepository.save(userDTO);
     }
+
     public void deleteUserByEmail(String email) {
         adminRepository.deleteByEmail(email);
     }

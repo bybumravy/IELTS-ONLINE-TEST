@@ -18,7 +18,7 @@ import web.ielts.Test.dto.ListTest;
 import web.ielts.Test.model.*;
 import web.ielts.Test.repository.*;
 import web.ielts.Test.repository.add.AddTestRepository;
-import web.ielts.Test.service.ProsodyService;
+import web.ielts.Test.service.AI.ProsodyService;
 import web.ielts.Test.service.TestService;
 
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -180,7 +180,6 @@ public class TestsController {
 
         String url = "https://swpieltsbucket.s3.ap-southeast-1.amazonaws.com/audio/user/phamhoangviet05052005%40gmail.com/T002_686e3b5c5f452736dfdd9a9e/part1-1.mp3";
 //        Map<String, Object> pronunciationAnalysis = prosodyService.analyzePronunciation(url, transcript);
-        Map<String, Object> prosodyFeatures = prosodyService.analyze(url, transcript);
     }
 
 }

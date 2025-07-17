@@ -8,53 +8,73 @@ export default function VnPayResultPage() {
     const [searchParams] = useSearchParams();
     const [status, setStatus] = useState<"success" | "failed" | null>(null);
 
-    useEffect(() => {
-        const responseCode = searchParams.get("vnp_ResponseCode");
+useEffect(() => {
+    const responseCode = searchParams.get("vnp_ResponseCode");
 
-        if (responseCode === "00") {
-            setStatus("success");
+    if (responseCode === "00") {
+        setStatus("success");
 
-            // 1. Gọi upgrade API
-            fetch(`${API_URL}/api/user/upgrade-premium`, {
-                method: "POST",
-                credentials: "include",
+        // Gọi nâng cấp Premium
+        fetch(`${API_URL}/api/user/upgrade-premium`, {
+            method: "POST",
+            credentials: "include",
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to upgrade premium");
+                return res.text();
             })
-                .then(res => {
-                    if (!res.ok) throw new Error("Failed to upgrade premium");
-                    return res.text();
-                })
-                .then(msg => {
-                    console.log("Upgrade success:", msg);
+            .then(msg => {
+                console.log("Upgrade success:", msg);
 
-                    // 2. Gọi getUserInfo
-                    return fetch(`${API_URL}/api/user-info`, {
-                        method: "GET",
-                        credentials: "include",
-                    });
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error("Failed to get user info");
-                    return res.json();
-                })
-                .then(userInfo => {
-                    console.log("User info updated:", userInfo);
-
-                    // TODO: Nếu bạn có AuthContext → có thể setUser(userInfo) ở đây
-                })
-                .catch(err => {
-                    console.error("Lỗi khi upgrade hoặc lấy user info:", err);
+                // ✅ Gọi user-info để cập nhật token / hiển thị mới
+                return fetch(`${API_URL}/api/user-info`, {
+                    method: "GET",
+                    credentials: "include",
                 });
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to get user info");
+                return res.json();
+            })
+            .then(userInfo => {
+                console.log("User info updated:", userInfo);
 
-            // 3. Chuyển hướng sau 3 giây
-            setTimeout(() => {
-                window.location.href = "/";
-            }, 3000);
-        } else {
-            setStatus("failed");
-        }
-    }, [searchParams]);
+                // 👉 Nếu có AuthContext thì setUser(userInfo) ở đây
+                // setUser(userInfo); (nếu bạn đang dùng context)
 
+                // Sau khi tất cả xong, lưu transaction
+                const stored = localStorage.getItem("selectedPlan");
+                const selectedPlan = stored ? JSON.parse(stored) : null;
 
+                if (selectedPlan) {
+                    fetch(`${API_URL}/api/transactions/save`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include",
+                        body: JSON.stringify({
+                            type: selectedPlan.duration,
+                            amount: selectedPlan.price,
+                            paymentMethod: "VNPay",
+                            status: "SUCCESS",
+                            message: "Giao dịch thành công",
+                        }),
+                    });
+                }
+
+                localStorage.removeItem("selectedPlan");
+
+                // Redirect sau 3s
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 3000);
+            })
+            .catch(err => {
+                console.error("Lỗi khi upgrade hoặc gọi user-info:", err);
+            });
+    } else {
+        setStatus("failed");
+    }
+}, [searchParams]);
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 text-center px-4">
             {status === "success" ? (

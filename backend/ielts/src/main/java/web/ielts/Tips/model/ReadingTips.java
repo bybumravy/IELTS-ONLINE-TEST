@@ -15,6 +15,14 @@ public class ReadingTips {
     private List<String> tips;
 
     private List<Exercise> exercises;
+
+    public ReadingTips(String id, String type, String description, String skill) {
+        this.id = id;
+        this.type = type;
+        this.description = description;
+        this.skill = skill;
+    }
+
     public static class Exercise {
         private String paragraph;
         private String instruction;

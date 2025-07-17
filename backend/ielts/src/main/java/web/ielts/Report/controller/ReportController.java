@@ -1,6 +1,5 @@
 package web.ielts.Report.controller;
 
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import web.ielts.Report.model.Report;
@@ -8,16 +7,15 @@ import web.ielts.Report.repository.ReportRepository;
 
 import java.util.List;
 
+import web.ielts.Report.service.ReportService;
 
 @RestController
 @RequestMapping("/api/report")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class ReportController {
-    private final ReportRepository reportRepository;
 
-    public ReportController(ReportRepository reportRepository) {
-        this.reportRepository = reportRepository;
-    }
+    private final ReportService reportService;
+    private final ReportRepository reportRepository;
 
     @GetMapping
     public List<Report> getAllReports() {
@@ -25,9 +23,14 @@ public class ReportController {
     }
 
 
+    public ReportController(ReportService reportService, ReportRepository reportRepository) {
+        this.reportService = reportService;
+        this.reportRepository = reportRepository;
+    }
+
     @PostMapping
     public ResponseEntity<String> submitFeedback(@RequestBody Report report) {
-        reportRepository.save(report);
+        reportService.submitFeedback(report);
         return ResponseEntity.ok("Feedback submitted successfully.");
     }
 }
