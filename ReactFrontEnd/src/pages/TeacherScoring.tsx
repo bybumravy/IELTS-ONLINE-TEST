@@ -1,5 +1,5 @@
 "use client"
-
+import { useParams } from "react-router-dom";
 import {useEffect, useState} from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -97,23 +97,24 @@ interface SentenceCorrection {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export default function Component() {
+export default function TeacherScoringPage() {
 
     const [taskData, setTaskData] = useState(null)
     const [selectedTask, setSelectedTask] = useState<"task1" | "task2">("task1")
-
+    const { id } = useParams<{ id: string }>();
     useEffect(() => {
-        fetch(`http://localhost:8080/verify/writingbyteacher/685f84953e1264c819a3630f`, {
+        if (!id) return;
+
+        fetch(`http://localhost:8080/verify/writingbyteacher/${id}`, {
             credentials: "include",
         })
             .then((res) => res.json())
             .then((data) => {
-                console.log("✅ WritingAnswer by ID:");
-
-                setTaskData(data)
+                console.log("✅ WritingAnswer by ID:", data);
+                setTaskData(data);
             })
             .catch((err) => console.error("❌ Error fetching writing data:", err));
-    }, []);
+    }, [id]);
     const [allScores, setAllScores] = useState<{
         task1: {
             taskResponse: string;

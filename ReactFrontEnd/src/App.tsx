@@ -63,6 +63,8 @@ import ProtectedLayout from "@/components/sections/ProtectedLayout"
 import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
 import ReadingResult from "@/pages/Result/ReadingResult.tsx";
 import TeacherScoring from "@/pages/TeacherScoring.tsx";
+import ManagerTeacherScoreList from "@/pages/ManagerTeacherScore";
+import TeacherScoringPage from "@/pages/TeacherScoring.tsx";
 
 export default function App() {
     return (
@@ -179,15 +181,15 @@ export default function App() {
 
                         {/* ========== Staff Routes ========== */}
                         <Route path="/staff-login" element={<StaffLogin />} />
-                        <Route path="/teacher-scoring" element={<MainLayout><TeacherScoring /></MainLayout>} />
-                        <Route path="/staff-page" element={<ProtectedLayoutRole allowRoles={["teacher", "manager"]}><StaffLayout><StaffPage /></StaffLayout></ProtectedLayoutRole>} />
+                        <Route path="/teacher-scoring/:id" element={<TeacherScoringPage />} />                        <Route path="/staff-page" element={<ProtectedLayoutRole allowRoles={["teacher", "manager"]}><StaffLayout><StaffPage /></StaffLayout></ProtectedLayoutRole>} />
                         <Route path="/add-test" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><AddTest /></StaffLayout></ProtectedLayout>} />
                         <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />
                         <Route path="/request-test-detail" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><RequestTestDetailPage /></StaffLayout></ProtectedLayout>} />
                         <Route path="/add-vocabulary" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><Vocabulary /></StaffLayout></ProtectedLayout>} />
                         <Route path="/review-report" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><ReviewReport /></StaffLayout></ProtectedLayout>} />
                         {/* ========== Error Pages ========== */}
-                        <Route path="/error" element={<ErrorPage />} />
+
+                        <Route path="/manageteacherscore" element={<ManagerTeacherScoreList />} />
 
                         {/* ========== 404 Not Found (Catch-all) ========== */}
                         <Route path="*" element={<NotFoundPage />} />
