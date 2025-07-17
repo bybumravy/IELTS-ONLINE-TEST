@@ -162,7 +162,7 @@ const LoginAdmin = () => {
                             className="w-full border-2"
                             onClick={handleGoogleLogin}
                         >
-                            <img src="/src/assets/google.png" alt="Google" className="mr-2 h-4 w-4" />
+                            <img  alt="Google" className="mr-2 h-4 w-4" />
                             Google
                         </Button>
                     </form>

@@ -28,7 +28,7 @@ class ErrorBoundary extends Component<Props, State> {
     
     // Redirect to error page after a short delay
     setTimeout(() => {
-      window.location.href = '/error';
+      window.location.href = '/';
     }, 1000);
   }
 

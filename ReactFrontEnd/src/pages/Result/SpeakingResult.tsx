@@ -315,7 +315,7 @@ export default function SpeakingResult() {
 
         const sentences = originalText.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g) || [originalText]
         const sentenceUsed: Record<number, boolean> = {}
-        const highlightedSentences = [...sentences]
+        const highlightedSentences: React.ReactNode[] = [...sentences]
 
         corrections.forEach((correction, idx) => {
             const contextIdx = sentences.findIndex(
@@ -334,16 +334,16 @@ export default function SpeakingResult() {
 
             highlightedSentences[contextIdx] = (
                 <span key={`sentence-${idx}`}>
-          {before}
+                    {before}
                     <mark className="bg-red-100 text-red-800 font-medium rounded-md px-2 py-1 cursor-help transition-colors hover:bg-red-200 relative">
-            {errorWord}
+                        {errorWord}
                         <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-              {idx + 1}
-            </span>
-          </mark>
+                            {idx + 1}
+                        </span>
+                    </mark>
                     {after}
-        </span>
-            ) as string
+                </span>
+            )
         })
 
         return (
@@ -406,10 +406,10 @@ export default function SpeakingResult() {
                                 }`}
                                 title={wordObj.feedback || `Stress: ${wordObj.stress}`}
                             >
-                {wordObj.word}
+                                {wordObj.word}
                                 {wordObj.stress === "primary" && <span className="text-blue-600 ml-0.5">ˈ</span>}
                                 {wordObj.stress === "secondary" && <span className="text-blue-500 ml-0.5">ˌ</span>}
-              </span>
+                            </span>
                         ))}
                     </div>
                 </div>

@@ -43,6 +43,7 @@
     "next-themes": "^0.4.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "recharts": "2.6.2",
     "react-day-picker": "^9.7.0",
     "react-hook-form": "^7.60.0",
     "react-router-dom": "^7.6.2",
@@ -54,8 +55,8 @@
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/node": "^22.15.29",
-    "@types/react": "^18.2.67",
-    "@types/react-dom": "^18.2.23",
+    "@types/react": "18.2.67",
+    "@types/react-dom": "18.2.23",
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.21",

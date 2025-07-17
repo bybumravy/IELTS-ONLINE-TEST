@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search as SearchIcon,
@@ -9,6 +9,10 @@ import {
 
 const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate('/');
+  }, [navigate]);
 
   const handleGoBack = () => {
     navigate(-1);

@@ -52,7 +52,6 @@ type Part = "part1" | "part2" | "part3"
 const SpeakingTest = () => {
     const { testId } = useParams<{ testId: string }>()
     const { user } = useAuth()
-    const {isPremium} = useAuth()
     const TOTAL_TEST_TIME = 600 // 10 phút (600 giây)
     const [speaking, setSpeaking] = useState<Speaking | null>(null)
     const [loading, setLoading] = useState(true)
@@ -72,7 +71,7 @@ const SpeakingTest = () => {
     const audioChunksRef = useRef<Blob[]>([])
     const [liveTranscript, setLiveTranscript] = useState<string>("");
     const recognitionRef = useRef<any>(null); // dùng any nếu TS báo lỗi SpeechRecognition
-    const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
+    const [_recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
     const [gradingMethod, setGradingMethod] = useState<"ai" | "teacher">("ai");
     const [showGradingDialog, setShowGradingDialog] = useState(false);
     const [totalRecordingTime, setTotalRecordingTime] = useState<{ [key in Part]: number }>({
@@ -474,11 +473,6 @@ const SpeakingTest = () => {
     const getQuestionNumber = () => {
         if (currentPart === "part2") return ""
         return currentQuestionIndex + 1
-    }
-
-    const getPartTitle = () => {
-        if (!speaking) return ""
-        return `PART ${speaking[currentPart].partNumber} ${speaking[currentPart].title.toUpperCase()}`
     }
 
     if (loading) {

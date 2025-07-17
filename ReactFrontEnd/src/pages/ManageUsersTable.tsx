@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { customFetch } from "@/components/sections/customFetch";
+import React from "react";
 
 interface ManageUsersTableProps {
     role: 'student' | 'teacher' | 'manager';
@@ -134,11 +135,11 @@ export default function ManageUsersTable({ role }: ManageUsersTableProps) {
     );
 }
 
-const thStyle = { padding: '8px 12px', borderBottom: '2px solid #ddd', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
-const tdStyle = { padding: '8px 12px', whiteSpace: 'nowrap' as const };
-const actionButtonStyle = { padding: '4px 8px', border: 'none', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#1976d2', color: '#fff' };
-const modalOverlay = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 };
-const modalContent = { backgroundColor: '#fff', padding: '20px', borderRadius: '8px', width: '400px' };
+const thStyle: React.CSSProperties = { padding: '8px 12px', borderBottom: '2px solid #ddd', fontWeight: 'bold', whiteSpace: 'nowrap' };
+const tdStyle: React.CSSProperties = { padding: '8px 12px', whiteSpace: 'nowrap' };
+const actionButtonStyle: React.CSSProperties = { padding: '4px 8px', border: 'none', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#1976d2', color: '#fff' };
+const modalOverlay: React.CSSProperties = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 };
+const modalContent: React.CSSProperties = { backgroundColor: '#fff', padding: '20px', borderRadius: '8px', width: '400px' };
 
 function renderSelect(label: string, value: string, onChange: (val: string) => void, options: string[]) {
     return (

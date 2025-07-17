@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pencil, Trash2, Crown } from "lucide-react";
@@ -23,7 +22,7 @@ export default function ManageStudentsPage() {
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<UserDTO | null>(null);
   const [editData, setEditData] = useState<Partial<UserDTO>>({});
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
 
   const fetchUsers = async () => {
@@ -62,7 +61,7 @@ export default function ManageStudentsPage() {
     fetchUsers();
   };
 
-  const handleUpgradePremium = async (email: string) => {
+  const handleUpgradePremium = async (_email: string) => {
     await fetch(`${API_URL}/api/user/upgrade-premium`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
