@@ -212,6 +212,64 @@
             }
         }
 
+        private double callOpenAIScorePronunciation(String transcript, List<StressMismatch> stressMismatches, List<PronunciationEvaluation> intonationResults) {
+            try {
+                StringBuilder prompt = new StringBuilder();
+                prompt.append("You are a certified IELTS Speaking examiner.\n")
+                    .append("Your task is to give a pronunciation score (from 0 to 9, with 0.5 increments) for the candidate's answer, based on the following information:\n")
+                    .append("- The transcript of the answer.\n")
+                    .append("- The list of words with stress mismatches (where the candidate's stress does not match the standard).\n")
+                    .append("- The list of important words that should be emphasized for natural intonation but were not.\n")
+                    .append("\n=== Instructions ===\n")
+                    .append("- Carefully consider both stress and intonation issues.\n")
+                    .append("- Penalize for frequent or severe stress mismatches, or for missing important intonation/emphasis.\n")
+                    .append("- If the answer is mostly correct with minor issues, give a high score (7.5-9).\n")
+                    .append("- If there are many errors, give a lower score.\n")
+                    .append("- Only return a single number (the score), no explanation, no extra text.\n\n");
+                prompt.append("Transcript:\n").append(transcript).append("\n\n");
+                prompt.append("Stress mismatches (word, detectedPosition, standardPosition):\n");
+                for (StressMismatch sm : stressMismatches) {
+                    prompt.append(String.format("- %s (detected: %s, standard: %s)\n", sm.getWord(), sm.getDetectedPosition(), sm.getStandardPosition()));
+                }
+                prompt.append("\nIntonation issues (missing emphasized words):\n");
+                for (PronunciationEvaluation pe : intonationResults) {
+                    prompt.append(String.format("- %s (sentence: %s)\n", pe.getText(), pe.getSentenceText()));
+                }
+                prompt.append("\nNow, return ONLY the pronunciation score (0-9, with 0.5 increments). No explanation.\n");
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.setBearerAuth(openaiApiKey);
+                Map<String, Object> requestBody = Map.of(
+                        "model", "gpt-4o",
+                        "messages", List.of(
+                                Map.of("role", "system", "content", "You are an IELTS pronunciation expert."),
+                                Map.of("role", "user", "content", prompt.toString())
+                        ),
+                        "temperature", 0.2
+                );
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+                ResponseEntity<String> response = restTemplate.postForEntity(
+                        "https://api.openai.com/v1/chat/completions",
+                        entity,
+                        String.class
+                );
+                if (response.getStatusCode().is2xxSuccessful()) {
+                    JsonNode root = objectMapper.readTree(response.getBody());
+                    String content = root.path("choices").get(0).path("message").path("content").asText();
+                    // Extract the first number (score) from the response
+                    Pattern p = Pattern.compile("([0-9]+(\\.[05])?)");
+                    Matcher m = p.matcher(content);
+                    if (m.find()) {
+                        return Double.parseDouble(m.group(1));
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error getting pronunciation score from OpenAI: " + e.getMessage());
+            }
+            return 0.0; // fallback
+        }
+
             private double praatGetAudioDuration(File wavFile) throws IOException {
             // Lấy đường dẫn tuyệt đối cho script Praat
             String scriptPath = new File("D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\getDuration.praat").getAbsolutePath();
@@ -389,7 +447,7 @@
         }
 
 
-        public void analyze(String Ob_id, String audioUrl, JsonNode root) throws IOException, InterruptedException {
+        public PronunciationAnswer analyze(String audioUrl, JsonNode root) throws IOException, InterruptedException {
             System.out.println("\n=======================================");
             System.out.println("🚀 STARTING PROSODY ANALYSIS");
             System.out.println("   Audio URL: " + audioUrl);
@@ -481,6 +539,9 @@
                             pronunciationEvaluationList.add(item);
                         }
                     }
+                    // === Gọi AI để chấm điểm pronunciation ===
+                    double score = callOpenAIScorePronunciation(transcript, result.getStressMismatchesDetailed(), intonationResults);
+                    result.setScore(score);
                 }
 
                 result.setStressMismatchesDetailed(stressMismatchesDetailed
@@ -509,6 +570,7 @@
                 System.out.println("   Final result: " + result);
                 System.out.println("=======================================");
 
+            return result;
         }
 
         // Helper class for word info

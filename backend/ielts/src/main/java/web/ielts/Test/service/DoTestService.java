@@ -222,7 +222,6 @@ public class DoTestService {
     }
 
     public void updateAnswerUrls(SpeakingAnswer speakingAnswer, Map<String, String> fileUrlMap) {
-        String Ob_id = speakingAnswer.getId();
         SpeakingAnswerPart13 part1 = speakingAnswer.getPart1();
         if (part1 != null && part1.getQuestions() != null) {
 
@@ -244,9 +243,12 @@ public class DoTestService {
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
                         System.out.println(transcript);
                         FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
-                        aiSpeakingService.evaluateSpeaking(Ob_id, transcript, qa.getQuestion(),1,prosodyFeatures,null);
-                        prosodyService.analyze(Ob_id, blob,transcript);
-
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,null);
+                        PronunciationAnswer pa = prosodyService.analyze(blob,transcript);
+                        qa.setGrammarAnswer(sp.getGrammarAnswer());
+                        qa.setLexicalAnswer(sp.getLexicalAnswer());
+                        qa.setFluencyCohAnswer(sp.getFluencyCohAnswer());
+                        qa.setPronunciationAnswer(pa);
                      //totalScore += eval.getScore();
 
                     } catch (Exception e) {
