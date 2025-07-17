@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { MainLayout } from "@/components/layout/MainLayout";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line, AreaChart, Area } from "recharts";
 
 interface MonthlyStat {
@@ -29,7 +28,7 @@ type StatType = "month" | "year" | "week" | "day";
 export default function TransactionPage() {
   const [stats, setStats] = useState<MonthlyStat[]>([]);
   const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [chartType, setChartType] = useState<ChartType>("bar");
   const [statType, setStatType] = useState<StatType>("month");
   const API_URL = import.meta.env.VITE_API_URL;

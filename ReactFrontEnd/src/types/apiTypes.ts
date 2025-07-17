@@ -140,6 +140,13 @@ export type WritingTask = {
   imageUrl?: string;
   prompt?: string;
 };
+export interface Vocabulary {
+    id: string;
+    word: string;
+    translate: string;
+    partOfSpeech?: string;
+    pronunciation?: string;
+}
 
 export interface SkillColors {
   [key: string]: {
@@ -189,7 +196,7 @@ export type QuestionUpdateHandler = {
   (field: 'options', value: string[]): void;
   (field: 'question' | 'answer' | 'explanation', value: string): void;
   (field: QuestionField, value: QuestionValue): void;
-}; 
+};
 
 export interface SpeakingTask {
   prompt?: string;

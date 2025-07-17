@@ -23,7 +23,7 @@ export default function UserManagementPage() {
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<UserDTO | null>(null);
   const [editData, setEditData] = useState<Partial<UserDTO>>({});
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
 
   const fetchUsers = async () => {
@@ -62,7 +62,7 @@ export default function UserManagementPage() {
     fetchUsers();
   };
 
-  const handleUpgradePremium = async (email: string) => {
+  const handleUpgradePremium = async (_email: string) => {
     await fetch(`${API_URL}/api/user/upgrade-premium`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

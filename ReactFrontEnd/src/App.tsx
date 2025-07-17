@@ -37,6 +37,7 @@ import FulllTest from "@/pages/DoTest/FullTest"
 import Vocabulary from "./pages/practice/Vocabulary"
 import ForgetPassword from "@/components/sections/ForgetPassword";
 import ResetPassword from "@/components/sections/ResetPassword";
+import VocabularyGame from "@/pages/student/VocabularyGame.tsx";
 
 // Result
 import WritingResult from "@/pages/Result/WritingResult"
@@ -115,6 +116,7 @@ export default function App() {
                                 <MainLayout><ListTestPage /></MainLayout>
                             </SoftProtectedLayout>
                         } />
+                        <Route path="/student/vocabulary-game" element={<MainLayout><VocabularyGame /></MainLayout>} />
 
 
                         <Route path="/practice/vocabulary" element={<SoftProtectedLayout allowRoles={["student"]}><MainLayout><VocabularyList /></MainLayout></SoftProtectedLayout>} />

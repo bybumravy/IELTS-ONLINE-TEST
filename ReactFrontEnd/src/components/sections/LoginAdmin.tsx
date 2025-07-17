@@ -12,22 +12,27 @@ const LoginAdmin = () => {
     const [password, setPassword] = useState("");
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
-    const API_URL = import.meta.env.VITE_API_URL;
+
     const navigate = useNavigate();
     const { login } = useAuth();
 
     const getEmailErrorMessage = (value: string): string => {
         if (!value) return "Email is required";
+
+        // Email regex chuẩn RFC 5322 simplified
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
         if (!emailRegex.test(value)) {
             return "Please enter a valid email address (e.g. you@example.com)";
         }
+
         return "";
     };
 
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setEmail(value);
+
         const errorMsg = getEmailErrorMessage(value);
         setEmailError(errorMsg);
     };
@@ -35,6 +40,7 @@ const LoginAdmin = () => {
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setPassword(value);
+
         if (!value) {
             setPasswordError("Password is required");
         } else {
@@ -44,17 +50,23 @@ const LoginAdmin = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        // Validate email
         const emailMsg = getEmailErrorMessage(email);
         setEmailError(emailMsg);
+
+        // Validate password
         let passwordMsg = "";
         if (!password) {
             passwordMsg = "Password is required";
         }
         setPasswordError(passwordMsg);
+
+        // If no errors, proceed login
         if (!emailMsg && !passwordMsg) {
             try {
                 await login(email, password);
-                navigate("/admin-page");
+                navigate("/adminpage");
             } catch (error) {
                 alert("Login failed");
                 console.error(error);
@@ -63,7 +75,7 @@ const LoginAdmin = () => {
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = `${API_URL}/oauth2/authorization/google`;
+        window.location.href = "http://localhost:8080/oauth2/authorization/google";
     };
 
     return (
@@ -150,14 +162,14 @@ const LoginAdmin = () => {
                             className="w-full border-2"
                             onClick={handleGoogleLogin}
                         >
-                            <img src="/src/assets/google.png" alt="Google" className="mr-2 h-4 w-4" />
+                            <img  alt="Google" className="mr-2 h-4 w-4" />
                             Google
                         </Button>
                     </form>
+
                 </CardContent>
             </Card>
         </div>
     );
 };
-
 export default LoginAdmin;

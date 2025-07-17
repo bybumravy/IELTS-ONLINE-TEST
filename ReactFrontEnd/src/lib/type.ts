@@ -1,8 +1,8 @@
-// src/lib/types.ts
 export interface ExampleSentence {
   esentence: string;
   vsentence: string;
 }
+
 export interface Vocabulary {
   id: string;
   word: string;
@@ -11,6 +11,8 @@ export interface Vocabulary {
   topic: string;
   band: string;
   exp: ExampleSentence[];
+  partOfSpeech: string;
+  pronunciation: string;
 }
 
 export interface AuthState {
