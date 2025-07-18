@@ -29,7 +29,7 @@ function formatPremiumRemainingTime(premiumExpiry: string | null): string {
     if (!premiumExpiry) return "Premium đã hết hạn";
 
     const expiryDateUtc = new Date(premiumExpiry);
-    const expiryDateVN = new Date(expiryDateUtc.getTime() + 7 * 60 * 60 * 1000); // UTC+7
+    const expiryDateVN = new Date(expiryDateUtc.getTime() + 7 * 60 * 60 * 1000);
 
     const now = new Date();
     const diffMs = expiryDateVN.getTime() - now.getTime();
@@ -125,7 +125,11 @@ export default function PremiumPage() {
 
             const result = await response.json();
             const payUrl = result?.payUrl;
+
             if (payUrl) {
+                // ✅ Lưu selectedPlan vào localStorage trước khi chuyển
+                localStorage.setItem("selectedPlan", JSON.stringify(selectedPlan));
+
                 window.location.href = payUrl;
             } else {
                 alert("Không nhận được URL thanh toán từ server.");
@@ -138,13 +142,14 @@ export default function PremiumPage() {
         }
     }
 
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-green-50">
             <header className="container mx-auto px-4 py-8 text-center">
                 <Badge className="mb-4 bg-orange-100 text-orange-800 hover:bg-orange-200">
                     🚀 Ra mắt AI Chấm Bài IELTS
                 </Badge>
-                {/* ✅ Thêm badge hiển thị thời hạn Premium */}
+                {/* Thêm badge hiển thị thời hạn Premium */}
                 {premiumExpiry && (
                     <div className="mb-2">
                         <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">

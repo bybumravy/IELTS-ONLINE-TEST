@@ -8,8 +8,12 @@ interface PracticeExerciseProps {
 }
 export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
     const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
-
+    const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmittedPerQuestion, setIsSubmittedPerQuestion] = useState<Record<string, boolean>>({});
+
+    const handleSubmitAll = () => {
+        setIsSubmitted(true);
+    };
 
     const handleAnswerChange = (key: string, value: string) => {
         setUserAnswers(prev => ({ ...prev, [key]: value.trim() }));
@@ -23,13 +27,13 @@ export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
 
         if (Array.isArray(correctAns)) {
             return correctAns
-                .filter(ans => typeof ans === "string")
                 .map(ans => ans.toLowerCase())
                 .includes(userAns.toLowerCase());
         }
 
-        return typeof correctAns === "string" && userAns.toLowerCase() === correctAns.toLowerCase();
+        return userAns.toLowerCase() === correctAns.toLowerCase();
     }
+
 
     return(
         <Card className="border shadow-sm mb-10">
@@ -78,6 +82,12 @@ export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
                     {(skill === "Listening" || skill === "Reading") &&
                         exercises.map((exercise, idx) => (
                             <div key={idx} className="mb-12">
+                                {/* Hiển thị đoạn paragraph với html */}
+                                <div className="mb-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: exercise.paragraph ?? "" }} />
+
+                                {/* Hiển thị instruction */}
+                                <p className="mb-6 font-semibold italic" dangerouslySetInnerHTML={{ __html: exercise.instruction}}/>
+
                                 {/* Hiển thị hình ảnh */}
                                 {exercise.imageUrl && (
                                     <div className="mb-4">
@@ -88,11 +98,6 @@ export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
                                         />
                                     </div>
                                 )}
-                                {/* Hiển thị đoạn paragraph với html */}
-                                <div className="mb-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: exercise.paragraph ?? "" }} />
-
-                                {/* Hiển thị instruction */}
-                                <p className="mb-6 font-semibold italic" dangerouslySetInnerHTML={{ __html: exercise.instruction}}/>
 
                                 {exercise.audioUrl && (
                                     <div className="mb-6">
@@ -188,9 +193,9 @@ export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
                                                                 </button>
                                                                 {isSubmittedPerQuestion[`q-${idx}-${qIdx}`] && userAnswers[`q-${idx}-${qIdx}`] && (
                                                                     <p className={`mt-1 font-semibold ${
-                                                                        isCorrect(userAnswers[`q-${idx}-${qIdx}`], q.answer) ? 'text-green-600' : 'text-red-600'
+                                                                        isCorrect(userAnswers[`q-${idx}-${qIdx}`].charAt(0), q.answer) ? 'text-green-600' : 'text-red-600'
                                                                     }`}>
-                                                                        {isCorrect(userAnswers[`q-${idx}-${qIdx}`], q.answer) ? '✅ Correct' : '❌ Incorrect'}
+                                                                        {isCorrect(userAnswers[`q-${idx}-${qIdx}`].charAt(0), q.answer) ? '✅ Correct' : '❌ Incorrect'}
                                                                     </p>
                                                                 )}
                                                             </div>
@@ -271,7 +276,7 @@ export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
                                             })()}
                                         </div>
                                         {/* Đáp án đúng */}
-                                        {isSubmittedPerQuestion[`q-${idx}-${qIdx}`] && (
+                                        {(isSubmittedPerQuestion[`q-${idx}-${qIdx}`] || isSubmitted) && (
                                             <details className="border-l-4 border-emerald-600 pl-3 mt-2">
                                                 <summary className="cursor-pointer text-emerald-700">
                                                     Answer & Explanation
@@ -280,7 +285,7 @@ export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
                                                     <strong>Answer:</strong> {Array.isArray(q.answer) ? q.answer : q.answer}
 
                                                 </p>
-                                                <p className="text-sm text-gray-600">{q.explanation}</p>
+                                                <p className="text-sm text-gray-600" dangerouslySetInnerHTML={{ __html: q.explanation ?? "" }}/>
                                             </details>
                                         )}
 

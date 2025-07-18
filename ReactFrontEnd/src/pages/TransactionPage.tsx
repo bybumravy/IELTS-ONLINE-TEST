@@ -58,7 +58,7 @@ export default function TransactionPage() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="key" />
           <YAxis />
-          <Tooltip formatter={(value: number) => [Number(value), "₫"]} />
+          <Tooltip formatter={(value: number) => value.toLocaleString() + " ₫"} />
           <Bar dataKey="totalAmount" fill="#10b981" radius={[6, 6, 0, 0]} />
         </BarChart>
       );
@@ -69,7 +69,7 @@ export default function TransactionPage() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="key" />
           <YAxis />
-          <Tooltip formatter={(value: number) => [Number(value), "₫"]} />
+          <Tooltip formatter={(value: number) => value.toLocaleString() + " ₫"} />
           <Line type="monotone" dataKey="totalAmount" stroke="#10b981" strokeWidth={3} dot={{ r: 5 }} />
         </LineChart>
       );
@@ -80,12 +80,12 @@ export default function TransactionPage() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="key" />
           <YAxis />
-          <Tooltip formatter={(value: number) => [Number(value), "₫"]} />
+          <Tooltip formatter={(value: number) => value.toLocaleString() + " ₫"} />
           <Area type="monotone" dataKey="totalAmount" stroke="#10b981" fill="#6ee7b7" strokeWidth={3} />
         </AreaChart>
       );
     }
-    return <div />;
+    return null;
   };
 
   return (

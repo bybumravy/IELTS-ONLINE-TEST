@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react"
+import {useEffect, useMemo, useRef, useState} from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -47,8 +47,6 @@ export default function ReviewReport() {
     const [newNote, setNewNote] = useState("")
     const [responseMessage, setResponseMessage] = useState("")
     const [dailyStats, setDailyStats] = useState<{ date: string; count: number }[]>([])
-
-
     // Filter function
     const applyFilters = () => {
         const filtered = reports.filter((report) => {
@@ -69,6 +67,10 @@ export default function ReviewReport() {
 
         setFilteredReports(filtered)
     }
+    useEffect(() => {
+        applyFilters()
+    }, [searchTerm])
+
 
     // Add note to report
     const addNoteToReport = (reportId: string, note: string) => {
@@ -138,7 +140,7 @@ export default function ReviewReport() {
                     <h1 className="text-3xl font-bold">Student Report Management</h1>
                     <p className="text-muted-foreground">View and manage reports from IELTS students</p>
                 </div>
-                <Button className="gap-2 bg-green-800">
+                <Button className="gap-2 bg-green-800 hover:bg-green-500">
                     <Download className="h-4 w-4 " />
                     Export Reports
                 </Button>
@@ -166,6 +168,7 @@ export default function ReviewReport() {
                                     <div className="relative">
                                         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                         <Input
+                                            type="search"
                                             placeholder="Name, subject..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -220,14 +223,15 @@ export default function ReviewReport() {
                                 </div>
                             </div>
 
-                            <Button onClick={applyFilters} className="w-full md:w-auto bg-green-800">
+                            <Button onClick={applyFilters} className="w-full md:w-auto bg-green-800 hover:bg-green-900">
                                 Apply Filters
                             </Button>
                         </CardContent>
                     </Card>
 
                     {/* Reports Table */}
-                    <Card>
+                    <div>
+                        <Card>
                         <CardHeader>
                             <CardTitle>Report List ({filteredReports.length})</CardTitle>
                         </CardHeader>
@@ -391,6 +395,7 @@ export default function ReviewReport() {
                             </Table>
                         </CardContent>
                     </Card>
+                    </div>
                 </TabsContent>
 
                 <TabsContent value="statistics" className="space-y-6">
