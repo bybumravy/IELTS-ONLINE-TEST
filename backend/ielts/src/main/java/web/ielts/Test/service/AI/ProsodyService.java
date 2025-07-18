@@ -9,9 +9,11 @@
     import org.springframework.http.ResponseEntity;
     import org.springframework.stereotype.Service;
     import org.springframework.web.client.RestTemplate;
+    import web.ielts.Test.model.answer.speaking.FleCohAnswer;
+    import web.ielts.Test.model.answer.speaking.PronunciationAnswer;
     import web.ielts.Test.model.answer.speaking.PronunciationEvaluation;
-    import web.ielts.Test.model.AI.ProsodyAnalysisResult;
     import web.ielts.Test.model.answer.speaking.StressMismatch;
+
 
     import java.io.*;
     import java.net.URL;
@@ -28,15 +30,15 @@
     @Service
     public class ProsodyService {
 
-            private final String PRAAT_PATH = "C:\\Users\\LAPTOP24H\\Downloads\\praat6438_win-intel64\\Praat.exe";
-            private final String PRAAT_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script.praat"; // Script Praat
-            private final String STRESS_ANALYSIS_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\stressAnalysis.praat";
-            private final String INTONATION_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script_intonation.praat";
-            private final String CMU_DICT_PATH = "C:\\Users\\LAPTOP24H\\Downloads\\cmudict-0.7b.txt";
-            @Value("${openai.api.key}")
-            private String openaiApiKey;
-            private final RestTemplate restTemplate = new RestTemplate();
-            private final ObjectMapper objectMapper = new ObjectMapper();
+        private final String PRAAT_PATH = "C:\\Users\\LAPTOP24H\\Downloads\\praat6438_win-intel64\\Praat.exe";
+        private final String PRAAT_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script.praat"; // Script Praat
+        private final String STRESS_ANALYSIS_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\stressAnalysis.praat";
+        private final String INTONATION_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script_intonation.praat";
+        private final String CMU_DICT_PATH = "C:\\Users\\VinhNQ\\Downloads\\archive\\cmudict-0.7b.txt";
+        @Value("${openai.api.key}")
+        private String openaiApiKey;
+        private final RestTemplate restTemplate = new RestTemplate();
+        private final ObjectMapper objectMapper = new ObjectMapper();
         private final List<String> stressMismatches = new ArrayList<>();
 
         private final Map<String, String> cmuDictMap = new HashMap<>(); // Lưu trữ CMU Dict
@@ -210,9 +212,68 @@
             }
         }
 
+        private double callOpenAIScorePronunciation(String transcript, List<StressMismatch> stressMismatches, List<PronunciationEvaluation> intonationResults) {
+            try {
+                StringBuilder prompt = new StringBuilder();
+                prompt.append("You are a certified IELTS Speaking examiner.\n")
+                    .append("Your task is to give a pronunciation score (from 0 to 9, with 0.5 increments) for the candidate's answer, based on the following information:\n")
+                    .append("- The transcript of the answer.\n")
+                    .append("- The list of words with stress mismatches (where the candidate's stress does not match the standard).\n")
+                    .append("- The list of important words that should be emphasized for natural intonation but were not.\n")
+                    .append("\n=== Instructions ===\n")
+                    .append("- Carefully consider both stress and intonation issues.\n")
+                    .append("- Penalize for frequent or severe stress mismatches, or for missing important intonation/emphasis.\n")
+                    .append("- If the answer is mostly correct with minor issues, give a high score (7.5-9).\n")
+                    .append("- If there are many errors, give a lower score.\n")
+                    .append("- Only return a single number (the score), no explanation, no extra text.\n\n");
+                prompt.append("Transcript:\n").append(transcript).append("\n\n");
+                prompt.append("Stress mismatches (word, detectedPosition, standardPosition):\n");
+                if (stressMismatches == null) stressMismatches = Collections.emptyList();
+                for (StressMismatch sm : stressMismatches) {
+                    prompt.append(String.format("- %s (detected: %s, standard: %s)\n", sm.getWord(), sm.getDetectedPosition(), sm.getStandardPosition()));
+                }
+                prompt.append("\nIntonation issues (missing emphasized words):\n");
+                for (PronunciationEvaluation pe : intonationResults) {
+                    prompt.append(String.format("- %s (sentence: %s)\n", pe.getText(), pe.getSentenceText()));
+                }
+                prompt.append("\nNow, return ONLY the pronunciation score (0-9, with 0.5 increments). No explanation.\n");
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.setBearerAuth(openaiApiKey);
+                Map<String, Object> requestBody = Map.of(
+                        "model", "gpt-4o",
+                        "messages", List.of(
+                                Map.of("role", "system", "content", "You are an IELTS pronunciation expert."),
+                                Map.of("role", "user", "content", prompt.toString())
+                        ),
+                        "temperature", 0.2
+                );
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+                ResponseEntity<String> response = restTemplate.postForEntity(
+                        "https://api.openai.com/v1/chat/completions",
+                        entity,
+                        String.class
+                );
+                if (response.getStatusCode().is2xxSuccessful()) {
+                    JsonNode root = objectMapper.readTree(response.getBody());
+                    String content = root.path("choices").get(0).path("message").path("content").asText();
+                    // Extract the first number (score) from the response
+                    Pattern p = Pattern.compile("([0-9]+(\\.[05])?)");
+                    Matcher m = p.matcher(content);
+                    if (m.find()) {
+                        return Double.parseDouble(m.group(1));
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error getting pronunciation score from OpenAI: " + e.getMessage());
+            }
+            return 0.0; // fallback
+        }
+
             private double praatGetAudioDuration(File wavFile) throws IOException {
             // Lấy đường dẫn tuyệt đối cho script Praat
-            String scriptPath = new File("D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\getDuration.praat").getAbsolutePath();
+                String scriptPath = new File("D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\getDuration.praat").getAbsolutePath();
             System.out.println("Praat path: " + PRAAT_PATH);
             System.out.println("Praat script: " + scriptPath);
             System.out.println("Audio file: " + wavFile.getAbsolutePath());
@@ -349,7 +410,7 @@
                     writer.println("            text = \"" + syllableCount + "\"");
                 }
 
-                System.out.println("✅ Ghi file TextGrid thành công: " + textGridFile.getAbsolutePath());
+                System.out.println("Ghi file TextGrid thành công: " + textGridFile.getAbsolutePath());
             }
             return textGridFile;
         }
@@ -374,10 +435,20 @@
 
             return sentences;
         }
+        public FleCohAnswer analyzeProsodyFeatures(String audioUrl, JsonNode root) {
+            try {
+                File mp3File = downloadAudioFile(audioUrl);
+                File wavFile = convertMp3ToWav(mp3File);
+                File textGridFile = generateTextGridFromJson(root, wavFile);
+                return runPraatAnalysis(wavFile, textGridFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
 
 
-
-        public ProsodyAnalysisResult analyze(String audioUrl, JsonNode root) {
+        public PronunciationAnswer analyze(String audioUrl, JsonNode root) throws IOException, InterruptedException {
             System.out.println("\n=======================================");
             System.out.println("🚀 STARTING PROSODY ANALYSIS");
             System.out.println("   Audio URL: " + audioUrl);
@@ -386,19 +457,13 @@
             stressMismatches.clear();
             List<Map<String, Object>> stressMismatchesDetailed = new ArrayList<>();
             List<Map<String, Object>> pronunciationEvaluationList = new ArrayList<>();
-            ProsodyAnalysisResult result = new ProsodyAnalysisResult();
-
-            try {
+            PronunciationAnswer result = new PronunciationAnswer();
                 // 1. Tải và chuyển đổi file âm thanh
                 File mp3File = downloadAudioFile(audioUrl);
                 File wavFile = convertMp3ToWav(mp3File);
 
                 // 2. Tạo TextGrid
                 File textGridFile = generateTextGridFromJson(root, wavFile);
-
-                // 3. Phân tích prosody cơ bản
-                System.out.println("Thong so co ban");
-                Map<String, Double> praatResults = runPraatAnalysis(wavFile, textGridFile);
 
                 // 4. Phân tích trọng âm từ (CHI TIẾT VỊ TRÍ)
                 System.out.println("Trong am");
@@ -475,6 +540,11 @@
                             pronunciationEvaluationList.add(item);
                         }
                     }
+                    // === Gọi AI để chấm điểm pronunciation ===
+                    List<StressMismatch> stressList = result.getStressMismatchesDetailed();
+                    if (stressList == null) stressList = Collections.emptyList();
+                    double score = callOpenAIScorePronunciation(transcript, stressList, intonationResults);
+                    result.setScore(score);
                 }
 
                 result.setStressMismatchesDetailed(stressMismatchesDetailed
@@ -502,12 +572,8 @@
                 System.out.println("🎉 ANALYSIS COMPLETED SUCCESSFULLY");
                 System.out.println("   Final result: " + result);
                 System.out.println("=======================================");
-                return result;
-            } catch (Exception e) {
-                ProsodyAnalysisResult errorResult = new ProsodyAnalysisResult();
-                return errorResult;
 
-            }
+            return result;
         }
 
         // Helper class for word info
@@ -790,7 +856,7 @@
         }
 
 
-        private Map<String, Double> runPraatAnalysis(File wavFile, File textGridFile) throws IOException, InterruptedException {
+        private FleCohAnswer runPraatAnalysis(File wavFile, File textGridFile) throws IOException, InterruptedException {
             File outputFile = File.createTempFile("praat-output", ".txt");
             System.out.println("▶️ [PRAAT ANALYSIS] Starting analysis...");
             System.out.println("   Input WAV: " + wavFile.getAbsolutePath());
@@ -827,36 +893,41 @@
             System.out.println("📊 [PRAAT] Parsing results from: " + outputFile.getAbsolutePath());
             System.out.println("✅ Praat process hoàn tất. Bắt đầu đọc file output...");
 
-            // Trả về Map từ parsePraatOutput
+            // Trả về FleCohAnswer từ parsePraatOutput
             return parsePraatOutput(outputFile);
         }
 
 
 
-        private Map<String, Double> parsePraatOutput(File outputFile) throws IOException {
-            Map<String, Double> results = new HashMap<>();
+        private FleCohAnswer parsePraatOutput(File outputFile) throws IOException {
+            FleCohAnswer answer = new FleCohAnswer();
             try (BufferedReader reader = new BufferedReader(new FileReader(outputFile))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     if (!line.contains("=")) continue;
-
                     String[] parts = line.split("=");
                     if (parts.length != 2) continue;
-
                     String key = parts[0].trim();
                     String valueStr = parts[1].trim();
-
-                    try {
-                        double value = Double.parseDouble(valueStr);
-                        results.put(key, value);
-                    } catch (NumberFormatException e) {
-                        System.err.println("⚠️ Không thể parse value: '" + valueStr + "' cho key: " + key);
+                    switch (key) {
+                        case "meanIntensity":
+                            answer.setMeanIntensity(valueStr);
+                            break;
+                        case "pauseCount":
+                            answer.setPauseCount(valueStr);
+                            break;
+                        case "speechRate":
+                            answer.setSpeechRate(valueStr);
+                            break;
                     }
                 }
             }
-            // In Map ra terminal
-            System.out.println("📤 Parsed Result Map:\n" + results);
-            return results;
+            // Set default values for score and comment
+            answer.setScore(0);
+            answer.setComment(null);
+            System.out.println("📤 Parsed FleCohAnswer:\n" +
+                    "meanIntensity=" + answer.getMeanIntensity() + ", pauseCount=" + answer.getPauseCount() + ", speechRate=" + answer.getSpeechRate());
+            return answer;
         }
 
 

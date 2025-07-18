@@ -7,56 +7,16 @@ public class SpeakingAnswerPart2 {
     private int partNumber;
     private String title;
     private String question;
-    private EvaluationResult evaluationResults;
-
-
-    private double averageScore;
-    public SpeakingAnswerPart2() {
-    }
-
-    private String instruction;
+    private String transcript;
+    private String audioAnswer;
+    private double score;
+    private GrammarAnswer grammarAnswer;
+    private GrammarAnswer lexicalAnswer;
+    private PronunciationAnswer pronunciationAnswer;
+    private FleCohAnswer fluencyCohAnswer;
     private List<String> cueCards;
-    private String studentAnswer;
 
-    public String getInstruction() {
-        return instruction;
-    }
-
-    public void setInstruction(String instruction) {
-        this.instruction = instruction;
-    }
-
-    public String getStudentAnswer() {
-        return studentAnswer;
-    }
-
-    public EvaluationResult getEvaluationResults() {
-        return evaluationResults;
-    }
-
-    public void setEvaluationResults(EvaluationResult evaluationResults) {
-        this.evaluationResults = evaluationResults;
-    }
-
-    public void setStudentAnswer(String studentAnswer) {
-        this.studentAnswer = studentAnswer;
-    }
-
-    public SpeakingAnswerPart2(int partNumber, String title, String question, String instruction, List<String> cueCards, String studentAnswer) {
-        this.partNumber = partNumber;
-        this.title = title;
-        this.question = question;
-        this.instruction = instruction;
-        this.cueCards = cueCards;
-        this.studentAnswer = studentAnswer;
-    }
-
-    public double getAverageScore() {
-        return averageScore;
-    }
-
-    public void setAverageScore(double averageScore) {
-        this.averageScore = averageScore;
+    public SpeakingAnswerPart2() {
     }
 
     public int getPartNumber() {
@@ -83,25 +43,68 @@ public class SpeakingAnswerPart2 {
         this.question = question;
     }
 
+
+    public String getTranscript() {
+        return transcript;
+    }
+
+    public void setTranscript(String transcript) {
+        this.transcript = transcript;
+    }
+
+    public String getAudioAnswer() {
+        return audioAnswer;
+    }
+
+    public void setAudioAnswer(String audioAnswer) {
+        this.audioAnswer = audioAnswer;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
+
+    public GrammarAnswer getGrammarAnswer() {
+        return grammarAnswer;
+    }
+
+    public void setGrammarAnswer(GrammarAnswer grammarAnswer) {
+        this.grammarAnswer = grammarAnswer;
+    }
+
+    public GrammarAnswer getLexicalAnswer() {
+        return lexicalAnswer;
+    }
+
+    public void setLexicalAnswer(GrammarAnswer lexicalAnswer) {
+        this.lexicalAnswer = lexicalAnswer;
+    }
+
+    public PronunciationAnswer getPronunciationAnswer() {
+        return pronunciationAnswer;
+    }
+
+    public void setPronunciationAnswer(PronunciationAnswer pronunciationAnswer) {
+        this.pronunciationAnswer = pronunciationAnswer;
+    }
+
+    public FleCohAnswer getFluencyCohAnswer() {
+        return fluencyCohAnswer;
+    }
+
+    public void setFluencyCohAnswer(FleCohAnswer fluencyCohAnswer) {
+        this.fluencyCohAnswer = fluencyCohAnswer;
+    }
+
     public List<String> getCueCards() {
         return cueCards;
     }
 
     public void setCueCards(List<String> cueCards) {
         this.cueCards = cueCards;
-    }
-
-    @Override
-    public String toString() {
-        return "SpeakingAnswerPart2{" +
-                "partNumber=" + partNumber +
-                ", title='" + title + '\'' +
-                ", question='" + question + '\'' +
-                ", evaluationResults=" + evaluationResults +
-                ", averageScore=" + averageScore +
-                ", instruction='" + instruction + '\'' +
-                ", cueCards=" + cueCards +
-                ", studentAnswer='" + studentAnswer + '\'' +
-                '}';
     }
 }

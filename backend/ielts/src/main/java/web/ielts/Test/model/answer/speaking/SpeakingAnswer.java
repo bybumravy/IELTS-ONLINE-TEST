@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 public class SpeakingAnswer {
     public SpeakingAnswer() {
     }
-
     @Id
     private String id;
     private String testId;
@@ -20,15 +19,7 @@ public class SpeakingAnswer {
     private SpeakingAnswerPart13 part3;
     private double band;
     private LocalDateTime submittedAt;
-    private String gradingMethod;
 
-    public String getGradingMethod() {
-        return gradingMethod;
-    }
-
-    public void setGradingMethod(String gradingMethod) {
-        this.gradingMethod = gradingMethod;
-    }
 
     public SpeakingAnswer(String testId) {
         this.testId = testId;
@@ -94,6 +85,21 @@ public class SpeakingAnswer {
         this.part1 = part1;
         this.part2 = part2;
         this.part3 = part3;
+    }
+
+    @Override
+    public String toString() {
+        return "SpeakingAnswer{" +
+                "id='" + id + '\'' +
+                ", testId='" + testId + '\'' +
+                ", username='" + username + '\'' +
+                ", skill='" + skill + '\'' +
+                ", part1=" + part1 +
+                ", part2=" + part2 +
+                ", part3=" + part3 +
+                ", band=" + band +
+                ", submittedAt=" + submittedAt +
+                '}';
     }
 
     public void setId(String id) {

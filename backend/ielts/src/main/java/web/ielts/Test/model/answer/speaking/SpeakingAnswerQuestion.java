@@ -1,26 +1,56 @@
 package web.ielts.Test.model.answer.speaking;
 
 
+import net.minidev.json.annotate.JsonIgnore;
+
 public class SpeakingAnswerQuestion {
     private String question;
-    private String studentAnswer;
+    private String transcript;
+    private String audioAnswer;
+    @JsonIgnore
     private double score;
     private GrammarAnswer grammarAnswer;
     private GrammarAnswer lexicalAnswer;
+    @JsonIgnore
     private PronunciationAnswer pronunciationAnswer;
     private FleCohAnswer fluencyCohAnswer;
+
+    public String getTranscript() {
+        return transcript;
+    }
+
+    public void setTranscript(String transcript) {
+        this.transcript = transcript;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
 
     public SpeakingAnswerQuestion() {
     }
 
-    public SpeakingAnswerQuestion(String question, String studentAnswer, double score, GrammarAnswer grammerAnswer, GrammarAnswer lexicalAnswer, PronunciationAnswer pronunciationAnswer, FleCohAnswer fluencyCohAnswer) {
+    public SpeakingAnswerQuestion(String question, String transcript, String audioAnswer, double score, GrammarAnswer grammarAnswer, GrammarAnswer lexicalAnswer, PronunciationAnswer pronunciationAnswer, FleCohAnswer fluencyCohAnswer) {
         this.question = question;
-        this.studentAnswer = studentAnswer;
+        this.transcript = transcript;
+        this.audioAnswer = audioAnswer;
         this.score = score;
-        this.grammarAnswer = grammerAnswer;
+        this.grammarAnswer = grammarAnswer;
         this.lexicalAnswer = lexicalAnswer;
         this.pronunciationAnswer = pronunciationAnswer;
         this.fluencyCohAnswer = fluencyCohAnswer;
+    }
+
+    public String getAudioAnswer() {
+        return audioAnswer;
+    }
+
+    public void setAudioAnswer(String audioAnswer) {
+        this.audioAnswer = audioAnswer;
     }
 
     public String getQuestion() {
@@ -31,21 +61,6 @@ public class SpeakingAnswerQuestion {
         this.question = question;
     }
 
-    public String getStudentAnswer() {
-        return studentAnswer;
-    }
-
-    public void setStudentAnswer(String studentAnswer) {
-        this.studentAnswer = studentAnswer;
-    }
-
-    public double getScore() {
-        return score;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
-    }
 
     public GrammarAnswer getGrammarAnswer() {
         return grammarAnswer;
@@ -69,6 +84,20 @@ public class SpeakingAnswerQuestion {
 
     public void setPronunciationAnswer(PronunciationAnswer pronunciationAnswer) {
         this.pronunciationAnswer = pronunciationAnswer;
+    }
+
+    @Override
+    public String toString() {
+        return "SpeakingAnswerQuestion{" +
+                "question='" + question + '\'' +
+                ", transcript='" + transcript + '\'' +
+                ", audioAnswer='" + audioAnswer + '\'' +
+                ", score=" + score +
+                ", grammarAnswer=" + grammarAnswer +
+                ", lexicalAnswer=" + lexicalAnswer +
+                ", pronunciationAnswer=" + pronunciationAnswer +
+                ", fluencyCohAnswer=" + fluencyCohAnswer +
+                '}';
     }
 
     public FleCohAnswer getFluencyCohAnswer() {

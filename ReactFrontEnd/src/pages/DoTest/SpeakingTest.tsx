@@ -359,11 +359,11 @@ const SpeakingTest = () => {
 
         cloned.part1.questions = cloned.part1.questions.map((q: any, i: number) => ({
             question: q.question,
-            studentAnswer: audioUrls[`part1-${i + 1}`] ? `part1-${i + 1}.webm` : "",
+            audioAnswer: audioUrls[`part1-${i + 1}`] ? `part1-${i + 1}.webm` : "",
             duration: recordingTimes[`part1-${i + 1}`] || 0,
         }))
 
-        cloned.part2.studentAnswer = audioUrls["part2"] ? "part2.webm" : ""
+        cloned.part2.audioAnswer = audioUrls["part2"] ? "part2.webm" : ""
         if (speaking) {
             cloned.part2.cueCards = speaking.part2.cueCards;
         }
@@ -371,7 +371,7 @@ const SpeakingTest = () => {
 
         cloned.part3.questions = cloned.part3.questions.map((q: any, i: number) => ({
             question: q.question,
-            studentAnswer: audioUrls[`part3-${i + 1}`] ? `part3-${i + 1}.webm` : "",
+            audioAnswer: audioUrls[`part3-${i + 1}`] ? `part3-${i + 1}.webm` : "",
             duration: recordingTimes[`part3-${i + 1}`] || 0,
         }))
         cloned.gradingMethod = gradingMethod
@@ -430,15 +430,12 @@ const SpeakingTest = () => {
                 method: "POST",
                 body: formData,
             })
-            if (gradingMethod === "ai") {
+            const result = await res.json();
+
                 // Nếu chọn AI: chuyển đến trang kết quả ngay
-                navigate(`/`);
+                navigate(`/speaking-result/${result.id}`);
                 alert("Bài viết đã được chấm bằng AI!.Your essay has been submitted successfully!");
-            } else {
-                // Nếu chọn giáo viên: hiển thị thông báo chờ
-                alert("Bài viết đã gửi đến giáo viên. Bạn sẽ nhận kết quả trong vòng 3-5 ngày tới.Your essay has been submitted successfully!");
-                navigate("/"); // Hoặc trang nào đó phù hợp
-            }
+
 
             if (!res.ok) throw new Error("Lỗi khi gửi bài!")
             alert("✅ Bài đã được nộp!")

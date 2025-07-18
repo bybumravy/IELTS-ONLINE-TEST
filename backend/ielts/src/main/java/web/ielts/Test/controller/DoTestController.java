@@ -83,7 +83,7 @@ public class DoTestController {
         return ResponseEntity.ok(doTestService.saveListeningAnswer(answer));
     }
     @PostMapping("/speaking/submit")
-    public ResponseEntity<String> uploadFiles(
+    public ResponseEntity<Map<String, Object>> uploadFiles(
             @RequestPart("metadata") MultipartFile metadataJson,
             @RequestPart(value = "files", required = false) MultipartFile[] files,
             @AuthenticationPrincipal User user
@@ -102,16 +102,16 @@ public class DoTestController {
             JsonNode root = mapper.readTree(jsonString);
 
             testId = root.get("testId").asText();
-
             submission = mapper.readValue(jsonString, SpeakingAnswer.class);
             submission.setUsername(studentUsername);
-            submission.setId(null); // Lưu lần đầu để sinh _id
-
+             System.out.println(submission.toString());
             saved = doTestService.saveSubmission(submission);
             System.out.println(saved);
 
         } catch (IOException e) {
-            return ResponseEntity.badRequest().body("Lỗi khi đọc hoặc lưu metadata JSON: " + e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Lỗi khi đọc hoặc lưu metadata JSON: " + e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         }
 
         String folderPath = "audio/user/" + studentUsername + "/" + testId + "_" + saved.getId();
@@ -125,8 +125,9 @@ public class DoTestController {
                     fileUrlMap.put(file.getOriginalFilename(), url);
                     System.out.println("Uploaded: " + url);
                 } catch (IOException e) {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body("Upload failed: " + e.getMessage());
+                    Map<String, Object> errorResponse = new HashMap<>();
+                    errorResponse.put("error", "Upload failed: " + e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
                 }
             }
         } else {
@@ -135,8 +136,12 @@ public class DoTestController {
 
         doTestService.updateAnswerUrls(saved, fileUrlMap);
         doTestService.saveSubmission(saved);
+        Map<String, Object> response = new HashMap<>();
 
-        return ResponseEntity.ok("✅ Upload và cập nhật thành công!");
+        response.put("id", saved.getId());
+        response.put("message", "✅ Upload và cập nhật thành công!");
+
+        return ResponseEntity.ok(response);
     }
 
 
