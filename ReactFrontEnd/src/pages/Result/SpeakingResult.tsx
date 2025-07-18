@@ -732,26 +732,12 @@ export default function SpeakingResult() {
                         <h1 className="text-4xl font-bold mb-8">AI Examiner Evaluation</h1>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 gap-6">
                         {/* Overall Score Card */}
                         <div className="bg-green-50 rounded-3xl p-8 text-center">
                             <p className="text-green-600 text-sm font-medium mb-2">Overall Score</p>
                             <div className="text-6xl font-bold text-green-800 mb-2">{overallScore}</div>
                             <p className="text-green-600 text-sm">Weighted Average</p>
-                        </div>
-
-                        {/* Part 1 Card */}
-                        <div className="bg-green-50 rounded-3xl p-8 text-center">
-                            <p className="text-green-600 text-sm font-medium mb-2">Part 1</p>
-                            <div className="text-6xl font-bold text-green-800 mb-2">{data.part1.averageScore}</div>
-                            <p className="text-green-600 text-sm">Introduction & Interview</p>
-                        </div>
-
-                        {/* Part 2 Card */}
-                        <div className="bg-green-50 rounded-3xl p-8 text-center">
-                            <p className="text-green-600 text-sm font-medium mb-2">Part 2</p>
-                            <div className="text-6xl font-bold text-green-800 mb-2">{data.part2.score}</div>
-                            <p className="text-green-600 text-sm">Long Turn</p>
                         </div>
                     </div>
                 </div>

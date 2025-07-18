@@ -238,7 +238,7 @@ public class DoTestService {
                     continue;
                 }
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
-                qa.setStudentAnswer(s3Url);
+                qa.setTranscript(s3Url);
                     try {
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
                         System.out.println(transcript);

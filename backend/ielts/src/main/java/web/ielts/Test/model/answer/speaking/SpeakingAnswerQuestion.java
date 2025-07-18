@@ -41,11 +41,11 @@ public class SpeakingAnswerQuestion {
         this.question = question;
     }
 
-    public String getStudentAnswer() {
+    public String getTranscript() {
         return transcript;
     }
 
-    public void setStudentAnswer(String transcript) {
+    public void setTranscript(String transcript) {
         this.transcript = transcript;
     }
 
