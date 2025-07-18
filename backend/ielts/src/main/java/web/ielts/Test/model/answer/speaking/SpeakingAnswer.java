@@ -87,6 +87,21 @@ public class SpeakingAnswer {
         this.part3 = part3;
     }
 
+    @Override
+    public String toString() {
+        return "SpeakingAnswer{" +
+                "id='" + id + '\'' +
+                ", testId='" + testId + '\'' +
+                ", username='" + username + '\'' +
+                ", skill='" + skill + '\'' +
+                ", part1=" + part1 +
+                ", part2=" + part2 +
+                ", part3=" + part3 +
+                ", band=" + band +
+                ", submittedAt=" + submittedAt +
+                '}';
+    }
+
     public void setId(String id) {
         this.id = id;
     }

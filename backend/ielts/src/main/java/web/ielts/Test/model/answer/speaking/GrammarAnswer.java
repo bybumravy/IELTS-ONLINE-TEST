@@ -2,12 +2,21 @@ package web.ielts.Test.model.answer.speaking;
 
 public class GrammarAnswer {
 
+
     private double score;
     private String errorText;
     private String correctText;
     private String errorType;
     private String explanation;
+    private String sentenceContext;
 
+    public String getSentenceContext() {
+        return sentenceContext;
+    }
+
+    public void setSentenceContext(String sentenceContext) {
+        this.sentenceContext = sentenceContext;
+    }
 
     public double getScore() {
         return score;

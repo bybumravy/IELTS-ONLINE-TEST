@@ -360,11 +360,11 @@ const SpeakingTest = () => {
 
         cloned.part1.questions = cloned.part1.questions.map((q: any, i: number) => ({
             question: q.question,
-            studentAnswer: audioUrls[`part1-${i + 1}`] ? `part1-${i + 1}.webm` : "",
+            audioAnswer: audioUrls[`part1-${i + 1}`] ? `part1-${i + 1}.webm` : "",
             duration: recordingTimes[`part1-${i + 1}`] || 0,
         }))
 
-        cloned.part2.studentAnswer = audioUrls["part2"] ? "part2.webm" : ""
+        cloned.part2.audioAnswer = audioUrls["part2"] ? "part2.webm" : ""
         if (speaking) {
             cloned.part2.cueCards = speaking.part2.cueCards;
         }
@@ -372,7 +372,7 @@ const SpeakingTest = () => {
 
         cloned.part3.questions = cloned.part3.questions.map((q: any, i: number) => ({
             question: q.question,
-            studentAnswer: audioUrls[`part3-${i + 1}`] ? `part3-${i + 1}.webm` : "",
+            audioAnswer: audioUrls[`part3-${i + 1}`] ? `part3-${i + 1}.webm` : "",
             duration: recordingTimes[`part3-${i + 1}`] || 0,
         }))
         cloned.gradingMethod = gradingMethod

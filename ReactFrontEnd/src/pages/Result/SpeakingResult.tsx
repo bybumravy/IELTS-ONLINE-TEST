@@ -37,7 +37,7 @@ interface PronunciationEvaluation {
 }
 
 interface GrammarAnswer {
-    score: number
+    score?: number
     errorText: string
     correctText: string
     errorType: string
@@ -45,7 +45,7 @@ interface GrammarAnswer {
 }
 
 interface FleCohAnswer {
-    score: number
+    score?: number
     meanIntensity: string
     pauseCount: string
     speechRate: string
@@ -74,7 +74,7 @@ interface SpeakingAnswerPart13 {
     partNumber: number
     title: string
     instruction: string
-    questions: SpeakingAnswerQuestion[]
+    questions?: SpeakingAnswerQuestion[]
     averageScore: number
 }
 
@@ -421,7 +421,7 @@ export default function SpeakingResult() {
                                         <Target className="h-6 w-6 text-red-600" />
                                         Grammar & Accuracy
                                     </h3>
-                                    <div className="text-3xl font-bold text-red-600">{currentQuestion.grammarAnswer.score}</div>
+                                    <div className="text-3xl font-bold text-red-600">{currentQuestion.grammarAnswer?.score ?? "-"}</div>
                                 </div>
                                 {renderErrorCorrections(
                                     currentQuestion.studentAnswer,
@@ -436,7 +436,7 @@ export default function SpeakingResult() {
                                         <BookOpen className="h-6 w-6 text-amber-600" />
                                         Lexical Resource
                                     </h3>
-                                    <div className="text-3xl font-bold text-amber-600">{currentQuestion.lexicalAnswer.score}</div>
+                                    <div className="text-3xl font-bold text-amber-600">{currentQuestion.lexicalAnswer?.score ?? "-"}</div>
                                 </div>
                                 {renderErrorCorrections(
                                     currentQuestion.studentAnswer,
@@ -451,31 +451,31 @@ export default function SpeakingResult() {
                                         <Zap className="h-6 w-6 text-blue-600" />
                                         Fluency & Coherence
                                     </h3>
-                                    <div className="text-3xl font-bold text-blue-600">{currentQuestion.fluencyCohAnswer.score}</div>
+                                    <div className="text-3xl font-bold text-blue-600">{currentQuestion.fluencyCohAnswer?.score ?? "-"}</div>
                                 </div>
 
                                 <div className="bg-blue-50 border border-blue-200 rounded-2xl p-8">
                                     <div className="bg-white rounded-xl p-6 mb-6 border border-blue-200">
                                         <h4 className="font-semibold text-blue-800 mb-3">Examiner Feedback</h4>
-                                        <p className="text-gray-700 leading-relaxed text-lg">{currentQuestion.fluencyCohAnswer.comment}</p>
+                                        <p className="text-gray-700 leading-relaxed text-lg">{currentQuestion.fluencyCohAnswer?.comment ?? ""}</p>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div className="bg-white rounded-xl p-6 border border-blue-200 text-center">
                                             <div className="text-3xl font-bold text-blue-600 mb-2">
-                                                {currentQuestion.fluencyCohAnswer.speechRate}
+                                                {currentQuestion.fluencyCohAnswer?.speechRate ?? "-"}
                                             </div>
                                             <p className="font-medium text-blue-800">Speech Rate</p>
                                         </div>
                                         <div className="bg-white rounded-xl p-6 border border-blue-200 text-center">
                                             <div className="text-3xl font-bold text-blue-600 mb-2">
-                                                {currentQuestion.fluencyCohAnswer.pauseCount}
+                                                {currentQuestion.fluencyCohAnswer?.pauseCount ?? "-"}
                                             </div>
                                             <p className="font-medium text-blue-800">Pauses</p>
                                         </div>
                                         <div className="bg-white rounded-xl p-6 border border-blue-200 text-center">
                                             <div className="text-3xl font-bold text-blue-600 mb-2">
-                                                {currentQuestion.fluencyCohAnswer.meanIntensity}
+                                                {currentQuestion.fluencyCohAnswer?.meanIntensity ?? "-"}
                                             </div>
                                             <p className="font-medium text-blue-800">Volume</p>
                                         </div>
@@ -489,9 +489,9 @@ export default function SpeakingResult() {
                                         <Mic className="h-6 w-6 text-purple-600" />
                                         Pronunciation Assessment
                                     </h3>
-                                    <div className="text-3xl font-bold text-purple-600">{currentQuestion.pronunciationAnswer.score}</div>
+                                    <div className="text-3xl font-bold text-purple-600">{currentQuestion.pronunciationAnswer?.score ?? "-"}</div>
                                 </div>
-                                {renderPronunciationScript(currentQuestion.pronunciationAnswer.pronunciationEvaluation)}
+                                {renderPronunciationScript(currentQuestion.pronunciationAnswer?.pronunciationEvaluation ?? [])}
                             </TabsContent>
                         </Tabs>
                     </div>
@@ -501,7 +501,7 @@ export default function SpeakingResult() {
             // part1 or part3: render all questions
             return (
                 <div className="space-y-12">
-                    {(part as SpeakingAnswerPart13).questions.map((question, idx) => (
+                    {((part as SpeakingAnswerPart13).questions ?? []).map((question, idx) => (
                         <div key={idx} className="space-y-6">
                             {/* Question Section */}
                             <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
@@ -611,7 +611,7 @@ export default function SpeakingResult() {
                                                 <Target className="h-6 w-6 text-red-600" />
                                                 Grammar & Accuracy
                                             </h3>
-                                            <div className="text-3xl font-bold text-red-600">{question.grammarAnswer.score}</div>
+                                            <div className="text-3xl font-bold text-red-600">{question.grammarAnswer?.score ?? "-"}</div>
                                         </div>
                                         {renderErrorCorrections(
                                             question.transcript,
@@ -626,7 +626,7 @@ export default function SpeakingResult() {
                                                 <BookOpen className="h-6 w-6 text-amber-600" />
                                                 Lexical Resource
                                             </h3>
-                                            <div className="text-3xl font-bold text-amber-600">{question.lexicalAnswer.score}</div>
+                                            <div className="text-3xl font-bold text-amber-600">{question.lexicalAnswer?.score ?? "-"}</div>
                                         </div>
                                         {renderErrorCorrections(
                                             question.transcript,
@@ -641,31 +641,31 @@ export default function SpeakingResult() {
                                                 <Zap className="h-6 w-6 text-blue-600" />
                                                 Fluency & Coherence
                                             </h3>
-                                            <div className="text-3xl font-bold text-blue-600">{question.fluencyCohAnswer.score}</div>
+                                            <div className="text-3xl font-bold text-blue-600">{question.fluencyCohAnswer?.score ?? "-"}</div>
                                         </div>
 
                                         <div className="bg-blue-50 border border-blue-200 rounded-2xl p-8">
                                             <div className="bg-white rounded-xl p-6 mb-6 border border-blue-200">
                                                 <h4 className="font-semibold text-blue-800 mb-3">Examiner Feedback</h4>
-                                                <p className="text-gray-700 leading-relaxed text-lg">{question.fluencyCohAnswer.comment}</p>
+                                                <p className="text-gray-700 leading-relaxed text-lg">{question.fluencyCohAnswer?.comment ?? ""}</p>
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                 <div className="bg-white rounded-xl p-6 border border-blue-200 text-center">
                                                     <div className="text-3xl font-bold text-blue-600 mb-2">
-                                                        {question.fluencyCohAnswer.speechRate}
+                                                        {question.fluencyCohAnswer?.speechRate ?? "-"}
                                                     </div>
                                                     <p className="font-medium text-blue-800">Speech Rate</p>
                                                 </div>
                                                 <div className="bg-white rounded-xl p-6 border border-blue-200 text-center">
                                                     <div className="text-3xl font-bold text-blue-600 mb-2">
-                                                        {question.fluencyCohAnswer.pauseCount}
+                                                        {question.fluencyCohAnswer?.pauseCount ?? "-"}
                                                     </div>
                                                     <p className="font-medium text-blue-800">Pauses</p>
                                                 </div>
                                                 <div className="bg-white rounded-xl p-6 border border-blue-200 text-center">
                                                     <div className="text-3xl font-bold text-blue-600 mb-2">
-                                                        {question.fluencyCohAnswer.meanIntensity}
+                                                        {question.fluencyCohAnswer?.meanIntensity ?? "-"}
                                                     </div>
                                                     <p className="font-medium text-blue-800">Volume</p>
                                                 </div>
@@ -679,9 +679,9 @@ export default function SpeakingResult() {
                                                 <Mic className="h-6 w-6 text-purple-600" />
                                                 Pronunciation Assessment
                                             </h3>
-                                            <div className="text-3xl font-bold text-purple-600">{question.pronunciationAnswer.score}</div>
+                                            <div className="text-3xl font-bold text-purple-600">{question.pronunciationAnswer?.score ?? "-"}</div>
                                         </div>
-                                        {renderPronunciationScript(question.pronunciationAnswer.pronunciationEvaluation)}
+                                        {renderPronunciationScript(question.pronunciationAnswer?.pronunciationEvaluation ?? [])}
                                     </TabsContent>
                                 </Tabs>
                             </div>

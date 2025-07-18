@@ -220,7 +220,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
 
                 );
             case 2:
-                return buildSpeakingPart2Prompt(question, transcript, cueCard);
+                return buildSpeakingPart2Prompt(question, transcript, cueCard,analyzeVoice);
             case 3:
                 return buildSpeakingPart3Prompt(question, transcript);
             default:
@@ -335,7 +335,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
 
         String speakingPart1 =
                 "You must return response strictly in JSON format.\n" +
-                        "Note: For simple factual questions in Part 1 (e.g., “What is your name?”), brief but relevant answers are acceptable. Do not penalize short responses if they clearly address the question.\n" +
+                        "Even for simple factual questions (e.g., “What is your name?”), if the response contains fewer than 2 full sentences, you must still limit the score to a **maximum of Band 6.5** in all categories. This ensures minimum development is required.\n+"+
 
                         "Note: Spoken responses do not contain punctuation. You must IGNORE all punctuation marks such as commas, periods, question marks, or missing capital letters. \\n\" +\n" +
                         "  Do NOT mark answers down due to missing or incorrect punctuation." +
@@ -349,7 +349,9 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "1. The question being asked (context and requirements)\n" +
                         "2. The full transcript of the user's response (content, grammar, vocabulary)\n" +
                         "3. You must evaluate whether the response is relevant to the question and does not go off-topic.\n" +
-
+                        ""+
+                        "4. Do not assign a score of 7.5 or higher if the response is relevant but lacks development.\n" +
+                        "If the response is very short (e.g., fewer than 5 sentences), even if it answers the question correctly and fluently, you must treat it as underdeveloped and assign no more than Band 7.0 in any category.\n" +
                         "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
                         +errorType+
 
@@ -394,8 +396,8 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
-//                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + praatResults+
-                        "\n" +
+                        "Fluency and Coherence 25%"+
+                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
                         "Scoring rules:\n" +
                         "- +0.5 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +
                         "- +0.25 if meanIntensity is between 60–65 dB (slightly strong but acceptable).\n Only add once." +
@@ -421,32 +423,27 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         IELTS_PUBLIC_FLUENCY_AND_COHERENCE+
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
+                        "Apply the evaluation criteria to score each individual aspect separately. For example, what is the score for Grammar"+
                         "RESPONSE FORMAT:\n" +
-                        "- score: decimal (overall band score, e.g. 6.5)\n" +
                         "- transcript: string ( transcript of the original answer)\n" +
-                        "- feedback: {\n" +
-                       "\"(In `errorCorrections`, include only short phrases or words that are clearly incorrect due to **grammar** or **lexical resource** problems. \" +\n" +
-                        "\"Do NOT include any issues related to **fluency**, **coherence**, or **pronunciation** such as hesitations, pauses, repetition, unnatural phrasing, or unclear idea progression.)\\n\\n\" +\n" +
-                        "\n" +
-                        "\"Each entry in the `errorCorrections` array must follow this format:\\n\" +\n" +
-                        "\"errorCorrections: [{\\n\" +\n" +
-                        "\"  originalText: string,            // The incorrect word or phrase\\n\" +\n" +
-                        "\"  correctedText: string,           // The corrected version\\n\" +\n" +
-                        "\"  errorType: string,               // Only 'Grammar' or 'Lexical' allowed\\n\" +\n" +
-                        "\"  explanation: string,             // Why it was incorrect (e.g., wrong tense, article usage, word choice)\\n\" +\n" +
-                        "\"  sentenceContext: string          // The full sentence where the error occurred\\n\" +\n" +
-                        "\"}]\\n\\n\" +\n" +
-                        "\n" +
-                        "\"\uD83D\uDEAB Do NOT include:\\n\" +\n" +
-                        "\"- Pauses, repetitions, fillers like 'uh', 'um'\\n\" +\n" +
-                        "\"- Vague or disorganized sentence structure\\n\" +\n" +
-                        "\"- Cohesion or logic issues (these go in Fluency and Coherence section)\\n\\n\" +\n" +
-                        "\n" +
-                        "\"✅ Only include:\\n\" +\n" +
-                        "\"- Grammar errors (e.g., subject-verb agreement, tense, preposition, article)\\n\" +\n" +
-                        "\"- Lexical errors (e.g., wrong word choice, inappropriate collocation)\\n\";"+
+                        "- question (string)"+
+                        ""+
 
-                        "},\n" + // ✅ Đóng đúng object feedback
+
+                       "- grammarAnswer (object) with:\n" +
+                        "    - score (double)\n" +
+                        "    - errorText (string)\n" +
+                        "    - correctText (string)\n" +
+                        "    - errorType (string)\n" +
+                        "    - explanation (string)\n" +
+                        "    - sentenceContext (string)\n" +
+                        "- lexicalAnswer (object) with:\n" +
+                        "    - score (double)\n" +
+                        "    - errorText (string)\n" +
+                        "    - correctText (string)\n" +
+                        "    - errorType (string)\n" +
+                        "    - explanation (string)\n" +
+                        "    - sentenceContext (string)"+
                         "\"For Fluency and Coherence, provide detailed feedback only after assigning the score. This feedback must be strictly based on the actual fluency and coherence performance observed in Part 1 of the candidate’s response.\n" +
                         "\n" +
                         "Do NOT provide generic or vague comments.\n" +
@@ -459,12 +456,10 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "- **Logical progression of ideas**: Did the candidate present ideas in a logical and connected manner?\n" +
                         "- **Use of cohesive devices**: Were linking words (e.g., however, because, so) used correctly and naturally?\n" +
                         "- **Overall clarity**: Was the response easy to follow and understand?"+
-                        "LexicalResource: {scoreEva: string, reviewEva: string},\n" +
-                        "Grammar: {scoreEva: string, reviewEva: string}\n" +
-                        "Fluency and coherence: {scoreEva: string, reviewEva: string}\n"+
-                        "Pronunciation: {scoreEva: string, reviewEva: string}\n"+
-                        "},\n" +
-                        "- sampleAnswer: string (Optional band 9 model)\n" +
+                        "- fluencyCohAnswer (object) with:\n" +
+                        "    - score (double)"+
+                        "    - comment (string)"
+                +
                         "Question:\n" + questions + "\n" +
                         "Original Answer:\n" + transcript;
 
@@ -472,7 +467,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
     }
 
 
-    public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards){
+    public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards,FleCohAnswer analyzeVoice){
         String speakingPart2 =
                 "You must return response strictly in JSON format.\n" +
                         "You are an official IELTS Speaking examiner. You are evaluating a real IELTS Part 2 speaking response. Extremely strict grading.\n" +
@@ -546,43 +541,68 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "→ Deduct 0.5 point in total for that error type about grammar (only once)"+
                         "Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation: "+
                       IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
-                        "• Fluency and coherence (25%):\n" +
-                        "+0.25 if the candidate maintains smooth flow of speech with minimal hesitation (Fluency)\n" +
-                        "→ ✅ Only add once.\n" +
+                        "Fluency and Coherence 25%"+
+                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
+                        "Scoring rules:\n" +
+                        "- +0.5 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +
+                        "- +0.25 if meanIntensity is between 60–65 dB (slightly strong but acceptable).\n Only add once." +
+                        "- -0.5 if meanIntensity < 45 dB (voice too weak).\n Only add once." +
+                        "- +0.5 if speechRate is between 2.0–3.0 words/sec (smooth and fluent).\n Only add once." +
+                        "- -0.5 if speechRate < 1.5 words/sec (slow, hesitant).\n Only add once." +
+                        "- +0.5 if pauseCount == 0.0 (no unnatural hesitation).\n Only add once." +
+                        "- -0.5 if pauseCount > 2 (frequent unnatural pauses).Only add once."+
+                        "Coherence  "+
+                        "+0.5 if the speaker presents ideas in a clear logical sequence (with an introduction, development, and conclusion).\n Only add once." +
                         "\n" +
-                        "+0.25 if the candidate uses natural pausing and appropriate pacing (Fluency)\n" +
-                        "→ ✅ Only add once.\n" +
+                        "+0.25 if cohesive devices (e.g., “however”, “as a result”, “on the other hand”) are used effectively and appropriately.\n Only add once." +
                         "\n" +
-                        "+0.25 if ideas are logically ordered and connected clearly (Coherence)\n" +
-                        "→ ✅ Only add once.\n" +
+                        "+0.25 if the speaker avoids repeating ideas or overemphasizing a single point.\n Only add once." +
                         "\n" +
-                        "+0.25 if discourse markers / cohesive devices are used appropriately (Coherence)\n" +
-                        "→ ✅ Only add once.\n" +
-                        "→ Deduct 0.5 point in total for that error type about Fluency and coherence  (only once)"+
-                        "If the response does not include a clear structure with an introduction, body, and conclusion, deduct 0.5 point."+
+                        "+0.25 if each sentence connects clearly to the previous one (no abrupt transitions).\n Only add once." +
+                        "\n" +
+                        "+0.25 if each argument or point is supported with examples, explanations, or reasons.\n Only add once." +
+                        "\n" +
+                        "+0.5 if the entire response does not contain any coherence-related errors listed below. Only add once."+
+                        "→ Deduct 0.5 point in total for that error type (only once) for Coherence"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_FLUENCY_AND_COHERENCE+
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
                         "   - Deduct 0.5 band per 2 major errors\n" +
                         "RESPONSE FORMAT:\n" +
-                        "- score: decimal (overall band score, e.g. 6.5)\n" +
-                        "- feedback: {\n" +
-                        "    errorCorrections: [{\n" +
-                        "      originalText: string,\n" +
-                        "      correctedText: string,\n" +
-                        "      errorType: string,\n" +
-                        "      explanation: string,\n" +
-                        "      sentenceContext: string\n" +
-                        "    }],\n" +
-                        "    overallComment: string\n" +
-                        "}\n" +
-                        "- evaluation: {\n" +
-                        "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
-                        "    Grammar: {scoreEva: string, reviewEva: string}\n" +
-                        "    Fluency and coherence: {scoreEva: string, reviewEva: string}\n" +
-                        "}\n" +
-                        "sampleAnswer: string (Optional band 9 model)\n" +
+                        "- transcript: string ( transcript of the original answer)\n" +
+                        "- question (string)"+
+                        ""+
+
+                        "- grammarAnswer (object) with:\n" +
+                        "    - score (double)\n" +
+                        "    - errorText (string)\n" +
+                        "    - correctText (string)\n" +
+                        "    - errorType (string)\n" + // only grammar type
+                        "    - explanation (string)\n" +
+                        "    - sentenceContext (string)\n" +
+                        "- lexicalAnswer (object) with:\n" +
+                        "    - score (double)\n" +
+                        "    - errorText (string)\n" +
+                        "    - correctText (string)\n" +
+                        "    - errorType (string)\n" +//only lexical
+                        "    - explanation (string)\n" +
+                        "    - sentenceContext (string)"+
+                        "\"For Fluency and Coherence, provide detailed feedback only after assigning the score. This feedback must be strictly based on the actual fluency and coherence performance observed in Part 1 of the candidate’s response.\n" +
+                        "\n" +
+                        "Do NOT provide generic or vague comments.\n" +
+                        "\n" +
+                        "Your feedback must explicitly mention and evaluate the following:\n" +
+                        "\n" +
+                        "meanIntensity"+
+                        "- **Speech rate**: Was the candidate’s speech fast, slow, or appropriately paced?\n" +
+                        "- **Number and nature of pauses**: Were there frequent unnatural pauses or hesitations?\n" +
+                        "- **Logical progression of ideas**: Did the candidate present ideas in a logical and connected manner?\n" +
+                        "- **Use of cohesive devices**: Were linking words (e.g., however, because, so) used correctly and naturally?\n" +
+                        "- **Overall clarity**: Was the response easy to follow and understand?"+
+                        "- fluencyCohAnswer (object) with:\n" +
+                        "    - score (double)"+
+                        "    - comment (string)"+
                         "Question:\n" + question + "\n" +
                         "CueCard:\n" + cueCards.toString() + "\n" +
                         "Original Answer:\n" + transcipt;

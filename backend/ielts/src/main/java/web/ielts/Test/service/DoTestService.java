@@ -238,103 +238,143 @@ public class DoTestService {
                     continue;
                 }
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
-                qa.setTranscript(s3Url);
+                System.out.println("tai sao"+s3Url);
+                qa.setAudioAnswer(s3Url);
                     try {
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
                         System.out.println(transcript);
                         FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
                         SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,null);
-                        PronunciationAnswer pa = prosodyService.analyze(blob,transcript);
+                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+                        qa.setTranscript(sp.getTranscript());
                         qa.setGrammarAnswer(sp.getGrammarAnswer());
                         qa.setLexicalAnswer(sp.getLexicalAnswer());
                         qa.setFluencyCohAnswer(sp.getFluencyCohAnswer());
                         qa.setPronunciationAnswer(pa);
                      //totalScore += eval.getScore();
+                        double grammar = sp.getGrammarAnswer().getScore();
+                        double lexical = sp.getLexicalAnswer().getScore();
+                        double fluency = sp.getFluencyCohAnswer().getScore();
+                        double pronunciation = pa.getScore();
+
+                        double averageForThisQuestion = (grammar + lexical + fluency + pronunciation) / 4.0;
+                        qa.setScore(averageForThisQuestion);
+
+                        totalScore += averageForThisQuestion;
 
                     } catch (Exception e) {
                         System.err.println("Lỗi khi chấm câu hỏi: " + qa.getQuestion());
                         e.printStackTrace();
                     }
             }
-                double avgScore = totalScore/validQuestionCount;
-                System.out.println("Average Part 1 Score: " + avgScore);
-                part1.setAverageScore(avgScore);
+            double avgScore = validQuestionCount > 0 ? (totalScore / validQuestionCount) : 0.0;
+            double roundedAvgScore = Math.round(avgScore * 2) / 2.0; // Làm tròn đến 0.5 nếu cần
+
+            part1.setAverageScore(roundedAvgScore);        }
+
+         //🔹 Part 2
+        SpeakingAnswerPart2 part2 = speakingAnswer.getPart2();
+        if (part2 != null) {
+            String blob = part2.getAudioAnswer();
+            String filename = extractFileName(blob);
+            String s3Url = fileUrlMap.getOrDefault(filename, blob);
+            String s3UrlNotEncrypt = s3Url;
+
+
+            if (s3UrlNotEncrypt == null) {
+                System.out.println("⚠️ Bỏ qua Part 2 do URL không hợp lệ: " + s3UrlNotEncrypt);
+            } else {
+                s3Url = UrlEncryptor.encodeUrl(s3Url);
+                part2.setAudioAnswer(s3Url);
+                    try {
+                        JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
+
+                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2,prosodyFeatures,part2.getCueCards());
+                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+                        part2.setTranscript(sp.getTranscript());
+                        part2.setGrammarAnswer(sp.getGrammarAnswer());
+                        part2.setLexicalAnswer(sp.getLexicalAnswer());
+                        part2.setFluencyCohAnswer(sp.getFluencyCohAnswer());
+                        part2.setPronunciationAnswer(pa);
+                        double grammar = sp.getGrammarAnswer().getScore();
+                        double lexical = sp.getLexicalAnswer().getScore();
+                        double fluency = sp.getFluencyCohAnswer().getScore();
+                        double pronunciation = pa.getScore();
+                        double averageForThisQuestion = (grammar + lexical + fluency + pronunciation) / 4.0;
+                        part2.setScore(averageForThisQuestion);
+                        // validQuestionCount++;
+                    } catch (Exception e) {
+                        System.err.println("❌ Lỗi khi chấm Part 2");
+                        e.printStackTrace();
+                    }
+
+
+
+
+            }
+
         }
 
-        // 🔹 Part 2
-//        SpeakingAnswerPart2 part2 = submission.getPart2();
-//        if (part2 != null) {
-//            String blob = part2.getStudentAnswer();
-//            String filename = extractFileName(blob);
-//            String s3Url = fileUrlMap.getOrDefault(filename, blob);
-//            String s3UrlNotEncrypt = s3Url;
-//
-//
-//            if (s3UrlNotEncrypt == null) {
-//                System.out.println("⚠️ Bỏ qua Part 2 do URL không hợp lệ: " + s3UrlNotEncrypt);
-//            } else {
-//                s3Url = UrlEncryptor.encodeUrl(s3Url);
-//                part2.setStudentAnswer(s3Url);
-//                    try {
-////                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
-////
-////                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2,cuecards);
-////                     part2.setEvaluationResults(eval);
-////                  part2.setAverageScore(eval.getScore());
-//
-//                        // validQuestionCount++;
-//                    } catch (Exception e) {
-//                        System.err.println("❌ Lỗi khi chấm Part 2");
-//                        e.printStackTrace();
-//                    }
-//
-//
-//
-//
-//            }
-//
-//        }
-//
-//  //Part 3
-//       SpeakingAnswerPart13 part3 = submission.getPart3();
-//        if (part3 != null && part3.getQuestions() != null) {
-//
-//            double totalScore = 0;
-//            int validQuestionCount = part3.getQuestions().size();
-//
-//            for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
-//                String blob = qa.getStudentAnswer();
-//                String filename = extractFileName(blob);
-//                String s3Url = fileUrlMap.getOrDefault(filename, blob);
-//                String s3UrlNotEncrypt = s3Url;
-//
-//                if (s3UrlNotEncrypt == null || s3UrlNotEncrypt.trim().isEmpty() || !s3UrlNotEncrypt.startsWith("http")) {
-//
-//                    continue;
-//                }
-//
-//                s3Url = UrlEncryptor.encodeUrl(s3Url);
-//                qa.setStudentAnswer(s3Url);
-//                    try {
-////                        String transcript = whisper.transcribe(s3UrlNotEncrypt);
-////                     EvaluationResult eval = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,null);
-////                   qa.setEvaluationResults(eval);
-////                    totalScore += eval.getScore();
-//
-//                    } catch (Exception e) {
-//
-//                        e.printStackTrace();
-//                    }
-//
-//
-//
-//            }
-//                double avgScore = totalScore/validQuestionCount;
-//                System.out.println("✅ Average Part 3 Score: " + avgScore);
-//                part3.setAverageScore(avgScore);
-//
+  //Part 3
+       SpeakingAnswerPart13 part3 = speakingAnswer.getPart3();
+        if (part3 != null && part3.getQuestions() != null) {
 
-//        }
+            double totalScore = 0;
+            int validQuestionCount = part3.getQuestions().size();
+
+            for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
+                String blob = qa.getAudioAnswer();
+                String filename = extractFileName(blob);
+                String s3Url = fileUrlMap.getOrDefault(filename, blob);
+                String s3UrlNotEncrypt = s3Url;
+
+                if (s3UrlNotEncrypt == null || s3UrlNotEncrypt.trim().isEmpty() || !s3UrlNotEncrypt.startsWith("http")) {
+
+                    continue;
+                }
+
+                s3Url = UrlEncryptor.encodeUrl(s3Url);
+                qa.setAudioAnswer(s3Url);
+                    try {
+                        JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
+                        System.out.println(transcript);
+                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,null);
+                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+                        qa.setTranscript(sp.getTranscript());
+                        qa.setGrammarAnswer(sp.getGrammarAnswer());
+                        qa.setLexicalAnswer(sp.getLexicalAnswer());
+                        qa.setFluencyCohAnswer(sp.getFluencyCohAnswer());
+                        qa.setPronunciationAnswer(pa);
+                        //totalScore += eval.getScore();
+                        double grammar = sp.getGrammarAnswer().getScore();
+                        double lexical = sp.getLexicalAnswer().getScore();
+                        double fluency = sp.getFluencyCohAnswer().getScore();
+                        double pronunciation = pa.getScore();
+
+                        double averageForThisQuestion = (grammar + lexical + fluency + pronunciation) / 4.0;
+                        qa.setScore(averageForThisQuestion);
+
+                        totalScore += averageForThisQuestion;
+                        validQuestionCount++;
+
+
+                    } catch (Exception e) {
+
+                        e.printStackTrace();
+                    }
+
+
+
+            }
+            double avgScore = validQuestionCount > 0 ? (totalScore / validQuestionCount) : 0.0;
+            double roundedAvgScore = Math.round(avgScore * 2) / 2.0; // Làm tròn đến 0.5 nếu cần
+
+            part3.setAverageScore(roundedAvgScore);
+
+
+        }
 
     }
     private String extractFileName(String blobUrl) {

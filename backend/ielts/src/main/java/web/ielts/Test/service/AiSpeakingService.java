@@ -16,6 +16,17 @@ public class AiSpeakingService {
     @Autowired WhisperService whisperService;
     @Autowired
     private AIService aiService;
+    public String cleanGptJson(String response) {
+        if (response == null) return "";
+        String trimmed = response.trim();
+        if (trimmed.startsWith("```")) {
+            return trimmed
+                    .replaceAll("(?s)```json\\s*", "")  // bỏ ```json và xuống dòng
+                    .replaceAll("(?s)```", "")          // bỏ ``` còn lại
+                    .trim();
+        }
+        return trimmed;
+    }
     public SpeakingAnswerQuestion evaluateSpeaking(
             JsonNode transcriptText,
             String question,
@@ -35,13 +46,13 @@ public class AiSpeakingService {
 
         // ✅ 2. Gọi GPT
         String gptResponse = aiService.callSpeakingPart(prompt);
-
+        String cleaned = cleanGptJson(gptResponse);
         System.out.println("=== GPT RESPONSE ===");
         System.out.println(gptResponse);
         // ✅ 3. Parse JSON
         try {
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(gptResponse, SpeakingAnswerQuestion.class);
+            return mapper.readValue(cleaned, SpeakingAnswerQuestion.class);
         } catch (JsonProcessingException e) {
             System.err.println("❌ Lỗi khi parse GPT response thành EvaluationResult:");
             e.printStackTrace();

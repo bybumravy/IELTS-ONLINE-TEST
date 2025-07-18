@@ -228,6 +228,7 @@
                     .append("- Only return a single number (the score), no explanation, no extra text.\n\n");
                 prompt.append("Transcript:\n").append(transcript).append("\n\n");
                 prompt.append("Stress mismatches (word, detectedPosition, standardPosition):\n");
+                if (stressMismatches == null) stressMismatches = Collections.emptyList();
                 for (StressMismatch sm : stressMismatches) {
                     prompt.append(String.format("- %s (detected: %s, standard: %s)\n", sm.getWord(), sm.getDetectedPosition(), sm.getStandardPosition()));
                 }
@@ -272,7 +273,7 @@
 
             private double praatGetAudioDuration(File wavFile) throws IOException {
             // Lấy đường dẫn tuyệt đối cho script Praat
-            String scriptPath = new File("D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\getDuration.praat").getAbsolutePath();
+                String scriptPath = new File("D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\getDuration.praat").getAbsolutePath();
             System.out.println("Praat path: " + PRAAT_PATH);
             System.out.println("Praat script: " + scriptPath);
             System.out.println("Audio file: " + wavFile.getAbsolutePath());
@@ -540,7 +541,9 @@
                         }
                     }
                     // === Gọi AI để chấm điểm pronunciation ===
-                    double score = callOpenAIScorePronunciation(transcript, result.getStressMismatchesDetailed(), intonationResults);
+                    List<StressMismatch> stressList = result.getStressMismatchesDetailed();
+                    if (stressList == null) stressList = Collections.emptyList();
+                    double score = callOpenAIScorePronunciation(transcript, stressList, intonationResults);
                     result.setScore(score);
                 }
 
