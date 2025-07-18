@@ -431,15 +431,12 @@ const SpeakingTest = () => {
                 method: "POST",
                 body: formData,
             })
-            if (gradingMethod === "ai") {
-                // Nếu chọn AI: chuyển đến trang kết quả ngay
-                navigate(`/`);
-                alert("Bài viết đã được chấm bằng AI!.Your essay has been submitted successfully!");
-            } else {
-                // Nếu chọn giáo viên: hiển thị thông báo chờ
-                alert("Bài viết đã gửi đến giáo viên. Bạn sẽ nhận kết quả trong vòng 3-5 ngày tới.Your essay has been submitted successfully!");
-                navigate("/"); // Hoặc trang nào đó phù hợp
-            }
+            const result = await res.json();
+
+            // Nếu chọn AI: chuyển đến trang kết quả ngay
+            navigate(`/speaking-result/${result.id}`);
+            alert("Bài viết đã được chấm bằng AI!.Your essay has been submitted successfully!");
+
 
             if (!res.ok) throw new Error("Lỗi khi gửi bài!")
             alert("✅ Bài đã được nộp!")

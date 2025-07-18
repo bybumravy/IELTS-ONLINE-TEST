@@ -222,7 +222,9 @@ public class DoTestService {
 
     }
     public void updateAnswerUrls(SpeakingAnswer speakingAnswer, Map<String, String> fileUrlMap) {
-
+        double part1Score = 0.0;
+        double part2Score = 0.0;
+        double part3Score = 0.0;
         SpeakingAnswerPart13 part1 = speakingAnswer.getPart1();
         if (part1 != null && part1.getQuestions() != null) {
 
@@ -272,7 +274,7 @@ public class DoTestService {
             double roundedAvgScore = Math.round(avgScore * 2) / 2.0; // Làm tròn đến 0.5 nếu cần
 
             part1.setAverageScore(roundedAvgScore);        }
-
+            part1Score = part1.getAverageScore();
          //🔹 Part 2
         SpeakingAnswerPart2 part2 = speakingAnswer.getPart2();
         if (part2 != null) {
@@ -309,7 +311,7 @@ public class DoTestService {
                         System.err.println("❌ Lỗi khi chấm Part 2");
                         e.printStackTrace();
                     }
-
+                    part2Score = part2.getScore();
 
 
 
@@ -373,10 +375,13 @@ public class DoTestService {
             double roundedAvgScore = Math.round(avgScore * 2) / 2.0; // Làm tròn đến 0.5 nếu cần
 
             part3.setAverageScore(roundedAvgScore);
+             part3Score = part3.getAverageScore();
 
 
         }
-
+        double band = part1Score + part2Score + part3Score;
+        double avgBand = Math.round((band / 3.0) * 2) / 2.0;
+        speakingAnswer.setBand(avgBand);
     }
     private String extractFileName(String blobUrl) {
         // Ví dụ input: blob:http://localhost:5173/cd13919f-ec76-4e5e-a348-95e5c3f1265c
