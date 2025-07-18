@@ -4,14 +4,15 @@ import { CheckCircle, XCircle } from "lucide-react";
 
 export default function VnPayResultPage() {
     const [searchParams] = useSearchParams();
-    const [status, setStatus] = useState<"success" | "failed" | null>(null);
+    const [status, setStatus] = useState<"Success" | "Failed" | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         const responseCode = searchParams.get("vnp_ResponseCode");
+        const transactionId = searchParams.get("vnp_TransactionNo"); // 👈 Lấy transactionId
 
         if (responseCode === "00") {
-            setStatus("success");
+            setStatus("Success");
 
             // Gọi nâng cấp Premium
             fetch("http://localhost:8080/api/user/upgrade-premium", {
@@ -38,7 +39,8 @@ export default function VnPayResultPage() {
                         type: selectedPlan.duration,              // ví dụ: "1 tháng"
                         amount: selectedPlan.price,
                         paymentMethod: "VNPay",
-                        status: "SUCCESS",
+                        status: "Success",
+                        transactionId: transactionId,
                         message: "Giao dịch thành công",
                     }),
                 });
@@ -52,7 +54,7 @@ export default function VnPayResultPage() {
                 window.location.href = "/";
             }, 3000);
         } else {
-            setStatus("failed");
+            setStatus("Failed");
         }
     }, [searchParams]);
 
@@ -60,13 +62,13 @@ export default function VnPayResultPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 text-center px-4">
-            {status === "success" ? (
+            {status === "Success" ? (
                 <>
                     <CheckCircle className="text-green-600 w-20 h-20 mb-4" />
                     <h1 className="text-3xl font-bold text-green-700">Thanh toán thành công!</h1>
                     <p className="text-gray-600 mt-2">Cảm ơn bạn đã đăng ký gói học IELTS Premium.</p>
                 </>
-            ) : status === "failed" ? (
+            ) : status === "Failed" ? (
                 <>
                     <XCircle className="text-red-600 w-20 h-20 mb-4" />
                     <h1 className="text-3xl font-bold text-red-700">Thanh toán thất bại</h1>

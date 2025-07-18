@@ -42,7 +42,7 @@ public class TransactionController {
     public ResponseEntity<String> recordTransaction(@RequestBody PaymentTransactionDto dto, Principal principal) {
         String email = principal.getName(); // Lấy email từ JWT
         service.saveTransaction(
-                email, dto.getType(), dto.getAmount(), dto.getPaymentMethod(), dto.getStatus(), dto.getMessage()
+                email, dto.getType(), dto.getAmount(), dto.getPaymentMethod(), dto.getStatus(), dto.getMessage(), dto.getTransactionId()
         );
         return ResponseEntity.ok("Giao dịch đã được lưu");
     }

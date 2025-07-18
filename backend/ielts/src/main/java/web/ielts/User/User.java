@@ -38,7 +38,7 @@ public class User implements UserDetails {
     }
 
     public boolean isPremiumActive() {
-        return premiumExpiry != null && premiumExpiry.isBefore(LocalDate.now());
+        return premiumExpiry != null && premiumExpiry.isAfter(LocalDate.now());
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

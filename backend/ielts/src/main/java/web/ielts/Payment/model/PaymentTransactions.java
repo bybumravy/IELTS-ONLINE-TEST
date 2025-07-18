@@ -14,11 +14,12 @@ import java.time.LocalDate;
         private String status;
         private LocalDate createdAt;
         private String message;
+        private String transactionId;
 
         public PaymentTransactions() {
         }
 
-        public PaymentTransactions(String id, String email, String type, double amount, String paymentMethod, String status, LocalDate createdAt, String message) {
+        public PaymentTransactions(String id, String email, String type, double amount, String paymentMethod, String status, LocalDate createdAt, String message, String transactionId) {
             this.id = id;
             this.email = email;
             this.type = type;
@@ -27,6 +28,7 @@ import java.time.LocalDate;
             this.status = status;
             this.createdAt = createdAt;
             this.message = message;
+            this.transactionId = transactionId;
         }
 
         public String getId() {
@@ -91,5 +93,13 @@ import java.time.LocalDate;
 
         public void setMessage(String message) {
             this.message = message;
+        }
+
+        public String getTransactionId() {
+            return transactionId;
+        }
+
+        public void setTransactionId(String transactionId) {
+            this.transactionId = transactionId;
         }
     }

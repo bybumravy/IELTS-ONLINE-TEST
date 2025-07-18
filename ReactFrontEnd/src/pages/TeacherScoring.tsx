@@ -290,7 +290,7 @@ The data suggests that government policies and economic factors significantly in
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="rounded-lg bg-blue-50 p-4">
+                <div className="rounded-lg bg-green-50 p-4">
                   <p className="text-sm text-gray-700">
                     <strong>Task 1:</strong> The chart below shows the percentage of households in owned and rented
                     accommodation in England and Wales between 1918 and 2011.
@@ -309,8 +309,10 @@ The data suggests that government policies and economic factors significantly in
                   <CardTitle>Bài làm của học viên</CardTitle>
                   <div className="flex gap-2">
                     <Button
-                      variant={isEditMode ? "default" : "outline"}
                       size="sm"
+                      className={`${
+                          isEditMode ? "bg-green-800 text-white hover:bg-green-900" : "bg-white text-black border border-gray-300 hover:bg-white"
+                      }`}
                       onClick={() => {
                         setIsEditMode(!isEditMode)
                         setIsSentenceMode(false)
@@ -320,8 +322,10 @@ The data suggests that government policies and economic factors significantly in
                       {isEditMode ? "Xong" : "Sửa từ"}
                     </Button>
                     <Button
-                      variant={isSentenceMode ? "default" : "outline"}
                       size="sm"
+                      className={`${
+                          isSentenceMode ? "bg-green-800 text-white hover:bg-green-900" : "bg-white text-black border border-gray-300 hover:bg-white"
+                      }`}
                       onClick={() => {
                         setIsSentenceMode(!isSentenceMode)
                         setIsEditMode(false)
@@ -734,7 +738,7 @@ The data suggests that government policies and economic factors significantly in
                       </SelectTrigger>
                       <SelectContent>
                         <>
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((score) => (
+                          {[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0].map((score) => (
                               <SelectItem key={score} value={score.toString()}>
                                 {score}
                               </SelectItem>
@@ -766,7 +770,7 @@ The data suggests that government policies and economic factors significantly in
                       </SelectTrigger>
                       <SelectContent>
                         <>
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((score) => (
+                          {[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0].map((score) => (
                               <SelectItem key={score} value={score.toString()}>
                                 {score}
                               </SelectItem>
@@ -798,7 +802,7 @@ The data suggests that government policies and economic factors significantly in
                       </SelectTrigger>
                       <SelectContent>
                         <>
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((score) => (
+                          {[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0].map((score) => (
                               <SelectItem key={score} value={score.toString()}>
                                 {score}
                               </SelectItem>
@@ -830,7 +834,7 @@ The data suggests that government policies and economic factors significantly in
                       </SelectTrigger>
                       <SelectContent>
                         <>
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((score) => (
+                          {[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0].map((score) => (
                               <SelectItem key={score} value={score.toString()}>
                                 {score}
                               </SelectItem>
@@ -855,9 +859,9 @@ The data suggests that government policies and economic factors significantly in
                 <CardTitle>Tổng kết</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4">
+                <div className="flex items-center justify-between rounded-lg bg-green-50 p-4">
                   <span className="font-medium">Điểm tổng kết:</span>
-                  <span className="text-2xl font-bold text-blue-600">{calculateOverallScore()}</span>
+                  <span className="text-2xl font-bold text-green-600">{calculateOverallScore()}</span>
                 </div>
 
                 <div className="space-y-2">
@@ -878,8 +882,8 @@ The data suggests that government policies and economic factors significantly in
                 <Save className="mr-2 h-4 w-4" />
                 Lưu nháp
               </Button>
-              <Button className="flex-1">
-                <Send className="mr-2 h-4 w-4" />
+              <Button className="bg-green-400 text-white hover:bg-green-500 flex-1 ">
+                <Send className="mr-2 h-4 w-4 " />
                 Hoàn thành chấm
               </Button>
             </div>

@@ -6,13 +6,15 @@ public class PaymentTransactionDto {
     private String paymentMethod;
     private String status;
     private String message;
+    private String transactionId;
 
-    public PaymentTransactionDto(String type, long amount, String paymentMethod, String status, String message) {
+    public PaymentTransactionDto(String type, long amount, String paymentMethod, String status, String message, String transactionId) {
         this.type = type;
         this.amount = amount;
         this.paymentMethod = paymentMethod;
         this.status = status;
         this.message = message;
+        this.transactionId = transactionId;
     }
 
     public String getType() {
@@ -53,5 +55,13 @@ public class PaymentTransactionDto {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
     }
 }

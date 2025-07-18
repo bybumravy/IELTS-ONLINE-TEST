@@ -17,7 +17,7 @@ public class UserService {
     }
 
     public User resetPremiumIfExpired(User user) {
-        if (user.isPremiumActive()) {
+        if (user != null  && user.isPremiumActive()) {
             user.setPremium(false);
             user.setPremiumExpiry(null);
             userRepository.save(user);

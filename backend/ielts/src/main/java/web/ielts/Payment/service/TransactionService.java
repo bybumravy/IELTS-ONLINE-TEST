@@ -27,7 +27,7 @@ public class TransactionService {
         return repository.save(transaction);
     }
 
-    public void saveTransaction(String email, String type, long amount, String method, String status, String message) {
+    public void saveTransaction(String email, String type, long amount, String method, String status, String message, String transactionId) {
         PaymentTransactions tx = new PaymentTransactions();
         tx.setEmail(email);
         tx.setType(type);
@@ -35,6 +35,7 @@ public class TransactionService {
         tx.setPaymentMethod(method);
         tx.setStatus(status);
         tx.setMessage(message);
+        tx.setTransactionId(transactionId);
         tx.setCreatedAt(LocalDate.now(ZoneOffset.UTC));
         repository.save(tx);
     }
@@ -49,6 +50,7 @@ public class TransactionService {
             transaction.setPaymentMethod(tx.getPaymentMethod());
             transaction.setStatus(tx.getStatus());
             transaction.setMessage(tx.getMessage());
+            transaction.setTransactionId(tx.getTransactionId());
             transaction.setCreatedAt(tx.getCreatedAt());
             return transaction;
         }).collect(Collectors.toList());

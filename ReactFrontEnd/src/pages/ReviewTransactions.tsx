@@ -104,11 +104,11 @@ const mockTransactions = [
 
 const getStatusBadge = (status: string) => {
   switch (status) {
-    case "success":
+    case "Success":
       return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Thành công</Badge>
-    case "failed":
+    case "Failed":
       return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Thất bại</Badge>
-    case "pending":
+    case "Pending":
       return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Đang xử lý</Badge>
     default:
       return <Badge variant="secondary">{status}</Badge>
@@ -122,12 +122,13 @@ const formatCurrency = (amount: number) => {
   }).format(amount)
 }
 
-const formatDateTime = (dateString: string) => {
-  return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: vi })
+const formatDate = (dateString: string) => {
+  return format(new Date(dateString), "dd/MM/yyyy", { locale: vi })
 }
 
 export default function TransactionHistory() {
   const [transactions, setTransactions] = useState<any[]>([])
+  const [filterTransactionId, setFilterTransactionId] = useState("");
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -140,8 +141,8 @@ export default function TransactionHistory() {
 
   // Statistics calculations
   const totalTransactions = transactions.length
-  const totalAmount = transactions.filter((t) => t.status === "success").reduce((sum, t) => sum + t.amount, 0)
-  const successRate = Math.round((transactions.filter((t) => t.status === "success").length / totalTransactions) * 100)
+  const totalAmount = transactions.filter((t) => t.status === "Success").reduce((sum, t) => sum + t.amount, 0)
+  const successRate = Math.round((transactions.filter((t) => t.status === "Success").length / totalTransactions) * 100)
   const paymentMethods = transactions.reduce(
     (acc, t) => {
       acc[t.paymentMethod] = (acc[t.paymentMethod] || 0) + 1
@@ -167,12 +168,18 @@ export default function TransactionHistory() {
   const applyFilters = () => {
     let filtered = [...transactions]
 
+    if (filterTransactionId.trim() !== "") {
+      filtered = filtered.filter((transaction) =>
+          (transaction.transactionId || "")
+              .toLowerCase()
+              .includes(filterTransactionId.toLowerCase())
+      );
+    }
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(
-        (t) =>
-          t.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          t.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      filtered = filtered.filter((t) =>
+          t.transactionId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          t.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
           t.amount.toString().includes(searchTerm),
       )
     }
@@ -226,7 +233,7 @@ export default function TransactionHistory() {
   // Apply filters whenever dependencies change
   useEffect(() => {
     applyFilters()
-  }, [transactions, searchTerm, statusFilter, userFilter, dateFrom, dateTo, sortBy, sortOrder])
+  }, [transactions, searchTerm, userFilter])
 
 
   const handleSort = (field: string) => {
@@ -239,10 +246,6 @@ export default function TransactionHistory() {
     applyFilters()
   }
 
-  const exportToExcel = () => {
-    // Mock export functionality
-    alert("Xuất Excel thành công!")
-  }
 
   const exportToPDF = () => {
     // Mock export functionality
@@ -251,7 +254,7 @@ export default function TransactionHistory() {
 
   const printTransaction = (transaction: any) => {
     // Mock print functionality
-    alert(`In phiếu giao dịch ${transaction.id}`)
+    alert(`In phiếu giao dịch ${transaction.transactionId}`)
   }
 
   return (
@@ -263,10 +266,6 @@ export default function TransactionHistory() {
           <p className="text-muted-foreground">Quản lý và theo dõi tất cả giao dịch</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={exportToExcel} variant="outline">
-            <FileText className="w-4 h-4 mr-2" />
-            Xuất Excel
-          </Button>
           <Button onClick={exportToPDF} variant="outline">
             <Download className="w-4 h-4 mr-2" />
             Xuất PDF
@@ -276,7 +275,7 @@ export default function TransactionHistory() {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="border-l-4 border-l-green-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Tổng giao dịch</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -287,7 +286,7 @@ export default function TransactionHistory() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-green-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Tổng doanh thu</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -298,7 +297,7 @@ export default function TransactionHistory() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-green-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Tỷ lệ thành công</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -309,7 +308,7 @@ export default function TransactionHistory() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-green-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Phương thức phổ biến</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
@@ -358,9 +357,9 @@ export default function TransactionHistory() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tất cả</SelectItem>
-                  <SelectItem value="success">Thành công</SelectItem>
-                  <SelectItem value="failed">Thất bại</SelectItem>
-                  <SelectItem value="pending">Đang xử lý</SelectItem>
+                  <SelectItem value="Success">Thành công</SelectItem>
+                  <SelectItem value="Failed">Thất bại</SelectItem>
+                  <SelectItem value="Pending">Đang xử lý</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -429,7 +428,7 @@ export default function TransactionHistory() {
           </div>
 
           <div className="flex gap-2">
-            <Button onClick={applyFilters}>
+            <Button onClick={applyFilters} className="bg-green-800">
               <Search className="w-4 h-4 mr-2" />
               Áp dụng bộ lọc
             </Button>
@@ -495,12 +494,11 @@ export default function TransactionHistory() {
               </TableHeader>
               <TableBody>
                 <>
-                  {filteredTransactions.map((transaction) => (
-                      <TableRow key={transaction.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">{transaction.id}</TableCell>
+                  {filteredTransactions.map((transaction,index) => (
+                      <TableRow key={index} className="hover:bg-muted/50">
+                        <TableCell className="font-medium">{transaction.transactionId}</TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{transaction.user}</div>
                             <div className="text-sm text-muted-foreground">{transaction.email}</div>
                           </div>
                         </TableCell>
@@ -508,7 +506,7 @@ export default function TransactionHistory() {
                         <TableCell className="font-medium">{formatCurrency(transaction.amount)}</TableCell>
                         <TableCell>{transaction.paymentMethod}</TableCell>
                         <TableCell>{getStatusBadge(transaction.status)as React.ReactNode}</TableCell>
-                        <TableCell>{formatDateTime(transaction.createdAt)}</TableCell>
+                        <TableCell>{formatDate(transaction.createdAt)}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Dialog>
@@ -519,7 +517,7 @@ export default function TransactionHistory() {
                               </DialogTrigger>
                               <DialogContent className="max-w-2xl">
                                 <DialogHeader>
-                                  <DialogTitle>Chi tiết giao dịch {transaction.id}</DialogTitle>
+                                  <DialogTitle>Chi tiết giao dịch {transaction.transactionId}</DialogTitle>
                                   <DialogDescription>Thông tin chi tiết về giao dịch</DialogDescription>
                                 </DialogHeader>
                                 {selectedTransaction && (
@@ -527,7 +525,7 @@ export default function TransactionHistory() {
                                       <div className="grid grid-cols-2 gap-4">
                                         <div>
                                           <Label className="text-sm font-medium">Mã giao dịch</Label>
-                                          <p className="text-sm">{selectedTransaction.id}</p>
+                                          <p className="text-sm">{selectedTransaction.transactionId}</p>
                                         </div>
                                         <div>
                                           <Label className="text-sm font-medium">Trạng thái</Label>
@@ -535,7 +533,6 @@ export default function TransactionHistory() {
                                         </div>
                                         <div>
                                           <Label className="text-sm font-medium">Người thực hiện</Label>
-                                          <p className="text-sm">{selectedTransaction.user}</p>
                                           <p className="text-xs text-muted-foreground">{selectedTransaction.email}</p>
                                         </div>
                                         <div>
@@ -552,13 +549,13 @@ export default function TransactionHistory() {
                                         </div>
                                         <div>
                                           <Label className="text-sm font-medium">Thời gian tạo</Label>
-                                          <p className="text-sm">{formatDateTime(selectedTransaction.createdAt)}</p>
+                                          <p className="text-sm">{formatDate(selectedTransaction.createdAt)}</p>
                                         </div>
                                         <div>
                                           <Label className="text-sm font-medium">Thời gian hoàn tất</Label>
                                           <p className="text-sm">
                                             {selectedTransaction.completedAt
-                                                ? formatDateTime(selectedTransaction.completedAt)
+                                                ? formatDate(selectedTransaction.completedAt)
                                                 : "Chưa hoàn tất"}
                                           </p>
                                         </div>

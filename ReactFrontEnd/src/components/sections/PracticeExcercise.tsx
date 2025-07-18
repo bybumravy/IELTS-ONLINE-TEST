@@ -27,12 +27,11 @@ export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
 
         if (Array.isArray(correctAns)) {
             return correctAns
-                .filter(ans => typeof ans === "string")
                 .map(ans => ans.toLowerCase())
                 .includes(userAns.toLowerCase());
         }
 
-        return typeof correctAns === "string" && userAns.toLowerCase() === correctAns.toLowerCase();
+        return userAns.toLowerCase() === correctAns.toLowerCase();
     }
 
 
