@@ -349,6 +349,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "1. The question being asked (context and requirements)\n" +
                         "2. The full transcript of the user's response (content, grammar, vocabulary)\n" +
                         "3. You must evaluate whether the response is relevant to the question and does not go off-topic.\n" +
+                        ""+
                         "4. Do not assign a score of 7.5 or higher if the response is relevant but lacks development.\n" +
                         "If the response is very short (e.g., fewer than 5 sentences), even if it answers the question correctly and fluently, you must treat it as underdeveloped and assign no more than Band 7.0 in any category.\n" +
                         "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
