@@ -76,7 +76,7 @@ import TransactionPage from "./pages/TransactionPage"
 
 export default function App() {
     return (
-        //<ErrorBoundary>
+        <ErrorBoundary>
             <AuthProvider>
                 <Router>
                     <Routes>
@@ -214,6 +214,6 @@ export default function App() {
                     </Routes>
                 </Router>
             </AuthProvider>
-        //</ErrorBoundary>
+        </ErrorBoundary>
     )
 }
