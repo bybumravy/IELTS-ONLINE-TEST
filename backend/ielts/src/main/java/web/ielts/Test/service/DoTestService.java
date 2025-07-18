@@ -27,6 +27,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -223,6 +225,9 @@ public class DoTestService {
 
     public void updateAnswerUrls(SpeakingAnswer speakingAnswer, Map<String, String> fileUrlMap) {
         SpeakingAnswerPart13 part1 = speakingAnswer.getPart1();
+        double part1Score = 0.0;
+        double part2Score = 0.0;
+        double part3Score = 0.0;
         if (part1 != null && part1.getQuestions() != null) {
 
             double totalScore = 0;
@@ -268,9 +273,12 @@ public class DoTestService {
                     }
             }
             double avgScore = validQuestionCount > 0 ? (totalScore / validQuestionCount) : 0.0;
-            double roundedAvgScore = Math.round(avgScore * 2) / 2.0; // Làm tròn đến 0.5 nếu cần
+            avgScore = new BigDecimal(avgScore).setScale(1, RoundingMode.HALF_UP).doubleValue();
 
-            part1.setAverageScore(roundedAvgScore);        }
+
+            part1.setAverageScore(avgScore);
+            part1Score = part1.getAverageScore();
+        }
 
          //🔹 Part 2
         SpeakingAnswerPart2 part2 = speakingAnswer.getPart2();
@@ -302,7 +310,10 @@ public class DoTestService {
                         double fluency = sp.getFluencyCohAnswer().getScore();
                         double pronunciation = pa.getScore();
                         double averageForThisQuestion = (grammar + lexical + fluency + pronunciation) / 4.0;
+
+                        averageForThisQuestion = new BigDecimal(averageForThisQuestion).setScale(1, RoundingMode.HALF_UP).doubleValue();
                         part2.setScore(averageForThisQuestion);
+                        part2Score = part2.getScore();
                         // validQuestionCount++;
                     } catch (Exception e) {
                         System.err.println("❌ Lỗi khi chấm Part 2");
@@ -340,7 +351,7 @@ public class DoTestService {
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
                         System.out.println(transcript);
                         FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,null);
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,prosodyFeatures,null);
                         PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
                         qa.setTranscript(sp.getTranscript());
                         qa.setGrammarAnswer(sp.getGrammarAnswer());
@@ -369,13 +380,15 @@ public class DoTestService {
 
             }
             double avgScore = validQuestionCount > 0 ? (totalScore / validQuestionCount) : 0.0;
-            double roundedAvgScore = Math.round(avgScore * 2) / 2.0; // Làm tròn đến 0.5 nếu cần
-
-            part3.setAverageScore(roundedAvgScore);
+            avgScore = new BigDecimal(avgScore).setScale(1, RoundingMode.HALF_UP).doubleValue();
+            part3.setAverageScore(avgScore);
+            part3Score = part3.getAverageScore();
 
 
         }
-
+        double band = part1Score + part2Score + part3Score;
+        double avgBand = Math.round((band / 3.0) * 2) / 2.0;
+        speakingAnswer.setBand(avgBand);
     }
     private String extractFileName(String blobUrl) {
         // Ví dụ input: blob:http://localhost:5173/cd13919f-ec76-4e5e-a348-95e5c3f1265c

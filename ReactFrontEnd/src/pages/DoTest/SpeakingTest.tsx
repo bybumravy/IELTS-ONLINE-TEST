@@ -249,29 +249,7 @@ const SpeakingTest = () => {
 
                 reader.readAsArrayBuffer(audioBlob)
             }
-            if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-                const SpeechRecognition =
-                    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                const recognition = new SpeechRecognition();
-                recognition.continuous = true;
-                recognition.interimResults = true;
-                recognition.lang = "en-US"; // hoặc "vi-VN"
 
-                recognition.onresult = (event: any) => {
-                    let transcript = "";
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        transcript += event.results[i][0].transcript;
-                    }
-                    setLiveTranscript(transcript);
-                };
-
-                recognition.onerror = (e: any) => {
-                    console.error("Speech recognition error:", e);
-                };
-
-                recognition.start();
-                recognitionRef.current = recognition;
-            }
             mediaRecorder.start()
         } catch (error) {
             console.error("Error accessing microphone:", error)
@@ -736,12 +714,7 @@ const SpeakingTest = () => {
                                         )}
 
                                     </div>
-                                    {recordingKey && (
-                                        <div className="bg-yellow-50 p-3 border border-yellow-400 rounded mt-2">
-                                            <strong>🗣 Script:</strong>
-                                            <p className="mt-1 text-gray-800">{liveTranscript || <em>Đang nghe...</em>}</p>
-                                        </div>
-                                    )}
+
                                 </CardContent>
                             </Card>
                         </div>

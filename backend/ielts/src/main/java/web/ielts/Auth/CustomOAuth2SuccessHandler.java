@@ -74,10 +74,10 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
             response.sendRedirect("http://localhost:5173");
         }
         else if(user.getRole().equalsIgnoreCase("ADMIN")){
-            response.sendRedirect("http://localhost:5173/adminpage");
+            response.sendRedirect("http://localhost:5173/admin-page");
         }
         else if(user.getRole().equalsIgnoreCase("TEAcher")){
-            response.sendRedirect("http://localhost:5173/teacher-page");
+            response.sendRedirect("http://localhost:5173/staff-page");
         }
         else{
             response.sendRedirect("http://localhost:5173/staff-page");

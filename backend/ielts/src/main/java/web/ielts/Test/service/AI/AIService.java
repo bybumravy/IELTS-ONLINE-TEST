@@ -298,28 +298,8 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             "- Vocabulary: word choice\n" +
             "- Vocabulary: informal expression\n" +
             "- Vocabulary: vague expression\n" +
-            "- Vocabulary: repetition\n" +
-            "\n" +
-            "• Coherence / Logic:\n" +
-            "- Coherence: unclear meaning\n" +
-            "- Coherence: repetition of ideas\n" +
-            "- Coherence: poor connection\n" +
-            "- Coherence: off-topic\n" +
-            "- Coherence: abrupt transition\n" +
-            "- Coherence: lack of cohesion devices\n" +
-            "- Coherence: disorganized idea structure\n" +
-            "- Coherence: unsupported point\n" +
-            "\n" +
-            "• Fluency-related:\n" +
-            "- Fluency: frequent hesitation\n" +
-            "- Fluency: excessive self-correction\n" +
-            "- Fluency: unnatural pause\n" +
-            "- Fluency: slow delivery\n" +
-            "- Fluency: choppy rhythm\n"+
-            "\n"+
-            "• Pronunciation-related:\n" +
-            "- Pronunciation: incorrect word stress\n" +
-            "- Pronunciation: incorrect intonation pattern\n"
+            "- Vocabulary: repetition\n"
+
             ;
 
     public String buildSpeakingPart1Prompt(
@@ -352,8 +332,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         ""+
                         "4. Do not assign a score of 7.5 or higher if the response is relevant but lacks development.\n" +
                         "If the response is very short (e.g., fewer than 5 sentences), even if it answers the question correctly and fluently, you must treat it as underdeveloped and assign no more than Band 7.0 in any category.\n" +
-                        "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
-                        +errorType+
+
 
 
                         "Once fully understood, proceed to scoring using official IELTS Band Descriptors and apply the detailed evaluation criteria provided below.\n" +
@@ -428,7 +407,22 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "- transcript: string ( transcript of the original answer)\n" +
                         "- question (string)"+
                         ""+
-
+                        "\n" +
+                        "IMPORTANT RULES:\n" +
+                        "- Only provide feedback **when there is an actual error** in the evaluated category.\n" +
+                        "- When evaluating **Grammar**, only identify and comment on **grammar-related errors**.\n" +
+                        "- When evaluating **Lexical Resource**, only identify and comment on **vocabulary-related errors**.\n" +
+                        "- Do **not** cross over between categories (e.g., do not mention vocabulary issues when scoring grammar).\n" +
+                        "- Always include a score in both grammarAnswer and lexicalAnswer, even if there are no errors\n" +
+                        "- If there are no errors in a category, do not provide errorText, correctText, explanation, or sentenceContext—only the score"+
+                        "For lexical and grammar evaluations:\n" +
+                        "✅ `errorText` must contain **only the incorrect word or phrase** (not the full sentence). (1–5 words maximum) \n" +
+                        "✅ `correctText` must contain **only the corrected word or phrase**. (1–5 words maximum) \n" +
+                        "❌ Do NOT include full sentence rewrites.  \n" +
+                        "✅ Provide the full sentence in `sentenceContext` so the error can be understood in context.\n" +
+                        "\n" +
+                        "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
+                        +errorType+
 
                        "- grammarAnswer (object) with:\n" +
                         "    - score (double)\n" +
@@ -482,8 +476,6 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "\n" +
                         "You must also check whether the response answers **all bullet points** in the cue card. For **each missing or ignored point**, deduct **0.5 Band** from Fluency & Coherence.\n"+
                         "Once fully understood, proceed to scoring using official IELTS Band Descriptors.\n" +
-                        "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
-                        +errorType+
                         "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
                         "\n" +
                         "• Lexical Resource (25%):\n" +
@@ -569,11 +561,28 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
                         "   - Deduct 0.5 band per 2 major errors\n" +
+                        "For lexical and grammar, the errorText should only include the incorrect word, and the correctText should contain the correct word."+
                         "RESPONSE FORMAT:\n" +
                         "- transcript: string ( transcript of the original answer)\n" +
                         "- question (string)"+
                         ""+
+                        "IMPORTANT RULES:\n" +
+                        "- Only provide feedback **when there is an actual error** in the evaluated category.\n" +
+                        "- When evaluating **Grammar**, only identify and comment on **grammar-related errors**.\n" +
+                        "- When evaluating **Lexical Resource**, only identify and comment on **vocabulary-related errors**.\n" +
+                        "- Do **not** cross over between categories (e.g., do not mention vocabulary issues when scoring grammar).\n" +
+                        "- Always include a score in both grammarAnswer and lexicalAnswer, even if there are no errors.\n" +
+                        "- If there are no errors in a category, do not provide errorText, correctText, explanation, or sentenceContext—only the score"+
 
+                        "\n" +
+                        "For lexical and grammar evaluations:\n" +
+                        "✅ `errorText` must contain **only the incorrect word or phrase** (not the full sentence). (1–5 words maximum) \n" +
+                        "✅ `correctText` must contain **only the corrected word or phrase**.(1–5 words maximum)  \n" +
+                        "❌ Do NOT include full sentence rewrites.  \n" +
+                        "✅ Provide the full sentence in `sentenceContext` so the error can be understood in context.\n" +
+                        "\n" +
+                        "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
+                        +errorType+
                         "- grammarAnswer (object) with:\n" +
                         "    - score (double)\n" +
                         "    - errorText (string)\n" +
@@ -618,8 +627,6 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "1. Understand the context of the question.\n" +
                         "2. Read the full transcript of the user's response.\n" +
                         "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
-                        "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
-                        +errorType+
 
                         "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
                         "\n" +
@@ -713,24 +720,58 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "Make sure each sentenceImprovement refers to a real sentence from the response and clearly shows how to improve it."+
                         "For sentence improvements,refer explicitly to the public band descriptors:  "+IELTS_PUBLIC_DESCRIPTORSLexicalResource +"and"+IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+". For example, if you assign the answer Band 6.0, you must suggest sentence improvements that elevate it to Band 7.0"+
                         "RESPONSE FORMAT:\n" +
-                        "- score: decimal (overall band score, e.g. 6.5)\n" +
-                        "- feedback: {\n" +
-                        "    (In errorCorrections, only include corrections where the originalText is clearly incorrect in terms of LexicalResource,grammar or fluency/coherence)\n" +
-                        "    errorCorrections: [{\n" +
-                        "      originalText: string,\n" +
-                        "      correctedText: string,\n" +
-                        "      errorType: string,\n" +
-                        "      explanation: string,\n" +
-                        "      sentenceContext: string\n" +
-                        "    }],\n" +
-                        "    overallComment: string\n" +
-                        "}\n" +
-                        "- evaluation: {\n" +
-                        "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
-                        "    Grammar: {scoreEva: string, reviewEva: string}\n" +
-                        "    Fluency and coherence: {scoreEva: string, reviewEva: string}\n" +
-                        "}\n" +
-                        "sampleAnswer: string (Optional band 9 model)\n" +
+                        "2. SCORING SYSTEM:\n" +
+                        "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
+                        "Apply the evaluation criteria to score each individual aspect separately. For example, what is the score for Grammar"+
+                        "For lexical and grammar, the errorText should only include the incorrect word, and the correctText should contain the correct word."+
+                        "RESPONSE FORMAT:\n" +
+                        "- transcript: string ( transcript of the original answer)\n" +
+                        "- question (string)"+
+                       "IMPORTANT RULES:\n" +
+                        "- Only provide feedback **when there is an actual error** in the evaluated category.\n" +
+                        "- When evaluating **Grammar**, only identify and comment on **grammar-related errors**.\n" +
+                        "- When evaluating **Lexical Resource**, only identify and comment on **vocabulary-related errors**.\n" +
+                        "- Do **not** cross over between categories (e.g., do not mention vocabulary issues when scoring grammar).\n" +
+                        "- Always include a score in both grammarAnswer and lexicalAnswer, even if there are no errors.\n" +
+                        "- If there are no errors in a category, do not provide errorText, correctText, explanation, or sentenceContext—only the score"+
+                        "\n" +
+                        "For lexical and grammar evaluations:\n" +
+                        "✅ `errorText` must contain **only the incorrect word or phrase** (not the full sentence).(1–5 words maximum)  \n" +
+                        "✅ `correctText` must contain **only the corrected word or phrase**. (1–5 words maximum) \n" +
+                        "❌ Do NOT include full sentence rewrites.  \n" +
+                        "✅ Provide the full sentence in `sentenceContext` so the error can be understood in context.\n" +
+                        "\n" +
+                        "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
+                        +errorType+
+                        "- grammarAnswer (object) with:\n" +
+                        "    - score (double)\n" +
+                        "    - errorText (string)\n" +
+                        "    - correctText (string)\n" +
+                        "    - errorType (string)\n" +
+                        "    - explanation (string)\n" +
+                        "    - sentenceContext (string)\n" +
+                        "- lexicalAnswer (object) with:\n" +
+                        "    - score (double)\n" +
+                        "    - errorText (string)\n" +
+                        "    - correctText (string)\n" +
+                        "    - errorType (string)\n" +
+                        "    - explanation (string)\n" +
+                        "    - sentenceContext (string)"+
+                        "\"For Fluency and Coherence, provide detailed feedback only after assigning the score. This feedback must be strictly based on the actual fluency and coherence performance observed in Part 1 of the candidate’s response.\n" +
+                        "\n" +
+                        "Do NOT provide generic or vague comments.\n" +
+                        "\n" +
+                        "Your feedback must explicitly mention and evaluate the following:\n" +
+                        "\n" +
+                        "meanIntensity"+
+                        "- **Speech rate**: Was the candidate’s speech fast, slow, or appropriately paced?\n" +
+                        "- **Number and nature of pauses**: Were there frequent unnatural pauses or hesitations?\n" +
+                        "- **Logical progression of ideas**: Did the candidate present ideas in a logical and connected manner?\n" +
+                        "- **Use of cohesive devices**: Were linking words (e.g., however, because, so) used correctly and naturally?\n" +
+                        "- **Overall clarity**: Was the response easy to follow and understand?"+
+                        "- fluencyCohAnswer (object) with:\n" +
+                        "    - score (double)"+
+                        "    - comment (string)"+
                         "Question:\n" + questions + "\n" +
                         "Original Answer:\n" + transcipt;
 
