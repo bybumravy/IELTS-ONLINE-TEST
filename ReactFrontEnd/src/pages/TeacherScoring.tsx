@@ -892,7 +892,7 @@ export default function TeacherScoringPage() {
                                                                                 />
 
                                                                                 <p className="text-sm text-muted-foreground mt-1 text-right">
-                                                                                    {newError.comment.length}/100 characters
+                                                                                    {newError.comment.length}/100 charactkkers
                                                                                 </p>
                                                                             </div>
                                                                             <Button
