@@ -13,6 +13,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Document(collection = "user")
 public class User implements UserDetails {
@@ -24,7 +26,7 @@ public class User implements UserDetails {
     private String email;
 
     private String password;
-    private String role;
+    private List<String> role;
 
 
     private LocalDate premiumExpiry;
@@ -40,13 +42,13 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(String email, String password, String role) {
+    public User(String email, String password, List<String> role) {
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
-    public User(String firstName, String lastName, String email, String password, String role,
+    public User(String firstName, String lastName, String email, String password, List<String> role,
                 LocalDate premiumExpiry, boolean premium, String googleID,
                 String createdAt, String birthDate, String gender, String phone) {
         this.firstName = firstName;
@@ -102,11 +104,11 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public String getRole() {
+    public List<String> getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(List<String> role) {
         this.role = role;
     }
 
@@ -167,10 +169,11 @@ public class User implements UserDetails {
     }
 
     // --- Spring Security Overrides ---
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(role));
+        return role.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
+                .collect(Collectors.toList());
     }
 
     @Override
