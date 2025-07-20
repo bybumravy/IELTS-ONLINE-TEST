@@ -121,8 +121,7 @@ export default function App() {
 
                         <Route path="/practice/vocabulary" element={<SoftProtectedLayout allowRoles={["student"]}><MainLayout><VocabularyList /></MainLayout></SoftProtectedLayout>} />
 
-
-                        <Route path="/student/vocabulary-matching-game" element={<SoftProtectedLayout allowRoles={["student"]}><MainLayout><MatchingGamePage /></MainLayout></SoftProtectedLayout>} />
+                        <Route path="/student/vocabulary-matching-game" element={<MainLayout><MatchingGamePage /></MainLayout>}/>
 
                         {/* ========== Student Test Routes (Login required) ========== */}
                         <Route path="/test/listening/:testId" element={
