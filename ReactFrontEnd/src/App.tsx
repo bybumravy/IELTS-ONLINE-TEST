@@ -71,6 +71,7 @@ import ProtectedLayout from "@/components/sections/ProtectedLayout"
 import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
 import ReadingResult from "@/pages/Result/ReadingResult.tsx";
 import TransactionPage from "./pages/TransactionPage"
+import ManagerLogin from "@/components/sections/ManagerLogin";
 
 
 
@@ -195,6 +196,7 @@ export default function App() {
 
                         {/* ========== Staff Routes ========== */}
                         <Route path="/staff-login" element={<StaffLogin />} />
+                        <Route path="/manager-login" element={<ManagerLogin />} />
                         <Route path="/staff-page" element={<ProtectedLayoutRole allowRoles={["teacher", "manager"]}><StaffLayout><StaffPage /></StaffLayout></ProtectedLayoutRole>} />
                         <Route path="/add-test" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><AddTest /></StaffLayout></ProtectedLayout>} />
                         <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />
@@ -208,10 +210,7 @@ export default function App() {
                         <Route path="/grade-writing" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><ManagerTeacherScoreList /></StaffLayout></ProtectedLayout>} />
                         <Route path="/teacher-scoring/:id" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><TeacherScoringPage /></StaffLayout></ProtectedLayout>} />
                         <Route path="/transactions-report" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><TransactionHistory /></StaffLayout></ProtectedLayout>} />
-                        {/* ========== Error Pages ========== */}
-                        <Route path="/error" element={<ErrorPage />} />
 
-                        {/* ========== 404 Not Found (Catch-all) ========== */}
                         <Route path="*" element={<NotFoundPage />} />
 
                     </Routes>

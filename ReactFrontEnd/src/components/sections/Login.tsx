@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Mail, Lock, ArrowRight } from "lucide-react";
-
+import { useLocation } from "react-router-dom";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-
+  const location = useLocation();
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -119,7 +119,10 @@ const LoginPage = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <Link to="/forgot-password" className="text-sm text-emerald-600 hover:text-emerald-700">
+                  <Link
+                      to={`/forgot-password?redirect=${encodeURIComponent(location.pathname)}`}
+                      className="text-sm text-emerald-600 hover:text-emerald-700"
+                  >
                     Forgot password?
                   </Link>
                 </div>

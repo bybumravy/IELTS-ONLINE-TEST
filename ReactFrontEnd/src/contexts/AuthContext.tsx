@@ -60,8 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
     };
 
-    const register = async (email: string, password: string, role = "student") => {
-        await authService.register(email, password, role);
+    const register = async (email: string, password: string) => {
+        await authService.register(email, password);
         await fetchUser();
     };
 

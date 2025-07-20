@@ -10,9 +10,15 @@ public class EmailForgetPasswordConfig {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendResetPasswordEmail(String toEmail, String token) {
+    public void sendResetPasswordEmail(String toEmail, String token, String redirectURL) {
         String subject = "Yêu cầu đặt lại mật khẩu";
+
+        // Nếu redirectURL không rỗng, thêm nó như một query param
         String resetUrl = "http://localhost:5173/reset-password?token=" + token;
+        if (redirectURL != null && !redirectURL.isEmpty()) {
+            resetUrl += "&redirectURL=" + redirectURL;
+        }
+
         String body = "Bạn đã yêu cầu đặt lại mật khẩu.\n\n" +
                 "Vui lòng nhấn vào liên kết sau để thiết lập mật khẩu mới:\n" +
                 resetUrl + "\n\n" +

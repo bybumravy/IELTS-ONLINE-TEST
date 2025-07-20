@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -14,6 +15,7 @@ import web.ielts.Auth.CustomOAuth2SuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import web.ielts.Auth.RoleCaptureFilter;
 
 import java.util.Arrays;
 
@@ -23,6 +25,8 @@ public class SecurityConfig {
 
     @Autowired
     private CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
+    @Autowired
+    private RoleCaptureFilter roleCaptureFilter;
 
     @Autowired
     private JwtAuthenticationFilter jwtFilter;
@@ -41,6 +45,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .addFilterBefore(new RoleCaptureFilter(), OAuth2AuthorizationRequestRedirectFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

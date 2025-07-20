@@ -38,6 +38,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
             user.setPassword(null);
             user.setGoogleID(googleId);
             user.setPremium(false);
+            roleFromQuery = "student";
         } else {
             if (!user.getRole().contains(roleFromQuery)) {
                 return;

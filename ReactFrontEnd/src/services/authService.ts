@@ -29,12 +29,12 @@ export const getMe = async () => {
     return res.json()
 }
 
-export const register = async (email: string, password: string, role = "student") => {
+export const register = async (email: string, password: string) => {
     const res = await fetch(`${API_URL}/api/register`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, password}),
     })
 
     if (!res.ok) throw new Error("Register failed")
