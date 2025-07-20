@@ -225,7 +225,10 @@ public class AuthService {
                 selectedRole = "teacher";
             } else if (path.equals("/manager-login") && roles.contains("manager")) {
                 selectedRole = "manager";
-            } else {
+            } else if (path.equals("/login-admin") && roles.contains("admin")) {
+                selectedRole = "admin";
+            }
+            else {
                 response.put("status", "fail");
                 response.put("message", "You do not have the required role to log in here");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);

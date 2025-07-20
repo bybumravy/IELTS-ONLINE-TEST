@@ -1,159 +1,257 @@
 import { useEffect, useState } from "react";
-import { customFetch } from "@/components/sections/customFetch";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { User, Loader2, Save, X } from "lucide-react";
 
-// Animation helpers
-import { CSSTransition } from "react-transition-group";
-import "@/components/sections/admin/manage-modal-anim.css";
+type RoleType = "student" | "teacher" | "manager";
 
 type User = {
-  email: string;
-  role: string;
-  originalEmail?: string;
+    email: string;
+    roles: string[];
 };
 
-interface ManageRoleProps {
-  role: "student" | "teacher" | "manager";
-}
+export default function ManageRole({ role }: { role: RoleType }) {
+    const [users, setUsers] = useState<User[]>([]);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [newRole, setNewRole] = useState<RoleType | "">("");
+    const [actionType, setActionType] = useState<"add" | "update" | "delete" | "">("");
+    const [searchEmail, setSearchEmail] = useState<string>("");
 
-export default function ManageRole({ role }: ManageRoleProps) {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [searchEmail, setSearchEmail] = useState("");
-  const [updating, setUpdating] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL;
+    const loadUsers = () => {
+        fetch(`http://localhost:8080/getuser/${role}`)
+            .then(res => {
+                if (!res.ok) throw new Error("response was not ok");
+                return res.json();
+            })
+            .then(data => {
+                console.log("Fetched users:", JSON.stringify(data, null, 2));
+                setUsers(data);
+            })
+            .catch(err => console.error("Fetch error:", err));
+    };
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const response = await customFetch(`${API_URL}/getuser/${role}`);
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      } else {
-        console.error("Failed to fetch users: HTTP status", response.status);
-      }
-    } catch (error) {
-      console.error("Failed to fetch users:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleAddRole = async () => {
+        if (!selectedUser || !newRole.trim()) return;
 
-  useEffect(() => {
-    fetchUsers();
-  }, [role]);
+        if (selectedUser.roles.includes(newRole)) {
+            alert("User already has this role!");
+            return;
+        }
 
-  const handleUpdateRole = async () => {
-    if (!selectedUser) return;
-    setUpdating(true);
-    const url = `${API_URL}/getuser/updateuser`;
-    const res = await customFetch(url, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: selectedUser.email,
-        role: selectedUser.role,
-      }),
-    });
-    setUpdating(false);
-    if (res.ok) {
-      alert("User role updated successfully!");
-      setShowForm(false);
-      await fetchUsers();
-    } else {
-      alert("Failed to update user role");
-    }
-  };
+        try {
+            const res = await fetch("http://localhost:8080/getuser/addrole", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: selectedUser.email,
+                    roles: [...selectedUser.roles, newRole.trim()]
+                })
+            });
 
-  return (
-    <Card className="p-6 shadow-lg border-emerald-200 bg-white">
-      <h2 className="text-2xl font-bold text-emerald-700 mb-4 flex items-center gap-2">
-        <User className="w-6 h-6 text-emerald-400" /> Manage {role.charAt(0).toUpperCase() + role.slice(1)}s
-      </h2>
-      <div className="mb-4 flex flex-col md:flex-row gap-2 items-center">
-        <Input
-          type="text"
-          placeholder="Search email..."
-          value={searchEmail}
-          onChange={e => setSearchEmail(e.target.value)}
-          className="w-full md:w-80 border-emerald-200 focus:border-emerald-400"
-        />
-      </div>
-      {loading ? (
-        <div className="flex items-center gap-2 text-emerald-500"><Loader2 className="animate-spin" /> Loading...</div>
-      ) : (
-        <div className="overflow-x-auto rounded-lg border border-emerald-100 bg-emerald-50 transition-all duration-500">
-          <table className="min-w-full divide-y divide-emerald-200">
-            <thead className="bg-emerald-100">
-              <tr>
-                <th className="px-4 py-2 text-left text-xs font-semibold text-emerald-700 uppercase">Email</th>
-                <th className="px-4 py-2 text-left text-xs font-semibold text-emerald-700 uppercase">Role</th>
-                <th className="px-4 py-2 text-left text-xs font-semibold text-emerald-700 uppercase">Update Role</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.filter(user => user.email.toLowerCase().includes(searchEmail.toLowerCase())).map(user => (
-                <tr key={user.email} className="border-b border-emerald-100 hover:bg-emerald-200/30 transition-colors">
-                  <td className="px-4 py-2 text-sm text-gray-800">{user.email}</td>
-                  <td className="px-4 py-2 text-sm text-gray-800">{user.role}</td>
-                  <td className="px-4 py-2">
-                    <Button
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-1 rounded shadow transition-all duration-200"
-                      onClick={() => {
-                        setSelectedUser({ ...user, originalEmail: user.email });
-                        setShowForm(true);
-                      }}
-                    >
-                      Update
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      {/* Modal for update form with animation */}
-      <CSSTransition in={showForm && !!selectedUser} timeout={300} classNames="fade-slide" unmountOnExit>
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="bg-white rounded-xl shadow-2xl border border-emerald-200 p-8 w-full max-w-md animate-fade-in-up relative">
-            <button
-              className="absolute top-3 right-3 text-emerald-400 hover:text-emerald-700 transition-colors"
-              onClick={() => setShowForm(false)}
-            >
-              <X className="w-6 h-6" />
-            </button>
-            <h3 className="text-xl font-bold text-emerald-700 mb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-emerald-400" /> Update Role
-            </h3>
-            <div className="mb-4">
-              <label className="block text-emerald-700 mb-1">Role</label>
-              <select
-                value={selectedUser?.role}
-                onChange={e => setSelectedUser(su => su ? { ...su, role: e.target.value } : su)}
-                className="w-full border border-emerald-200 rounded px-3 py-2 focus:border-emerald-400 focus:outline-none"
-              >
-                <option value="student">student</option>
-                <option value="teacher">teacher</option>
-                <option value="manager">manager</option>
-              </select>
+            if (!res.ok) throw new Error("Failed to add role");
+
+            await loadUsers();
+            resetForm();
+        } catch (err) {
+            console.error("Add role error:", err);
+        }
+    };
+
+    const handleDeleteRole = async (email: string | undefined, roleToDelete: string) => {
+        const user = users.find(user => user.email === email);
+        if (!user) return;
+
+        if (user.roles.length <= 1) {
+            alert("Cannot delete the last role of a user.");
+            return;
+        }
+
+        const updatedRoles = user.roles.filter(role => role !== roleToDelete);
+
+        try {
+            const res = await fetch("http://localhost:8080/getuser/deleterole", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, roles: updatedRoles })
+            });
+
+            if (!res.ok) {
+                const msg = await res.text();
+                throw new Error(msg);
+            }
+
+            await loadUsers();
+            resetForm();
+        } catch (err) {
+            alert("Delete role error: " + err.message);
+        }
+    };
+
+    const handleUpdateRole = async () => {
+        if (!selectedUser || !newRole.trim()) return;
+
+        try {
+            const currentRoles = selectedUser.roles;
+            const updatedRoles = currentRoles.includes(newRole)
+                ? currentRoles.filter(role => role !== newRole)
+                : [...currentRoles, newRole.trim()];
+
+            const res = await fetch("http://localhost:8080/getuser/updateuser", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: selectedUser.email,
+                    roles: updatedRoles
+                })
+            });
+
+            if (!res.ok) throw new Error("Failed to update role");
+
+            await loadUsers();
+            resetForm();
+        } catch (err) {
+            console.error("Update role error:", err);
+        }
+    };
+
+    const resetForm = () => {
+        setSelectedUser(null);
+        setNewRole("");
+        setActionType("");
+    };
+
+    useEffect(() => {
+        loadUsers();
+    }, [role]);
+
+    // Lọc người dùng theo email
+    const filteredUsers = users.filter(user =>
+        user.email.toLowerCase().includes(searchEmail.toLowerCase())
+    );
+
+    return (
+        <div>
+            <h2>Manage Role: {role}</h2>
+
+            <div className="mt-4 mb-2">
+                <input
+                    type="text"
+                    value={searchEmail}
+                    onChange={e => setSearchEmail(e.target.value)}
+                    placeholder="Search by email..."
+                    className="border px-3 py-2 rounded w-1/2"
+                />
             </div>
-            <Button
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2 shadow-md transition-all duration-200"
-              onClick={handleUpdateRole}
-              disabled={updating}
-            >
-              {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
-            </Button>
-          </div>
+
+            <table className="min-w-full border mt-2 text-left">
+                <thead>
+                <tr className="bg-gray-100">
+                    <th className="px-4 py-2">Email</th>
+                    <th className="px-4 py-2">Roles</th>
+                    <th className="px-4 py-2">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                {filteredUsers.map(user => (
+                    <tr key={user.email}>
+                        <td className="px-4 py-2">{user.email}</td>
+                        <td className="px-4 py-2">{user.roles.join(", ")}</td>
+                        <td className="px-4 py-2 space-x-2">
+                            <button
+                                className="bg-yellow-500 text-white px-2 py-1 rounded"
+                                onClick={() => {
+                                    setSelectedUser(user);
+                                    setActionType("update");
+                                }}
+                            >
+                                Update
+                            </button>
+                            <button
+                                className="bg-green-600 text-white px-2 py-1 rounded"
+                                onClick={() => {
+                                    setSelectedUser(user);
+                                    setActionType("add");
+                                }}
+                            >
+                                Add
+                            </button>
+                            <button
+                                className="bg-red-600 text-white px-2 py-1 rounded"
+                                onClick={() => {
+                                    setSelectedUser(user);
+                                    setActionType("delete");
+                                }}
+                            >
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+
+            {selectedUser && (
+                <div className="mt-4 border p-4 rounded shadow">
+                    <h3>
+                        {actionType === "add" && "Add Role"}
+                        {actionType === "update" && "Update Role"}
+                        {actionType === "delete" && "Delete Role"} for: {selectedUser.email}
+                    </h3>
+
+                    <label>{actionType === "delete" ? "Select role to delete:" : "New Role:"}</label>
+                    <select
+                        value={newRole}
+                        onChange={e => setNewRole(e.target.value as RoleType)}
+                        className="ml-2 border px-2 py-1"
+                    >
+                        <option value="">Select role</option>
+                        {actionType === "delete"
+                            ? selectedUser.roles.map(role => (
+                                <option key={role} value={role}>
+                                    {role}
+                                </option>
+                            ))
+                            : ["student", "teacher", "manager"]
+                                .filter(r => !selectedUser?.roles.includes(r))
+                                .map(r => (
+                                    <option key={r} value={r}>
+                                        {r}
+                                    </option>
+                                ))}
+                    </select>
+
+                    {actionType === "update" && (
+                        <button
+                            className="ml-4 bg-blue-500 text-white px-3 py-1 rounded"
+                            onClick={handleUpdateRole}
+                        >
+                            Confirm Update
+                        </button>
+                    )}
+                    {actionType === "add" && (
+                        <button
+                            className="ml-4 bg-green-600 text-white px-3 py-1 rounded"
+                            onClick={handleAddRole}
+                        >
+                            Confirm Add
+                        </button>
+                    )}
+                    {actionType === "delete" && (
+                        <button
+                            className="ml-4 bg-red-600 text-white px-3 py-1 rounded"
+                            onClick={() =>
+                                handleDeleteRole(selectedUser?.email, newRole as RoleType)
+                            }
+                        >
+                            Confirm Delete
+                        </button>
+                    )}
+
+                    <button
+                        className="ml-2 text-red-500"
+                        onClick={resetForm}
+                    >
+                        Cancel
+                    </button>
+                </div>
+            )}
         </div>
-      </CSSTransition>
-    </Card>
-  );
+    );
 }

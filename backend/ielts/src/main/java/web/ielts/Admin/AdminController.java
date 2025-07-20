@@ -20,16 +20,9 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
     @GetMapping("/{role}")
-    public ResponseEntity<List<UserDTO>> getUsersByRole(@PathVariable String role) {
-        try {
-            System.out.println("Fetching users with role: " + role);
-            List<UserDTO> users = adminService.findByRole(role);
-            System.out.println("Found " + users.size() + " users");
-            return ResponseEntity.ok(users);
-        } catch (Exception e) {
-            e.printStackTrace(); // In stacktrace để xem lỗi gì
-            return ResponseEntity.status(500).build();
-        }
+    public List<UserDTO> getUsersByRole(@PathVariable String role) {
+
+        return adminService.getUsersByRole(role);
     }
 
 
@@ -39,12 +32,33 @@ public class AdminController {
 
     @PutMapping("/updateuser")
     public ResponseEntity<?> updateUser(@RequestBody Map<String, Object> data) {
-        String email = (String) data.get("email");
-        String role =  (String) data.get("role");
-        // Map sang UserDTO
-        adminService.updateUser(email,role);
+        System.out.println("dang update");
 
+        String email = (String) data.get("email");
+        List<String> roles = (List<String>) data.get("roles"); // 👈 nhận danh sách roles
+        System.out.println(roles);
+        adminService.updateUser(email, roles);
         return ResponseEntity.ok("Updated");
     }
+    @PostMapping("/addrole")
+    public ResponseEntity<?> addRole(@RequestBody Map<String, Object> data) {
+        System.out.println("dang add");
 
+        String email = (String) data.get("email");
+        List<String> roles = (List<String>) data.get("roles"); // 👈 nhận danh sách roles
+        System.out.println(roles);
+        adminService.updateUser(email, roles);
+        return ResponseEntity.ok("Updated");
+    }
+    @DeleteMapping("/deleterole")
+    public ResponseEntity<?> deleteRole(@RequestBody Map<String, Object> data) {
+        System.out.println("dang delete");
+
+        String email = (String) data.get("email");
+        String roleToDelete = (String)data.get("roleToDelete");
+        List<String> roles = (List<String>) data.get("roles"); // 👈 nhận danh sách roles
+        System.out.println(roles);
+        adminService.updateUser(email, roles);
+        return ResponseEntity.ok("Updated");
+    }
 }

@@ -38,7 +38,7 @@ const ResetPassword = () => {
 
         return !hasError;
     };
-
+    console.log(redirectURL)
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validate()) return;
