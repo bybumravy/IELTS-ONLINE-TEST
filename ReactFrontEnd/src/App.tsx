@@ -67,7 +67,7 @@ import ProtectedLayout from "@/components/sections/ProtectedLayout"
 import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
 import ReadingResult from "@/pages/Result/ReadingResult.tsx";
 import TransactionPage from "./pages/TransactionPage"
-
+import MatchingGamePage from '@/pages/student/MatchingGamePage';
 
 export default function App() {
     return (
@@ -120,6 +120,9 @@ export default function App() {
 
 
                         <Route path="/practice/vocabulary" element={<SoftProtectedLayout allowRoles={["student"]}><MainLayout><VocabularyList /></MainLayout></SoftProtectedLayout>} />
+
+
+                        <Route path="/student/vocabulary-matching-game" element={<SoftProtectedLayout allowRoles={["student"]}><MainLayout><MatchingGamePage /></MainLayout></SoftProtectedLayout>} />
 
                         {/* ========== Student Test Routes (Login required) ========== */}
                         <Route path="/test/listening/:testId" element={
