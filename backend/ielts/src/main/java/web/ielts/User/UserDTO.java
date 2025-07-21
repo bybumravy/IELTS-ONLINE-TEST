@@ -18,12 +18,12 @@ public class UserDTO {
     private String createdAt;
     private String country;
     private String timeZone;
-    private String cuurency;
+    private String currency;
     private String userName;
     public UserDTO() {
     }
 
-    public UserDTO(String firstName, String lastName, String email, String role, boolean premium, String birthDate, String gender, String phone, String createdAt, String country, String timeZone, String cuurency) {
+    public UserDTO(String firstName, String lastName, String email, String role, boolean premium, String birthDate, String gender, String phone, String createdAt, String country, String timeZone, String currency) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -35,7 +35,7 @@ public class UserDTO {
         this.createdAt = createdAt;
         this.country = country;
         this.timeZone = timeZone;
-        this.cuurency = cuurency;
+        this.currency = currency;
     }
 
     public String getUserName() {
@@ -134,12 +134,12 @@ public class UserDTO {
         this.timeZone = timeZone;
     }
 
-    public String getCuurency() {
-        return cuurency;
+    public String getCurrency() {
+        return currency;
     }
 
-    public void setCuurency(String cuurency) {
-        this.cuurency = cuurency;
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     @Override
@@ -156,7 +156,7 @@ public class UserDTO {
                 ", createdAt='" + createdAt + '\'' +
                 ", country='" + country + '\'' +
                 ", timeZone='" + timeZone + '\'' +
-                ", cuurency='" + cuurency + '\'' +
+                ", cuurency='" + currency + '\'' +
                 '}';
     }
 }

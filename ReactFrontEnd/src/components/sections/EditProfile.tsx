@@ -10,6 +10,7 @@ import { customFetch } from "@/components/sections/customFetch"
 import { useAuth } from "@/contexts/AuthContext"
 import { User, Calendar, Phone, Users, Save, Loader2 } from "lucide-react"
 import * as React from "react";
+import { validateWordLimit } from "@/lib/utils";
 
 interface EditProfileProps {
     isOpen: boolean
@@ -38,6 +39,13 @@ export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
     })
 
     const [loading, setLoading] = useState(false)
+    const [errors, setErrors] = useState({
+        firstName: "",
+        lastName: "",
+        birthDate: "",
+        gender: "",
+        phone: ""
+    });
 
     // Fetch data when dialog opens
     useEffect(() => {
@@ -49,8 +57,49 @@ export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
         }
     }, [isOpen, user])
 
+    const validateField = (field: string, value: string) => {
+        let error = "";
+        if (value && value.trim() !== "") {
+            if (field === "phone") {
+                // Simple phone validation: only digits, length 8-15
+                const phoneRegex = /^\d{8,15}$/;
+                if (!phoneRegex.test(value.trim())) {
+                    error = "Phone must be 8-15 digits.";
+                }
+            } else if (field === "firstName" || field === "lastName") {
+                if (value.length > 30) {
+                    error = "Must not exceed 30 characters.";
+                }
+            } else if (field === "birthDate") {
+                const today = new Date();
+                const inputDate = new Date(value);
+                // Chỉ validate nếu nhập đúng định dạng yyyy-mm-dd
+                if (!isNaN(inputDate.getTime()) && inputDate > today) {
+                    error = "Birth date cannot be in the future.";
+                }
+            }
+        }
+        setErrors((prev) => ({ ...prev, [field]: error }));
+        return error;
+    };
+
+    const handleChange = (field: string, value: string) => {
+        setProfile((prev) => ({ ...prev, [field]: value }));
+        validateField(field, value);
+    };
+
+    const validateAll = () => {
+        let valid = true;
+        Object.entries(profile).forEach(([field, value]) => {
+            const error = validateField(field, value);
+            if (error) valid = false;
+        });
+        return valid;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+        e.preventDefault();
+        if (!validateAll()) return;
         setLoading(true)
         console.log("Vao put");
         try {
@@ -68,9 +117,8 @@ export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
         }
     }
 
-    const handleChange = (field: string, value: string) => {
-        setProfile((prev) => ({ ...prev, [field]: value }))
-    }
+    const hasError = Object.values(errors).some((err) => err);
+    // Không kiểm tra hasEmpty nữa
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -104,6 +152,7 @@ export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
                                             onChange={(e) => handleChange("firstName", e.target.value)}
                                             className="h-11"
                                         />
+                                        {errors.firstName && <div className="text-red-500 text-xs mt-1">{errors.firstName}</div>}
                                     </div>
 
                                     <div className="space-y-2">
@@ -117,6 +166,7 @@ export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
                                             onChange={(e) => handleChange("lastName", e.target.value)}
                                             className="h-11"
                                         />
+                                        {errors.lastName && <div className="text-red-500 text-xs mt-1">{errors.lastName}</div>}
                                     </div>
                                 </div>
                             </div>
@@ -143,6 +193,7 @@ export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
                                             onChange={(e) => handleChange("birthDate", e.target.value)}
                                             className="h-11"
                                         />
+                                        {errors.birthDate && <div className="text-red-500 text-xs mt-1">{errors.birthDate}</div>}
                                     </div>
 
                                     <div className="space-y-2">
@@ -159,6 +210,7 @@ export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
                                                 <SelectItem value="other">Other</SelectItem>
                                             </SelectContent>
                                         </Select>
+                                        {errors.gender && <div className="text-red-500 text-xs mt-1">{errors.gender}</div>}
                                     </div>
                                 </div>
 
@@ -175,6 +227,7 @@ export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
                                         onChange={(e) => handleChange("phone", e.target.value)}
                                         className="h-11"
                                     />
+                                    {errors.phone && <div className="text-red-500 text-xs mt-1">{errors.phone}</div>}
                                 </div>
                             </div>
 
@@ -185,7 +238,7 @@ export default function EditProfile({ isOpen, onClose }: EditProfileProps) {
                                 <Button type="button" variant="outline" onClick={onClose} className="flex-1 h-11" disabled={loading}>
                                     Cancel
                                 </Button>
-                                <Button type="submit" disabled={loading} className="flex-1 h-11 bg-primary hover:bg-primary/90">
+                                <Button type="submit" disabled={loading || hasError} className="flex-1 h-11 bg-primary hover:bg-primary/90">
                                     {loading ? (
                                         <>
                                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />

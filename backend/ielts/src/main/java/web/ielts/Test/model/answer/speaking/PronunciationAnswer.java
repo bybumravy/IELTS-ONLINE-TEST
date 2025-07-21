@@ -1,26 +1,32 @@
 package web.ielts.Test.model.answer.speaking;
 
 import java.util.List;
+import web.ielts.Test.model.answer.speaking.IntonationSentence;
 
 public class PronunciationAnswer {
     private double score;
     private String stressTranscript;
     private List<StressMismatch> stressMismatchesDetailed;
-    private List<IntonationSentence> pronunciationEvaluation;
     private String transcript;
-    private List<String> importantWords;
-    private List<String> emphasizedWords;
-    private List<String> correctEmphasizedWords;
-    private List<String> correctEmphasizedSentences;
+    private List<IntonationSentence> importantWords;
+    private List<IntonationSentence> emphasizedWords;
+    private List<IntonationSentence> correctEmphasizedWords;
+    private List<IntonationSentence> overEmphasis;
+    private List<IntonationSentence> missingEmphasis;
 
     public PronunciationAnswer() {
     }
 
-    public PronunciationAnswer(double score, String stressTranscript, List<StressMismatch> stressMismatchesDetailed, List<IntonationSentence> pronunciationEvaluation) {
+    public PronunciationAnswer(double score, String stressTranscript, List<StressMismatch> stressMismatchesDetailed, String transcript, List<IntonationSentence> importantWords, List<IntonationSentence> emphasizedWords, List<IntonationSentence> correctEmphasizedWords, List<IntonationSentence> overEmphasis, List<IntonationSentence> missingEmphasis) {
         this.score = score;
         this.stressTranscript = stressTranscript;
         this.stressMismatchesDetailed = stressMismatchesDetailed;
-        this.pronunciationEvaluation = pronunciationEvaluation;
+        this.transcript = transcript;
+        this.importantWords = importantWords;
+        this.emphasizedWords = emphasizedWords;
+        this.correctEmphasizedWords = correctEmphasizedWords;
+        this.overEmphasis = overEmphasis;
+        this.missingEmphasis = missingEmphasis;
     }
 
     public double getScore() {
@@ -47,42 +53,40 @@ public class PronunciationAnswer {
         this.stressMismatchesDetailed = stressMismatchesDetailed;
     }
 
-    public List<IntonationSentence> getPronunciationEvaluation() {
-        return pronunciationEvaluation;
-    }
-
-    public void setPronunciationEvaluation(List<IntonationSentence> intonationSentence) {
-        this.pronunciationEvaluation = intonationSentence;
-    }
-
     public String getTranscript() {
         return transcript;
     }
     public void setTranscript(String transcript) {
         this.transcript = transcript;
     }
-    public List<String> getImportantWords() {
+    public List<IntonationSentence> getImportantWords() {
         return importantWords;
     }
-    public void setImportantWords(List<String> importantWords) {
+    public void setImportantWords(List<IntonationSentence> importantWords) {
         this.importantWords = importantWords;
     }
-    public List<String> getEmphasizedWords() {
+    public List<IntonationSentence> getEmphasizedWords() {
         return emphasizedWords;
     }
-    public void setEmphasizedWords(List<String> emphasizedWords) {
+    public void setEmphasizedWords(List<IntonationSentence> emphasizedWords) {
         this.emphasizedWords = emphasizedWords;
     }
-    public List<String> getCorrectEmphasizedWords() {
+    public List<IntonationSentence> getCorrectEmphasizedWords() {
         return correctEmphasizedWords;
     }
-    public void setCorrectEmphasizedWords(List<String> correctEmphasizedWords) {
+    public void setCorrectEmphasizedWords(List<IntonationSentence> correctEmphasizedWords) {
         this.correctEmphasizedWords = correctEmphasizedWords;
     }
-    public List<String> getCorrectEmphasizedSentences() {
-        return correctEmphasizedSentences;
+    public List<IntonationSentence> getOverEmphasis() {
+        return overEmphasis;
     }
-    public void setCorrectEmphasizedSentences(List<String> correctEmphasizedSentences) {
-        this.correctEmphasizedSentences = correctEmphasizedSentences;
+    public void setOverEmphasis(List<IntonationSentence> overEmphasis) {
+        this.overEmphasis = overEmphasis;
+    }
+    public List<IntonationSentence> getMissingEmphasis() {
+        return missingEmphasis;
+    }
+    public void setMissingEmphasis(List<IntonationSentence> missingEmphasis) {
+        this.missingEmphasis = missingEmphasis;
     }
 }

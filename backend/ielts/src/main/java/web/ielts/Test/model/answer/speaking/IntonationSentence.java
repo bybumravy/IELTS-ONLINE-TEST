@@ -2,14 +2,14 @@ package web.ielts.Test.model.answer.speaking;
 
 public class IntonationSentence {
     private String text;
-    private String sentenceText;
+    private int index;
 
     public IntonationSentence() {
     }
 
-    public IntonationSentence(String text, String sentenceText) {
+    public IntonationSentence(String text, int index) {
         this.text = text;
-        this.sentenceText = sentenceText;
+        this.index = index;
     }
 
     public String getText() {
@@ -20,19 +20,19 @@ public class IntonationSentence {
         this.text = text;
     }
 
-    public String getSentenceText() {
-        return sentenceText;
+    public int getIndex() {
+        return index;
     }
 
-    public void setSentenceText(String sentenceText) {
-        this.sentenceText = sentenceText;
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     @Override
     public String toString() {
-        return "PronunciationEvaluation{" +
+        return "IntonationSentence{" +
                 "text='" + text + '\'' +
-                ", sentenceText='" + sentenceText + '\'' +
+                ", index=" + index +
                 '}';
     }
 }

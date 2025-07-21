@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { validateWordLimit } from "@/lib/utils";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -104,6 +105,21 @@ export default function WritingTest() {
             return;
         }
 
+        const MAX_WORDS_TASK1 = 500;
+        const MAX_WORDS_TASK2 = 500;
+
+        const { valid: valid1, error: error1 } = validateWordLimit(essayTask1, MAX_WORDS_TASK1);
+        const { valid: valid2, error: error2 } = validateWordLimit(essayTask2, MAX_WORDS_TASK2);
+
+        if (!valid1) {
+          alert(error1);
+          return;
+        }
+        if (!valid2) {
+          alert(error2);
+          return;
+        }
+
         const payload = {
             testId: writingData.testId,
             username: user?.username,
@@ -148,6 +164,34 @@ export default function WritingTest() {
         } else {
             document.exitFullscreen();
         }
+    };
+
+    const MAX_WORDS_TASK1 = 500;
+
+    const handleEssayTask1Change = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const value = e.target.value;
+      const { valid, wordCount, error } = validateWordLimit(value, MAX_WORDS_TASK1);
+
+      if (!valid) {
+        // Có thể alert, hoặc setError để hiển thị ra UI
+        alert(error);
+        // Không cập nhật state nếu vượt quá giới hạn
+        return;
+      }
+      setEssayTask1(value);
+    };
+
+    const MAX_WORDS_TASK2 = 500;
+
+    const handleEssayTask2Change = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const value = e.target.value;
+      const { valid, wordCount, error } = validateWordLimit(value, MAX_WORDS_TASK2);
+
+      if (!valid) {
+        alert(error);
+        return;
+      }
+      setEssayTask2(value);
     };
 
     return (
@@ -242,7 +286,7 @@ export default function WritingTest() {
                             <Textarea
                                 placeholder="Type your essay for Task 1 here..."
                                 value={essayTask1}
-                                onChange={(e) => setEssayTask1(e.target.value)}
+                                onChange={handleEssayTask1Change}
                                 className="flex-1 resize-none border-gray-300 focus:border-teal-500 focus:ring-teal-500"
                             />
                             <div className="mt-4 flex justify-between items-center">
@@ -256,7 +300,7 @@ export default function WritingTest() {
                             <Textarea
                                 placeholder="Type your essay for Task 2 here..."
                                 value={essayTask2}
-                                onChange={(e) => setEssayTask2(e.target.value)}
+                                onChange={handleEssayTask2Change}
                                 className="flex-1 resize-none border-gray-300 focus:border-teal-500 focus:ring-teal-500"
                             />
                             <div className="mt-4 flex justify-between items-center">
