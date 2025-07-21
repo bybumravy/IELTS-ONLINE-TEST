@@ -11,7 +11,7 @@
     import org.springframework.web.client.RestTemplate;
     import web.ielts.Test.model.answer.speaking.FleCohAnswer;
     import web.ielts.Test.model.answer.speaking.PronunciationAnswer;
-    import web.ielts.Test.model.answer.speaking.PronunciationEvaluation;
+    import web.ielts.Test.model.answer.speaking.IntonationSentence;
     import web.ielts.Test.model.answer.speaking.StressMismatch;
 
 
@@ -30,11 +30,11 @@
     @Service
     public class ProsodyService {
 
-        private final String PRAAT_PATH = "D:\\praat6438_win-intel64\\Praat.exe";
-        private final String PRAAT_SCRIPT_PATH = "D:\\SWP_Project4\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script.praat"; // Script Praat
-        private final String STRESS_ANALYSIS_SCRIPT_PATH = "D:\\SWP_Project4\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\stressAnalysis.praat";
-        private final String INTONATION_SCRIPT_PATH = "D:\\SWP_Project4\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script_intonation.praat";
-        private final String CMU_DICT_PATH = "D:\\archive\\cmudict-0.7b.txt";
+        private final String PRAAT_PATH = "C:\\Users\\LAPTOP24H\\Downloads\\praat6438_win-intel64\\Praat.exe";
+        private final String PRAAT_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script.praat"; // Script Praat
+        private final String STRESS_ANALYSIS_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\stressAnalysis.praat";
+        private final String INTONATION_SCRIPT_PATH = "D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script_intonation.praat";
+        private final String CMU_DICT_PATH = "C:\\Users\\LAPTOP24H\\Downloads\\cmudict-0.7b.txt";
         @Value("${openai.api.key}")
         private String openaiApiKey;
         private final RestTemplate restTemplate = new RestTemplate();
@@ -79,7 +79,7 @@
             }
         }
 
-        private List<PronunciationEvaluation> parsePronunciationResponseToList(String aiResponse) {
+        private List<IntonationSentence> parsePronunciationResponseToList(String aiResponse) {
             try {
                 Pattern pattern = Pattern.compile("\\[.*?\\]", Pattern.DOTALL);
                 Matcher matcher = pattern.matcher(aiResponse);
@@ -88,7 +88,7 @@
                     System.out.println("🔍 Extracted JSON: " + jsonStr);
                     return objectMapper.readValue(
                             jsonStr,
-                            new TypeReference<List<PronunciationEvaluation>>() {}
+                            new TypeReference<List<IntonationSentence>>() {}
                     );
                 } else {
                     System.err.println("❌ No JSON array found in AI response:\n" + aiResponse);
@@ -102,15 +102,13 @@
 
 
 
-        private List<PronunciationEvaluation> evaluatePronunciation(
-                String transcript,
-                String intonationAnalysis
+        private List<IntonationSentence> evaluatePronunciation(
+                String transcript
         ) {
             System.out.println("\n🔊 [PRONUNCIATION] Starting AI evaluation...");
             try {
-
                 // 2. Xây dựng prompt chi tiết với dữ liệu đã parse
-                String prompt = buildPronunciationPrompt(transcript, intonationAnalysis);
+                String prompt = buildPronunciationPrompt(transcript);
 
                 // 3. Gọi API OpenAI
                 String aiResponse = callOpenAIPronunciation(prompt);
@@ -124,51 +122,38 @@
             }
         }
 
-        private String buildPronunciationPrompt(
-                String transcript,
-                String intonationAnalysis
-        ) {
+        private String buildPronunciationPrompt(String transcript) {
             StringBuilder prompt = new StringBuilder();
 
             prompt.append("You are a certified IELTS Speaking examiner and an expert in English intonation.\n")
-                    .append("Your task is to identify important words in the given transcript that SHOULD be emphasized for natural and effective intonation, but are NOT marked as emphasized in the provided intonation analysis.\n\n");
-
-            prompt.append("=== Instructions ===\n")
-                    .append("- Carefully read the transcript and its sentences.\n")
-                    .append("- Compare each sentence and its emphasized words listed in the intonation analysis.\n")
-                    .append("- Identify words that are **semantically important** (such as names, cities, countries, actions, contrastive markers, new information, etc.).\n")
-                    .append("- Pay special attention to:\n")
-                    .append("  * Proper nouns (names of people, places, etc.)\n")
-                    .append("  * Main action verbs\n")
-                    .append("  * Contrastive or emphatic elements\n")
-                    .append("- Do NOT include function words (e.g., the, and, of, to) or already-emphasized words.\n")
-                    .append("- Return ONLY a JSON array, where each element is an object with two fields: 'text' (the word) and 'sentenceText' (the full sentence containing that word).\n")
-                    .append("- Do NOT return any explanation, comments, or extra text.\n\n");
-
-            prompt.append("=== Example ===\n")
-                    .append("Transcript: Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\n")
-                    .append("Intonation Analysis:\n")
-                    .append("    Emphasized word: 'Last'\n")
-                    .append("    Emphasized word: 'year'\n")
-                    .append("    Emphasized word: 'traveled'\n")
-                    .append("    Emphasized word: 'Japan'\n")
-                    .append("Result:\n")
-                    .append("[")
-                    .append("{\"text\": \"Kyoto\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"},\n")
-                    .append("{\"text\": \"Tokyo\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"},\n")
-                    .append("{\"text\": \"Osaka\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"},\n")
-                    .append("{\"text\": \"visited\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"}\n")
-                    .append("]\n\n");
-
-            prompt.append("=== Transcript ===\n")
-                    .append(transcript)
-                    .append("\n\n");
-
-            prompt.append("=== Intonation Analysis ===\n")
-                    .append(intonationAnalysis)
-                    .append("\n\n");
-
-            prompt.append("Now, return ONLY the missing emphasized words in the specified JSON array format. Do not repeat words that are already emphasized. Do not return any explanation or extra text.\n");
+                .append("Your task is to identify ALL important words in the given transcript that SHOULD be emphasized for natural and effective intonation.\n\n")
+                .append("=== Instructions ===\n")
+                .append("- Carefully read the transcript and its sentences.\n")
+                .append("- Identify words that are semantically important (such as names, cities, countries, actions, contrastive markers, new information, etc.).\n")
+                .append("- Pay special attention to:\n")
+                .append("  * Proper nouns (names of people, places, etc.)\n")
+                .append("  * Main action verbs\n")
+                .append("  * Contrastive or emphatic elements\n")
+                .append("- Do NOT include function words (e.g., the, and, of, to).\n")
+                .append("- Return ONLY a JSON array, where each element is an object with two fields: 'text' (the word) and 'sentenceText' (the full sentence containing that word).\n")
+                .append("- Do NOT return any explanation, comments, or extra text.\n\n")
+                .append("=== Example ===\n")
+                .append("Transcript: Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\n")
+                .append("Result:\n")
+                .append("[")
+                .append("{\"text\": \"Last\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"},\n")
+                .append("{\"text\": \"year\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"},\n")
+                .append("{\"text\": \"traveled\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"},\n")
+                .append("{\"text\": \"Japan\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"},\n")
+                .append("{\"text\": \"Kyoto\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"},\n")
+                .append("{\"text\": \"Tokyo\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"},\n")
+                .append("{\"text\": \"Osaka\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"},\n")
+                .append("{\"text\": \"visited\", \"sentenceText\": \"Last year I traveled to Japan and visited Kyoto, Tokyo, and Osaka.\"}\n")
+                .append("]\n\n")
+                .append("=== Transcript ===\n")
+                .append(transcript)
+                .append("\n\n")
+                .append("Now, return ONLY the important words in the specified JSON array format. Do not return any explanation or extra text.\n");
 
             System.out.println(prompt.toString());
             return prompt.toString();
@@ -212,7 +197,7 @@
             }
         }
 
-        private double callOpenAIScorePronunciation(String transcript, List<StressMismatch> stressMismatches, List<PronunciationEvaluation> intonationResults) {
+        private double callOpenAIScorePronunciation(String transcript, List<StressMismatch> stressMismatches, List<IntonationSentence> intonationResults) {
             try {
                 StringBuilder prompt = new StringBuilder();
                 prompt.append("You are a certified IELTS Speaking examiner.\n")
@@ -233,7 +218,7 @@
                     prompt.append(String.format("- %s (detected: %s, standard: %s)\n", sm.getWord(), sm.getDetectedPosition(), sm.getStandardPosition()));
                 }
                 prompt.append("\nIntonation issues (missing emphasized words):\n");
-                for (PronunciationEvaluation pe : intonationResults) {
+                for (IntonationSentence pe : intonationResults) {
                     prompt.append(String.format("- %s (sentence: %s)\n", pe.getText(), pe.getSentenceText()));
                 }
                 prompt.append("\nNow, return ONLY the pronunciation score (0-9, with 0.5 increments). No explanation.\n");
@@ -273,7 +258,7 @@
 
             private double praatGetAudioDuration(File wavFile) throws IOException {
             // Lấy đường dẫn tuyệt đối cho script Praat
-                String scriptPath = new File("D:\\SWP_Project4\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\getDuration.praat").getAbsolutePath();
+                String scriptPath = new File("D:\\Ki4\\PRJ\\SWP_SE1934_Group3\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\getDuration.praat").getAbsolutePath();
             System.out.println("Praat path: " + PRAAT_PATH);
             System.out.println("Praat script: " + scriptPath);
             System.out.println("Audio file: " + wavFile.getAbsolutePath());
@@ -458,120 +443,146 @@
             List<Map<String, Object>> stressMismatchesDetailed = new ArrayList<>();
             List<Map<String, Object>> pronunciationEvaluationList = new ArrayList<>();
             PronunciationAnswer result = new PronunciationAnswer();
-                // 1. Tải và chuyển đổi file âm thanh
-                File mp3File = downloadAudioFile(audioUrl);
-                File wavFile = convertMp3ToWav(mp3File);
+            // 1. Tải và chuyển đổi file âm thanh
+            File mp3File = downloadAudioFile(audioUrl);
+            File wavFile = convertMp3ToWav(mp3File);
 
-                // 2. Tạo TextGrid
-                File textGridFile = generateTextGridFromJson(root, wavFile);
+            // 2. Tạo TextGrid
+            File textGridFile = generateTextGridFromJson(root, wavFile);
 
-                // 4. Phân tích trọng âm từ (CHI TIẾT VỊ TRÍ)
-                System.out.println("Trong am");
-                List<WordInfo> wordInfoList = new ArrayList<>();
-                if (root.has("words")) {
-                    int idx = 0;
-                    for (JsonNode wordNode : root.get("words")) {
+            // 4. Phân tích trọng âm từ (CHI TIẾT VỊ TRÍ)
+            System.out.println("Trong am");
+            List<WordInfo> wordInfoList = new ArrayList<>();
+            if (root.has("words")) {
+                int idx = 0;
+                for (JsonNode wordNode : root.get("words")) {
+                    String w = wordNode.get("word").asText().toLowerCase();
+                    double start = wordNode.has("start") ? wordNode.get("start").asDouble() : -1;
+                    double end = wordNode.has("end") ? wordNode.get("end").asDouble() : -1;
+                    wordInfoList.add(new WordInfo(w, start, end, idx));
+                    idx++;
+                }
+            } else if (root.has("segments")) {
+                int idx = 0;
+                for (JsonNode segment : root.get("segments")) {
+                    for (JsonNode wordNode : segment.get("words")) {
                         String w = wordNode.get("word").asText().toLowerCase();
                         double start = wordNode.has("start") ? wordNode.get("start").asDouble() : -1;
                         double end = wordNode.has("end") ? wordNode.get("end").asDouble() : -1;
                         wordInfoList.add(new WordInfo(w, start, end, idx));
                         idx++;
                     }
-                } else if (root.has("segments")) {
-                    int idx = 0;
-                    for (JsonNode segment : root.get("segments")) {
-                        for (JsonNode wordNode : segment.get("words")) {
-                            String w = wordNode.get("word").asText().toLowerCase();
-                            double start = wordNode.has("start") ? wordNode.get("start").asDouble() : -1;
-                            double end = wordNode.has("end") ? wordNode.get("end").asDouble() : -1;
-                            wordInfoList.add(new WordInfo(w, start, end, idx));
-                            idx++;
-                        }
-                    }
                 }
-                List<DetectedStressWord> detectedStressWords = new ArrayList<>();
-                String stressResults = parseStressOutputWithList(textGridFile, detectedStressWords);
-                // Compare and build detailed mismatches by index
-                for (int i = 0; i < detectedStressWords.size(); i++) {
-                    DetectedStressWord detected = detectedStressWords.get(i);
-                    if (i >= wordInfoList.size()) break; // safety
-                    WordInfo info = wordInfoList.get(i);
-                    Integer standardPosition = getStandardStressPosition(detected.word);
-                    if (standardPosition == null || !standardPosition.equals(detected.detectedPosition)) {
-                        Map<String, Object> detail = new HashMap<>();
-                        detail.put("word", detected.word);
-                        detail.put("detectedPosition", detected.detectedPosition);
-                        detail.put("standardPosition", standardPosition);
-                        detail.put("start", info.start);
-                        detail.put("end", info.end);
-                        detail.put("index", info.index);
-                        stressMismatchesDetailed.add(detail);
-                    }
+            }
+            List<DetectedStressWord> detectedStressWords = new ArrayList<>();
+            String stressResults = parseStressOutputWithList(textGridFile, detectedStressWords);
+            // Compare and build detailed mismatches by index
+            for (int i = 0; i < detectedStressWords.size(); i++) {
+                DetectedStressWord detected = detectedStressWords.get(i);
+                if (i >= wordInfoList.size()) break; // safety
+                WordInfo info = wordInfoList.get(i);
+                Integer standardPosition = getStandardStressPosition(detected.word);
+                if (standardPosition == null || !standardPosition.equals(detected.detectedPosition)) {
+                    Map<String, Object> detail = new HashMap<>();
+                    detail.put("word", detected.word);
+                    detail.put("detectedPosition", detected.detectedPosition);
+                    detail.put("standardPosition", standardPosition);
+                    detail.put("start", info.start);
+                    detail.put("end", info.end);
+                    detail.put("index", info.index);
+                    stressMismatchesDetailed.add(detail);
                 }
-                System.out.println("\n===== STRESS COMPARISON RESULTS =====");
-                if (stressMismatchesDetailed.isEmpty()) {
-                    System.out.println("All words match CMU Dictionary stress patterns");
-                } else {
-                    System.out.println("Words with stress mismatches:");
-                    for (Map<String, Object> mismatch : stressMismatchesDetailed) {
-                        System.out.println("  - " + mismatch);
-                    }
+            }
+            System.out.println("\n===== STRESS COMPARISON RESULTS =====");
+            if (stressMismatchesDetailed.isEmpty()) {
+                System.out.println("All words match CMU Dictionary stress patterns");
+            } else {
+                System.out.println("Words with stress mismatches:");
+                for (Map<String, Object> mismatch : stressMismatchesDetailed) {
+                    System.out.println("  - " + mismatch);
                 }
-                System.out.println("=====================================");
-                // 5. Phân tích ngữ điệu câu (MỚI)
-                System.out.println("Ngu dieu cau");
-                List<PronunciationEvaluation> intonationResults = analyzeSentenceIntonation(wavFile, textGridFile);
+            }
+            System.out.println("=====================================");
+            // 5. Phân tích ngữ điệu câu (MỚI)
+            System.out.println("Ngu dieu cau");
+            List<IntonationSentence> intonationResults = analyzeSentenceIntonation(wavFile, textGridFile);
 
-                // 6. Tính điểm tổng hợp
+            // 6. Tính điểm tổng hợp
 
-                // 7. Tổng hợp kết quả
-                // 8. Phân tích và chấm điểm Pronunciation bằng AI
-                if (root.has("text")) {
-                    String transcript = root.get("text").asText();
-                    List<PronunciationEvaluation> pronunciationEvaluation = evaluatePronunciation(
-                            transcript,
-                            intonationResults.toString()
-                    );
-                    if (pronunciationEvaluation != null) {
-                        for (PronunciationEvaluation p : pronunciationEvaluation) {
-                            Map<String, Object> item = new HashMap<>();
-                            item.put("text", p.getText());
-                            item.put("sentenceText", p.getSentenceText());
-                            pronunciationEvaluationList.add(item);
-                        }
-                    }
-                    // === Gọi AI để chấm điểm pronunciation ===
-                    List<StressMismatch> stressList = result.getStressMismatchesDetailed();
-                    if (stressList == null) stressList = Collections.emptyList();
-                    double score = callOpenAIScorePronunciation(transcript, stressList, intonationResults);
-                    result.setScore(score);
-                }
-
-                result.setStressMismatchesDetailed(stressMismatchesDetailed
-                        .stream()
-                        .map(map -> new StressMismatch(
-                                (String) map.get("word"),
-                                (Integer) map.get("detectedPosition"),
-                                (Integer) map.get("standardPosition"),
-                                (Double) map.get("start"),
-                                (Double) map.get("end"),
-                                (Integer) map.get("index")
-                        )).collect(Collectors.toList())
+            // 7. Tổng hợp kết quả
+            // 8. Phân tích và chấm điểm Pronunciation bằng AI
+            String transcript = null;
+            if (root.has("text")) {
+                transcript = root.get("text").asText();
+                List<IntonationSentence> intonationSentence = evaluatePronunciation(
+                        transcript
                 );
+                if (intonationSentence != null) {
+                    for (IntonationSentence p : intonationSentence) {
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("text", p.getText());
+                        item.put("sentenceText", p.getSentenceText());
+                        pronunciationEvaluationList.add(item);
+                    }
+                }
+                // === Gọi AI để chấm điểm pronunciation ===
+                List<StressMismatch> stressList = result.getStressMismatchesDetailed();
+                if (stressList == null) stressList = Collections.emptyList();
+                double score = callOpenAIScorePronunciation(transcript, stressList, intonationResults);
+                result.setScore(score);
+            }
 
-                result.setPronunciationEvaluation(
-                        pronunciationEvaluationList.stream()
-                                .map(map -> new PronunciationEvaluation(
-                                        (String) map.get("text"),
-                                        (String) map.get("sentenceText")
-                                ))
-                                .collect(Collectors.toList())
-                );
+            result.setStressMismatchesDetailed(stressMismatchesDetailed
+                    .stream()
+                    .map(map -> new StressMismatch(
+                            (String) map.get("word"),
+                            (Integer) map.get("detectedPosition"),
+                            (Integer) map.get("standardPosition"),
+                            (Double) map.get("start"),
+                            (Double) map.get("end"),
+                            (Integer) map.get("index")
+                    )).collect(Collectors.toList())
+            );
 
-                System.out.println("\n=======================================");
-                System.out.println("🎉 ANALYSIS COMPLETED SUCCESSFULLY");
-                System.out.println("   Final result: " + result);
-                System.out.println("=======================================");
+            result.setPronunciationEvaluation(
+                    pronunciationEvaluationList.stream()
+                            .map(map -> new IntonationSentence(
+                                    (String) map.get("text"),
+                                    (String) map.get("sentenceText")
+                            ))
+                            .collect(Collectors.toList())
+            );
+            result.setStressTranscript(stressTranscript(transcript));
+
+            // Bổ sung các trường cho Word-by-Word Analysis
+            result.setTranscript(transcript);
+            // importantWords: các từ cần nhấn mạnh (từ AI)
+            List<String> importantWords = pronunciationEvaluationList.stream()
+                    .map(map -> (String) map.get("text"))
+                    .collect(Collectors.toList());
+            result.setImportantWords(importantWords);
+            // emphasizedWords: các từ student đã nhấn mạnh (từ intonationResults)
+            List<String> emphasizedWords = intonationResults.stream()
+                    .map(IntonationSentence::getText)
+                    .collect(Collectors.toList());
+            result.setEmphasizedWords(emphasizedWords);
+            // correctEmphasizedWords: giao giữa importantWords và emphasizedWords
+            List<String> correctEmphasizedWords = importantWords.stream()
+                    .filter(w -> emphasizedWords.stream().anyMatch(e -> e.equalsIgnoreCase(w)))
+                    .collect(Collectors.toList());
+            result.setCorrectEmphasizedWords(correctEmphasizedWords);
+            // correctEmphasizedSentences: các câu chứa từ đúng nhấn mạnh
+            List<String> correctEmphasizedSentences = intonationResults.stream()
+                    .filter(i -> importantWords.stream().anyMatch(w -> w.equalsIgnoreCase(i.getText())))
+                    .map(IntonationSentence::getSentenceText)
+                    .distinct()
+                    .collect(Collectors.toList());
+            result.setCorrectEmphasizedSentences(correctEmphasizedSentences);
+
+            System.out.println("\n=======================================");
+            System.out.println("🎉 ANALYSIS COMPLETED SUCCESSFULLY");
+            System.out.println("   Final result: " + result);
+            System.out.println("=======================================");
 
             return result;
         }
@@ -709,8 +720,8 @@
         }
 
 
-        private List<PronunciationEvaluation> analyzeSentenceIntonation(File wavFile, File textGridFile) {
-            List<PronunciationEvaluation> resultList = new ArrayList<>();
+        private List<IntonationSentence> analyzeSentenceIntonation(File wavFile, File textGridFile) {
+            List<IntonationSentence> resultList = new ArrayList<>();
             try {
                 File outputFile = new File(textGridFile.getParent(),
                         "intonation_output_" + System.currentTimeMillis() + ".txt");
@@ -759,7 +770,7 @@
                             String word = line.split("'")[1];
                             // Tìm câu chứa từ này (nếu có thể lấy được)
                             // Ở đây không có nội dung câu thực tế, nên chỉ set text và sentenceText giống nhau
-                            resultList.add(new PronunciationEvaluation(word, ""));
+                            resultList.add(new IntonationSentence(word, ""));
                         }
                     }
                 }
@@ -961,5 +972,77 @@
             }
             System.out.println("Chuyển đổi thành công sang WAV: " + wavFile.getAbsolutePath());
             return wavFile;
+        }
+
+        /**
+         * Trả về transcript với các âm tiết mang trọng âm (theo CMU Dict) được viết hoa.
+         * Ví dụ: "I believe that technological..." => "I beLIEVE that techNOlogical..."
+         */
+        public String stressTranscript(String transcript) {
+            if (transcript == null || transcript.isEmpty()) return transcript;
+            StringBuilder result = new StringBuilder();
+            String[] words = transcript.split("(\\s+|(?=[,.!?;:]))"); // giữ dấu câu tách riêng
+            for (String word : words) {
+                if (word.trim().isEmpty()) {
+                    result.append(word);
+                    continue;
+                }
+                String cleanWord = word.replaceAll("[^a-zA-Z]", "").toLowerCase();
+                String pronunciation = cmuDictMap.get(cleanWord);
+                if (pronunciation == null || cleanWord.isEmpty()) {
+                    result.append(word);
+                } else {
+                    // Tìm các âm tiết có số (vowel syllables)
+                    String[] syllables = pronunciation.split("\\s+");
+                    List<String> vowelSyllables = new ArrayList<>();
+                    List<Integer> vowelIndexes = new ArrayList<>();
+                    for (int i = 0, sylIdx = 0; i < syllables.length; i++) {
+                        if (syllables[i].matches(".*[0-2]$")) {
+                            vowelSyllables.add(syllables[i]);
+                            vowelIndexes.add(i);
+                            sylIdx++;
+                        }
+                    }
+                    int stressSyllable = -1;
+                    for (int i = 0; i < vowelSyllables.size(); i++) {
+                        if (vowelSyllables.get(i).contains("1")) {
+                            stressSyllable = i;
+                            break;
+                        }
+                    }
+                    // Nếu chỉ có 1 âm tiết nguyên âm thì KHÔNG viết hoa, giữ nguyên từ
+                    if (vowelSyllables.size() == 1) {
+                        result.append(word);
+                    } else if (stressSyllable == -1) {
+                        result.append(word);
+                    } else {
+                        // Tách từ thành các phần ứng với các âm tiết trong CMU
+                        // Đơn giản hóa: chia đều các ký tự cho các âm tiết nguyên âm
+                        // (không hoàn hảo nhưng đủ tốt cho hiển thị)
+                        int len = word.replaceAll("[^a-zA-Z]", "").length();
+                        int[] splitPoints = new int[vowelSyllables.size() + 1];
+                        for (int i = 0; i <= vowelSyllables.size(); i++) {
+                            splitPoints[i] = (int) Math.round((double) i * len / vowelSyllables.size());
+                        }
+                        String onlyLetters = word.replaceAll("[^a-zA-Z]", "");
+                        StringBuilder stressedWord = new StringBuilder();
+                        int letterIdx = 0;
+                        for (int i = 0; i < vowelSyllables.size(); i++) {
+                            String part = onlyLetters.substring(splitPoints[i], splitPoints[i+1]);
+                            if (i == stressSyllable) {
+                                stressedWord.append(part.toUpperCase());
+                            } else {
+                                stressedWord.append(part.toLowerCase());
+                            }
+                        }
+                        // Thêm lại dấu câu nếu có
+                        String nonLetter = word.replaceAll("[a-zA-Z]", "");
+                        result.append(stressedWord);
+                        result.append(nonLetter);
+                    }
+                }
+                result.append(" ");
+            }
+            return result.toString().replaceAll("\\s+([,.!?;:])", "$1").trim();
         }
     }

@@ -147,77 +147,80 @@ public class DoTestService {
     public WritingAnswer saveWritingAnswer(WritingAnswer answer) {
         WritingAnswer savedAnswer = writingAnswerRepository.save(answer);
         if(savedAnswer.getGradingMethod().equalsIgnoreCase("AI")) {
-            // Xử lý Task 1
-            System.out.println("helolllllll ai "+savedAnswer.getGradingMethod());
+            // Xử lý Task 1 nếu có
             var task1 = savedAnswer.getTask1();
-            try {
-                WritingAIResponse eval1 = aiService.WritingTask1(task1.getImageUrl(), task1.getQuestion(), task1.getAnswer());
+            if (task1 != null) {
+                try {
+                    WritingAIResponse eval1 = aiService.WritingTask1(task1.getImageUrl(), task1.getQuestion(), task1.getAnswer());
 
-                // Set feedback và sample answer
-                task1.setFeedback(eval1.getFeedback());
-                task1.getFeedback().setErrorCorrections(eval1.getFeedback().getErrorCorrections());
-                task1.getFeedback().setOverallComment(eval1.getFeedback().getOverallComment());
-                task1.getFeedback().setSentenceImprovements(eval1.getFeedback().getSentenceImprovements());
-                task1.setSampleAnswer(eval1.getSampleAnswer());
-                task1.setScore(eval1.getScore());
+                    // Set feedback và sample answer
+                    task1.setFeedback(eval1.getFeedback());
+                    task1.getFeedback().setErrorCorrections(eval1.getFeedback().getErrorCorrections());
+                    task1.getFeedback().setOverallComment(eval1.getFeedback().getOverallComment());
+                    task1.getFeedback().setSentenceImprovements(eval1.getFeedback().getSentenceImprovements());
+                    task1.setSampleAnswer(eval1.getSampleAnswer());
+                    task1.setScore(eval1.getScore());
 
-                // Log evaluation
-               System.out.println("================================");
-                System.out.println("Task 1 Evaluation:");
-                System.out.println("- Task Achievement: " + eval1.getEvaluation().getTaskAchievement());
-                System.out.println("- Coherence Cohesion: " + eval1.getEvaluation().getCoherenceCohesion());
-                System.out.println("- Lexical Resource: " + eval1.getEvaluation().getLexicalResource());
-                System.out.println("- Grammar: " + eval1.getEvaluation().getGrammar());
+                    // Log evaluation
+                   System.out.println("================================");
+                    System.out.println("Task 1 Evaluation:");
+                    System.out.println("- Task Achievement: " + eval1.getEvaluation().getTaskAchievement());
+                    System.out.println("- Coherence Cohesion: " + eval1.getEvaluation().getCoherenceCohesion());
+                    System.out.println("- Lexical Resource: " + eval1.getEvaluation().getLexicalResource());
+                    System.out.println("- Grammar: " + eval1.getEvaluation().getGrammar());
 
-                // Set evaluation
+                    // Set evaluation
 //            if (task1.getEvaluation() == null) {
 //                task1.setEvaluation(new WritingEvaluation());
 //            }
-                task1.setEvaluation(eval1.getEvaluation());
-                task1.getEvaluation().setTaskAchievement(eval1.getEvaluation().getTaskAchievement());
-                task1.getEvaluation().setCoherenceCohesion(eval1.getEvaluation().getCoherenceCohesion());
-                task1.getEvaluation().setLexicalResource(eval1.getEvaluation().getLexicalResource());
-                task1.getEvaluation().setGrammar(eval1.getEvaluation().getGrammar());
+                    task1.setEvaluation(eval1.getEvaluation());
+                    task1.getEvaluation().setTaskAchievement(eval1.getEvaluation().getTaskAchievement());
+                    task1.getEvaluation().setCoherenceCohesion(eval1.getEvaluation().getCoherenceCohesion());
+                    task1.getEvaluation().setLexicalResource(eval1.getEvaluation().getLexicalResource());
+                    task1.getEvaluation().setGrammar(eval1.getEvaluation().getGrammar());
 
-            } catch (Exception e) {
-                System.out.println("Error evaluating Task 1: " + e.getMessage());
+                } catch (Exception e) {
+                    System.out.println("Error evaluating Task 1: " + e.getMessage());
+                }
             }
 
-            // Xử lý Task 2
+            // Xử lý Task 2 nếu có
             var task2 = savedAnswer.getTask2();
-            try {
+            if (task2 != null) {
+                try {
 
-                WritingAIResponse eval2 = aiService.WritingTask2(task2.getQuestion(), task2.getAnswer());
+                    WritingAIResponse eval2 = aiService.WritingTask2(task2.getQuestion(), task2.getAnswer());
 
-                // Set feedback và sample answer
-                task2.setFeedback(eval2.getFeedback());
-                task2.setSampleAnswer(eval2.getSampleAnswer());
-                task2.setScore(eval2.getScore());
+                    // Set feedback và sample answer
+                    task2.setFeedback(eval2.getFeedback());
+                    task2.setSampleAnswer(eval2.getSampleAnswer());
+                    task2.setScore(eval2.getScore());
 
 
-                task2.getFeedback().setErrorCorrections(eval2.getFeedback().getErrorCorrections());
-                task2.getFeedback().setSentenceImprovements(eval2.getFeedback().getSentenceImprovements());
-                task2.getFeedback().setOverallComment(eval2.getFeedback().getOverallComment());
-                // Log evaluation
-                System.out.println("================================");
-                System.out.println("Task 2 Evaluation:");
-                System.out.println("- Task Achievement: " + eval2.getEvaluation().getTaskAchievement());
-                System.out.println("- Coherence Cohesion: " + eval2.getEvaluation().getCoherenceCohesion());
-                System.out.println("- Lexical Resource: " + eval2.getEvaluation().getLexicalResource());
-                System.out.println("- Grammar: " + eval2.getEvaluation().getGrammar());
+                    task2.getFeedback().setErrorCorrections(eval2.getFeedback().getErrorCorrections());
+                    task2.getFeedback().setSentenceImprovements(eval2.getFeedback().getSentenceImprovements());
+                    task2.getFeedback().setOverallComment(eval2.getFeedback().getOverallComment());
+                    // Log evaluation
+                    System.out.println("================================");
+                    System.out.println("Task 2 Evaluation:");
+                    System.out.println("- Task Achievement: " + eval2.getEvaluation().getTaskAchievement());
+                    System.out.println("- Coherence Cohesion: " + eval2.getEvaluation().getCoherenceCohesion());
+                    System.out.println("- Lexical Resource: " + eval2.getEvaluation().getLexicalResource());
+                    System.out.println("- Grammar: " + eval2.getEvaluation().getGrammar());
 
-                // Set evaluation
+                    // Set evaluation
 //            if (task2.getEvaluation() == null) {
 //                task2.setEvaluation(new WritingEvaluation());
 //            }
-                task2.setEvaluation(eval2.getEvaluation());
-                task2.getEvaluation().setTaskAchievement(eval2.getEvaluation().getTaskAchievement());
-                task2.getEvaluation().setCoherenceCohesion(eval2.getEvaluation().getCoherenceCohesion());
-                task2.getEvaluation().setLexicalResource(eval2.getEvaluation().getLexicalResource());
-                task2.getEvaluation().setGrammar(eval2.getEvaluation().getGrammar());
+                    task2.setEvaluation(eval2.getEvaluation());
+                    task2.getEvaluation().setTaskAchievement(eval2.getEvaluation().getTaskAchievement());
+                    task2.getEvaluation().setCoherenceCohesion(eval2.getEvaluation().getCoherenceCohesion());
+                    task2.getEvaluation().setLexicalResource(eval2.getEvaluation().getLexicalResource());
+                    task2.getEvaluation().setGrammar(eval2.getEvaluation().getGrammar());
 
-            } catch (Exception e) {
-                System.out.println("Error evaluating Task 2: " + e.getMessage());
+                } catch (Exception e) {
+                    System.out.println("Error evaluating Task 2: " + e.getMessage());
+                }
             }
         }
         return writingAnswerRepository.save(savedAnswer);

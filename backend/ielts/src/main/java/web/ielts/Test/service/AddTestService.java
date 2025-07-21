@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.List;
 @Service
-public class AddTestService {
+public class  AddTestService {
 
     @Autowired
     private AddTestRepository testRepository;

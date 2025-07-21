@@ -56,7 +56,7 @@ interface FleCohAnswer {
 
 interface PronunciationAnswer {
     score: number
-    StressTranscript: string
+    stressTranscript: string
     stressMismatchesDetailed: StressMismatch[]
     pronunciationEvaluation: PronunciationEvaluation[]
 }
@@ -249,7 +249,7 @@ export default function SpeakingResult() {
     // Hiển thị chi tiết Pronunciation (đầy đủ trường mới)
     const renderPronunciationDetail = (pronunciationAnswer?: PronunciationAnswer) => {
         if (!pronunciationAnswer) return <div className="text-red-500">No pronunciation data.</div>;
-        const { score, StressTranscript, stressMismatchesDetailed, pronunciationEvaluation } = pronunciationAnswer;
+        const { score, stressTranscript, stressMismatchesDetailed, pronunciationEvaluation } = pronunciationAnswer;
         return (
             <div className="space-y-6">
                 {/* Stress Transcript */}
@@ -259,7 +259,7 @@ export default function SpeakingResult() {
                         Stress Transcript
                     </h4>
                     <div className="whitespace-pre-line text-base text-gray-700 font-mono bg-gray-50 rounded-xl p-4 border border-gray-100">
-                        {StressTranscript || <span className="italic text-gray-400">No stress transcript available.</span>}
+                        {stressTranscript || <span className="italic text-gray-400">No stress transcript available.</span>}
                     </div>
                 </div>
                 {/* Stress Mismatches Table */}

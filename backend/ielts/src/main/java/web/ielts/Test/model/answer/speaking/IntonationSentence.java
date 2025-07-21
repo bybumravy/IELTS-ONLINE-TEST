@@ -1,13 +1,13 @@
 package web.ielts.Test.model.answer.speaking;
 
-public class PronunciationEvaluation {
+public class IntonationSentence {
     private String text;
     private String sentenceText;
 
-    public PronunciationEvaluation() {
+    public IntonationSentence() {
     }
 
-    public PronunciationEvaluation(String text, String sentenceText) {
+    public IntonationSentence(String text, String sentenceText) {
         this.text = text;
         this.sentenceText = sentenceText;
     }
