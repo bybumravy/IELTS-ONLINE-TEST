@@ -30,11 +30,11 @@
     @Service
     public class ProsodyService {
 
-        private final String PRAAT_PATH = "D:\\praat6438_win-intel64\\Praat.exe";
+        private final String PRAAT_PATH = "C:\\Users\\DELL\\Downloads\\praat6438_win-intel64\\Praat.exe";
         private final String PRAAT_SCRIPT_PATH = "D:\\SWP_Project4\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script.praat"; // Script Praat
         private final String STRESS_ANALYSIS_SCRIPT_PATH = "D:\\SWP_Project4\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\stressAnalysis.praat";
         private final String INTONATION_SCRIPT_PATH = "D:\\SWP_Project4\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script_intonation.praat";
-        private final String CMU_DICT_PATH = "D:\\archive\\cmudict-0.7b.txt";
+        private final String CMU_DICT_PATH = "C:\\Users\\DELL\\Downloads\\cmudict-0.7b.txt";
         @Value("${openai.api.key}")
         private String openaiApiKey;
         private final RestTemplate restTemplate = new RestTemplate();

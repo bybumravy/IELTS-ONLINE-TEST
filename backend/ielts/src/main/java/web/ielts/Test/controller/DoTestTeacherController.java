@@ -33,4 +33,9 @@ public class DoTestTeacherController {
         return doTestTeacherService.getTeacherGradedAnswers();
     }
 
+    @GetMapping("/allwriting")
+    public List<WritingAnswer> getAllWritingAnswers() {
+        return doTestTeacherService.getAllWritingAnswers();
+    }
+
 }

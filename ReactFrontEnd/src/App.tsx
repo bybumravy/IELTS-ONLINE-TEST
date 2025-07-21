@@ -63,6 +63,7 @@ import ManageTeachersPage from "./pages/ManageTeachersPage";
 
 import ManagerTeacherScoreList from "@/pages/ManagerTeacherScore";
 import TeacherScoringPage from "@/pages/TeacherScoring.tsx";
+import TeacherScoredList from "@/pages/TeacherScoredList.tsx";
 import TransactionHistory from "@/pages/ReviewTransactions.tsx";
 
 // Protected Layouts
@@ -208,6 +209,7 @@ export default function App() {
                         <Route path="/grade-writing" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><ManagerTeacherScoreList /></StaffLayout></ProtectedLayout>} />
                         <Route path="/teacher-scoring/:id" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><TeacherScoringPage /></StaffLayout></ProtectedLayout>} />
                         <Route path="/transactions-report" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><TransactionHistory /></StaffLayout></ProtectedLayout>} />
+                        <Route path="/teacher-scored-list" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><TeacherScoredList /></StaffLayout></ProtectedLayout>} />
                         {/* ========== Error Pages ========== */}
                         <Route path="/error" element={<ErrorPage />} />
 
