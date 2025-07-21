@@ -256,17 +256,17 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                     "    • Band 3: Basic sentence forms are attempted but grammatical errors are numerous except in apparently memorised utterances.\n" +
                     "    • Band 2: No evidence of basic sentence forms.\n" +
                     "    • Band 1: No rateable language unless memorised.\n";
-    private static final String IELTS_PUBLIC_FLUENCY_AND_COHERENCE =
-            "- IELTS Public Descriptors:\n" +
-                    "Band 9: Fluent with only very occasional repetition or self-correction. Any hesitation that occurs is used only to prepare the content of the next utterance and not to find words or grammar. Speech is situationally appropriate and cohesive features are fully acceptable. Topic development is fully coherent and appropriately extended.\n" +
-                    "Band 8: Fluent with only very occasional repetition or self-correction. Hesitation may occasionally be used to find words or grammar, but most will be content related. Topic development is coherent, appropriate and relevant.\n" +
-                    "Band 7: Able to keep going and readily produce long turns without noticeable effort. Some hesitation, repetition and/or self-correction may occur, often mid-sentence and indicate problems with accessing appropriate language. However, these will not affect coherence. Flexible use of spoken discourse markers, connectives and cohesive features.\n" +
-                    "Band 6: Able to keep going and demonstrates a willingness to produce long turns. Coherence may be lost at times as a result of hesitation, repetition and/or self-correction. Uses a range of spoken discourse markers, connectives and cohesive features though not always appropriately.\n" +
-                    "Band 5: Usually able to keep going, but relies on repetition and self-correction to do so and/or on slow speech. Hesitations are often associated with mid-sentence searches for fairly basic lexis and grammar. Overuse of certain discourse markers, connectives and other cohesive features. More complex speech usually causes disfluency but simpler language may be produced fluently.\n" +
-                    "Band 4: Unable to keep going without noticeable pauses. Speech may be slow with frequent repetition. Often self-corrects. Can link simple sentences but often with repetitious use of connectives. Some breakdowns in coherence.\n" +
-                    "Band 3: Frequent, sometimes long, pauses occur while candidate searches for words. Limited ability to link simple sentences and go beyond simple responses to questions. Frequently unable to convey basic message.\n" +
-                    "Band 2: Lengthy pauses before nearly every word. Isolated words may be recognisable but speech is of virtually no communicative significance.\n" +
-                    "Band 1: Essentially none. Speech is totally incoherent.\n";
+    private static final String IELTS_PUBLIC_COHERENCE_ONLY =
+            "- IELTS Public Descriptors (Coherence only):\n" +
+                    "Band 9: Topic development is fully coherent and appropriately extended. Cohesive features are fully appropriate and natural.\n" +
+                    "Band 8: Topic development is coherent, appropriate and relevant. Cohesive devices are used flexibly and naturally.\n" +
+                    "Band 7: Topic development is logical. Uses a range of cohesive features and discourse markers flexibly, though occasional misuse may occur.\n" +
+                    "Band 6: Coherence may be lost at times. Uses a range of discourse markers and connectives, though sometimes inappropriately.\n" +
+                    "Band 5: Frequent overuse or inappropriate use of cohesive devices. Coherence is affected by repetition or unclear linkage between ideas.\n" +
+                    "Band 4: Can link simple sentences but with frequent breakdowns in coherence. Repetitious use of connectives.\n" +
+                    "Band 3: Limited ability to link ideas or develop topics logically. Often incoherent or fragmented.\n" +
+                    "Band 2: No meaningful progression of ideas. Utterances are isolated with no logical sequence.\n" +
+                    "Band 1: No coherence at all. Utterances are unrelated or unintelligible.\n";
     private static final String IELTS_PUBLIC_Pronunciation =
             "- IELTS Public Descriptors:\n" +
                     "Band 9: Uses a full range of phonological features to convey precise and/or subtle meaning. Flexible use of features of connected speech is sustained throughout. Can be effortlessly understood throughout. Accent has no effect on intelligibility.\n" +
@@ -320,6 +320,8 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "Note: Spoken responses do not contain punctuation. You must IGNORE all punctuation marks such as commas, periods, question marks, or missing capital letters. \\n\" +\n" +
                         "  Do NOT mark answers down due to missing or incorrect punctuation." +
                         "  Do NOT suggest corrections just to add commas or punctuation"+
+                        "For all other issues (Lexical Resource, Grammatical), ONLY include the smallest possible incorrect unit (usually a word or short phrase) in 'originalText'. Do NOT include full sentences for these error types.\""+
+                        "For Fluency and Coherence, feedback must be given only after evaluating the entire response. Fluency must be based on +"+analyzeVoice +"metrics, while Coherence should be evaluated based on the overall content of the answer."+
                         "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
                         "\n" +
                         "However, if the answer is short but still directly addresses the question  \n" +
@@ -339,67 +341,29 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
                         "\n" +
                         "• Lexical Resource (25%):\n" +
-                        "+0.25 if the candidate uses 2 or more correct, natural collocations\n" +
-                        "(e.g., “make a living”, “strong bond”)\n" +
-                        "→ ✅ Only add once, even if more than 2 collocations are used.\n" +
-                        "\n" +
-                        "+0.25 if the candidate uses 1 or more idioms or phrasal verbs appropriately\n" +
-                        "(e.g., “over the moon”, “give up”)\n" +
-                        "→ ✅ Only add once.\n" +
-                        "\n" +
-                        "+0.25 if there's clear lexical variety (e.g., appropriate use of synonyms, no repetition of basic words)\n" +
-                        "→ ✅ Add only once, even if lexical variety is shown throughout.\n" +
-                        "\n" +
-                        "+0.25 if the candidate successfully paraphrases the question instead of repeating it\n" +
-                        "→ ✅ Only add once even if paraphrasing appears in multiple responses."+
-                        "+0.5 if the candidate uses advanced or topic-specific vocabulary naturally and correctly\n" +
-                        "\n" +
-                        "E.g., “onsen”, “scenic town”, “black eggs” (for the topic of travel in Japan)\n" +
-                        "✅ Only add once, regardless of how many topic-specific terms are used."+
                         " If any single errorType occurs more than 3 times,\n" +
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_DESCRIPTORSLexicalResource + "\n" +
                         "• Grammatical Range and Accuracy (25%):\n" +
-                        "+0.25 if the candidate uses at least 2 different complex structures correctly\n" +
-                        "(e.g., conditionals, passives, relative clauses)\n" +
-                        "→ ✅ Only add once.\n" +
-                        "\n" +
-                        "+0.25 if the candidate maintains grammatical variety and accuracy throughout\n" +
-                        "→ ✅ Only add once.\n" +
-                        "\n" +
-                        "+0.25 if the candidate attempts advanced grammar (e.g., modal verbs, inversion, past perfect), even if imperfect\n" +
-                        "→ ✅ Only add once."+
-                        "Deduct points for frequent grammar errors that affect understanding:\n\n" +
-                        " If any single errorType occurs more than 3 times,\n" +
+
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
                         "Fluency and Coherence 25%"+
                         "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
                         "Scoring rules:\n" +
-                        "- +0.5 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +
+                        "- +0.25 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +
                         "- +0.25 if meanIntensity is between 60–65 dB (slightly strong but acceptable).\n Only add once." +
-                        "- -0.5 if meanIntensity < 45 dB (voice too weak).\n Only add once." +
-                        "- +0.5 if speechRate is between 2.0–3.0 words/sec (smooth and fluent).\n Only add once." +
-                        "- -0.5 if speechRate < 1.5 words/sec (slow, hesitant).\n Only add once." +
-                        "- +0.5 if pauseCount == 0.0 (no unnatural hesitation).\n Only add once." +
-                        "- -0.5 if pauseCount > 2 (frequent unnatural pauses).Only add once."+
+                        "- -0.25 if meanIntensity < 45 dB (voice too weak).\n Only add once." +
+                        "- +0.25 if speechRate is between 2.0–3.0 words/sec (smooth and fluent).\n Only add once." +
+                        "- -0.25 if speechRate < 1.5 words/sec (slow, hesitant).\n Only add once." +
+                        "- +0.25 if pauseCount == 0.0 (no unnatural hesitation).\n Only add once." +
+                        "- -0.25 if pauseCount > 2 (frequent unnatural pauses).Only add once."+
                         "Coherence  "+
-                        "+0.5 if the speaker presents ideas in a clear logical sequence (with an introduction, development, and conclusion).\n Only add once." +
-                        "\n" +
-                        "+0.25 if cohesive devices (e.g., “however”, “as a result”, “on the other hand”) are used effectively and appropriately.\n Only add once." +
-                        "\n" +
-                        "+0.25 if the speaker avoids repeating ideas or overemphasizing a single point.\n Only add once." +
-                        "\n" +
-                        "+0.25 if each sentence connects clearly to the previous one (no abrupt transitions).\n Only add once." +
-                        "\n" +
-                        "+0.25 if each argument or point is supported with examples, explanations, or reasons.\n Only add once." +
-                        "\n" +
-                        "+0.5 if the entire response does not contain any coherence-related errors listed below. Only add once."+
                         "→ Deduct 0.5 point in total for that error type (only once) for Coherence"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
-                        IELTS_PUBLIC_FLUENCY_AND_COHERENCE+
+                        IELTS_PUBLIC_COHERENCE_ONLY+
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
                         "Apply the evaluation criteria to score each individual aspect separately. For example, what is the score for Grammar"+
@@ -415,12 +379,8 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "- Do **not** cross over between categories (e.g., do not mention vocabulary issues when scoring grammar).\n" +
                         "- Always include a score in both grammarAnswer and lexicalAnswer, even if there are no errors\n" +
                         "- If there are no errors in a category, do not provide errorText, correctText, explanation, or sentenceContext—only the score"+
-                        "For lexical and grammar evaluations:\n" +
-                        "✅ `errorText` must contain **only the incorrect word or phrase** (not the full sentence). (1–5 words maximum) \n" +
-                        "✅ `correctText` must contain **only the corrected word or phrase**. (1–5 words maximum) \n" +
-                        "❌ Do NOT include full sentence rewrites.  \n" +
-                        "✅ Provide the full sentence in `sentenceContext` so the error can be understood in context.\n" +
-                        "\n" +
+
+
                         "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
                         +errorType+
 
@@ -428,14 +388,14 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "    - score (double)\n" +
                         "    - errorText (string)\n" +
                         "    - correctText (string)\n" +
-                        "    - errorType (string)\n" +
+                        "    - errorType (string)\n" +// only grammar error
                         "    - explanation (string)\n" +
                         "    - sentenceContext (string)\n" +
                         "- lexicalAnswer (object) with:\n" +
                         "    - score (double)\n" +
                         "    - errorText (string)\n" +
                         "    - correctText (string)\n" +
-                        "    - errorType (string)\n" +
+                        "    - errorType (string)\n" +// only Vocabulary
                         "    - explanation (string)\n" +
                         "    - sentenceContext (string)"+
                         "\"For Fluency and Coherence, provide detailed feedback only after assigning the score. This feedback must be strictly based on the actual fluency and coherence performance observed in Part 1 of the candidate’s response.\n" +
@@ -557,7 +517,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "+0.5 if the entire response does not contain any coherence-related errors listed below. Only add once."+
                         "→ Deduct 0.5 point in total for that error type (only once) for Coherence"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
-                        IELTS_PUBLIC_FLUENCY_AND_COHERENCE+
+                        IELTS_PUBLIC_COHERENCE_ONLY+
                         "2. SCORING SYSTEM:\n" +
                         "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
                         "   - Deduct 0.5 band per 2 major errors\n" +
@@ -707,7 +667,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "→ Deduct 0.5 point in total for that error type about Fluency and coherence  (only once)"+
                         "If the response does not include a clear structure with an introduction, body, and conclusion, deduct 0.5 point."+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
-                        IELTS_PUBLIC_FLUENCY_AND_COHERENCE+
+                        IELTS_PUBLIC_COHERENCE_ONLY+
 
                         "====================\n" +
                         "2. SCORING SYSTEM\n" +

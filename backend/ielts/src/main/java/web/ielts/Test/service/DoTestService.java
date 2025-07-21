@@ -282,114 +282,114 @@ public class DoTestService {
         }
 
          //🔹 Part 2
-        SpeakingAnswerPart2 part2 = speakingAnswer.getPart2();
-        if (part2 != null) {
-            String blob = part2.getAudioAnswer();
-            String filename = extractFileName(blob);
-            String s3Url = fileUrlMap.getOrDefault(filename, blob);
-            String s3UrlNotEncrypt = s3Url;
-
-
-            if (s3UrlNotEncrypt == null) {
-                System.out.println("⚠️ Bỏ qua Part 2 do URL không hợp lệ: " + s3UrlNotEncrypt);
-            } else {
-                s3Url = UrlEncryptor.encodeUrl(s3Url);
-                part2.setAudioAnswer(s3Url);
-                    try {
-                        JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
-
-                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2,prosodyFeatures,part2.getCueCards());
-                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
-                        part2.setTranscript(sp.getTranscript());
-                        part2.setGrammarAnswer(sp.getGrammarAnswer());
-                        part2.setLexicalAnswer(sp.getLexicalAnswer());
-                        part2.setFluencyCohAnswer(sp.getFluencyCohAnswer());
-                        part2.setPronunciationAnswer(pa);
-                        double grammar = sp.getGrammarAnswer().getScore();
-                        double lexical = sp.getLexicalAnswer().getScore();
-                        double fluency = sp.getFluencyCohAnswer().getScore();
-                        double pronunciation = pa.getScore();
-                        double averageForThisQuestion = (grammar + lexical + fluency + pronunciation) / 4.0;
-
-                        averageForThisQuestion = new BigDecimal(averageForThisQuestion).setScale(1, RoundingMode.HALF_UP).doubleValue();
-                        part2.setScore(averageForThisQuestion);
-                        part2Score = part2.getScore();
-                        // validQuestionCount++;
-                    } catch (Exception e) {
-                        System.err.println("❌ Lỗi khi chấm Part 2");
-                        e.printStackTrace();
-                    }
-
-
-
-
-            }
-
-        }
-
-  //Part 3
-       SpeakingAnswerPart13 part3 = speakingAnswer.getPart3();
-        if (part3 != null && part3.getQuestions() != null) {
-
-            double totalScore = 0;
-            int validQuestionCount = 0;
-
-            for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
-                String blob = qa.getAudioAnswer();
-                String filename = extractFileName(blob);
-                String s3Url = fileUrlMap.getOrDefault(filename, blob);
-                String s3UrlNotEncrypt = s3Url;
-
-                if (s3UrlNotEncrypt == null || s3UrlNotEncrypt.trim().isEmpty() || !s3UrlNotEncrypt.startsWith("http")) {
-
-                    continue;
-                }
-
-                s3Url = UrlEncryptor.encodeUrl(s3Url);
-                qa.setAudioAnswer(s3Url);
-                    try {
-                        JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
-                        System.out.println(transcript);
-                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,prosodyFeatures,null);
-                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
-                        qa.setTranscript(sp.getTranscript());
-                        qa.setGrammarAnswer(sp.getGrammarAnswer());
-                        qa.setLexicalAnswer(sp.getLexicalAnswer());
-                        qa.setFluencyCohAnswer(sp.getFluencyCohAnswer());
-                        qa.setPronunciationAnswer(pa);
-                        //totalScore += eval.getScore();
-                        double grammar = sp.getGrammarAnswer().getScore();
-                        double lexical = sp.getLexicalAnswer().getScore();
-                        double fluency = sp.getFluencyCohAnswer().getScore();
-                        double pronunciation = pa.getScore();
-
-                        double averageForThisQuestion = (grammar + lexical + fluency + pronunciation) / 4.0;
-                        qa.setScore(averageForThisQuestion);
-
-                        totalScore += averageForThisQuestion;
-                        validQuestionCount++;
-
-
-                    } catch (Exception e) {
-
-                        e.printStackTrace();
-                    }
-
-
-
-            }
-            double avgScore = validQuestionCount > 0 ? (totalScore / validQuestionCount) : 0.0;
-            avgScore = new BigDecimal(avgScore).setScale(1, RoundingMode.HALF_UP).doubleValue();
-            part3.setAverageScore(avgScore);
-            part3Score = part3.getAverageScore();
-
-
-        }
-        double band = part1Score + part2Score + part3Score;
-        double avgBand = Math.round((band / 3.0) * 2) / 2.0;
-        speakingAnswer.setBand(avgBand);
+//        SpeakingAnswerPart2 part2 = speakingAnswer.getPart2();
+//        if (part2 != null) {
+//            String blob = part2.getAudioAnswer();
+//            String filename = extractFileName(blob);
+//            String s3Url = fileUrlMap.getOrDefault(filename, blob);
+//            String s3UrlNotEncrypt = s3Url;
+//
+//
+//            if (s3UrlNotEncrypt == null) {
+//                System.out.println("⚠️ Bỏ qua Part 2 do URL không hợp lệ: " + s3UrlNotEncrypt);
+//            } else {
+//                s3Url = UrlEncryptor.encodeUrl(s3Url);
+//                part2.setAudioAnswer(s3Url);
+//                    try {
+//                        JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
+//
+//                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
+//                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2,prosodyFeatures,part2.getCueCards());
+//                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+//                        part2.setTranscript(sp.getTranscript());
+//                        part2.setGrammarAnswer(sp.getGrammarAnswer());
+//                        part2.setLexicalAnswer(sp.getLexicalAnswer());
+//                        part2.setFluencyCohAnswer(sp.getFluencyCohAnswer());
+//                        part2.setPronunciationAnswer(pa);
+//                        double grammar = sp.getGrammarAnswer().getScore();
+//                        double lexical = sp.getLexicalAnswer().getScore();
+//                        double fluency = sp.getFluencyCohAnswer().getScore();
+//                        double pronunciation = pa.getScore();
+//                        double averageForThisQuestion = (grammar + lexical + fluency + pronunciation) / 4.0;
+//
+//                        averageForThisQuestion = new BigDecimal(averageForThisQuestion).setScale(1, RoundingMode.HALF_UP).doubleValue();
+//                        part2.setScore(averageForThisQuestion);
+//                        part2Score = part2.getScore();
+//                        // validQuestionCount++;
+//                    } catch (Exception e) {
+//                        System.err.println("❌ Lỗi khi chấm Part 2");
+//                        e.printStackTrace();
+//                    }
+//
+//
+//
+//
+//            }
+//
+//        }
+//
+//  //Part 3
+//       SpeakingAnswerPart13 part3 = speakingAnswer.getPart3();
+//        if (part3 != null && part3.getQuestions() != null) {
+//
+//            double totalScore = 0;
+//            int validQuestionCount = 0;
+//
+//            for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
+//                String blob = qa.getAudioAnswer();
+//                String filename = extractFileName(blob);
+//                String s3Url = fileUrlMap.getOrDefault(filename, blob);
+//                String s3UrlNotEncrypt = s3Url;
+//
+//                if (s3UrlNotEncrypt == null || s3UrlNotEncrypt.trim().isEmpty() || !s3UrlNotEncrypt.startsWith("http")) {
+//
+//                    continue;
+//                }
+//
+//                s3Url = UrlEncryptor.encodeUrl(s3Url);
+//                qa.setAudioAnswer(s3Url);
+//                    try {
+//                        JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
+//                        System.out.println(transcript);
+//                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
+//                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,prosodyFeatures,null);
+//                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+//                        qa.setTranscript(sp.getTranscript());
+//                        qa.setGrammarAnswer(sp.getGrammarAnswer());
+//                        qa.setLexicalAnswer(sp.getLexicalAnswer());
+//                        qa.setFluencyCohAnswer(sp.getFluencyCohAnswer());
+//                        qa.setPronunciationAnswer(pa);
+//                        //totalScore += eval.getScore();
+//                        double grammar = sp.getGrammarAnswer().getScore();
+//                        double lexical = sp.getLexicalAnswer().getScore();
+//                        double fluency = sp.getFluencyCohAnswer().getScore();
+//                        double pronunciation = pa.getScore();
+//
+//                        double averageForThisQuestion = (grammar + lexical + fluency + pronunciation) / 4.0;
+//                        qa.setScore(averageForThisQuestion);
+//
+//                        totalScore += averageForThisQuestion;
+//                        validQuestionCount++;
+//
+//
+//                    } catch (Exception e) {
+//
+//                        e.printStackTrace();
+//                    }
+//
+//
+//
+//            }
+//            double avgScore = validQuestionCount > 0 ? (totalScore / validQuestionCount) : 0.0;
+//            avgScore = new BigDecimal(avgScore).setScale(1, RoundingMode.HALF_UP).doubleValue();
+//            part3.setAverageScore(avgScore);
+//            part3Score = part3.getAverageScore();
+//
+//
+//        }
+//        double band = part1Score + part2Score + part3Score;
+//        double avgBand = Math.round((band / 3.0) * 2) / 2.0;
+//        speakingAnswer.setBand(avgBand);
     }
     private String extractFileName(String blobUrl) {
         // Ví dụ input: blob:http://localhost:5173/cd13919f-ec76-4e5e-a348-95e5c3f1265c

@@ -135,8 +135,8 @@ public class UserController {
 //            return dto;
 //        }).collect(Collectors.toList());
 //    }
-
-    // Lấy danh sách user theo role (cho manager)
+//
+//     Lấy danh sách user theo role (cho manager)
 //    @GetMapping("/role/{role}")
 //    public List<UserDTO> getUsersByRole(@PathVariable String role) {
 //        List<User> users = userRepository.findAll();
