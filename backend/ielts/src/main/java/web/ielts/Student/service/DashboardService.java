@@ -1,4 +1,4 @@
-package web.ielts.service;
+package web.ielts.Student.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
