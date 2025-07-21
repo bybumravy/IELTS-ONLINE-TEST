@@ -37,6 +37,6 @@ export const register = async (email: string, password: string) => {
         body: JSON.stringify({ email, password}),
     })
 
-    if (!res.ok) throw new Error("Register failed")
+    if (!res.ok) throw new Error("Email da dang ki")
 }
 

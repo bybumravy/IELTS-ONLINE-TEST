@@ -23,16 +23,17 @@ const RegisterPage = () => {
         }
 
         try {
-            alert("Hay check duong link trong gmail")
+
             await register(email, password);
+            alert("Hay check duong link trong gmail")
 
         } catch (error: any) {
-            alert(error.message || "Registration failed");
+            alert(error.message || "Email da duoc dang ki");
         }
     };
 
     const handleGoogleSignup = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        window.location.href = "http://localhost:8080/oauth2/authorization/google?role=student";
     };
 
     return (

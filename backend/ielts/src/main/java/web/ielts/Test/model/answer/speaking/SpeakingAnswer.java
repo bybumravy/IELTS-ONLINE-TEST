@@ -17,6 +17,7 @@ public class SpeakingAnswer {
     private SpeakingAnswerPart13 part1;
     private SpeakingAnswerPart2 part2;
     private SpeakingAnswerPart13 part3;
+
     private double band;
     private LocalDateTime submittedAt;
 

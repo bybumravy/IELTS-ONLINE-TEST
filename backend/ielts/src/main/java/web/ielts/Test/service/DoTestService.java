@@ -231,7 +231,7 @@ public class DoTestService {
         if (part1 != null && part1.getQuestions() != null) {
 
             double totalScore = 0;
-            int validQuestionCount = part1.getQuestions().size();
+            int validQuestionCount = 0;
 
             for (SpeakingAnswerQuestion qa : part1.getQuestions()) {
                 String blob = qa.getAudioAnswer();
@@ -247,7 +247,7 @@ public class DoTestService {
                 qa.setAudioAnswer(s3Url);
                     try {
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
-                        System.out.println(transcript);
+
                         FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
                         SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,null);
                         PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
@@ -256,7 +256,7 @@ public class DoTestService {
                         qa.setLexicalAnswer(sp.getLexicalAnswer());
                         qa.setFluencyCohAnswer(sp.getFluencyCohAnswer());
                         qa.setPronunciationAnswer(pa);
-                     //totalScore += eval.getScore();
+                        validQuestionCount++;
                         double grammar = sp.getGrammarAnswer().getScore();
                         double lexical = sp.getLexicalAnswer().getScore();
                         double fluency = sp.getFluencyCohAnswer().getScore();
@@ -272,6 +272,7 @@ public class DoTestService {
                         e.printStackTrace();
                     }
             }
+            System.out.println(validQuestionCount);
             double avgScore = validQuestionCount > 0 ? (totalScore / validQuestionCount) : 0.0;
             avgScore = new BigDecimal(avgScore).setScale(1, RoundingMode.HALF_UP).doubleValue();
 
@@ -332,7 +333,7 @@ public class DoTestService {
         if (part3 != null && part3.getQuestions() != null) {
 
             double totalScore = 0;
-            int validQuestionCount = part3.getQuestions().size();
+            int validQuestionCount = 0;
 
             for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
                 String blob = qa.getAudioAnswer();

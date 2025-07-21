@@ -44,6 +44,7 @@ public class AuthService {
     // Đăng ký tài khoản mới và gửi email xác thực
     public ResponseEntity<?> register(User newUser) {
         if (authRepository.findByEmail(newUser.getEmail()) != null) {
+            System.out.println("dang bi loi gmail");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email đã được đăng ký");
         };
         // Tạo token xác thực
