@@ -191,10 +191,6 @@ export default function ListeningTest() {
 
     const handleSubmit = async () => {
         if (!listeningTest) return;
-        if (!testAnswerId) {
-            alert("Thiếu testAnswerId, vui lòng quay lại bước đầu tiên.");
-            return;
-        }
         const dataToSend = structuredClone(listeningTest);
         if (user?.username) dataToSend.username = user.username;
         dataToSend.skill = "listening";
@@ -215,11 +211,20 @@ export default function ListeningTest() {
             });
         });
         try {
-            const res = await customFetch(`${API_URL}/verify/listening/submit?testAnswerId=${testAnswerId}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSend),
-            });
+            let res;
+            if (testAnswerId) {
+                res = await customFetch(`${API_URL}/verify/listening/submit?testAnswerId=${testAnswerId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dataToSend),
+                });
+            } else {
+                res = await customFetch(`${API_URL}/verify/listening/submit`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dataToSend),
+                });
+            }
             const result = await res.json();
             alert("Submit thành công!");
             if (mode === "fulltest") {

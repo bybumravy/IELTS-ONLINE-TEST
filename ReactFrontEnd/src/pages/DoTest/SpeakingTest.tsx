@@ -395,12 +395,6 @@ const SpeakingTest = () => {
         }
         setIsSubmitting(true); // Bây giờ mới set submitting
         setIsGrading(true); // Bắt đầu overlay loading
-        if (!testAnswerId) {
-            alert("Thiếu testAnswerId, vui lòng quay lại bước đầu tiên.");
-            setIsGrading(false);
-            setIsSubmitting(false);
-            return;
-        }
         const submissionData = prepareSubmissionData()
         if (!submissionData) return
         const formData = new FormData()
@@ -416,10 +410,18 @@ const SpeakingTest = () => {
             }),
         )
         try {
-            const res = await customFetch(`${API_URL}/verify/speaking/submit?testAnswerId=${testAnswerId}`, {
-                method: "POST",
-                body: formData,
-            })
+            let res;
+            if (testAnswerId) {
+                res = await customFetch(`${API_URL}/verify/speaking/submit?testAnswerId=${testAnswerId}`, {
+                    method: "POST",
+                    body: formData,
+                });
+            } else {
+                res = await customFetch(`${API_URL}/verify/speaking/submit`, {
+                    method: "POST",
+                    body: formData,
+                });
+            }
             const result = await res.json();
             setIsGrading(false); // Tắt overlay trước khi chuyển trang
             if (mode === "fulltest") {

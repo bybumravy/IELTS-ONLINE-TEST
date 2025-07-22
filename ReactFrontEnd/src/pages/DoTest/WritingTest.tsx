@@ -81,10 +81,6 @@ export default function WritingTest() {
 
     const handleSubmit = async () => {
         if (!writingData || writingData.tasks.length < 2) return;
-        if (!testAnswerId) {
-            alert("Thiếu testAnswerId, vui lòng quay lại bước đầu tiên.");
-            return;
-        }
         const task1Data = writingData.tasks[0];
         const task2Data = writingData.tasks[1];
         const task1Submission = essayTask1.trim()
@@ -132,12 +128,22 @@ export default function WritingTest() {
         setShowGradingDialog(false);
         setIsGrading(true); // Bắt đầu overlay loading
         try {
-            const response = await fetch(`${API_URL}/verify/writing/submit?testAnswerId=${testAnswerId}`, {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
+            let response;
+            if (testAnswerId) {
+                response = await fetch(`${API_URL}/verify/writing/submit?testAnswerId=${testAnswerId}`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+            } else {
+                response = await fetch(`${API_URL}/verify/writing/submit`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+            }
             if (!response.ok) throw new Error("Failed to submit writing");
             const result = await response.json();
             if (gradingMethod === "ai") {

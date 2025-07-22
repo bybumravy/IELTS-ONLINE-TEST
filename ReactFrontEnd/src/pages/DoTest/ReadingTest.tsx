@@ -154,10 +154,6 @@ export default function ReadingTest() {
 
     const handleSubmit = async () => {
         if (!readingTest) return;
-        if (!testAnswerId) {
-            alert("Thiếu testAnswerId, vui lòng quay lại bước đầu tiên.");
-            return;
-        }
         const dataToSend = structuredClone(readingTest);
         if (user?.username) dataToSend.username = user.username;
         dataToSend.skill = "reading";
@@ -189,12 +185,23 @@ export default function ReadingTest() {
                     })),
                 })),
             };
-            const response = await fetch(`${API_URL}/verify/reading/submit?testAnswerId=${testAnswerId}`, {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSendFinal),
-            });
+            let response;
+            if(testAnswerId != null) {
+                response = await fetch(`${API_URL}/verify/reading/submit?testAnswerId=${testAnswerId}`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(dataToSendFinal),
+                });
+            }
+            else {
+                response = await fetch(`${API_URL}/verify/reading/submit`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(dataToSendFinal),
+                });
+            }
             if (!response.ok) throw new Error("Submit failed");
             const result = await response.json();
             alert("🎉 Submitted successfully!");

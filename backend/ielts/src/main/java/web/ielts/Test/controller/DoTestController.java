@@ -76,30 +76,36 @@ public class DoTestController {
         return ResponseEntity.ok(testAnswer);
     }
     @PostMapping("/reading/submit")
-    public ResponseEntity<ReadingAnswer> saveReadingAnswer(@RequestBody ReadingAnswer answer, @RequestParam String testAnswerId) {
+    public ResponseEntity<ReadingAnswer> saveReadingAnswer(@RequestBody ReadingAnswer answer, @RequestParam(required = false) String testAnswerId) {
         ReadingAnswer saved = doTestService.saveReadingAnswer(answer);
-        testAnswerService.updateReadingAnswer(testAnswerId, saved.getId());
+        if (testAnswerId != null && !testAnswerId.isEmpty()) {
+            testAnswerService.updateReadingAnswer(testAnswerId, saved.getId());
+        }
         return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/writing/submit")
-    public ResponseEntity<WritingAnswer> saveWritingAnswer(@RequestBody WritingAnswer answer, @RequestParam String testAnswerId) {
+    public ResponseEntity<WritingAnswer> saveWritingAnswer(@RequestBody WritingAnswer answer, @RequestParam(required = false) String testAnswerId) {
         WritingAnswer saved = doTestService.saveWritingAnswer(answer);
-        testAnswerService.updateWritingAnswer(testAnswerId, saved.getId());
+        if (testAnswerId != null && !testAnswerId.isEmpty()) {
+            testAnswerService.updateWritingAnswer(testAnswerId, saved.getId());
+        }
         return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/listening/submit")
-    public ResponseEntity<ListeningAnswer> saveListeningAnswer(@RequestBody ListeningAnswer answer, @RequestParam String testAnswerId) {
+    public ResponseEntity<ListeningAnswer> saveListeningAnswer(@RequestBody ListeningAnswer answer, @RequestParam(required = false) String testAnswerId) {
         ListeningAnswer saved = doTestService.saveListeningAnswer(answer);
-        testAnswerService.updateListeningAnswer(testAnswerId, saved.getId());
+        if (testAnswerId != null && !testAnswerId.isEmpty()) {
+            testAnswerService.updateListeningAnswer(testAnswerId, saved.getId());
+        }
         return ResponseEntity.ok(saved);
     }
     @PostMapping("/speaking/submit")
     public ResponseEntity<Map<String, Object>> uploadFiles(
             @RequestPart("metadata") MultipartFile metadataJson,
             @RequestPart(value = "files", required = false) MultipartFile[] files,
-            @RequestParam String testAnswerId,
+            @RequestParam(required = false) String testAnswerId,
             @AuthenticationPrincipal User user
     ) {
         String studentUsername = user.getUsername();
@@ -155,7 +161,9 @@ public class DoTestController {
         response.put("id", saved.getId());
         response.put("message", "✅ Upload và cập nhật thành công!");
 
-        testAnswerService.updateSpeakingAnswer(testAnswerId, saved.getId());
+        if (testAnswerId != null && !testAnswerId.isEmpty()) {
+            testAnswerService.updateSpeakingAnswer(testAnswerId, saved.getId());
+        }
         return ResponseEntity.ok(response);
     }
 
