@@ -207,7 +207,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             String question,
             JsonNode transcript,
 
-            FleCohAnswer analyzeVoice,
+            double FluentScore,
 
             List<String> cueCard
     ) {
@@ -216,11 +216,11 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                 return buildSpeakingPart1Prompt(
                         question,
                         transcript,
-                        analyzeVoice
+                        FluentScore
 
                 );
             case 2:
-                return buildSpeakingPart2Prompt(question, transcript, cueCard,analyzeVoice);
+                return buildSpeakingPart2Prompt(question, transcript, cueCard,FluentScore);
             case 3:
                 return buildSpeakingPart3Prompt(question, transcript);
             default:
@@ -305,7 +305,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
     public String buildSpeakingPart1Prompt(
             String questions,
             JsonNode transcript,
-            FleCohAnswer analyzeVoice
+            double FluentScore
 
     ) {
 //        System.out.println("hello");
@@ -376,7 +376,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
                         "Fluency and Coherence 25%"+
-                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
+//                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
                         "Scoring rules:\n" +
                         "- +0.5 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +
                         "- +0.25 if meanIntensity is between 60–65 dB (slightly strong but acceptable).\n Only add once." +
@@ -461,7 +461,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
     }
 
 
-    public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards,FleCohAnswer analyzeVoice){
+    public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards,double FluentScore){
         String speakingPart2 =
                 "You must return response strictly in JSON format.\n" +
                         "You are an official IELTS Speaking examiner. You are evaluating a real IELTS Part 2 speaking response. Extremely strict grading.\n" +
@@ -534,7 +534,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation: "+
                       IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
                         "Fluency and Coherence 25%"+
-                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
+//                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
                         "Scoring rules:\n" +
                         "- +0.5 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +
                         "- +0.25 if meanIntensity is between 60–65 dB (slightly strong but acceptable).\n Only add once." +
@@ -778,319 +778,731 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
         return speakingPart3;
     }
 
+
+        public static final String IELTS_PUBLIC_DESCRIPTORS_WritingTask1_TaskAchievement =
+                "**Task Achievement (Academic only)**:\n" +
+                        "- Band 9: All the requirements of the task are fully and appropriately satisfied.\n" +
+                        "There may be extremely rare lapses in content." +
+                        "- Band 8: The response covers all the requirements of the task appropriately, relevantly\n" +
+                        "and sufficiently.\n" +
+                        "Key features are skilfully selected, and clearly presented,\n" +
+                        "highlighted and illustrated.\n" +
+                        "There may be occasional omissions or lapses in content.\n" +
+                        "- Band 7: The response covers the requirements of the task.\n" +
+                        "The content is relevant and accurate – there may be a few omissions or lapses.\n" +
+                        "The format is appropriate.\n" +
+                        "Key features which are selected are covered and clearly\n" +
+                        "highlighted but could be more fully or more appropriately illustrated or\n" +
+                        "extended.\n" +
+                        "It presents a clear overview, the data are appropriately\n" +
+                        "categorised, and main trends or differences are identified. " +
+                        "- Band 6: The response focuses on the requirements of the task and an appropriate\n" +
+                        "format is used.\n" +
+                        "Key features which are selected are covered and adequately\n" +
+                        "highlighted. A relevant overview is attempted. Information is appropriately\n" +
+                        "selected and supported using figures/data.\n" +
+                        "Some irrelevant, inappropriate or inaccurate information may occur in\n" +
+                        "areas of detail or when illustrating or extending the main points.\n" +
+                        "Some details may be missing (or excessive) and further extension or\n" +
+                        "illustration may be needed.\n" +
+                        "- Band 5: The response generally addresses the requirements of the task. The\n" +
+                        "format may be inappropriate in places.\n" +
+                        "Key features which are selected are not adequately covered.\n" +
+                        "The recounting of detail is mainly mechanical. There may be no data to\n" +
+                        "support the description.\n" +
+                        "The inclusion of irrelevant, inappropriate or inaccurate material in key\n" +
+                        "areas detracts from the task achievement.\n" +
+                        "There is limited detail when extending and illustrating the main points.\n" +
+                        "- Band 4: The response is an attempt to address the task.\n" +
+                        "Few key features have been selected.\n" +
+                        "The format may be inappropriate.\n" +
+                        "Key features/bullet points which are presented may be irrelevant, repetitive,\n" +
+                        "inaccurate or inappropriate." +
+                        "- Band 3: The response does not address the requirements of the task (possibly because\n" +
+                        "of misunderstanding of the data/diagram/situation).\n" +
+                        "Key features/bullet points which are presented may be largely irrelevant.\n" +
+                        "Limited information is presented, and this may be used repetitively." +
+                        "- Band 2: The content barely relates to the task. " +
+                        "- Band 1: Responses of 20 words or fewer are rated at Band 1.\n" +
+                        "The content is wholly unrelated to the task.\n" +
+                        "Any copied rubric must be discounted.\n" +
+                        "- Band 0: Should only be used where a candidate did not attend or attempt the question in any way, used a language other than English throughout, or where there is proof that a candidate’s answer has been totally\n" +
+                        "memorised.";
+
+        public static final String IELTS_PUBLIC_DESCRIPTORS_WritingTask1_CoherenceCohesion =
+                "**Coherence and Cohesion**:\n" +
+                        "- Band 9: The message can be followed effortlessly.\n" +
+                        "Cohesion is used in such a way that it very\n" +
+                        "rarely attracts attention.\n" +
+                        "Any lapses in coherence or cohesion are\n" +
+                        "minimal.\n" +
+                        "Paragraphing is skilfully managed." +
+                        "- Band 8: The message can be followed with ease.\n" +
+                        "Information and ideas are logically\n" +
+                        "sequenced, and cohesion is well managed.\n" +
+                        "Occasional lapses in coherence or\n" +
+                        "cohesion may occur.\n" +
+                        "Paragraphing is used sufficiently and\n" +
+                        "appropriately.\n" +
+                        "- Band 7: Information and ideas are logically\n" +
+                        "organised and there is a clear progression\n" +
+                        "throughout the response. A few lapses\n" +
+                        "may occur.\n" +
+                        "A range of cohesive devices including\n" +
+                        "reference and substitution is used flexibly\n" +
+                        "but with some inaccuracies or some\n" +
+                        "over/under use." +
+                        "- Band 6: Information and ideas are generally\n" +
+                        "arranged coherently and there is a clear\n" +
+                        "overall progression.\n" +
+                        "Cohesive devices are used to some good\n" +
+                        "effect but cohesion within and/or\n" +
+                        "between sentences may be faulty or\n" +
+                        "mechanical due to misuse, overuse or\n" +
+                        "omission.\n" +
+                        "The use of reference and substitution\n" +
+                        "may lack flexibility or clarity and result in\n" +
+                        "some repetition or error\n" +
+                        "- Band 5: Organisation is evident but is not wholly\n" +
+                        "logical and there may be a lack of overall\n" +
+                        "progression. Nevertheless, there is a\n" +
+                        "sense of underlying coherence to the\n" +
+                        "response.\n" +
+                        "The relationship of ideas can be followed\n" +
+                        "but the sentences are not fluently linked\n" +
+                        "to each other.\n" +
+                        "There may be limited/overuse of cohesive\n" +
+                        "devices with some inaccuracy.\n" +
+                        "The writing may be repetitive due to\n" +
+                        "inadequate and/or inaccurate use of\n" +
+                        "reference and substitution." +
+                        "- Band 4: Information and ideas are evident but not\n" +
+                        "arranged coherently, and there is no clear\n" +
+                        "progression within the response.\n" +
+                        "Relationships between ideas can be unclear\n" +
+                        "and/or inadequately marked. There is some\n" +
+                        "use of basic cohesive devices, which may be\n" +
+                        "inaccurate or repetitive.\n" +
+                        "There is inaccurate use or a lack of\n" +
+                        "substitution or referencing.\n" +
+                        "- Band 3: There is no apparent logical organisation.\n" +
+                        "Ideas are discernible but difficult to relate\n" +
+                        "to each other.\n" +
+                        "Minimal use of sequencers or cohesive\n" +
+                        "devices. Those used do not necessarily\n" +
+                        "indicate a logical relationship between\n" +
+                        "ideas.\n" +
+                        "There is difficulty in identifying referencing" +
+                        "- Band 2: There is little relevant message, or the\n" +
+                        "entire response may be off-topic.\n" +
+                        "There is little evidence of control of\n" +
+                        "organisational features." +
+                        "- Band 1: Responses of 20 words or fewer are\n" +
+                        "rated at Band 1.\n" +
+                        "The writing fails to communicate any\n" +
+                        "message and appears to be by a virtual\n" +
+                        "non-writer" +
+                        "- Band 0: Should only be used where a candidate did not attend or attempt the question in any way, used a language other than English throughout, or where there is proof that a candidate’s answer has been totally\n" +
+                        "memorised.";
+
+        public static final String IELTS_PUBLIC_DESCRIPTORS_WritingTask1_LexicalResource =
+                "**Lexical Resource**:\n" +
+                        "- Band 9: Full flexibility and precise use are evident\n" +
+                        "within the scope of the task.\n" +
+                        "A wide range of vocabulary is used accurately\n" +
+                        "and appropriately with very natural and\n" +
+                        "sophisticated control of lexical features.\n" +
+                        "Minor errors in spelling and word formation\n" +
+                        "are extremely rare and have minimal impact\n" +
+                        "on communication." +
+                        "- Band 8: A wide resource is fluently and flexibly used\n" +
+                        "to convey precise meanings within the scope\n" +
+                        "of the task.\n" +
+                        "There is skilful use of uncommon and/or\n" +
+                        "idiomatic items when appropriate, despite\n" +
+                        "occasional inaccuracies in word choice and\n" +
+                        "collocation.\n" +
+                        "Occasional errors in spelling and/or word\n" +
+                        "formation may occur, but have minimal\n" +
+                        "impact on communication." +
+                        "- Band 7:  The resource is sufficient to allow some\n" +
+                        "flexibility and precision.\n" +
+                        "There is some ability to use less common\n" +
+                        "and/or idiomatic items.\n" +
+                        "An awareness of style and collocation is\n" +
+                        "evident, though inappropriacies occur.\n" +
+                        "There are only a few errors in spelling and/or\n" +
+                        "word formation, and they do not detract\n" +
+                        "from overall clarity." +
+                        "- Band 6: The resource is generally adequate and\n" +
+                        "appropriate for the task.\n" +
+                        "The meaning is generally clear in spite of a\n" +
+                        "rather restricted range or a lack of\n" +
+                        "precision in word choice.\n" +
+                        "If the writer is a risk-taker, there will be a\n" +
+                        "wider range of vocabulary used but higher\n" +
+                        "degrees of inaccuracy or inappropriacy.\n" +
+                        "There are some errors in spelling and/or\n" +
+                        "word formation, but these do not impede\n" +
+                        "communication." +
+                        "- Band 5: The resource is limited but minimally\n" +
+                        "adequate for the task.\n" +
+                        "Simple vocabulary may be used accurately\n" +
+                        "but the range does not permit much\n" +
+                        "variation in expression.\n" +
+                        "There may be frequent lapses in\n" +
+                        "the appropriacy of word choice, and a lack\n" +
+                        "of flexibility is apparent in frequent\n" +
+                        "simplifications and/or repetitions.\n" +
+                        "Errors in spelling and/or word formation\n" +
+                        "may be noticeable and may cause some\n" +
+                        "difficulty for the reader.\n" +
+                        "- Band 4: The resource is limited and inadequate for\n" +
+                        "or unrelated to the task. Vocabulary is basic and\n" +
+                        "may be used repetitively.\n" +
+                        "There may be inappropriate use of lexical chunks\n" +
+                        "(e.g. memorised phrases, formulaic language\n" +
+                        "and/or language from the input material).\n" +
+                        "Inappropriate word choice and/or errors in word\n" +
+                        "formation and/or in spelling may impede\n" +
+                        "meaning.\n" +
+                        "- Band 3: The resource is inadequate (which may be due to\n" +
+                        "the response being significantly underlength).\n" +
+                        "Possible over-dependence on input material or\n" +
+                        "memorised language.\n" +
+                        "Control of word choice and/or spelling is very\n" +
+                        "limited, and errors predominate. These errors may\n" +
+                        "severely impede meaning." +
+                        "- Band 2: The resource is extremely limited with few\n" +
+                        "recognisable strings, apart from memorised\n" +
+                        "phrases.\n" +
+                        "There is no apparent control of word formation\n" +
+                        "and/or spelling." +
+                        "- Band 1: Responses of 20 words or fewer are rated at\n" +
+                        "Band 1.\n" +
+                        "No resource is apparent, except for a few isolated\n" +
+                        "words." +
+                        "- Band 0: Should only be used where a candidate did not attend or attempt the question in any way, used a language other than English throughout, or where there is proof that a candidate’s answer has been totally\n" +
+                        "memorised.";
+
+        public static final String IELTS_PUBLIC_DESCRIPTORS_WritingTask1_Grammar =
+                "**Grammatical Range and Accuracy**:\n" +
+                        "- Band 9: A wide range of structures within the scope\n" +
+                        "of the task is used with full flexibility and\n" +
+                        "control.\n" +
+                        "Punctuation and grammar are used\n" +
+                        "appropriately throughout.\n" +
+                        "Minor errors are extremely rare and have\n" +
+                        "minimal impact on communication" +
+                        "- Band 8: A wide range of structures within the scope\n" +
+                        "of the task is flexibly and accurately used.\n" +
+                        "The majority of sentences are error-free, and\n" +
+                        "punctuation is well managed.\n" +
+                        "Occasional, non-systematic errors and\n" +
+                        "inappropriacies occur, but have minimal\n" +
+                        "impact on communication." +
+                        "- Band 7: A variety of complex structures is used with\n" +
+                        "some flexibility and accuracy.\n" +
+                        "Grammar and punctuation are generally well\n" +
+                        "controlled, and error-free sentences are\n" +
+                        "frequent.\n" +
+                        "A few errors in grammar may persist, but\n" +
+                        "these do not impede communication." +
+                        "- Band 6: A mix of simple and complex sentence\n" +
+                        "forms is used but flexibility is limited.\n" +
+                        "Examples of more complex structures are\n" +
+                        "not marked by the same level of accuracy\n" +
+                        "as in simple structures.\n" +
+                        "Errors in grammar and punctuation occur,\n" +
+                        "but rarely impede communication\n" +
+                        "- Band 5: The range of structures is limited and\n" +
+                        "rather repetitive.\n" +
+                        "Although complex sentences are\n" +
+                        "attempted, they tend to be faulty, and the\n" +
+                        "greatest accuracy is achieved on simple\n" +
+                        "sentences.\n" +
+                        "Grammatical errors may be frequent and\n" +
+                        "cause some difficulty for the reader.\n" +
+                        "Punctuation may be faulty." +
+                        "- Band 4: A very limited range of structures is\n" +
+                        "used.\n" +
+                        "Subordinate clauses are rare and\n" +
+                        "simple sentences predominate.\n" +
+                        "Some structures are produced accurately\n" +
+                        "but grammatical errors are frequent and\n" +
+                        "may impede meaning.\n" +
+                        "Punctuation is often faulty or inadequate.\n" +
+                        "- Band 3: Sentence forms are attempted, but\n" +
+                        "errors in grammar and punctuation\n" +
+                        "predominate (except in memorised\n" +
+                        "phrases or those taken from the input\n" +
+                        "material). This prevents most meaning\n" +
+                        "from coming through.\n" +
+                        "Length may be insufficient to provide\n" +
+                        "evidence of control of sentence forms." +
+                        "- Band 2: There is little or no evidence of sentence\n" +
+                        "forms (except in memorised phrases).\n" +
+                        "- Band 1: Responses of 20 words or fewer are\n" +
+                        "rated at Band 1.\n" +
+                        "No rateable language is evident." +
+                        "- Band 0: Should only be used where a candidate did not attend or attempt the question in any way, used a language other than English throughout, or where there is proof that a candidate’s answer has been totally\n" +
+                        "memorised.";
+
+
+
     //Prompt cho Writing 1
     private String buildTask1Prompt(String question, String answer) {
-        String promptBuilder1 =
-                "You must return response strictly in JSON format.\n" +
-                "You are an IELTS examiner analyzing Writing Task 1 based on visual data. Extremely strict grading " +
-                "1. DATA VERIFICATION:\n" +
-                "   - Cross-check ALL data points/trends between image and student's answer\n" +
-                "   - Flag ANY discrepancies\n" +
-                "   - Verify ALL numerical values/percentages against visual data (tolerance: 0% error)\n" +
+        return "You must return response strictly in JSON format.\n" +
+                "You are an IELTS examiner analyzing Academic Writing Task 1 based on visual data. Apply extremely strict grading criteria to BOTH data accuracy and language quality (grammar, vocabulary, and spelling).\n" +
+                "For all other issues (grammar, academic vocabulary, spelling, sentence structure), ONLY include the smallest possible incorrect unit (usually a word or short phrase) in 'originalText'. Do NOT include full sentences for these error types.\n"+
+        "You must carefully cross-check EVERY numerical figure, comparison, and trend against the chart/table/image provided in the question, AND also rigorously check the student's grammar, academic vocabulary, spelling, and sentence structure.\n" +
+                "IF ANY numerical value, trend description, date, or percentage does NOT MATCH the data from the visual, you MUST add it to the errorCorrections list by errorType wrong data\n" +
+                "1. DATA ANALYSIS REQUIREMENTS:\n" +
+                "- Verify ALL data points/trends between visual and student's description\n" +
+                "- Only mark discrepancies in errorCorrections if the student's paraphrase changes the original meaning or data value\n" +
+                "- Accept paraphrasing if the numerical meaning and trend are accurately conveyed (e.g., “just over 50%” is acceptable for 52%)\n" +
+                "- Check for accurate time references (past/present/future tenses)\n\n" +
 
-                "\n" +
-                "2. EVALUATION (Official IELTS Criteria):\n" +
-                        "• Task Achievement (25%):\n" +
-                        "- [MUST HAVE] Each main idea must be clearly extended with explanation and/or example. \n" +
-                        "  (If ideas are presented without development, cap maximum Band 6.)\n" +
-                        "- Ideas must be specific and avoid generalised statements. \n" +
-                        "  (Over-generalisation = -0.5 band)\n"+
-                        "   - [MUST HAVE] Clear overview paragraph (missing = max Band 5)\n" +
-                        "   - Accurate data reporting (1 error = -0.5 band)\n" +
-                        "   - Appropriate detail selection\n" +
-                        "   - IELTS Public Descriptors:\n" +
-                        "     • Band 9: Fully addresses all parts of the task. Presents a fully developed position with relevant, fully extended and well-supported ideas.\n" +
-                        "     • Band 8: Sufficiently addresses all parts. Presents a well-developed response with relevant, extended and supported ideas.\n" +
-                        "     • Band 7: Addresses all parts. Presents a clear position, extends and supports main ideas though there may be over-generalisation or lack of focus.\n" +
-                        "     • Band 6: Addresses most parts. Presents relevant main ideas though some may lack clarity, development or conclusions.\n" +
-                        "     • Band 5: Addresses task only partially. Some main ideas limited/irrelevant. Development may be unclear.\n" +
-                        "\n" +
-                        "• Coherence & Cohesion (25%):\n" +
-                        "- Cohesion must include varied linking devices and natural progression.\n" +
-                        "  (If listing-type progression dominates, cap at Band 6.)\n"+
-                        "   - Logical paragraphing (Introduction/Overview/Details)\n" +
-                        "   - Effective linking (but not repetitive)\n" +
-                        "   - Progression (Band 7+ requires progression beyond listing)\n" +
-                        "   - IELTS Public Descriptors:\n" +
-                        "     • Band 9: Uses cohesion naturally so it attracts no attention. Skilfully manages paragraphing.\n" +
-                        "     • Band 8: Sequences information and ideas logically. Manages all aspects of cohesion well. Uses paragraphing sufficiently and appropriately.\n" +
-                        "     • Band 7: Logically organises information with clear progression. Uses cohesive devices appropriately, though there may be under-/over-use.\n" +
-                        "     • Band 6: Arranges information coherently but cohesion may be faulty or mechanical. Paragraphing present but not always logical.\n" +
-                        "     • Band 5: Presents information with some organisation but lacks overall progression. Inadequate, inaccurate or over-use of cohesive devices. Poor paragraphing.\n" +
-                        "\n" +
-                        "• Lexical Resource (25%):\n"+
-                        "- Advanced vocabulary must include topic-specific academic collocations. \n" +
-                        "  (If vocabulary remains general and safe, cap at Band 6.)\n"+
-                        "   - Academic vocabulary (Band 9 requires ≥8 advanced terms)\n" +
-                        "   - Collocation accuracy (e.g. \"sharp increase\" not \"fast increase\")\n" +
-                        "   - Spelling (3 errors = -0.5 band)\n" +
-                        "   - IELTS Public Descriptors:\n" +
-                        "     • Band 9: Uses wide range of vocabulary naturally and precisely. Sophisticated control. Rare minor slips.\n" +
-                        "     • Band 8: Uses wide range fluently and flexibly. Skilfully uses uncommon items with rare inaccuracies.\n" +
-                        "     • Band 7: Uses sufficient range with flexibility. Attempts less common items with some errors.\n" +
-                        "     • Band 6: Uses adequate range. Attempts less common terms but with inaccuracy.\n" +
-                        "     • Band 5: Limited range. Noticeable spelling/word formation errors. May cause difficulty for the reader.\n" +
-                        "\n" +
-                        "• Grammar (25%):\n" +
-                        "- Minimum of 3 complex structures per body paragraph.\n" +
-                        "  (If majority are simple or compound sentences, cap at Band 6.)\n"+
-                        "   - Tense accuracy (graph data must use past tense if historical)\n" +
-                        "   - Complex structures (Band 7+ needs ≥3 complex sentences)\n" +
-                        "   - Punctuation (comma errors = -0.5 band)\n" +
-                        "   - IELTS Public Descriptors:\n" +
-                        "     • Band 9: Uses wide range of structures with full flexibility and accuracy. Rare minor slips.\n" +
-                        "     • Band 8: Uses wide range of structures. Majority of sentences are error-free.\n" +
-                        "     • Band 7: Uses variety of complex structures. Frequent error-free sentences.\n" +
-                        "     • Band 6: Mix of simple/complex forms. Some errors but rarely reduce communication.\n" +
-                        "     • Band 5: Limited range. Frequent grammatical and punctuation errors. Errors can cause difficulty for the reader."+
-                        "\n" +
-                "3. SCORING SYSTEM:\n" +
-                "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
-                "   - Deduct 0.5 band per 2 major errors\n" +
-                "   - Automatic caps: No overview → max 5.0 | Data errors → max 6.5"+
+                "2. EVALUATION CRITERIA (Official IELTS Band Descriptors):\n" +
+                "**Task Achievement** (Must include):\n" +
+                "- Clear overview paragraph (missing = automatic Band 5 cap)\n" +
+                "- Accurate data reporting (1 major error = -0.5 band)\n" +
+                "- Appropriate feature selection (minimum 3 key features for Band 6+)\n" +
+                "- Logical grouping of information\n" +
+                "- " + IELTS_PUBLIC_DESCRIPTORS_WritingTask1_TaskAchievement + "\n\n" +
 
-                "RESPONSE FORMAT:\n" +
-                "- score: decimal (overall band score, e.g. 6.5)\n" +
-                "- feedback: {\n" +
-                "    (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)\n" +
-                "    errorCorrections: [{\n" +
-                "      originalText: string,  // EXACT match required\n" +
-                "      correctedText: string,\n" +
-                "      errorType: string,\n" +
-                "      explanation: string,\n" +
-                "      sentenceContext: string // the full sentence from the answer that contains the originalText; must match exactly as in the answer\n" +
+                "**Coherence and Cohesion** (Must include):\n" +
+                "- Logical paragraphing (Introduction/Overview/Details)\n" +
+                "- Effective linking (minimum 4 different cohesive devices for Band 6+)\n" +
+                "- Progression beyond simple listing (required for Band 7+)\n" +
+                "- " + IELTS_PUBLIC_DESCRIPTORS_WritingTask1_CoherenceCohesion + "\n\n" +
+
+                "**Lexical Resource** (Must include):\n" +
+                "- Minimum 5 academic vocabulary items (e.g., 'fluctuate' not 'go up and down')\n" +
+                "- Accurate collocations (e.g., 'sharp increase' not 'fast increase')\n" +
+                "- Spelling (3 errors = -0.5 band)\n" +
+                "- " + IELTS_PUBLIC_DESCRIPTORS_WritingTask1_LexicalResource + "\n\n" +
+
+                "**Grammatical Range and Accuracy** (Must include):\n" +
+                "- Minimum 3 complex structures per paragraph (Band 6+ requirement)\n" +
+                "- Tense consistency (especially for time-based data)\n" +
+                "- Punctuation accuracy (comma errors = -0.5 band)\n" +
+                "- " + IELTS_PUBLIC_DESCRIPTORS_WritingTask1_Grammar + "\n\n" +
+
+                "3. AUTOMATIC BAND CAPS:\n" +
+                "- No overview paragraph = maximum Band 5\n" +
+                "- Data inaccuracy = maximum Band 6.5\n" +
+                "- Majority simple sentences = maximum Band 6\n" +
+                "- General vocabulary only = maximum Band 6\n\n" +
+
+                "4. SCORING SYSTEM:\n" +
+                "- 0.5 band deduction per 2 major errors\n" +
+                "- Band 9 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n\n" +
+
+                "5. ERROR CORRECTION RULES:\n" +
+                "- For errorType 'wrong data', you MAY use the full sentence as 'originalText' if necessary to clearly show the data inaccuracy.\n" +
+                "- For errorTypes 'grammar', 'spelling', and 'vocabulary', you MUST only include the smallest incorrect unit (usually 1 word or a short phrase) in 'originalText'. Do NOT include full sentences for these types.\n" +
+                "- Each error must be listed separately, even if they appear in the same sentence.\n" +
+                "- Always include the full sentence in 'sentenceContext' for clarity.\n" +
+                "- Do NOT ignore grammar, vocabulary, or spelling issues — they MUST be corrected even if the data is accurate.\n"
+
+                +
+
+        "RESPONSE FORMAT:\n" +
+                "{\n" +
+                "  \"score\": number (e.g. 6.5),\n" +
+                "  \"feedback\": {\n" +
+                "    \"errorCorrections (Follow ERROR CORRECTION RULES:)\": [{\n" +
+                "      \"originalText\": string, // Full sentence only for wrong data; word/phrase for other error types\n" +
+                "      \"correctedText\": string,(You must fix correctly)\n" +
+                "      \"errorType\": \"vocabulary/spelling/grammar/wrong data\",\n" +
+                "      \"explanation\": string,\n" +
+                "      \"sentenceContext\": \"full original sentence\"\n" +
                 "    }],\n" +
-                "    (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)\n" +
-                "    sentenceImprovements: [{\n" +
-                "      originalSentence: string,\n" +
-                "      improvedSentence: string,\n" +
-                "      techniquesUsed: [string],\n" +
-                "      bandBoost: string (6 -> 6.5)\n" +
+                "    \"sentenceImprovements\": [{\n" +
+                "      \"originalSentence\": string,\n" +
+                "      \"improvedSentence\": string,\n" +
+                "      \"techniquesUsed\": [\"academic vocab\", \"complex structure\", etc],\n" +
+                "      \"bandBoost\": string (e.g. \"6 → 6.5\")\n" +
                 "    }],\n" +
-                "    overallComment: string\n" +
-                "}\n" +
-                "- evaluation: {\n" +
-                "    TaskAchievement: {scoreEva: string, reviewEva: string},\n" +
-                "    CoherenceCohesion: {scoreEva: string, reviewEva: string},\n" +
-                "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
-                "    Grammar: {scoreEva: string, reviewEva: string}\n" +
-                "  }\n" +
-                "sampleAnswer: string (Optional band 9 model)"+
-                "Question:\n" + question + "\n" +
-                "Original Answer:\n" + answer;
+                "    \"overallComment\": string (100+ words)\n" +
+                "  },\n" +
+                "  \"evaluation\": {\n" +
+                "    \"TaskAchievement\": {\"score\": number, \"review\": string},\n" +
+                "    \"CoherenceCohesion\": {\"score\": number, \"review\": string},\n" +
+                "    \"LexicalResource\": {\"score\": number, \"review\": string},\n" +
+                "    \"Grammar\": {\"score\": number, \"review\": string}\n" +
+                "  },\n" +
+                "  \"sampleAnswer\": string (optional Band 9 model)\n" +
+                "}\n\n" +
 
-        return promptBuilder1;
+                "QUESTION:\n" + question + "\n\n" +
+                "STUDENT'S ANSWER:\n" + answer;
     }
-    private static final String IELTS_PUBLIC_DESCRIPTORSLexicalResourceWrtingTask2 =
-            "  - IELTS Public Descriptors:\n" +
-                     "• Band 9: Full flexibility and precise use are widely evident. A wide range of vocabulary is used accurately and appropriately with very natural and sophisticated control of lexical features. Minor errors in spelling and word formation are extremely rare and have minimal impact on communication.\n" +
-                    "\n" +
-                    "• Band 8: A wide resource is fluently and flexibly used to convey precise meanings. There is skilful use of uncommon and/or idiomatic items when appropriate, despite occasional inaccuracies in word choice and collocation. Occasional errors in spelling and/or word formation may occur, but have minimal impact on communication.\n" +
-                    "\n" +
-                    "• Band 7: The resource is sufficient to allow some flexibility and precision. There is some ability to use less common and/or idiomatic items. An awareness of style and collocation is evident, though inappropriacies occur. There are only a few errors in spelling and/or word formation and they do not detract from overall clarity.\n" +
-                    "\n" +
-                    "• Band 6: The resource is generally adequate and appropriate for the task. The meaning is generally clear in spite of a rather restricted range or a lack of precision in word choice. If the writer is a risk-taker, there will be a wider range of vocabulary used but higher degrees of inaccuracy or inappropriacy. There are some errors in spelling and/or word formation, but these do not impede communication.\n" +
-                    "\n" +
-                    "• Band 5: The resource is limited but minimally adequate for the task. Simple vocabulary may be used accurately but the range does not permit much variation in expression. There may be frequent lapses in the appropriacy of word choice and a lack of flexibility is apparent in frequent simplifications and/or repetitions. Errors in spelling and/or word formation may be noticeable and may cause some difficulty for the reader.\n" +
-                    "\n" +
-                    "• Band 4: The resource is limited and inadequate for or unrelated to the task. Vocabulary is basic and may be used repetitively. There may be inappropriate use of lexical chunks (e.g., memorised phrases, formulaic language and/or language from the input material). Inappropriate word choice and/or errors in word formation and/or in spelling may impede meaning.\n" +
-                    "\n" +
-                    "• Band 3: The resource is inadequate (which may be due to the response being significantly under-length). Possible over-dependence on input material or memorised language. Control of word choice and/or spelling is very limited, and errors predominate. These errors may severely impede meaning.\n" +
-                    "\n" +
-                    "• Band 2: The resource is extremely limited with few recognisable strings, apart from memorised phrases. There is no apparent control of word choice or spelling.\n" +
-                    "\n" +
-                    "• Band 1: Responses of 20 words or fewer are rated at Band 1. No resource is apparent, except for a few isolated words."
-            ;
-    private static final String IELTS_PUBLIC_DESCRIPTORSGrammarWrtingTask2 =
-            "  - IELTS Public Descriptors: " +
-                    "• Band 9: A wide range of structures is used with full flexibility and control. " +
-                    "Punctuation and grammar are used appropriately throughout. " +
-                    "Minor errors are extremely rare and have minimal impact on communication. " +
-
-                    "• Band 8: A wide resource is fluently and flexibly used to convey precise meanings. " +
-                    "There is skilfully use of uncommon and/or idiomatic items when appropriate, despite occasional inaccuracies in word choice and collocation. " +
-                    "Occasional errors in spelling and/or word formation may occur, but have minimal impact on communication. " +
-
-                    "• Band 7: A variety of complex structures is used with some flexibility and accuracy. " +
-                    "Grammar and punctuation are generally well controlled, and error-free sentences are frequent. " +
-                    "A few errors in grammar may persist, but these do not impede communication. " +
-
-                    "• Band 6: A mix of simple and complex sentence forms is used but flexibility is limited. " +
-                    "Examples of more complex structures are not marked by the same level of accuracy as in simple structures. " +
-                    "Errors in grammar and punctuation occur, but rarely impede communication. " +
-
-                    "• Band 5: The range of structures is limited and rather repetitive. " +
-                    "Although complex sentences are attempted, they tend to be faulty, and the greatest accuracy is achieved on simple sentences. " +
-                    "Grammatical errors may be frequent and cause some difficulty for the reader. " +
-                    "Punctuation may be faulty. " +
-
-                    "• Band 4: A very limited range of structures is used. " +
-                    "Subordinate clauses are rare and simple sentences predominate. " +
-                    "Some structures are produced accurately but grammatical errors are frequent and may impede meaning. " +
-                    "Punctuation is often faulty or inadequate. " +
-
-                    "• Band 3: Sentence forms are attempted, but errors in grammar and punctuation predominate (except in memorised phrases or those taken from the input material). " +
-                    "This prevents most meaning from coming through. " +
-                    "Length may be insufficient to provide evidence of control of sentence forms. " +
-
-                    "• Band 2: There is little or no evidence of sentence forms (except in memorised phrases). " +
-
-                    "• Band 1: Responses of 20 words or fewer are rated at Band 1. " +
-                    "No rateable language is evident.";
-    private static final String IELTS_PUBLIC_DESCRIPTORSTaskResponseTask2 =
-            "  - IELTS Public Descriptors: " +
-                    "• Band 9: The prompt is appropriately addressed and explored in depth.\n" +
+    private static final String IELTS_PUBLIC_DESCRIPTORS_WritingTask2_TaskResponse =
+            "• Band 9: The prompt is appropriately addressed and explored in depth.\n" +
                     "A clear and fully developed position is presented which directly\n" +
                     "answers the question/s.\n" +
                     "Ideas are relevant, fully extended and well supported.\n" +
-                    "Any lapses in content or support are extremely rare. " +
-
+                    "Any lapses in content or support are extremely rare.\n" +
                     "• Band 8: The prompt is appropriately and sufficiently addressed.\n" +
                     "A clear and well-developed position is presented in response to the\n" +
-                    "question" +
+                    "question/s.\n" +
                     "Ideas are relevant, well extended and supported.\n" +
-                    "There may be occasional omissions or lapses in content.\n " +
+                    "There may be occasional omissions or lapses in content." +
+                    "• Band 7: The main parts of the prompt are appropriately addressed.\n" +
+                    "A clear and developed position is presented.\n" +
+                    "Main ideas are extended and supported but there may be a\n" +
+                    "tendency to over-generalise or there may be a lack of focus and\n" +
+                    "precision in supporting ideas/material." +
+                    "• Band 6: The main parts of the prompt are addressed (though some may be\n" +
+                    "more fully covered than others). An appropriate format is used.\n" +
+                    "A position is presented that is directly relevant to the prompt,\n" +
+                    "although the conclusions drawn may be unclear, unjustified or\n" +
+                    "repetitive.\n" +
+                    "Main ideas are relevant, but some may be insufficiently developed\n" +
+                    "or may lack clarity, while some supporting arguments and evidence\n" +
+                    "may be less relevant or inadequate.\n" +
+                    "• Band 5: The main parts of the prompt are incompletely addressed. The\n" +
+                    "format may be inappropriate in places.\n" +
+                    "The writer expresses a position, but the development is not always\n" +
+                    "clear.\n" +
+                    "Some main ideas are put forward, but they are limited and are not\n" +
+                    "sufficiently developed and/or there may be irrelevant detail.\n" +
+                    "There may be some repetition.\n" +
+                    "• Band 4: The prompt is tackled in a minimal way, or the answer is\n" +
+                    "tangential, possibly due to some misunderstanding of\n" +
+                    "the prompt. The format may be inappropriate.\n" +
+                    "A position is discernible, but the reader has to read\n" +
+                    "carefully to find it.\n" +
+                    "Main ideas are difficult to identify and such ideas that\n" +
+                    "are identifiable may lack relevance, clarity and/or\n" +
+                    "support.\n" +
+                    "Large parts of the response may be repetitive. " +
+                    "• Band 3: No part of the prompt is adequately addressed, or the\n" +
+                    "prompt has been misunderstood.\n" +
+                    "No relevant position can be identified, and/or there is\n" +
+                    "little direct response to the question/s.\n" +
+                    "There are few ideas, and these may be irrelevant or\n" +
+                    "insufficiently developed.\n" +
+                    "• Band 2: The content is barely related to the prompt.\n" +
+                    "No position can be identified.\n" +
+                    "There may be glimpses of one or two ideas without\n" +
+                    "development. " +
+                    "• Band 1: Responses of 20 words or fewer are rated at Band 1.\n" +
+                    "The content is wholly unrelated to the prompt.\n" +
+                    "Any copied rubric must be discounted." +
+                    "• Band 0: Should only be used where a candidate did not attend or attempt the question in any way, used a language other than English throughout, or where there is proof that a candidate’s answer has been totally memorised."
 
-                    "• Band 7: A variety of complex structures is used with some flexibility and accuracy. " +
-                    "Grammar and punctuation are generally well controlled, and error-free sentences are frequent. " +
-                    "A few errors in grammar may persist, but these do not impede communication. " +
+            ;
 
-                    "• Band 6: A mix of simple and complex sentence forms is used but flexibility is limited. " +
-                    "Examples of more complex structures are not marked by the same level of accuracy as in simple structures. " +
-                    "Errors in grammar and punctuation occur, but rarely impede communication. " +
+    private static final String IELTS_PUBLIC_DESCRIPTORS_WritingTask2_CoherenceCohesion =
+                    "• Band 9: The message can be followed effortlessly.\n" +
+                            "Cohesion is used in such a way that it very\n" +
+                            "rarely attracts attention.\n" +
+                            "Any lapses in coherence or cohesion are\n" +
+                            "minimal.\n" +
+                            "Paragraphing is skilfully managed.\n" +
+                    "• Band 8: The message can be followed with ease.\n" +
+                            "Information and ideas are logically sequenced,\n" +
+                            "and cohesion is well managed.\n" +
+                            "Occasional lapses in coherence and cohesion\n" +
+                            "may occur.\n" +
+                            "Paragraphing is used sufficiently and\n" +
+                            "appropriately. " +
+                    "• Band 7: Information and ideas are logically organised,\n" +
+                            "and there is a clear progression throughout\n" +
+                            "the response. (A few lapses may occur, but\n" +
+                            "these are minor.)\n" +
+                            "A range of cohesive devices including\n" +
+                            "reference and substitution is used flexibly but\n" +
+                            "with some inaccuracies or some over/under\n" +
+                            "use.\n" +
+                            "Paragraphing is generally used effectively to\n" +
+                            "support overall coherence, and the sequencing\n" +
+                            "of ideas within a paragraph is generally logical.   " +
+                    "• Band 6: Information and ideas are generally arranged\n" +
+                            "coherently and there is a clear overall\n" +
+                            "progression.\n" +
+                            "Cohesive devices are used to some good effect\n" +
+                            "but cohesion within and/or between sentences\n" +
+                            "may be faulty or mechanical due to misuse,\n" +
+                            "overuse or omission.\n" +
+                            "The use of reference and substitution may lack\n" +
+                            "flexibility or clarity and result in some\n" +
+                            "repetition or error.\n" +
+                            "Paragraphing may not always be logical and/or\n" +
+                            "the central topic may not always be clear.\n" +
+                    "• Band 5: Organisation is evident but is not wholly logical\n" +
+                            "and there may be a lack of overall progression.\n" +
+                            "Nevertheless, there is a sense of underlying\n" +
+                            "coherence to the response.\n" +
+                            "The relationship of ideas can be followed but\n" +
+                            "the sentences are not fluently linked to each\n" +
+                            "other.\n" +
+                            "There may be limited/overuse of cohesive\n" +
+                            "devices with some inaccuracy.\n" +
+                            "The writing may be repetitive due to\n" +
+                            "inadequate and/or inaccurate use of reference\n" +
+                            "and substitution.\n" +
+                            "Paragraphing may be inadequate or\n" +
+                            "missing.\n" +
+                    "• Band 4: Information and ideas are evident but not arranged\n" +
+                            "coherently and there is no clear progression within the\n" +
+                            "response.\n" +
+                            "Relationships between ideas can be unclear and/or\n" +
+                            "inadequately marked. There is some use of basic cohesive\n" +
+                            "devices, which may be inaccurate or repetitive.\n" +
+                            "There is inaccurate use or a lack of substitution or\n" +
+                            "referencing.\n" +
+                            "There may be no paragraphing and/or no clear main topic\n" +
+                            "within paragraphs" +
+                    "• Band 3: There is no apparent logical organisation. Ideas are\n" +
+                            "discernible but difficult to relate to each other.\n" +
+                            "There is minimal use of sequencers or cohesive devices.\n" +
+                            "Those used do not necessarily indicate a logical relationship\n" +
+                            "between ideas.\n" +
+                            "There is difficulty in identifying referencing.\n" +
+                            "Any attempts at paragraphing are unhelpful." +
+                    "• Band 2: There is little relevant message, or the entire response may\n" +
+                            "be off-topic.\n" +
+                            "There is little evidence of control of organisational features." +
+                    "• Band 1: Responses of 20 words or fewer are rated at Band 1.\n" +
+                            "The writing fails to communicate any message and appears\n" +
+                            "to be by a virtual non-writer.\n" +
+                    "• Band 0: Should only be used where a candidate did not attend or attempt the question in any way, used a language other than English throughout, or where there is proof that a candidate’s answer has been totally memorised.";
 
-                    "• Band 5: The range of structures is limited and rather repetitive. " +
-                    "Although complex sentences are attempted, they tend to be faulty, and the greatest accuracy is achieved on simple sentences. " +
-                    "Grammatical errors may be frequent and cause some difficulty for the reader. " +
-                    "Punctuation may be faulty. " +
 
-                    "• Band 4: A very limited range of structures is used. " +
-                    "Subordinate clauses are rare and simple sentences predominate. " +
-                    "Some structures are produced accurately but grammatical errors are frequent and may impede meaning. " +
-                    "Punctuation is often faulty or inadequate. " +
+    private static final String IELTS_PUBLIC_DESCRIPTORS_WritingTask2_LexicalResource =
+            "• Band 9:  Full flexibility and precise use are widely\n" +
+                    "evident.\n" +
+                    "A wide range of vocabulary is used\n" +
+                    "accurately and appropriately with very\n" +
+                    "natural and sophisticated control of lexical\n" +
+                    "features.\n" +
+                    "Minor errors in spelling and word\n" +
+                    "formation are extremely rare and hav" +
+                    "• Band 8:  A wide resource is fluently and flexibly\n" +
+                    "used to convey precise meanings.\n" +
+                    "There is skilful use of uncommon and/or\n" +
+                    "idiomatic items when appropriate, despite\n" +
+                    "occasional inaccuracies in word choice and\n" +
+                    "collocation.\n" +
+                    "Occasional errors in spelling and/or word\n" +
+                    "formation may occur, but have minimal\n" +
+                    "impact on communication" +
+                    "• Band 7: The resource is sufficient to allow some\n" +
+                    "flexibility and precision.\n" +
+                    "There is some ability to use less common\n" +
+                    "and/or idiomatic items.\n" +
+                    "An awareness of style and collocation is\n" +
+                    "evident, though inappropriacies occur.\n" +
+                    "There are only a few errors in spelling\n" +
+                    "and/or word formation and they do not\n" +
+                    "detract from overall clarity. " +
+                    "• Band 6: The resource is generally adequate and\n" +
+                    "appropriate for the task.\n" +
+                    "The meaning is generally clear in spite of a\n" +
+                    "rather restricted range or a lack of\n" +
+                    "precision in word choice.\n" +
+                    "If the writer is a risk-taker, there will be a\n" +
+                    "wider range of vocabulary used but higher\n" +
+                    "degrees of inaccuracy or inappropriacy.\n" +
+                    "There are some errors in spelling and/or\n" +
+                    "word formation, but these do not impede\n" +
+                    "communication.\n" +
+                    "• Band 5: The resource is limited but minimally\n" +
+                    "adequate for the task.\n" +
+                    "Simple vocabulary may be used accurately\n" +
+                    "but the range does not permit much\n" +
+                    "variation in expression.\n" +
+                    "There may be frequent lapses in the\n" +
+                    "appropriacy of word choice and a lack of\n" +
+                    "flexibility is apparent in frequent\n" +
+                    "simplifications and/or repetitions.\n" +
+                    "Errors in spelling and/or word formation\n" +
+                    "may be noticeable and may cause some\n" +
+                    "difficulty for the reader.\n" +
+                    "• Band 4: The resource is limited and inadequate for\n" +
+                    "or unrelated to the task. Vocabulary is\n" +
+                    "basic and may be used repetitively.\n" +
+                    "There may be inappropriate use of lexical\n" +
+                    "chunks (e.g. memorised phrases, formulaic\n" +
+                    "language and/or language from the input\n" +
+                    "material).\n" +
+                    "Inappropriate word choice and/or errors in\n" +
+                    "word formation and/or in spelling\n" +
+                    "may impede meaning.  " +
+                    "• Band 3: The resource is inadequate (which may be\n" +
+                    "due to the response being significantly\n" +
+                    "underlength). Possible over-dependence on\n" +
+                    "input material or memorised language.\n" +
+                    "Control of word choice and/or spelling is\n" +
+                    "very limited, and errors predominate. These\n" +
+                    "errors may severely impede meaning." +
+                    "• Band 2: The resource is extremely limited with few\n" +
+                    "recognisable strings, apart from memorised\n" +
+                    "phrases.\n" +
+                    "There is no apparent control of word\n" +
+                    "formation and/or spelling." +
+                    "• Band 1: Responses of 20 words or fewer are rated\n" +
+                    "at Band 1.\n" +
+                    "No resource is apparent, except for a few\n" +
+                    "isolated words." +
+                    "• Band 0: Should only be used where a candidate did not attend or attempt the question in any way, used a language other than English throughout, or where there is proof that a candidate’s answer has been totally memorised.";
 
-                    "• Band 3: Sentence forms are attempted, but errors in grammar and punctuation predominate (except in memorised phrases or those taken from the input material). " +
-                    "This prevents most meaning from coming through. " +
-                    "Length may be insufficient to provide evidence of control of sentence forms. " +
 
-                    "• Band 2: There is little or no evidence of sentence forms (except in memorised phrases). " +
+    private static final String IELTS_PUBLIC_DESCRIPTORS_WritingTask2_Grammar =
+            "• Band 9: A wide range of structures is used with full\n" +
+                    "flexibility and control.\n" +
+                    "Punctuation and grammar are used\n" +
+                    "appropriately throughout.\n" +
+                    "Minor errors are extremely rare and have\n" +
+                    "minimal impact on communication.\n" +
+                    "• Band 8: A wide range of structures is flexibly and\n" +
+                    "accurately used.\n" +
+                    "The majority of sentences are error-free,\n" +
+                    "and punctuation is well managed.\n" +
+                    "Occasional, non-systematic errors and\n" +
+                    "inappropriacies occur, but have minimal\n" +
+                    "impact on communication.\n" +
+                    "• Band 7:  A variety of complex structures is used\n" +
+                    "with some flexibility and accuracy.\n" +
+                    "Grammar and punctuation are generally\n" +
+                    "well controlled, and error-free sentences\n" +
+                    "are frequent.\n" +
+                    "A few errors in grammar may persist, but\n" +
+                    "these do not impede communication.\n" +
+                    "• Band 6: A mix of simple and complex sentence\n" +
+                    "forms is used but flexibility is limited.\n" +
+                    "Examples of more complex structures are\n" +
+                    "not marked by the same level of accuracy\n" +
+                    "as in simple structures.\n" +
+                    "Errors in grammar and punctuation occur,\n" +
+                    "but rarely impede communication.\n" +
+                    "• Band 5: The range of structures is limited and\n" +
+                    "rather repetitive.\n" +
+                    "Although complex sentences are\n" +
+                    "attempted, they tend to be faulty, and the\n" +
+                    "greatest accuracy is achieved on simple\n" +
+                    "sentences.\n" +
+                    "Grammatical errors may be frequent and\n" +
+                    "cause some difficulty for the reader.\n" +
+                    "Punctuation may be faulty.\n" +
+                    "• Band 4: A very limited range of structures is\n" +
+                    "used.\n" +
+                    "Subordinate clauses are rare and\n" +
+                    "simple sentences predominate.\n" +
+                    "Some structures are produced\n" +
+                    "accurately but grammatical errors are\n" +
+                    "frequent and may impede meaning.\n" +
+                    "Punctuation is often faulty or\n" +
+                    "inadequate" +
+                    "• Band 3: Sentence forms are attempted, but\n" +
+                    "errors in grammar and punctuation\n" +
+                    "predominate (except in memorised\n" +
+                    "phrases or those taken from the input\n" +
+                    "material). This prevents most meaning\n" +
+                    "from coming through.\n" +
+                    "Length may be insufficient to\n" +
+                    "provide evidence of control of\n" +
+                    "sentence forms. " +
+                    "• Band 2: There is little or no evidence of\n" +
+                    "sentence forms (except in memorised\n" +
+                    "phrases).\n" +
+                    "• Band 1: Responses of 20 words or fewer are\n" +
+                    "rated at Band 1.\n" +
+                    "No rateable language is evident.\n" +
+                    "• Band 0: Should only be used where a candidate did not attend or attempt the question in any way, used a language other than English throughout, or where there is proof that a candidate’s answer has been totally memorised.";
 
-                    "• Band 1: Responses of 20 words or fewer are rated at Band 1. " +
-                    "No rateable language is evident.";
+
 
     private String buildTask2Prompt(String question, String answer) {
         String promptBuilder2 =
                 "You must return response strictly in JSON format.\n" +
-                        "You are an IELTS examiner analyzing Writing Task 2. Extremely strict grading" +
-                        "Before evaluation, you must first carefully understand:\n" +
-                        "1. The question being asked (context and requirements)\n" +
-                        "2. The full transcript of the user's response (content, grammar, vocabulary)\n" +
-                        "3. You must evaluate whether the response is relevant to the question and does not go off-topic.\n" +
-                        "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
-                        "4. You must strictly check if the candidate addresses **all bullet points** in the cue card:\n" +
-                        "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
+                        "You are an IELTS examiner evaluating Writing Task 2 based on the four official criteria: Task Response, Coherence and Cohesion, Lexical Resource, and Grammatical Range and Accuracy. Apply **extremely strict** Band Descriptor standards.\n" +
                         "\n" +
-                        "• Task Achievement (25%):\n" +
-                        "- [MUST HAVE] Each main idea must be clearly extended with explanation and/or example. \n" +
-                        "  (If ideas are presented without development, cap maximum Band 6.)\n" +
-                        "- Ideas must be specific and avoid generalised statements. \n" +
-                        "  (Over-generalisation = -0.5 band)\n"+
-                        "   - [MUST HAVE] Clear overview paragraph (missing = max Band 5)\n" +
-                        "   - Accurate data reporting (1 error = -0.5 band)\n" +
-                        "   - Appropriate detail selection\n" +
-                        "   - IELTS Public Descriptors:\n" +
-                        "     • Band 9: Fully addresses all parts of the task. Presents a fully developed position with relevant, fully extended and well-supported ideas.\n" +
-                        "     • Band 8: Sufficiently addresses all parts. Presents a well-developed response with relevant, extended and supported ideas.\n" +
-                        "     • Band 7: Addresses all parts. Presents a clear position, extends and supports main ideas though there may be over-generalisation or lack of focus.\n" +
-                        "     • Band 6: Addresses most parts. Presents relevant main ideas though some may lack clarity, development or conclusions.\n" +
-                        "     • Band 5: Addresses task only partially. Some main ideas limited/irrelevant. Development may be unclear.\n" +
+                        "1. Read and understand:\n" +
+                        "- The essay question (requirements and context)\n" +
+                        "- The full candidate response (content, organization, vocabulary, grammar)\n" +
                         "\n" +
-                        "• Coherence & Cohesion (25%):\n" +
-                        "- Cohesion must include varied linking devices and natural progression.\n" +
-                        "  (If listing-type progression dominates, cap at Band 6.)\n"+
-                        "   - Logical paragraphing (Introduction/Overview/Details)\n" +
-                        "   - Effective linking (but not repetitive)\n" +
-                        "   - Progression (Band 7+ requires progression beyond listing)\n" +
-                        "   - IELTS Public Descriptors:\n" +
-                        "     • Band 9: Uses cohesion naturally so it attracts no attention. Skilfully manages paragraphing.\n" +
-                        "     • Band 8: Sequences information and ideas logically. Manages all aspects of cohesion well. Uses paragraphing sufficiently and appropriately.\n" +
-                        "     • Band 7: Logically organises information with clear progression. Uses cohesive devices appropriately, though there may be under-/over-use.\n" +
-                        "     • Band 6: Arranges information coherently but cohesion may be faulty or mechanical. Paragraphing present but not always logical.\n" +
-                        "     • Band 5: Presents information with some organisation but lacks overall progression. Inadequate, inaccurate or over-use of cohesive devices. Poor paragraphing.\n" +
+                        "2. Evaluate based on the following criteria:\n" +
                         "\n" +
-                        "• Lexical Resource (25%):\n"+
-                        "✅ +0.25 bonus to the Lexical Resource score if the candidate fulfills at least one of the following:\n" +
-                        "Accurate use of academic vocabulary\n" +
-                        "e.g., mitigate, infrastructure, sustainability\n" +
+                        "• Task Response (25%):\n" +
+                        "- Does the candidate address **all parts** of the task?\n" +
+                        "- Are ideas **clearly presented**, extended and supported with **examples or explanations**?\n" +
+                        "- Penalize over-generalization or lack of development (e.g. cap at Band 6).\n" +
+                        "- Absence of clear position or conclusion → max Band 6\n" +
+                        "- Fully off-topic → max Band 3\n" +
+                        IELTS_PUBLIC_DESCRIPTORS_WritingTask2_TaskResponse + "\n" +
                         "\n" +
-                        "Correct use of academic collocations\n" +
-                        "e.g., “pose a threat,” “play a crucial role,” “bring about change”\n" +
+                        "• Coherence and Cohesion (25%):\n" +
+                        "- Logical organization of information\n" +
+                        "- Use of cohesive devices (avoid under-/over-use)\n" +
+                        "- Effective and logical paragraphing (Intro, Body, Conclusion)\n" +
+                        "- Listing-type organization or faulty cohesion → cap at Band 6\n" +
+                        IELTS_PUBLIC_DESCRIPTORS_WritingTask2_CoherenceCohesion + "\n" +
                         "\n" +
-                        "Use of idiomatic expressions that are appropriate for formal writing\n" +
-                        "e.g., “a double-edged sword,” “a stepping stone to success”\n" +
+                        "• Lexical Resource (25%):\n" +
+                        "- Range and accuracy of vocabulary\n" +
+                        "- Use of less common words and collocations\n" +
+                        "- Penalize frequent repetition or incorrect word usage\n" +
+                        "- Apply +0.25 bonus if candidate uses any of:\n" +
+                        "   • Academic vocabulary accurately (e.g., mitigate, infrastructure)\n" +
+                        "   • Formal collocations (e.g., play a crucial role)\n" +
+                        "   • Idiomatic expressions (e.g., a double-edged sword) appropriately\n" +
+                        "   • Effective paraphrasing of key terms\n" +
+                        IELTS_PUBLIC_DESCRIPTORS_WritingTask2_LexicalResource + "\n" +
                         "\n" +
-                        "Effective paraphrasing of key task terms\n" +
-                        "e.g., “young people” → “the younger generation,” “adolescents”\n" +
+                        "• Grammatical Range and Accuracy (25%):\n" +
+                        "- Variety of sentence structures (simple, complex, compound)\n" +
+                        "- Use of advanced grammar (e.g., conditionals, clauses, inversion)\n" +
+                        "- Control of punctuation\n" +
+                        "- Apply +0.25 bonus if:\n" +
+                        "   • ≥80% of sentences are complex/compound AND mostly error-free\n" +
+                        "   • Error-free sentence rate is ≥60% with no major mistakes\n" +
+                        IELTS_PUBLIC_DESCRIPTORS_WritingTask2_Grammar + "\n" +
                         "\n" +
-                        "Consistently appropriate word choice, with no significant vocabulary errors throughout the essay\n" +
-                        "\n"+
-                        " Deduct 0.5 point in total for that error type about Lexical Resource  (only once)\"+\n" +
-                        " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:\" +"+
-                        IELTS_PUBLIC_DESCRIPTORSLexicalResourceWrtingTask2+
-                        "• Grammar (25%):\n" +
-                       " +0.25 point\n" +
-                        "The candidate demonstrates a wide range of complex grammatical structures (e.g., conditionals, inversion, cleft sentences, relative clauses…) with high accuracy, and the remaining errors do not affect meaning.\n" +
-                        "→ Apply this if the candidate is around Band 6–7 but shows strong evidence of reaching Band 8:\n" +
-                        "Several complex or uncommon structures are used\n" +
-                        "These structures are mostly accurate\n" +
-                        "Remaining grammatical errors are minor and do not hinder understanding\n" +
-                        " Deduct 0.5 point in total for that error type about Grammar  (only once)\"+\n" +
-                        " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:\" +"+
-                        IELTS_PUBLIC_DESCRIPTORSGrammarWrtingTask2+
-                        " +0.25 point\n" +
-                        "Over 80% of all sentences are compound or complex, and most of them are grammatically and punctuation accurate.\n" +
-                        "→ Apply this when there is clear evidence of control over a variety of clauses such as: Relative clauses,Adverbial clauses,Noun clauses,Correct usage of punctuation (commas, semicolons, etc.)" +
-                        " +0.25 point\n" +
-                        "There are no serious grammar errors throughout the essay, and the proportion of error-free sentences is ≥ 60%.\n" +
-                        "→ Apply this if the overall accuracy is high, even if the grammatical range is not very wide."+
-
-                        "2. SCORING SYSTEM:\n" +
-                        "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
-                        "   - Deduct 0.5 band per 2 major errors\n" +
-                        "   - Automatic caps: No overview → max 5.0 | Data errors → max 6.5"+
-
-                        "RESPONSE FORMAT:\n" +
-                        "- score: decimal (overall band score, e.g. 6.5)\n" +
-                        "- feedback: {\n" +
-                        "    (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)\n" +
-                        "    errorCorrections: [{\n" +
-                        "      originalText: string,  // EXACT match required\n" +
-                        "      correctedText: string,\n" +
-                        "      errorType: string,\n" +
-                        "      explanation: string,\n" +
-                        "      sentenceContext: string // the full sentence from the answer that contains the originalText; must match exactly as in the answer\n" +
-                        "    }],\n" +
-                        "    (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)\n" +
-                        "    sentenceImprovements: [{\n" +
-                        "      originalSentence: string,\n" +
-                        "      improvedSentence: string,\n" +
-                        "      techniquesUsed: [string],\n" +
-                        "      bandBoost: string (6 -> 6.5)\n" +
-                        "    }],\n" +
-                        "    overallComment: string\n" +
-                        "}\n" +
-                        "- evaluation: {\n" +
+                        "3. Scoring Policy:\n" +
+                        "- Final band = average of 4 criteria (rounded to nearest 0.5)\n" +
+                        "- Deduct 0.5 for every 2 major lexical or grammar errors\n" +
+                        "- Missing overview/conclusion = max 5.0\n" +
+                        "- Data misreporting = max 6.5\n" +
+                        "\n" +
+                        "4. Output Format:\n" +
+                        "{\n" +
+                        "  score: number (e.g., 6.5),\n" +
+                        "  evaluation: {\n" +
                         "    TaskAchievement: {scoreEva: string, reviewEva: string},\n" +
                         "    CoherenceCohesion: {scoreEva: string, reviewEva: string},\n" +
                         "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
                         "    Grammar: {scoreEva: string, reviewEva: string}\n" +
-                        "  }\n" +
-                        "sampleAnswer: string (Optional band 9 model)"+
+                        "  },\n" +
+                        "  feedback: {\n" +
+                        "    errorCorrections: [{\n" +
+                        "      originalText: string,\n" +
+                        "      correctedText: string,\n" +
+                        "      errorType: string,\n" +
+                        "      explanation: string,\n" +
+                        "      sentenceContext: string\n" +
+                        "    }],\n" +
+                        "    sentenceImprovements: [{\n" +
+                        "      originalSentence: string,\n" +
+                        "      improvedSentence: string,\n" +
+                        "      techniquesUsed: [string],\n" +
+                        "      bandBoost: string\n" +
+                        "    }],\n" +
+                        "    overallComment: string\n" +
+                        "  },\n" +
+                        "  sampleAnswer: string (optional Band 9)\n" +
+                        "}\n" +
+                        "\n" +
                         "Question:\n" + question + "\n" +
                         "Original Answer:\n" + answer;
 
         return promptBuilder2;
     }
+
 
     private WritingAIResponse parseResponse(String content, String originalAnswer) {
         try {

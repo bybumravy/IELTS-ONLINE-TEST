@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import web.ielts.Test.service.AI.AzurePronunciationService;
+import web.ielts.Test.model.answer.speaking.AzurePronunciationResult;
+
 @Service
 public class DoTestService {
     @Autowired
@@ -70,6 +73,8 @@ public class DoTestService {
     private  WhisperService whisper;
     @Autowired
     private AiSpeakingService aiSpeakingService;
+    @Autowired
+    private AzurePronunciationService azurePronunciationService;
     @Value("${aws.s3.bucket}")
     private String bucket;
 
@@ -147,77 +152,80 @@ public class DoTestService {
     public WritingAnswer saveWritingAnswer(WritingAnswer answer) {
         WritingAnswer savedAnswer = writingAnswerRepository.save(answer);
         if(savedAnswer.getGradingMethod().equalsIgnoreCase("AI")) {
-            // Xử lý Task 1
-            System.out.println("helolllllll ai "+savedAnswer.getGradingMethod());
+            // Xử lý Task 1 nếu có
             var task1 = savedAnswer.getTask1();
-            try {
-                WritingAIResponse eval1 = aiService.WritingTask1(task1.getImageUrl(), task1.getQuestion(), task1.getAnswer());
+            if (task1 != null) {
+                try {
+                    WritingAIResponse eval1 = aiService.WritingTask1(task1.getImageUrl(), task1.getQuestion(), task1.getAnswer());
 
-                // Set feedback và sample answer
-                task1.setFeedback(eval1.getFeedback());
-                task1.getFeedback().setErrorCorrections(eval1.getFeedback().getErrorCorrections());
-                task1.getFeedback().setOverallComment(eval1.getFeedback().getOverallComment());
-                task1.getFeedback().setSentenceImprovements(eval1.getFeedback().getSentenceImprovements());
-                task1.setSampleAnswer(eval1.getSampleAnswer());
-                task1.setScore(eval1.getScore());
+                    // Set feedback và sample answer
+                    task1.setFeedback(eval1.getFeedback());
+                    task1.getFeedback().setErrorCorrections(eval1.getFeedback().getErrorCorrections());
+                    task1.getFeedback().setOverallComment(eval1.getFeedback().getOverallComment());
+                    task1.getFeedback().setSentenceImprovements(eval1.getFeedback().getSentenceImprovements());
+                    task1.setSampleAnswer(eval1.getSampleAnswer());
+                    task1.setScore(eval1.getScore());
 
-                // Log evaluation
-               System.out.println("================================");
-                System.out.println("Task 1 Evaluation:");
-                System.out.println("- Task Achievement: " + eval1.getEvaluation().getTaskAchievement());
-                System.out.println("- Coherence Cohesion: " + eval1.getEvaluation().getCoherenceCohesion());
-                System.out.println("- Lexical Resource: " + eval1.getEvaluation().getLexicalResource());
-                System.out.println("- Grammar: " + eval1.getEvaluation().getGrammar());
+                    // Log evaluation
+                   System.out.println("================================");
+                    System.out.println("Task 1 Evaluation:");
+                    System.out.println("- Task Achievement: " + eval1.getEvaluation().getTaskAchievement());
+                    System.out.println("- Coherence Cohesion: " + eval1.getEvaluation().getCoherenceCohesion());
+                    System.out.println("- Lexical Resource: " + eval1.getEvaluation().getLexicalResource());
+                    System.out.println("- Grammar: " + eval1.getEvaluation().getGrammar());
 
-                // Set evaluation
+                    // Set evaluation
 //            if (task1.getEvaluation() == null) {
 //                task1.setEvaluation(new WritingEvaluation());
 //            }
-                task1.setEvaluation(eval1.getEvaluation());
-                task1.getEvaluation().setTaskAchievement(eval1.getEvaluation().getTaskAchievement());
-                task1.getEvaluation().setCoherenceCohesion(eval1.getEvaluation().getCoherenceCohesion());
-                task1.getEvaluation().setLexicalResource(eval1.getEvaluation().getLexicalResource());
-                task1.getEvaluation().setGrammar(eval1.getEvaluation().getGrammar());
+                    task1.setEvaluation(eval1.getEvaluation());
+                    task1.getEvaluation().setTaskAchievement(eval1.getEvaluation().getTaskAchievement());
+                    task1.getEvaluation().setCoherenceCohesion(eval1.getEvaluation().getCoherenceCohesion());
+                    task1.getEvaluation().setLexicalResource(eval1.getEvaluation().getLexicalResource());
+                    task1.getEvaluation().setGrammar(eval1.getEvaluation().getGrammar());
 
-            } catch (Exception e) {
-                System.out.println("Error evaluating Task 1: " + e.getMessage());
+                } catch (Exception e) {
+                    System.out.println("Error evaluating Task 1: " + e.getMessage());
+                }
             }
 
-            // Xử lý Task 2
+            // Xử lý Task 2 nếu có
             var task2 = savedAnswer.getTask2();
-            try {
+            if (task2 != null) {
+                try {
 
-                WritingAIResponse eval2 = aiService.WritingTask2(task2.getQuestion(), task2.getAnswer());
+                    WritingAIResponse eval2 = aiService.WritingTask2(task2.getQuestion(), task2.getAnswer());
 
-                // Set feedback và sample answer
-                task2.setFeedback(eval2.getFeedback());
-                task2.setSampleAnswer(eval2.getSampleAnswer());
-                task2.setScore(eval2.getScore());
+                    // Set feedback và sample answer
+                    task2.setFeedback(eval2.getFeedback());
+                    task2.setSampleAnswer(eval2.getSampleAnswer());
+                    task2.setScore(eval2.getScore());
 
 
-                task2.getFeedback().setErrorCorrections(eval2.getFeedback().getErrorCorrections());
-                task2.getFeedback().setSentenceImprovements(eval2.getFeedback().getSentenceImprovements());
-                task2.getFeedback().setOverallComment(eval2.getFeedback().getOverallComment());
-                // Log evaluation
-                System.out.println("================================");
-                System.out.println("Task 2 Evaluation:");
-                System.out.println("- Task Achievement: " + eval2.getEvaluation().getTaskAchievement());
-                System.out.println("- Coherence Cohesion: " + eval2.getEvaluation().getCoherenceCohesion());
-                System.out.println("- Lexical Resource: " + eval2.getEvaluation().getLexicalResource());
-                System.out.println("- Grammar: " + eval2.getEvaluation().getGrammar());
+                    task2.getFeedback().setErrorCorrections(eval2.getFeedback().getErrorCorrections());
+                    task2.getFeedback().setSentenceImprovements(eval2.getFeedback().getSentenceImprovements());
+                    task2.getFeedback().setOverallComment(eval2.getFeedback().getOverallComment());
+                    // Log evaluation
+                    System.out.println("================================");
+                    System.out.println("Task 2 Evaluation:");
+                    System.out.println("- Task Achievement: " + eval2.getEvaluation().getTaskAchievement());
+                    System.out.println("- Coherence Cohesion: " + eval2.getEvaluation().getCoherenceCohesion());
+                    System.out.println("- Lexical Resource: " + eval2.getEvaluation().getLexicalResource());
+                    System.out.println("- Grammar: " + eval2.getEvaluation().getGrammar());
 
-                // Set evaluation
+                    // Set evaluation
 //            if (task2.getEvaluation() == null) {
 //                task2.setEvaluation(new WritingEvaluation());
 //            }
-                task2.setEvaluation(eval2.getEvaluation());
-                task2.getEvaluation().setTaskAchievement(eval2.getEvaluation().getTaskAchievement());
-                task2.getEvaluation().setCoherenceCohesion(eval2.getEvaluation().getCoherenceCohesion());
-                task2.getEvaluation().setLexicalResource(eval2.getEvaluation().getLexicalResource());
-                task2.getEvaluation().setGrammar(eval2.getEvaluation().getGrammar());
+                    task2.setEvaluation(eval2.getEvaluation());
+                    task2.getEvaluation().setTaskAchievement(eval2.getEvaluation().getTaskAchievement());
+                    task2.getEvaluation().setCoherenceCohesion(eval2.getEvaluation().getCoherenceCohesion());
+                    task2.getEvaluation().setLexicalResource(eval2.getEvaluation().getLexicalResource());
+                    task2.getEvaluation().setGrammar(eval2.getEvaluation().getGrammar());
 
-            } catch (Exception e) {
-                System.out.println("Error evaluating Task 2: " + e.getMessage());
+                } catch (Exception e) {
+                    System.out.println("Error evaluating Task 2: " + e.getMessage());
+                }
             }
         }
         return writingAnswerRepository.save(savedAnswer);
@@ -231,7 +239,7 @@ public class DoTestService {
         if (part1 != null && part1.getQuestions() != null) {
 
             double totalScore = 0;
-            int validQuestionCount = 0;
+            int validQuestionCount = part1.getQuestions().size();
 
             for (SpeakingAnswerQuestion qa : part1.getQuestions()) {
                 String blob = qa.getAudioAnswer();
@@ -246,17 +254,29 @@ public class DoTestService {
                 System.out.println("tai sao"+s3Url);
                 qa.setAudioAnswer(s3Url);
                     try {
+                        //Whisper
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
+                        System.out.println(transcript);
+                        File mp3File = prosodyService.downloadAudioFile(s3UrlNotEncrypt);
+                        File wavFile = prosodyService.convertMp3ToWav(mp3File);
+                        String transcriptText = transcript.has("text") ? transcript.get("text").asText() : null;
+                        //Azure
+                        AzurePronunciationResult azureResult = azurePronunciationService.assessAndSave(wavFile, transcriptText, s3UrlNotEncrypt);
 
-                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,null);
-                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+                        //PHan Viet
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,azureResult.getFluencyScore()/10,null);
+
+                        // Tích hợp Azure Pronunciation Assessment
+
+                        //Praat va AI
+                        PronunciationAnswer pa = prosodyService.analyze(azureResult,s3UrlNotEncrypt,transcript);
+                        pa.setAzureResult(azureResult);
                         qa.setTranscript(sp.getTranscript());
                         qa.setGrammarAnswer(sp.getGrammarAnswer());
                         qa.setLexicalAnswer(sp.getLexicalAnswer());
                         qa.setFluencyCohAnswer(sp.getFluencyCohAnswer());
                         qa.setPronunciationAnswer(pa);
-                        validQuestionCount++;
+                     //totalScore += eval.getScore();
                         double grammar = sp.getGrammarAnswer().getScore();
                         double lexical = sp.getLexicalAnswer().getScore();
                         double fluency = sp.getFluencyCohAnswer().getScore();
@@ -272,7 +292,6 @@ public class DoTestService {
                         e.printStackTrace();
                     }
             }
-            System.out.println(validQuestionCount);
             double avgScore = validQuestionCount > 0 ? (totalScore / validQuestionCount) : 0.0;
             avgScore = new BigDecimal(avgScore).setScale(1, RoundingMode.HALF_UP).doubleValue();
 
@@ -296,16 +315,29 @@ public class DoTestService {
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
                 part2.setAudioAnswer(s3Url);
                     try {
+                        //Whisper
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
+                        System.out.println(transcript);
+                        File mp3File = prosodyService.downloadAudioFile(s3UrlNotEncrypt);
+                        File wavFile = prosodyService.convertMp3ToWav(mp3File);
+                        String transcriptText = transcript.has("text") ? transcript.get("text").asText() : null;
+                        //Azure
+                        AzurePronunciationResult azureResult = azurePronunciationService.assessAndSave(wavFile, transcriptText, s3UrlNotEncrypt);
 
-                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2,prosodyFeatures,part2.getCueCards());
-                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+                        //PHan Viet
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),1,azureResult.getFluencyScore()/10,null);
+
+                        // Tích hợp Azure Pronunciation Assessment
+
+                        //Praat va AI
+                        PronunciationAnswer pa = prosodyService.analyze(azureResult,s3UrlNotEncrypt,transcript);
+                        pa.setAzureResult(azureResult);
                         part2.setTranscript(sp.getTranscript());
                         part2.setGrammarAnswer(sp.getGrammarAnswer());
                         part2.setLexicalAnswer(sp.getLexicalAnswer());
                         part2.setFluencyCohAnswer(sp.getFluencyCohAnswer());
                         part2.setPronunciationAnswer(pa);
+                        //part2.setAzurePronunciationResult(azureResult); // Cần thêm trường này vào model nếu muốn lưu
                         double grammar = sp.getGrammarAnswer().getScore();
                         double lexical = sp.getLexicalAnswer().getScore();
                         double fluency = sp.getFluencyCohAnswer().getScore();
@@ -333,7 +365,7 @@ public class DoTestService {
         if (part3 != null && part3.getQuestions() != null) {
 
             double totalScore = 0;
-            int validQuestionCount = 0;
+            int validQuestionCount = part3.getQuestions().size();
 
             for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
                 String blob = qa.getAudioAnswer();
@@ -349,16 +381,28 @@ public class DoTestService {
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
                 qa.setAudioAnswer(s3Url);
                     try {
+                        //Whisper
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
                         System.out.println(transcript);
-                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,prosodyFeatures,null);
-                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+                        File mp3File = prosodyService.downloadAudioFile(s3UrlNotEncrypt);
+                        File wavFile = prosodyService.convertMp3ToWav(mp3File);
+                        String transcriptText = transcript.has("text") ? transcript.get("text").asText() : null;
+                        //Azure
+                        AzurePronunciationResult azureResult = azurePronunciationService.assessAndSave(wavFile, transcriptText, s3UrlNotEncrypt);
+
+                        //PHan Viet
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,azureResult.getFluencyScore()/10,null);
+
+                        // Tích hợp Azure Pronunciation Assessment
+
+                        //Praat va AI
+                        PronunciationAnswer pa = prosodyService.analyze(azureResult,s3UrlNotEncrypt,transcript);
                         qa.setTranscript(sp.getTranscript());
                         qa.setGrammarAnswer(sp.getGrammarAnswer());
                         qa.setLexicalAnswer(sp.getLexicalAnswer());
                         qa.setFluencyCohAnswer(sp.getFluencyCohAnswer());
                         qa.setPronunciationAnswer(pa);
+                        //qa.setAzurePronunciationResult(azureResult); // Cần thêm trường này vào model nếu muốn lưu
                         //totalScore += eval.getScore();
                         double grammar = sp.getGrammarAnswer().getScore();
                         double lexical = sp.getLexicalAnswer().getScore();

@@ -30,6 +30,7 @@ import WritingTest from "@/pages/DoTest/WritingTest"
 import SpeakingTest from "@/pages/DoTest/SpeakingTest"
 
 import FulllTest from "@/pages/DoTest/FullTest"
+import FullTestResult from "@/pages/Result/FullTestResult";
 
 //Vocab
 import Vocabulary from "./pages/practice/Vocabulary"
@@ -156,6 +157,7 @@ export default function App() {
                                 <FulllTest />
                             </ProtectedLayout>
                         } />
+                        <Route path="/test/fulltest-result/:testId" element={<FullTestResult />} />
                         <Route path="/writing-result/:resultId" element={
                             <ProtectedLayout allowRoles={["student"]}>
                                 <MainLayout><WritingResult /></MainLayout>

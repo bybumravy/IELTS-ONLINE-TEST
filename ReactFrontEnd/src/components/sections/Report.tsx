@@ -9,6 +9,7 @@ import { MessageSquare, Send, FileText } from "lucide-react"
 import * as React from "react"
 import { customFetch } from "@/components/sections/customFetch"
 import { useAuth } from "@/contexts/AuthContext"
+import { validateWordLimit, validateCharLimit } from "@/lib/utils"
 
 interface FeedbackModalProps {
     isOpen: boolean
@@ -24,6 +25,15 @@ export default function Report({ isOpen, onClose }: FeedbackModalProps) {
     const [category, setCategory] = useState("")
     const [subject, setSubject] = useState("")
     const [message, setMessage] = useState("")
+    const [errorMessage, setErrorMessage] = useState("")
+    const [wordCount, setWordCount] = useState(0)
+    const MAX_WORDS = 100;
+    const MAX_CHARS = 1000;
+    const MAX_SUBJECT_WORDS = 10;
+    const MAX_SUBJECT_CHARS = 100;
+
+    const [errorSubject, setErrorSubject] = useState("");
+    const [subjectWordCount, setSubjectWordCount] = useState(0);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -64,6 +74,36 @@ export default function Report({ isOpen, onClose }: FeedbackModalProps) {
         setIsSubmitted(false)
         onClose()
     }
+
+    const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const value = e.target.value;
+        setMessage(value);
+        const wordResult = validateWordLimit(value, MAX_WORDS);
+        const charResult = validateCharLimit(value, MAX_CHARS);
+        setWordCount(wordResult.wordCount);
+        if (!wordResult.valid) {
+            setErrorMessage(wordResult.error || "");
+        } else if (!charResult.valid) {
+            setErrorMessage(charResult.error || "");
+        } else {
+            setErrorMessage("");
+        }
+    };
+
+    const handleSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSubject(value);
+        const wordResult = validateWordLimit(value, MAX_SUBJECT_WORDS);
+        const charResult = validateCharLimit(value, MAX_SUBJECT_CHARS);
+        setSubjectWordCount(wordResult.wordCount);
+        if (!wordResult.valid) {
+            setErrorSubject(wordResult.error || "");
+        } else if (!charResult.valid) {
+            setErrorSubject(charResult.error || "");
+        } else {
+            setErrorSubject("");
+        }
+    };
 
     if (isSubmitted) {
         return (
@@ -123,11 +163,16 @@ export default function Report({ isOpen, onClose }: FeedbackModalProps) {
                         <Input
                             id="subject"
                             value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
+                            onChange={handleSubjectChange}
                             placeholder="A brief summary of your feedback"
                             required
                             className="transition-all focus:ring-2 focus:ring-orange-500"
                         />
+                        <div className="flex justify-between text-sm mt-1">
+                            <span className={errorSubject ? "text-red-500" : "text-muted-foreground"}>
+                                {errorSubject ? errorSubject : `Word count: ${subjectWordCount}/${MAX_SUBJECT_WORDS}, Char: ${subject.length}/${MAX_SUBJECT_CHARS}`}
+                            </span>
+                        </div>
                     </div>
 
                     <div className="space-y-2">
@@ -138,11 +183,16 @@ export default function Report({ isOpen, onClose }: FeedbackModalProps) {
                         <Textarea
                             id="message"
                             value={message}
-                            onChange={(e) => setMessage(e.target.value)}
+                            onChange={handleMessageChange}
                             placeholder="Describe your feedback, suggestion, or issue in detail..."
                             className="min-h-[120px] transition-all focus:ring-2 focus:ring-orange-500"
                             required
                         />
+                        <div className="flex justify-between text-sm mt-1">
+                            <span className={errorMessage ? "text-red-500" : "text-muted-foreground"}>
+                                {errorMessage ? errorMessage : `Word count: ${wordCount}/${MAX_WORDS}, Char: ${message.length}/${MAX_CHARS}`}
+                            </span>
+                        </div>
                     </div>
 
                     <div className="flex gap-3 pt-4">
@@ -151,7 +201,7 @@ export default function Report({ isOpen, onClose }: FeedbackModalProps) {
                         </Button>
                         <Button
                             type="submit"
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || !!errorMessage || !!errorSubject}
                             className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
                         >
                             {isSubmitting ? (

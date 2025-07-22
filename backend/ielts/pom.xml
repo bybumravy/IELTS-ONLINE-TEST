@@ -130,6 +130,11 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.microsoft.cognitiveservices.speech</groupId>
+            <artifactId>client-sdk</artifactId>
+            <version>1.34.0</version>
+        </dependency>
+        <dependency>
             <groupId>ws.schild</groupId>
             <artifactId>jave-all-deps</artifactId>
             <version>3.3.1</version>

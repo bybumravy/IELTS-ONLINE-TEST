@@ -52,11 +52,12 @@ export default function ListeningTest() {
     const [duration, setDuration] = useState(0);
     const [progress, setProgress] = useState(0);
     const [searchParams] = useSearchParams();
+    const testAnswerId = searchParams.get("testAnswerId");
+    const mode = searchParams.get("mode");
     const navigate = useNavigate();
     const { user } = useAuth();
     const [isHighlightMode, setIsHighlightMode] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
-    const mode = searchParams.get("mode");
 
     // Khởi tạo dark mode từ localStorage
     const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -190,44 +191,44 @@ export default function ListeningTest() {
 
     const handleSubmit = async () => {
         if (!listeningTest) return;
-
         const dataToSend = structuredClone(listeningTest);
         if (user?.username) dataToSend.username = user.username;
         dataToSend.skill = "listening";
         delete dataToSend.audioUrl;
-
         dataToSend.tasks.forEach((task: TaskListening) => {
             delete task.title;
             delete task.audioIntroduction;
-
             task.sections.forEach((section: Section) => {
                 delete section.introduction;
                 delete section.imageUrl;
-
                 section.questions.forEach((q: QuestionWithStudentAnswer) => {
                     const question = q as QuestionWithStudentAnswer;
                     const qid = question.questionId!;
                     question.studentAnswer = answers[qid] || null;
-
                     delete question.explanation;
                     delete question.options;
                 });
             });
         });
-
-
         try {
-            const res = await customFetch(`${API_URL}/verify/listening/submit`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSend),
-            });
-
+            let res;
+            if (testAnswerId) {
+                res = await customFetch(`${API_URL}/verify/listening/submit?testAnswerId=${testAnswerId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dataToSend),
+                });
+            } else {
+                res = await customFetch(`${API_URL}/verify/listening/submit`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dataToSend),
+                });
+            }
             const result = await res.json();
-            console.log(result);
             alert("Submit thành công!");
             if (mode === "fulltest") {
-                navigate(`/test/reading/${testId}?mode=${mode}`);
+                navigate(`/test/reading/${testId}?testAnswerId=${testAnswerId}&mode=${mode}`);
             } else {
                 navigate(`/listening-result/${result.id}`);
             }

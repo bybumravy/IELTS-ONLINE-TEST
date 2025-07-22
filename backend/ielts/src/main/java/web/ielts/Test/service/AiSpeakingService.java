@@ -31,7 +31,7 @@ public class AiSpeakingService {
             JsonNode transcriptText,
             String question,
             int partNumber,
-            FleCohAnswer analyzeVoice,
+            double FluentScore,
             List<String> cueCard
     ) {
         // ✅ 1. Tạo prompt đúng cho từng part
@@ -39,7 +39,7 @@ public class AiSpeakingService {
                 partNumber,
                 question,
                 transcriptText,
-                 analyzeVoice,
+                FluentScore,
                 cueCard
 
         );
