@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { CheckCircle, XCircle } from "lucide-react";
 
 export default function VnPayResultPage() {
     const [searchParams] = useSearchParams();
     const [status, setStatus] = useState<"Success" | "Failed" | null>(null);
-    const navigate = useNavigate();
+    const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
-        const responseCode = searchParams.get("vnp_ResponseCode");
+        const vnp_ResponseCode = searchParams.get("vnp_ResponseCode");
         const transactionId = searchParams.get("vnp_TransactionNo"); // 👈 Lấy transactionId
 
-        if (responseCode === "00") {
+        if (vnp_ResponseCode === "00") {
             setStatus("Success");
 
             // Gọi nâng cấp Premium
-            fetch("http://localhost:8080/api/user/upgrade-premium", {
+            fetch(`${API_URL}/api/user/upgrade-premium`, {
                 method: "POST",
                 credentials: "include",
             })
@@ -31,7 +31,7 @@ export default function VnPayResultPage() {
             const selectedPlan = stored ? JSON.parse(stored) : null;
 
             if (selectedPlan) {
-                fetch("http://localhost:8080/api/transactions/save", {
+                fetch(`${API_URL}/api/transactions/save`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",

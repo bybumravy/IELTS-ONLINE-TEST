@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Mail } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const ForgetPasswordPage = () => {
@@ -13,7 +13,7 @@ const ForgetPasswordPage = () => {
     const [emailError, setEmailError] = useState("");
     const [message] = useState("");
     const location = useLocation();
-    const navigate = useNavigate();
+
 
     // ⏬ Lấy redirect URL từ query string (nếu có)
     const searchParams = new URLSearchParams(location.search);

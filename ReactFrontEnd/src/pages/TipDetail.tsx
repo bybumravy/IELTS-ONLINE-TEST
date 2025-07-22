@@ -15,14 +15,15 @@ interface TipDetail {
 }
 
 function TipDetail() {
-    const [detail, setDetail] = useState<TipDetail | null>(null);
+    const API_URL = import.meta.env.VITE_API_URL;
     const { skill, id } = useParams<{ skill: string; id: string }>();
+    const [detail, setDetail] = useState<TipDetail | null>(null);
 
 
     useEffect(() => {
         if (!id) return;
 
-        const data = fetch(`http://localhost:8080/api/${skill}/${id}`)
+        const data = fetch(`${API_URL}/api/${skill}/${id}`)
             .then((res) => res.json())
             .then((data: TipDetail) => {
                 setDetail(data);

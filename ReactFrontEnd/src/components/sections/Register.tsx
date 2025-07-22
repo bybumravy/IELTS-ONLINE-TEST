@@ -33,7 +33,8 @@ const RegisterPage = () => {
     };
 
     const handleGoogleSignup = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/google?role=student";
+        const API_URL = import.meta.env.VITE_API_URL;
+        window.location.href = `${API_URL}/oauth2/authorization/google?role=student`;
     };
 
     return (

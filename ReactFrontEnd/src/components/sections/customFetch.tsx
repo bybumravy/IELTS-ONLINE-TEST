@@ -12,7 +12,8 @@ export const customFetch = async (url: string, options: RequestInit = {}) => {
 
     // Nếu AccessToken hết hạn và không gọi chính /refresh-token
     if (response.status === 401 && !url.includes("/refresh-token")) {
-        const refreshRes = await fetch("http://localhost:8080/api/refreshtoken", {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const refreshRes = await fetch(`${API_URL}/api/refreshtoken`, {
             method: "POST",
             credentials: "include",
         });

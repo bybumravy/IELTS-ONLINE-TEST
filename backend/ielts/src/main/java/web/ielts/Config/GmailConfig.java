@@ -11,8 +11,8 @@ import java.util.Properties;
 public class GmailConfig {
 
     public static void main(String[] args) {
-        final String username = "ietlsonline.swp.2025@gmail.com"; // tài khoản Gmail
-        final String appPassword = "cxyauqswponfkgcf"; // App Password (16 ký tự)
+        final String username = "languages.center25@gmail.com"; // tài khoản Gmail
+        final String appPassword = "ftmiukztsqbabbbt"; // App Password (16 ký tự)
 
         Properties prop = new Properties();
         prop.put("mail.smtp.auth", true);

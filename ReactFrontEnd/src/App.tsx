@@ -1,11 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { AuthProvider } from "@/contexts/AuthContext"
-import ErrorBoundary from "@/components/ErrorBoundary"
 
 // Layouts
 import { MainLayout } from "@/components/layout/MainLayout"
 import { StaffLayout } from "@/components/layout/Staff/StaffLayout"
-
+import { AdminLayout } from "./components/layout/AdminLayout"
 //Payment
 import VnPayResultPage from "./pages/Payment/VNPayResultPage"
 import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
@@ -17,7 +16,6 @@ import RegisterPage from "@/components/sections/Register"
 import VerifyEmail from "@/components/sections/VerifyEmail"
 import Contact from "@/pages/Contact"
 import HelpCenter from "@/pages/HelpCenter"
-import ErrorPage from "@/pages/ErrorPage"
 import NotFoundPage from "@/pages/NotFoundPage"
 
 // Tips
@@ -47,7 +45,7 @@ import SpeakingResult from "@/pages/Result/SpeakingResult.tsx";
 // Admin
 
 import LoginAdmin from "./components/sections/admin/LoginAdmin"
-import AdminPage from "./pages/Adminpage"
+import AdminPage from "./pages/AdminPage"
 
 // Staff
 import StaffLogin from "./components/sections/StaffLogin"
@@ -190,7 +188,7 @@ export default function App() {
                         <Route path="/login-admin" element={<LoginAdmin />} />
                         <Route path="/admin-page" element={
                             <ProtectedLayoutRole allowRoles={["admin"]}>
-                                <AdminPage />
+                                <AdminLayout><AdminPage /></AdminLayout>
                             </ProtectedLayoutRole>
                         } />
 

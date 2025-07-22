@@ -102,7 +102,7 @@ export default function TeacherScoringPage() {
     useEffect(() => {
         if (!id) return;
 
-        fetch(`http://localhost:8080/verify/writingbyteacher/${id}`, {
+        fetch(`${API_URL}/verify/writingbyteacher/${id}`, {
             credentials: "include",
         })
             .then((res) => res.json())

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil} from "lucide-react";
 
 interface UserDTO {
   userName: string;
@@ -38,11 +38,11 @@ export default function ManageTeachersPage() {
     // eslint-disable-next-line
   }, []);
 
-  const handleDelete = async (email: string) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
-    await fetch(`${API_URL}/api/user/${email}`, { method: "DELETE" });
-    fetchUsers();
-  };
+  // const handleDelete = async (email: string) => {
+  //   if (!window.confirm("Are you sure you want to delete this user?")) return;
+  //   await fetch(`${API_URL}/api/user/${email}`, { method: "DELETE" });
+  //   fetchUsers();
+  // };
 
   const handleEdit = (user: UserDTO) => {
     setEditing(user);
@@ -102,7 +102,7 @@ export default function ManageTeachersPage() {
                     <td className="px-4 py-2 text-sm text-gray-800">{user.createdAt}</td>
                     <td className="px-4 py-2 text-sm text-gray-800 flex gap-2">
                       <Button size="sm" variant="outline" className="border-emerald-300 text-emerald-700" onClick={() => handleEdit(user)}><Pencil className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="outline" className="border-red-300 text-red-700" onClick={() => handleDelete(user.userName)}><Trash2 className="w-4 h-4" /></Button>
+                      {/* <Button size="sm" variant="outline" className="border-red-300 text-red-700" onClick={() => handleDelete(user.userName)}><Trash2 className="w-4 h-4" /></Button> */}
                     </td>
                   </tr>
                 ))}

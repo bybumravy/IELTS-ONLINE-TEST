@@ -14,7 +14,6 @@ public class UserDTO {
     private String lastName;
     @Id
     private String email;
-    private String role;
     private boolean premium;
     private String birthDate;
     private String gender;
@@ -25,12 +24,11 @@ public class UserDTO {
     private String cuurency;
     private String userName;
 
-    public UserDTO(List<String> roles, String firstName, String lastName, String email, String role, boolean premium, String birthDate, String gender, String phone, String createdAt, String country, String timeZone, String cuurency, String userName) {
+    public UserDTO(List<String> roles, String firstName, String lastName, String email, boolean premium, String birthDate, String gender, String phone, String createdAt, String country, String timeZone, String cuurency, String userName) {
         this.roles = roles;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.role = role;
         this.premium = premium;
         this.birthDate = birthDate;
         this.gender = gender;
@@ -64,14 +62,6 @@ public class UserDTO {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 
     public boolean isPremium() {

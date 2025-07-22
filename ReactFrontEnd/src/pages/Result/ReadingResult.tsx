@@ -21,7 +21,8 @@ export default function ReadingResult() {
     useEffect(() => {
         if (!resultId) return
         setLoading(true)
-        fetch(`http://localhost:8080/api/result/reading/by-id?answerId=${resultId}`)
+        const API_URL = import.meta.env.VITE_API_URL;
+        fetch(`${API_URL}/api/result/reading/by-id?answerId=${resultId}`)
             .then(res => {
                 if (!res.ok) throw new Error("Không tìm thấy kết quả")
                 return res.json()

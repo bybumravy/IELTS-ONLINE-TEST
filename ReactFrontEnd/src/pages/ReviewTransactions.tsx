@@ -22,7 +22,6 @@ import {
   Search,
   Filter,
   Download,
-  FileText,
   Printer,
   ArrowUpDown,
   ArrowUp,
@@ -39,68 +38,6 @@ import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 
 // Mock data
-const mockTransactions = [
-  {
-    id: "TXN001",
-    user: "Nguyễn Văn A",
-    email: "nguyenvana@email.com",
-    type: "Nạp tiền",
-    amount: 500000,
-    paymentMethod: "MoMo",
-    status: "success",
-    createdAt: "2024-01-15T10:30:00Z",
-    completedAt: "2024-01-15T10:31:00Z",
-    message: "Giao dịch thành công từ MoMo",
-  },
-  {
-    id: "TXN002",
-    user: "Trần Thị B",
-    email: "tranthib@email.com",
-    type: "Thanh toán khóa học",
-    amount: 1200000,
-    paymentMethod: "VNPay",
-    status: "success",
-    createdAt: "2024-01-15T09:15:00Z",
-    completedAt: "2024-01-15T09:16:00Z",
-    message: "Thanh toán thành công qua VNPay",
-  },
-  {
-    id: "TXN003",
-    user: "Lê Văn C",
-    email: "levanc@email.com",
-    type: "Hoàn tiền",
-    amount: 300000,
-    paymentMethod: "Tiền mặt",
-    status: "pending",
-    createdAt: "2024-01-15T08:45:00Z",
-    completedAt: null,
-    message: "Đang xử lý hoàn tiền",
-  },
-  {
-    id: "TXN004",
-    user: "Phạm Thị D",
-    email: "phamthid@email.com",
-    type: "Thanh toán",
-    amount: 800000,
-    paymentMethod: "VNPay",
-    status: "failed",
-    createdAt: "2024-01-14T16:20:00Z",
-    completedAt: null,
-    message: "Giao dịch thất bại - Số dư không đủ",
-  },
-  {
-    id: "TXN005",
-    user: "Hoàng Văn E",
-    email: "hoangvane@email.com",
-    type: "Nạp tiền",
-    amount: 2000000,
-    paymentMethod: "Chuyển khoản",
-    status: "success",
-    createdAt: "2024-01-14T14:10:00Z",
-    completedAt: "2024-01-14T14:15:00Z",
-    message: "Chuyển khoản thành công",
-  },
-]
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -128,7 +65,7 @@ const formatDate = (dateString: string) => {
 
 export default function TransactionHistory() {
   const [transactions, setTransactions] = useState<any[]>([])
-  const [filterTransactionId, setFilterTransactionId] = useState("");
+  const [filterTransactionId] = useState("");
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -150,9 +87,9 @@ export default function TransactionHistory() {
     },
     {} as Record<string, number>,
   )
-
+    const API_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
-    fetch("http://localhost:8080/api/user/transactions", { credentials: "include" })
+    fetch(`${API_URL}/api/user/transactions`, { credentials: "include" })
         .then((res) => res.json())
         .then((data) => {
           setTransactions(data)
@@ -315,10 +252,14 @@ export default function TransactionHistory() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {Object.entries(paymentMethods).sort(([, a], [, b]) => b - a)[0]?.[0] || "N/A"}
+              {Object.entries(paymentMethods)
+                .sort(([, a], [, b]) => Number(b) - Number(a))[0]?.[0] || "N/A"}
             </div>
             <p className="text-xs text-muted-foreground">
-              {Object.entries(paymentMethods).sort(([, a], [, b]) => b - a)[0]?.[1] || 0} giao dịch
+              {(
+                Object.entries(paymentMethods)
+                  .sort(([, a], [, b]) => Number(b) - Number(a))[0]?.[1] ?? 0
+              ).toString()} giao dịch
             </p>
           </CardContent>
         </Card>

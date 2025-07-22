@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import {
-    Award,
     FileText,
     BookOpen,
     Target,
@@ -12,11 +11,9 @@ import {
     Play,
     Pause,
     Clock,
-    CheckCircle,
     AlertCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {useParams} from "react-router-dom";
 import { urlDecrypt } from "@/lib/utils"
@@ -119,7 +116,6 @@ export default function SpeakingResult() {
 
     const { resultId } = useParams  <{ resultId: string }>();
 
-    const [feedbackView, setFeedbackView] = useState<"errors" | "improvements">("errors")
     useEffect(() => {
         fetch(`${API_URL}/api/result/speaking/${resultId}`)
             .then(res => {
@@ -171,85 +167,85 @@ export default function SpeakingResult() {
         audio.play().catch(() => setIsPlaying(false))
     }
 
-    const renderErrorCorrections = (originalText: string, grammarAnswer: GrammarAnswer, lexicalAnswer: GrammarAnswer) => {
-        const errors = []
-        if (grammarAnswer?.errorText) errors.push({ ...grammarAnswer, type: "Grammar" })
-        if (lexicalAnswer?.errorText) errors.push({ ...lexicalAnswer, type: "Lexical" })
+    // const renderErrorCorrections = (originalText: string, grammarAnswer: GrammarAnswer, lexicalAnswer: GrammarAnswer) => {
+    //     const errors = []
+    //     if (grammarAnswer?.errorText) errors.push({ ...grammarAnswer, type: "Grammar" })
+    //     if (lexicalAnswer?.errorText) errors.push({ ...lexicalAnswer, type: "Lexical" })
 
-        if (errors.length === 0) {
-            return (
-                <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <CheckCircle className="h-8 w-8 text-green-600" />
-                    </div>
-                    <h4 className="text-lg font-semibold text-green-800 mb-2">Excellent Work!</h4>
-                    <p className="text-green-700">No errors detected in this section. Keep up the great work!</p>
-                </div>
-            )
-        }
+    //     if (errors.length === 0) {
+    //         return (
+    //             <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
+    //                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+    //                     <CheckCircle className="h-8 w-8 text-green-600" />
+    //                 </div>
+    //                 <h4 className="text-lg font-semibold text-green-800 mb-2">Excellent Work!</h4>
+    //                 <p className="text-green-700">No errors detected in this section. Keep up the great work!</p>
+    //             </div>
+    //         )
+    //     }
 
-        return (
-            <div className="space-y-6">
-                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
-                    <h4 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-green-600" />
-                        Your Response
-                    </h4>
-                    <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <p className="text-gray-700 leading-relaxed italic">"{originalText}"</p>
-                    </div>
-                </div>
+    //     return (
+    //         <div className="space-y-6">
+    //             <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+    //                 <h4 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+    //                     <FileText className="h-5 w-5 text-green-600" />
+    //                     Your Response
+    //                 </h4>
+    //                 <div className="bg-white border border-gray-200 rounded-xl p-4">
+    //                     <p className="text-gray-700 leading-relaxed italic">"{originalText}"</p>
+    //                 </div>
+    //             </div>
 
-                <div className="space-y-4">
-                    <h4 className="font-semibold text-gray-800 flex items-center gap-2 text-lg">
-                        <Target className="h-6 w-6 text-red-600" />
-                        Areas for Improvement
-                    </h4>
-                    {errors.map((error, index) => (
-                        <div key={index} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                            <div className="flex items-start justify-between mb-4">
-                                <Badge className="bg-red-100 text-red-700 border-red-200">{error.type} Error</Badge>
-                                <Badge variant="outline" className="text-gray-600">
-                                    {error.errorType}
-                                </Badge>
-                            </div>
+    //             <div className="space-y-4">
+    //                 <h4 className="font-semibold text-gray-800 flex items-center gap-2 text-lg">
+    //                     <Target className="h-6 w-6 text-red-600" />
+    //                     Areas for Improvement
+    //                 </h4>
+    //                 {errors.map((error, index) => (
+    //                     <div key={index} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+    //                         <div className="flex items-start justify-between mb-4">
+    //                             <Badge className="bg-red-100 text-red-700 border-red-200">{error.type} Error</Badge>
+    //                             <Badge variant="outline" className="text-gray-600">
+    //                                 {error.errorType}
+    //                             </Badge>
+    //                         </div>
 
-                            <div className="grid md:grid-cols-2 gap-6 mb-4">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <AlertCircle className="h-4 w-4 text-red-500" />
-                                        <span className="text-sm font-medium text-gray-700">Original</span>
-                                    </div>
-                                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                                        <p className="text-red-700 font-medium">{error.errorText}</p>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <CheckCircle className="h-4 w-4 text-green-500" />
-                                        <span className="text-sm font-medium text-gray-700">Correction</span>
-                                    </div>
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                                        <p className="text-green-700 font-medium">{error.correctText}</p>
-                                    </div>
-                                </div>
-                            </div>
+    //                         <div className="grid md:grid-cols-2 gap-6 mb-4">
+    //                             <div className="space-y-2">
+    //                                 <div className="flex items-center gap-2">
+    //                                     <AlertCircle className="h-4 w-4 text-red-500" />
+    //                                     <span className="text-sm font-medium text-gray-700">Original</span>
+    //                                 </div>
+    //                                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+    //                                     <p className="text-red-700 font-medium">{error.errorText}</p>
+    //                                 </div>
+    //                             </div>
+    //                             <div className="space-y-2">
+    //                                 <div className="flex items-center gap-2">
+    //                                     <CheckCircle className="h-4 w-4 text-green-500" />
+    //                                     <span className="text-sm font-medium text-gray-700">Correction</span>
+    //                                 </div>
+    //                                 <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+    //                                     <p className="text-green-700 font-medium">{error.correctText}</p>
+    //                                 </div>
+    //                             </div>
+    //                         </div>
 
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <h5 className="font-medium text-blue-800 mb-2">Explanation</h5>
-                                <p className="text-blue-700 text-sm leading-relaxed">{error.explanation}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        )
-    }
+    //                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+    //                             <h5 className="font-medium text-blue-800 mb-2">Explanation</h5>
+    //                             <p className="text-blue-700 text-sm leading-relaxed">{error.explanation}</p>
+    //                         </div>
+    //                     </div>
+    //                 ))}
+    //             </div>
+    //         </div>
+    //     )
+    // }
 
     // Hiển thị chi tiết Pronunciation (đầy đủ trường mới)
     const renderPronunciationDetail = (pronunciationAnswer?: PronunciationAnswer) => {
         if (!pronunciationAnswer) return <div className="text-red-500">No pronunciation data.</div>;
-        const { score, StressTranscript, stressMismatchesDetailed, pronunciationEvaluation } = pronunciationAnswer;
+        const {  StressTranscript, stressMismatchesDetailed, pronunciationEvaluation } = pronunciationAnswer;
         return (
             <div className="space-y-6">
                 {/* Stress Transcript */}
@@ -408,7 +404,6 @@ export default function SpeakingResult() {
         // Tách transcript thành các câu
         const sentences = transcript.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g) || [transcript];
         // Gom lỗi theo từng câu (ưu tiên sentenceText, fallback errorText xuất hiện trong câu)
-        let errorIdx = 0;
         let highlightedSentences: React.ReactNode[] = sentences.map((sentence, sIdx) => {
             // Lấy các lỗi thuộc về câu này (ưu tiên sentenceText, nếu không có thì errorText xuất hiện trong câu)
             const matchedErrors = errors
@@ -422,7 +417,6 @@ export default function SpeakingResult() {
             // Tìm tất cả vị trí xuất hiện của từng errorText trong câu, highlight lần lượt
             let parts: React.ReactNode[] = [];
             let lastIdx = 0;
-            let workingSentence = sentence;
             // Tạo mảng các lỗi với vị trí xuất hiện (có thể trùng lặp)
             let errorSpans: { start: number, end: number, error: typeof errors[0], idx: number }[] = [];
             matchedErrors.forEach(({ error, idx }) => {

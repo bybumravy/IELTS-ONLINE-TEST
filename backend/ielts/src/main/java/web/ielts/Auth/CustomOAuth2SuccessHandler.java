@@ -55,7 +55,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         // Tạo Cookie
         ResponseCookie cookie = ResponseCookie.from("jwt_token", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(24 * 60 * 60)
                 .sameSite("Lax")
@@ -67,7 +67,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60) // 7 ngày
                 .sameSite("Lax")
@@ -78,16 +78,16 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
 
         switch (roleFromQuery.toUpperCase()) {
             case "STUDENT":
-                redirectUrl = "http://localhost:5173";
+                redirectUrl = "https://www.languages.io.vn/";
                 break;
             case "ADMIN":
-                redirectUrl = "http://localhost:5173/admin-page";
+                redirectUrl = "https://www.languages.io.vn/admin-page";
                 break;
             case "TEACHER":
-                redirectUrl = "http://localhost:5173/staff-page";
+                redirectUrl = "https://www.languages.io.vn/staff-page";
                 break;
             default:
-                redirectUrl = "http://localhost:5173/staff-page";
+                redirectUrl = "https://www.languages.io.vn/staff-page";
                 break;
         }
 

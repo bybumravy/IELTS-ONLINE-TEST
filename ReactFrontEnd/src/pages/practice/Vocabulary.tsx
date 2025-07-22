@@ -34,7 +34,8 @@ const Vocabulary: React.FC = () => {
     const [editData, setEditData] = useState<VocabularyType | null>(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null); // NEW
 
-    const API_BASE = 'http://localhost:8080/api/practice';
+    const API_URL = import.meta.env.VITE_API_URL;
+    const API_BASE = `${API_URL}/api/practice`;
 
     // Load topics & bands
     useEffect(() => {

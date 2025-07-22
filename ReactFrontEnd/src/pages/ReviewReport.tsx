@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState} from "react"
+import {useEffect, useState} from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -36,6 +36,7 @@ const typeColors: TypeColors = {
 };
 
 export default function ReviewReport() {
+    const API_URL = import.meta.env.VITE_API_URL;
     const [reports, setReports] = useState<Report[]>([])
     const [filteredReports, setFilteredReports] = useState<Report[]>([])
     const [loading, setLoading] = useState(true)
@@ -112,7 +113,10 @@ export default function ReviewReport() {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const response = await fetch("http://localhost:8080/api/report")
+                const response = await fetch(`${API_URL}/api/report`);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch reports");
+                }
                 const data = await response.json()
                 setReports(data)
                 setFilteredReports(data)
