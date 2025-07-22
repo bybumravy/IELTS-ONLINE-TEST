@@ -68,7 +68,7 @@ import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
 import ReadingResult from "@/pages/Result/ReadingResult.tsx";
 import TransactionPage from "./pages/TransactionPage"
 import MatchingGamePage from '@/pages/student/MatchingGamePage';
-
+import DashboardPage from "@/pages/student/DashboardPage.tsx";
 export default function App() {
     return (
         <ErrorBoundary>
@@ -118,9 +118,8 @@ export default function App() {
                         } />
                         <Route path="/student/vocabulary-game" element={<MainLayout><VocabularyGame /></MainLayout>} />
 
-
                         <Route path="/practice/vocabulary" element={<SoftProtectedLayout allowRoles={["student"]}><MainLayout><VocabularyList /></MainLayout></SoftProtectedLayout>} />
-
+                        <Route path="/student/dashboard" element={<SoftProtectedLayout allowRoles={["student"]}><MainLayout><DashboardPage /></MainLayout></SoftProtectedLayout>} />
                         <Route path="/student/vocabulary-matching-game" element={<MainLayout><MatchingGamePage /></MainLayout>}/>
 
                         {/* ========== Student Test Routes (Login required) ========== */}

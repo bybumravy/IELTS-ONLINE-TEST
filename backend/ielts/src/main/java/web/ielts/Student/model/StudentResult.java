@@ -9,7 +9,7 @@ import java.util.Date;
 public class StudentResult {
     private String username;
     private String skill;
-    private int band;
-    private int totalCorrect;
+    private Double band;           // Sửa kiểu thành Double
+    private Integer totalCorrect;  // Sửa kiểu thành Integer
     private Date submittedAt;
 }

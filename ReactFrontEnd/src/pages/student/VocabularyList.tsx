@@ -82,6 +82,24 @@ const VocabularyList: React.FC = () => {
             setLoading(false);
         }
     };
+    const fetchAllFilteredVocabularies = async (): Promise<VocabularyType[]> => {
+        const { topic, band } = appliedFilters;
+        const params = new URLSearchParams();
+        if (search) params.append('keyword', search);
+        if (topic) params.append('topic', topic);
+        if (band) params.append('band', band);
+        params.append('page', '0');
+        params.append('size', '1000'); // hoặc số đủ lớn để lấy tất cả
+
+        const url = `${API_BASE}/vocabulary/filter?${params.toString()}`;
+        const response = await fetch(url, {
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+        });
+        const data = await response.json();
+        return data.content || [];
+    };
+
 
     useEffect(() => {
         if (user) fetchVocabularies();
@@ -149,15 +167,17 @@ const VocabularyList: React.FC = () => {
                         </Button>
 
                         <Button
-                            onClick={() => {
+                            onClick={async () => {
+                                const allFilteredVocab = await fetchAllFilteredVocabularies();
                                 navigate('/student/vocabulary-matching-game', {
-                                    state: { vocabList: vocabularies }
+                                    state: { vocabList: allFilteredVocab }
                                 });
                             }}
                             className="bg-green-600 hover:bg-green-700 text-white"
                         >
                             🔗 Ghép từ và nghĩa (Matching Game)
                         </Button>
+
                     </div>
                 </DialogContent>
             </Dialog>

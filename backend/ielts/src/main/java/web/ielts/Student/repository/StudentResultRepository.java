@@ -16,9 +16,9 @@ public interface StudentResultRepository extends MongoRepository<StudentResult, 
                     "bandListening: { $max: { $cond: [ { $eq: ['$skill', 'listening'] }, '$band', null ] } }, " +
                     "bandSpeaking: { $max: { $cond: [ { $eq: ['$skill', 'speaking'] }, '$band', null ] } } } }",
             "{ $sort: { avgTotalCorrect: -1 } }",
-            "{ $limit: 20 }"
+            "{ $limit: 10 }"
     })
-    List<Object> getTop20Students();
+    List<Object> getTop10Students();
 
     @Aggregation(pipeline = {
             "{ $match: { skill: ?0 } }",

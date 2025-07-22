@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import type { Vocabulary as VocabularyType } from '@/types/apiTypes';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { ArrowLeft } from 'lucide-react'; // dùng icon mũi tên
 
 type CardType = {
     id: string;
@@ -15,19 +16,26 @@ export default function MatchingGamePage() {
     const location = useLocation();
     const vocabList: VocabularyType[] = location.state?.vocabList || [];
 
+    const batchSize = 6;
+    const totalBatches = Math.ceil(vocabList.length / batchSize);
+
+    const [batchIndex, setBatchIndex] = useState(0);
     const [cards, setCards] = useState<CardType[]>([]);
     const [selected, setSelected] = useState<number[]>([]);
     const [shakeIndexes, setShakeIndexes] = useState<number[]>([]);
+    const [gameCompleted, setGameCompleted] = useState(false);
+
+    const currentBatch = vocabList.slice(batchIndex * batchSize, (batchIndex + 1) * batchSize);
 
     useEffect(() => {
-        const wordCards: CardType[] = vocabList.map(v => ({
+        const wordCards: CardType[] = currentBatch.map(v => ({
             id: v.id,
             text: v.word,
             type: 'word',
             matched: false
         }));
 
-        const translateCards: CardType[] = vocabList.map(v => ({
+        const translateCards: CardType[] = currentBatch.map(v => ({
             id: v.id,
             text: v.translate,
             type: 'translate',
@@ -36,7 +44,9 @@ export default function MatchingGamePage() {
 
         const shuffledCards = shuffleArray([...wordCards, ...translateCards]);
         setCards(shuffledCards);
-    }, [vocabList]);
+        setSelected([]);
+        setShakeIndexes([]);
+    }, [batchIndex, vocabList]);
 
     const handleCardClick = (index: number) => {
         if (cards[index].matched || selected.includes(index)) return;
@@ -63,9 +73,28 @@ export default function MatchingGamePage() {
         }
     };
 
+    const handleNextBatch = () => {
+        if (batchIndex < totalBatches - 1) {
+            setBatchIndex(batchIndex + 1);
+        } else {
+            setGameCompleted(true);
+        }
+    };
+
     return (
-        <div className="max-w-4xl mx-auto text-center mt-10">
+        <div className="max-w-4xl mx-auto text-center mt-10 px-4">
+            <div className="mb-4 text-left">
+                <a
+                    href="http://localhost:5173/practice/vocabulary"
+                    className="inline-flex items-center gap-2 text-blue-600 hover:underline text-base font-medium"
+                >
+                    <ArrowLeft className="w-5 h-5" />
+                    {gameCompleted && <span>Quay lại luyện tập từ vựng</span>}
+                </a>
+            </div>
+
             <h1 className="text-3xl font-bold mb-6">🔗 Ghép từ và nghĩa</h1>
+
             <div className="grid grid-cols-4 gap-4">
                 {cards.map((card, index) => (
                     <Card
@@ -82,8 +111,30 @@ export default function MatchingGamePage() {
                     </Card>
                 ))}
             </div>
-            {cards.length > 0 && cards.every(c => c.matched) && (
-                <div className="text-2xl font-bold text-green-600 mt-10">🎉 Hoàn thành!</div>
+
+            {cards.length > 0 && cards.every(c => c.matched) && !gameCompleted && (
+                <div className="mt-8">
+                    {batchIndex < totalBatches - 1 ? (
+                        <button
+                            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                            onClick={handleNextBatch}
+                        >
+                            👉 Tiếp tục 6 từ tiếp theo
+                        </button>
+                    ) : (
+                        <div className="text-2xl font-bold text-green-600 mt-10">
+                            🎉 Bạn đã hoàn thành tất cả cặp từ! <br />
+                            <span className="text-xl text-green-700">Chúc mừng bạn nhé!</span>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {gameCompleted && (
+                <div className="text-2xl font-bold text-green-600 mt-10">
+                    🎉 Bạn đã hoàn thành tất cả cặp từ! <br />
+                    <span className="text-xl text-green-700">Chúc mừng bạn nhé!</span>
+                </div>
             )}
         </div>
     );
