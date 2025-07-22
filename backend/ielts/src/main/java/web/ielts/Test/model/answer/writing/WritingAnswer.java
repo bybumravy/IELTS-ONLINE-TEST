@@ -14,6 +14,8 @@ public class WritingAnswer {
     private TaskWritingAnswer task1;
     private TaskWritingAnswer task2;
     private String gradingMethod;
+
+    private String skill;
     private double band;
     private LocalDateTime submittedAt;
 
@@ -33,6 +35,14 @@ public class WritingAnswer {
                 ", band=" + band +
                 ", submittedAt=" + submittedAt +
                 '}';
+    }
+
+    public String getSkill() {
+        return skill;
+    }
+
+    public void setSkill(String skill) {
+        this.skill = skill;
     }
 
     public void setGradingMethod(String gradingMethod) {

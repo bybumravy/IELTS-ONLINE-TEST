@@ -207,7 +207,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             String question,
             JsonNode transcript,
 
-            FleCohAnswer analyzeVoice,
+            double FluentScore,
 
             List<String> cueCard
     ) {
@@ -216,11 +216,11 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                 return buildSpeakingPart1Prompt(
                         question,
                         transcript,
-                        analyzeVoice
+                        FluentScore
 
                 );
             case 2:
-                return buildSpeakingPart2Prompt(question, transcript, cueCard,analyzeVoice);
+                return buildSpeakingPart2Prompt(question, transcript, cueCard,FluentScore);
             case 3:
                 return buildSpeakingPart3Prompt(question, transcript);
             default:
@@ -305,7 +305,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
     public String buildSpeakingPart1Prompt(
             String questions,
             JsonNode transcript,
-            FleCohAnswer analyzeVoice
+            double FluentScore
 
     ) {
 //        System.out.println("hello");
@@ -376,7 +376,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
                         "Fluency and Coherence 25%"+
-                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
+//                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
                         "Scoring rules:\n" +
                         "- +0.5 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +
                         "- +0.25 if meanIntensity is between 60–65 dB (slightly strong but acceptable).\n Only add once." +
@@ -461,7 +461,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
     }
 
 
-    public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards,FleCohAnswer analyzeVoice){
+    public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards,double FluentScore){
         String speakingPart2 =
                 "You must return response strictly in JSON format.\n" +
                         "You are an official IELTS Speaking examiner. You are evaluating a real IELTS Part 2 speaking response. Extremely strict grading.\n" +
@@ -534,7 +534,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation: "+
                       IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
                         "Fluency and Coherence 25%"+
-                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
+//                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
                         "Scoring rules:\n" +
                         "- +0.5 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +
                         "- +0.25 if meanIntensity is between 60–65 dB (slightly strong but acceptable).\n Only add once." +

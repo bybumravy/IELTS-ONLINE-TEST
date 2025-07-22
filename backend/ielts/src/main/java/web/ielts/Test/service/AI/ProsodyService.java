@@ -9,10 +9,7 @@
     import org.springframework.http.ResponseEntity;
     import org.springframework.stereotype.Service;
     import org.springframework.web.client.RestTemplate;
-    import web.ielts.Test.model.answer.speaking.FleCohAnswer;
-    import web.ielts.Test.model.answer.speaking.PronunciationAnswer;
-    import web.ielts.Test.model.answer.speaking.IntonationSentence;
-    import web.ielts.Test.model.answer.speaking.StressMismatch;
+    import web.ielts.Test.model.answer.speaking.*;
 
 
     import java.io.*;
@@ -25,6 +22,8 @@
     import java.util.regex.Matcher;
     import java.util.regex.Pattern;
     import java.util.stream.Collectors;
+    import org.springframework.beans.factory.annotation.Autowired;
+
 
 
     @Service
@@ -43,6 +42,7 @@
         private final List<String> stressMismatches = new ArrayList<>();
 
         private final Map<String, String> cmuDictMap = new HashMap<>(); // Lưu trữ CMU Dict
+
 
         public ProsodyService() {
             loadCmuDict();
@@ -215,54 +215,102 @@
             }
         }
 
-        private double callOpenAIScorePronunciation(String transcript, List<StressMismatch> stressMismatches, List<IntonationSentence> intonationResults, List<String> importantWords, List<String> emphasizedWords, List<String> correctEmphasizedWords) {
+        private FeedBackAI callOpenAIScorePronunciation(String transcript, List<StressMismatch> stressMismatches, List<String> importantWords, List<String> emphasizedWords, String azureJsonResult) {
             try {
                 StringBuilder prompt = new StringBuilder();
-                prompt.append("You are a certified IELTS Speaking examiner.\n")
-                    .append("Your task is to give a pronunciation score (from 0 to 9, with 0.5 increments) for the candidate's answer, based on the following information:\n")
-                    .append("- The transcript of the answer.\n")
-                    .append("- The list of words that SHOULD be emphasized (importantWords, from AI).\n")
-                    .append("- The list of words that the student ACTUALLY emphasized (emphasizedWords, from analysis).\n")
-                    .append("- The list of words that are BOTH needed and actually emphasized (correctEmphasizedWords).\n")
-                    .append("- The list of sentences where the student emphasized correctly (correctEmphasizedSentences).\n")
-                    .append("- The list of words that SHOULD be emphasized but were NOT (missingEmphasis).\n")
-                    .append("- The list of words that were emphasized but should NOT be (overEmphasis).\n")
-                    .append("\n=== Instructions ===\n")
-                    .append("- Penalize for frequent or severe stress mismatches, or for missing important intonation/emphasis.\n")
-                    .append("- If the answer is mostly correct with minor issues, give a high score (7.5-9).\n")
-                    .append("- If there are many errors, give a lower score.\n")
-                    .append("- Only return a single number (the score), no explanation, no extra text.\n\n");
-                prompt.append("Transcript:\n").append(transcript).append("\n\n");
+                prompt.append("You are a certified IELTS Speaking examiner specializing in pronunciation assessment.\n")
+                        .append("Your task is to assign a pronunciation band score (from 0.0 to 9.0, using 0.5 increments) for the candidate's spoken answer.\n")
+                        .append("Use only the provided information below:\n")
+                        .append("- The full transcript of the spoken answer.\n")
+                        .append("- The list of important words that SHOULD be emphasized.\n")
+                        .append("- The list of stress mismatches (i.e., words whose stressed syllables were incorrect).\n")
+                        .append("- The list of important words that were NOT emphasized (missing emphasis).\n")
+                        .append("- The Azure Pronunciation Assessment JSON result.\n\n")
+                        .append("=== IELTS Pronunciation Band Descriptors ===\n")
+                        .append("Band 9: Uses a full range of phonological features to\n" +
+                                "convey precise and/or subtle meaning.\n" +
+                                "Flexible use of features of connected speech is\n" +
+                                "sustained throughout.\n" +
+                                "Can be effortlessly understood throughout.\n" +
+                                "Accent has no effect on intelligibility\n")
+                        .append("Band 8: Uses a wide range of phonological features to\n" +
+                                "convey precise and/or subtle meaning.\n" +
+                                "Can sustain appropriate rhythm. Flexible use of\n" +
+                                "stress and intonation across long utterances,\n" +
+                                "despite occasional lapses.\n" +
+                                "Can be easily understood throughout.\n" +
+                                "Accent has minimal effect on intelligibility\n")
+                        .append("Band 7: Displays all the positive features of band 6, and\n" +
+                                "some, but not all, of the positive features of\n" +
+                                "band 8.\n")
+                        .append("Band 6: Uses a range of phonological features, but control is\n" +
+                                "variable.\n" +
+                                "Chunking is generally appropriate, but rhythm may be\n" +
+                                "affected by a lack of stress-timing and/or a rapid speech\n" +
+                                "rate.\n" +
+                                "Some effective use of intonation and stress, but this is\n" +
+                                "not sustained.\n" +
+                                "Individual words or phonemes may be mispronounced\n" +
+                                "but this causes only occasional lack of clarity.\n" +
+                                "Can generally be understood throughout without much\n" +
+                                "effort.\n")
+                        .append("Band 5: Displays all the positive features of band 4, and some,\n" +
+                                "but not all, of the positive features of band 6.\n\n")
+                        .append("Band 4: Uses some acceptable phonological features, but the\n" +
+                                "range is limited.\n" +
+                                "Produces some acceptable chunking, but there are\n" +
+                                "frequent lapses in overall rhythm.\n" +
+                                "Attempts to use intonation and stress, but control is\n" +
+                                "limited.\n" +
+                                "Individual words or phonemes are frequently\n" +
+                                "mispronounced, causing lack of clarity.\n" +
+                                "Understanding requires some effort and there may be\n" +
+                                "patches of speech that cannot be understood.\n")
+                        .append("Band 3: Displays some features of band 2, and some,\n" +
+                                "but not all, of the positive features of band 4.\n\n\n")
+                        .append("Band 2: Uses few acceptable phonological features\n" +
+                                "(possibly because sample is insufficient).\n" +
+                                "Overall problems with delivery impair attempts\n" +
+                                "at connected speech.\n" +
+                                "Individual words and phonemes are mainly\n" +
+                                "mispronounced and little meaning is conveyed.\n" +
+                                "Often unintelligible.\n")
+                        .append("Band 1: Can produce occasional individual words and\n" +
+                                "phonemes that are recognisable, but no overall\n" +
+                                "meaning is conveyed.\n" +
+                                "Unintelligible.\n")
+                        .append("=== Scoring Instructions ===\n")
+                        .append("- Penalize for frequent or severe stress mismatches.\n")
+                        .append("- Penalize for missing emphasis on important words.\n")
+                        .append("- Consider rhythm, intonation, clarity, and natural connected speech.\n")
+                        .append("- If the speech is mostly natural with minor issues, score should be 7.5 to 9.\n")
+                        .append("- If many issues hinder clarity or fluency, assign a lower score accordingly.\n")
+                        .append("- Return ONLY a single JSON object with two fields: \"score\" (e.g., 6.5) and \"comment\" (a brief summary of the pronunciation strengths and weaknesses). Do not return any explanation or extra text.\n\n")
+
+                        .append("Transcript:\n").append(transcript).append("\n\n");
+
                 prompt.append("Stress mismatches (word, detectedPosition, standardPosition):\n");
                 if (stressMismatches == null) stressMismatches = Collections.emptyList();
                 for (StressMismatch sm : stressMismatches) {
                     prompt.append(String.format("- %s (detected: %s, standard: %s)\n", sm.getWord(), sm.getDetectedPosition(), sm.getStandardPosition()));
                 }
+
                 prompt.append("\nImportant words (should be emphasized):\n");
                 for (String w : importantWords) {
                     prompt.append("- ").append(w).append("\n");
                 }
-                prompt.append("\nEmphasized words (student actually emphasized):\n");
-                for (String w : emphasizedWords) {
-                    prompt.append("- ").append(w).append("\n");
-                }
-                prompt.append("\nCorrectly emphasized words (both needed and actually emphasized):\n");
-                for (String w : correctEmphasizedWords) {
-                    prompt.append("- ").append(w).append("\n");
-                }
-                // missingEmphasis: cần nhấn mạnh nhưng không nhấn mạnh
-                List<String> missingEmphasis = importantWords.stream().filter(w -> emphasizedWords.stream().noneMatch(e -> e.equalsIgnoreCase(w))).collect(Collectors.toList());
+
+                List<String> missingEmphasis = importantWords.stream()
+                        .filter(w -> emphasizedWords.stream().noneMatch(e -> e.equalsIgnoreCase(w)))
+                        .collect(Collectors.toList());
+
                 prompt.append("\nMissing emphasis (should be emphasized but were not):\n");
                 for (String w : missingEmphasis) {
                     prompt.append("- ").append(w).append("\n");
                 }
-                // overEmphasis: không cần nhấn mạnh nhưng lại nhấn mạnh
-                List<String> overEmphasis = emphasizedWords.stream().filter(w -> importantWords.stream().noneMatch(i -> i.equalsIgnoreCase(w))).collect(Collectors.toList());
-                prompt.append("\nOver emphasis (emphasized but should not be):\n");
-                for (String w : overEmphasis) {
-                    prompt.append("- ").append(w).append("\n");
-                }
-                prompt.append("\nNow, return ONLY the pronunciation score (0-9, with 0.5 increments). No explanation.\n");
+
+                prompt.append("\nAzure Pronunciation Assessment JSON result:\n");
+                prompt.append(azureJsonResult == null ? "{}" : azureJsonResult).append("\n\n");
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
@@ -284,17 +332,21 @@
                 if (response.getStatusCode().is2xxSuccessful()) {
                     JsonNode root = objectMapper.readTree(response.getBody());
                     String content = root.path("choices").get(0).path("message").path("content").asText();
-                    // Extract the first number (score) from the response
-                    Pattern p = Pattern.compile("([0-9]+(\\.[05])?)");
-                    Matcher m = p.matcher(content);
-                    if (m.find()) {
-                        return Double.parseDouble(m.group(1));
+                    // Làm sạch markdown nếu có
+                    content = content.trim();
+                    if (content.startsWith("```")) {
+                        int firstBrace = content.indexOf('{');
+                        int lastBrace = content.lastIndexOf('}');
+                        if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
+                            content = content.substring(firstBrace, lastBrace + 1);
+                        }
                     }
+                    return objectMapper.readValue(content, FeedBackAI.class);
                 }
             } catch (Exception e) {
                 System.err.println("Error getting pronunciation score from OpenAI: " + e.getMessage());
             }
-            return 0.0; // fallback
+            return new FeedBackAI(0.0, null);
         }
 
             private double praatGetAudioDuration(File wavFile) throws IOException {
@@ -474,7 +526,7 @@
         }
 
 
-        public PronunciationAnswer analyze(String audioUrl, JsonNode root) throws IOException, InterruptedException {
+        public PronunciationAnswer analyze(AzurePronunciationResult azureResult, String audioUrl, JsonNode root) throws IOException, InterruptedException {
             System.out.println("\n=======================================");
             System.out.println("🚀 STARTING PROSODY ANALYSIS");
             System.out.println("   Audio URL: " + audioUrl);
@@ -643,17 +695,15 @@
                 }
 
                 // === Gọi AI để chấm điểm pronunciation ===
-                List<StressMismatch> stressList = result.getStressMismatchesDetailed();
-                if (stressList == null) stressList = Collections.emptyList();
-                double score = callOpenAIScorePronunciation(
+                FeedBackAI feedback = callOpenAIScorePronunciation(
                         transcript,
-                        stressList,
-                        intonationResults,
+                        result.getStressMismatchesDetailed(),
                         importantWords.stream().map(IntonationSentence::getText).collect(Collectors.toList()),
-                        emphasizedWords.stream().map(IntonationSentence::getText).collect(Collectors.toList()),
-                        correctEmphasizedWords.stream().map(IntonationSentence::getText).collect(Collectors.toList())
+                        missingEmphasis.stream().map(IntonationSentence::getText).collect(Collectors.toList()),
+                        azureResult != null ? azureResult.getJsonResult() : null
                 );
-                result.setScore(score);
+                result.setScore(feedback.getScore());
+                result.setComment(feedback.getComment());
 
                 // Set các list vào PronunciationAnswer
                 result.setImportantWords(importantWords);
@@ -950,7 +1000,7 @@
 
 
 
-        private File downloadAudioFile(String url) throws IOException {
+        public File downloadAudioFile(String url) throws IOException {
             System.out.println("Đang tải file từ URL: " + url);
             File file = Files.createTempFile("prosody-", ".mp3").toFile();
             try (InputStream in = new URL(url).openStream(); OutputStream out = new FileOutputStream(file)) {
@@ -960,7 +1010,7 @@
             return file;
         }
 
-        private File convertMp3ToWav(File mp3File) throws IOException, InterruptedException {
+        public File convertMp3ToWav(File mp3File) throws IOException, InterruptedException {
             System.out.println("Bắt đầu chuyển đổi MP3 sang WAV...");
             File wavFile = new File(mp3File.getParent(), mp3File.getName().replace(".mp3", ".wav"));
             ProcessBuilder pb = new ProcessBuilder(

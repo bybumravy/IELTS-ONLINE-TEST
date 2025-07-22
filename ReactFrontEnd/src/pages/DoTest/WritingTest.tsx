@@ -47,6 +47,7 @@ export default function WritingTest() {
     const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
     const toggleHighlightMode = () => setIsHighlightMode((prev) => !prev);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [isGrading, setIsGrading] = useState(false); // Thêm state loading overlay
 
 
     useEffect(() => {
@@ -123,6 +124,7 @@ export default function WritingTest() {
         const payload = {
             testId: writingData.testId,
             username: user?.username,
+            skill: "writing",
             task1: task1Submission,
             task2: task2Submission,
             gradingMethod,
@@ -130,6 +132,7 @@ export default function WritingTest() {
 
         setIsSubmitting(true);
         setShowGradingDialog(false);
+        setIsGrading(true); // Bắt đầu overlay loading
 
         try {
             const response = await fetch(`${API_URL}/verify/writing/submit`, {
@@ -143,14 +146,18 @@ export default function WritingTest() {
 
             const result = await response.json();
             if (gradingMethod === "ai") {
+                // Tắt overlay trước khi chuyển trang
+                setIsGrading(false);
                 navigate(`/writing-result/${result.id}`);
                 alert("Bài viết đã được chấm bằng AI! Your essay has been submitted successfully!");
             } else {
+                setIsGrading(false);
                 alert("Bài viết đã gửi đến giáo viên. Bạn sẽ nhận kết quả trong vòng 3-5 ngày tới.");
                 navigate("/");
             }
         } catch (error) {
             console.error("Error submitting writing:", error);
+            setIsGrading(false);
             alert("Submit failed. Please try again.");
         } finally {
             setIsSubmitting(false);
@@ -196,6 +203,26 @@ export default function WritingTest() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            {/* Overlay loading khi đang chấm điểm AI */}
+            {isGrading && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 9999,
+                        background: "rgba(0,0,0,0.4)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center">
+                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald -600 border-t-blue-600 mb-6"></div>
+                        <div className="text-xl font-bold text-blue-700 mb-2">Scoring</div>
+                        <div className="text-gray-600">Please wait while AI scores your essay</div>
+                    </div>
+                </div>
+            )}
             <DoTestHeader initialTime={60 * 60}
                           onSubmit={handleSubmitClick}
                           isDarkMode={isDarkMode}

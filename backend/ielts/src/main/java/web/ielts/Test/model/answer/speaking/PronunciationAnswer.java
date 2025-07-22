@@ -1,7 +1,7 @@
 package web.ielts.Test.model.answer.speaking;
 
 import java.util.List;
-import web.ielts.Test.model.answer.speaking.IntonationSentence;
+
 
 public class PronunciationAnswer {
     private double score;
@@ -13,6 +13,30 @@ public class PronunciationAnswer {
     private List<IntonationSentence> correctEmphasizedWords;
     private List<IntonationSentence> overEmphasis;
     private List<IntonationSentence> missingEmphasis;
+    private AzurePronunciationResult azureResult;
+    private String comment;
+
+    public PronunciationAnswer(double score, String stressTranscript, List<StressMismatch> stressMismatchesDetailed, String transcript, List<IntonationSentence> importantWords, List<IntonationSentence> emphasizedWords, List<IntonationSentence> correctEmphasizedWords, List<IntonationSentence> overEmphasis, List<IntonationSentence> missingEmphasis, AzurePronunciationResult azureResult, String comment) {
+        this.score = score;
+        this.stressTranscript = stressTranscript;
+        this.stressMismatchesDetailed = stressMismatchesDetailed;
+        this.transcript = transcript;
+        this.importantWords = importantWords;
+        this.emphasizedWords = emphasizedWords;
+        this.correctEmphasizedWords = correctEmphasizedWords;
+        this.overEmphasis = overEmphasis;
+        this.missingEmphasis = missingEmphasis;
+        this.azureResult = azureResult;
+        this.comment = comment;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
     public PronunciationAnswer() {
     }
@@ -88,5 +112,12 @@ public class PronunciationAnswer {
     }
     public void setMissingEmphasis(List<IntonationSentence> missingEmphasis) {
         this.missingEmphasis = missingEmphasis;
+    }
+
+    public AzurePronunciationResult getAzureResult() {
+        return azureResult;
+    }
+    public void setAzureResult(AzurePronunciationResult azureResult) {
+        this.azureResult = azureResult;
     }
 }

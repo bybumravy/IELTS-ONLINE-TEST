@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import web.ielts.Test.service.AI.AzurePronunciationService;
+import web.ielts.Test.model.answer.speaking.AzurePronunciationResult;
+
 @Service
 public class DoTestService {
     @Autowired
@@ -70,6 +73,8 @@ public class DoTestService {
     private  WhisperService whisper;
     @Autowired
     private AiSpeakingService aiSpeakingService;
+    @Autowired
+    private AzurePronunciationService azurePronunciationService;
     @Value("${aws.s3.bucket}")
     private String bucket;
 
@@ -249,11 +254,23 @@ public class DoTestService {
                 System.out.println("tai sao"+s3Url);
                 qa.setAudioAnswer(s3Url);
                     try {
+                        //Whisper
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
                         System.out.println(transcript);
-                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,null);
-                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+                        File mp3File = prosodyService.downloadAudioFile(s3UrlNotEncrypt);
+                        File wavFile = prosodyService.convertMp3ToWav(mp3File);
+                        String transcriptText = transcript.has("text") ? transcript.get("text").asText() : null;
+                        //Azure
+                        AzurePronunciationResult azureResult = azurePronunciationService.assessAndSave(wavFile, transcriptText, s3UrlNotEncrypt);
+
+                        //PHan Viet
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,azureResult.getFluencyScore()/10,null);
+
+                        // Tích hợp Azure Pronunciation Assessment
+
+                        //Praat va AI
+                        PronunciationAnswer pa = prosodyService.analyze(azureResult,s3UrlNotEncrypt,transcript);
+                        pa.setAzureResult(azureResult);
                         qa.setTranscript(sp.getTranscript());
                         qa.setGrammarAnswer(sp.getGrammarAnswer());
                         qa.setLexicalAnswer(sp.getLexicalAnswer());
@@ -298,16 +315,29 @@ public class DoTestService {
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
                 part2.setAudioAnswer(s3Url);
                     try {
+                        //Whisper
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
+                        System.out.println(transcript);
+                        File mp3File = prosodyService.downloadAudioFile(s3UrlNotEncrypt);
+                        File wavFile = prosodyService.convertMp3ToWav(mp3File);
+                        String transcriptText = transcript.has("text") ? transcript.get("text").asText() : null;
+                        //Azure
+                        AzurePronunciationResult azureResult = azurePronunciationService.assessAndSave(wavFile, transcriptText, s3UrlNotEncrypt);
 
-                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),2,prosodyFeatures,part2.getCueCards());
-                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+                        //PHan Viet
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),1,azureResult.getFluencyScore()/10,null);
+
+                        // Tích hợp Azure Pronunciation Assessment
+
+                        //Praat va AI
+                        PronunciationAnswer pa = prosodyService.analyze(azureResult,s3UrlNotEncrypt,transcript);
+                        pa.setAzureResult(azureResult);
                         part2.setTranscript(sp.getTranscript());
                         part2.setGrammarAnswer(sp.getGrammarAnswer());
                         part2.setLexicalAnswer(sp.getLexicalAnswer());
                         part2.setFluencyCohAnswer(sp.getFluencyCohAnswer());
                         part2.setPronunciationAnswer(pa);
+                        //part2.setAzurePronunciationResult(azureResult); // Cần thêm trường này vào model nếu muốn lưu
                         double grammar = sp.getGrammarAnswer().getScore();
                         double lexical = sp.getLexicalAnswer().getScore();
                         double fluency = sp.getFluencyCohAnswer().getScore();
@@ -351,16 +381,28 @@ public class DoTestService {
                 s3Url = UrlEncryptor.encodeUrl(s3Url);
                 qa.setAudioAnswer(s3Url);
                     try {
+                        //Whisper
                         JsonNode transcript = whisper.transcribeWithTimestampsAndSyllables(s3UrlNotEncrypt);
                         System.out.println(transcript);
-                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),3,prosodyFeatures,null);
-                        PronunciationAnswer pa = prosodyService.analyze(s3UrlNotEncrypt,transcript);
+                        File mp3File = prosodyService.downloadAudioFile(s3UrlNotEncrypt);
+                        File wavFile = prosodyService.convertMp3ToWav(mp3File);
+                        String transcriptText = transcript.has("text") ? transcript.get("text").asText() : null;
+                        //Azure
+                        AzurePronunciationResult azureResult = azurePronunciationService.assessAndSave(wavFile, transcriptText, s3UrlNotEncrypt);
+
+                        //PHan Viet
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,azureResult.getFluencyScore()/10,null);
+
+                        // Tích hợp Azure Pronunciation Assessment
+
+                        //Praat va AI
+                        PronunciationAnswer pa = prosodyService.analyze(azureResult,s3UrlNotEncrypt,transcript);
                         qa.setTranscript(sp.getTranscript());
                         qa.setGrammarAnswer(sp.getGrammarAnswer());
                         qa.setLexicalAnswer(sp.getLexicalAnswer());
                         qa.setFluencyCohAnswer(sp.getFluencyCohAnswer());
                         qa.setPronunciationAnswer(pa);
+                        //qa.setAzurePronunciationResult(azureResult); // Cần thêm trường này vào model nếu muốn lưu
                         //totalScore += eval.getScore();
                         double grammar = sp.getGrammarAnswer().getScore();
                         double lexical = sp.getLexicalAnswer().getScore();

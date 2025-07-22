@@ -86,6 +86,7 @@ const SpeakingTest = () => {
     const testTimerRef = useRef<number | null>(null)
     const [showMinRecordingWarning, setShowMinRecordingWarning] = useState(false)
     const [minRecordingWarningMsg, setMinRecordingWarningMsg] = useState("")
+    const [isGrading, setIsGrading] = useState(false); // Thêm state loading overlay
 
     const MIN_RECORDING_TIMES = {
         part1: 1,
@@ -356,6 +357,11 @@ const SpeakingTest = () => {
         return cloned
     }
     const handleSubmitClick = async () => {
+        // Dừng timer khi bắt đầu submit
+        if (testTimerRef.current) {
+            clearInterval(testTimerRef.current);
+            testTimerRef.current = null;
+        }
         if (recordingKey) {
             stopRecording()
             await new Promise((resolve) => {
@@ -381,9 +387,14 @@ const SpeakingTest = () => {
     }
 
     const handleSubmit = async () => {
+        // Dừng timer khi thực sự submit (phòng trường hợp gọi trực tiếp)
+        if (testTimerRef.current) {
+            clearInterval(testTimerRef.current);
+            testTimerRef.current = null;
+        }
         setIsSubmitting(true); // Bây giờ mới set submitting
         setShowGradingDialog(false);
-
+        setIsGrading(true); // Bắt đầu overlay loading
 
 
         const submissionData = prepareSubmissionData()
@@ -411,6 +422,7 @@ const SpeakingTest = () => {
             const result = await res.json();
 
                 // Nếu chọn AI: chuyển đến trang kết quả ngay
+                setIsGrading(false); // Tắt overlay trước khi chuyển trang
                 navigate(`/speaking-result/${result.id}`);
                 alert("Bài viết đã được chấm bằng AI!.Your essay has been submitted successfully!");
 
@@ -420,6 +432,7 @@ const SpeakingTest = () => {
 
         } catch (err) {
             console.error(err)
+            setIsGrading(false); // Tắt overlay nếu lỗi
             alert("❌ Gửi bài thất bại!")
         }
 
@@ -594,6 +607,26 @@ const SpeakingTest = () => {
 
     return (
         <div className="h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col overflow-hidden">
+            {/* Overlay loading khi đang chấm điểm AI */}
+            {isGrading && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 9999,
+                        background: "rgba(0,0,0,0.4)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center">
+                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald-200 border-t-emerald-600 mb-6"></div>
+                        <div className="text-xl font-bold text-emerald-700 mb-2">Scoring...</div>
+                        <div className="text-gray-600">Waiting for AI to score your answer</div>
+                    </div>
+                </div>
+            )}
             {/* Compact Header */}
             <div className="flex-shrink-0">
                 <DoTestSpeakingHeader initialTime={testTimeLeft} />

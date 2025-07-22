@@ -60,6 +60,7 @@ interface PronunciationAnswer {
     overEmphasis: { index: number }[];
     missingEmphasis: { index: number }[];
     correctEmphasizedWords: { index: number }[];
+    comment?: string; // Added comment field
 }
 
 interface SpeakingAnswerQuestion {
@@ -280,6 +281,20 @@ export default function SpeakingResult() {
                         pronunciationAnswer.missingEmphasis || [],
                         pronunciationAnswer.correctEmphasizedWords || []
                     )}
+                </div>
+                {/* Pronunciation Feedback */}
+                <div className="bg-purple-50 border border-purple-200 rounded-2xl p-6">
+                    <h4 className="font-semibold text-purple-800 mb-4 flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5 text-purple-600" />
+                        Examiner Feedback
+                    </h4>
+                    <div className="text-base text-gray-800">
+                        {pronunciationAnswer.comment ? (
+                            <span>{pronunciationAnswer.comment}</span>
+                        ) : (
+                            <span className="italic text-gray-400">No feedback available.</span>
+                        )}
+                    </div>
                 </div>
             </div>
         );

@@ -675,8 +675,8 @@ export default function WritingResult() {
                 {/* Active Task Content */}
                 <div className="space-y-6">
                   {activeTask === "task1"
-                    ? (data.task1 ? renderTaskContent(data.task1) : <Card className="p-8 text-center">Không có dữ liệu cho Task 1</Card>)
-                    : (data.task2 ? renderTaskContent(data.task2) : <Card className="p-8 text-center">Không có dữ liệu cho Task 2</Card>)}
+                    ? (data.task1 ? renderTaskContent(data.task1) : <Card className="p-8 text-center">No data for Task 1</Card>)
+                    : (data.task2 ? renderTaskContent(data.task2) : <Card className="p-8 text-center">No data for Task 2</Card>)}
                 </div>
 
             </div>
