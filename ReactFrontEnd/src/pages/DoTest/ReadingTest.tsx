@@ -25,7 +25,6 @@ export interface Task {
 }
 
 export interface ReadingTest {
-    idReading: string;
     testId: string;
     tasks: Task[];
     username: string;
@@ -33,8 +32,8 @@ export interface ReadingTest {
 }
 
 interface QuestionWithStudentAnswer extends Question {
-    studentAnswer: string | null;
-    questionId: number;
+    studentAnswer?: string | null;
+    questionId?: number;
 }
 
 export default function ReadingTest() {
@@ -48,8 +47,8 @@ export default function ReadingTest() {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const containerRef = useRef<HTMLDivElement>(null);
-    const paragraphRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const paragraphRef = useRef<HTMLDivElement | null>(null);
 
     const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
     const [isHighlightMode, setIsHighlightMode] = useState(false);
@@ -141,9 +140,8 @@ export default function ReadingTest() {
         };
     }, [showColorPicker]);
     const handleFullscreen = () => {
-        if (!containerRef.current) return;
         if (!document.fullscreenElement) {
-            containerRef.current.requestFullscreen().catch((err) => console.error(err));
+            containerRef.current?.requestFullscreen().catch((err) => console.error(err));
         } else {
             document.exitFullscreen();
         }
@@ -156,16 +154,17 @@ export default function ReadingTest() {
         if (user?.username) dataToSend.username = user.username;
         dataToSend.skill = "reading";
 
-        dataToSend.tasks.forEach((task) => {
+        dataToSend.tasks.forEach((task: Task) => {
             delete (task as any).title;
 
-            task.sections.forEach((section) => {
+            task.sections.forEach((section: Section) => {
                 delete (section as any).introduction;
                 delete (section as any).imageUrl;
 
-                section.questions.forEach((q) => {
+                section.questions.forEach((q:QuestionWithStudentAnswer) => {
                     const question = q as QuestionWithStudentAnswer;
-                    question.studentAnswer = question.studentAnswer || null;
+                    const qid = question.questionId!;
+                    question.studentAnswer = answers[qid] || null;
 
                     delete (question as any).explanation;
                     delete (question as any).options;
@@ -176,28 +175,12 @@ export default function ReadingTest() {
         setIsSubmitted(true);
 
         try {
-            const dataToSend = {
-                ...readingTest,
-                tasks: readingTest.tasks.map((task) => ({
-                    ...task,
-                    sections: task.sections.map((section) => ({
-                        ...section,
-                        questions: section.questions.map((question) => ({
-                            ...question,
-                            studentAnswer: (question as QuestionWithStudentAnswer).studentAnswer || null,
-                        })),
-                    })),
-                })),
-            };
-
             const response = await fetch(`${API_URL}/verify/reading/submit`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(dataToSend),
             });
-
-            if (!response.ok) throw new Error("Submit failed");
 
             const result = await response.json();
             console.log("Saved:", result);

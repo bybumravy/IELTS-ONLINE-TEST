@@ -1,5 +1,5 @@
 "use client"
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate  } from "react-router-dom";
 import {useEffect, useState} from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -96,6 +96,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export default function TeacherScoringPage() {
 
+    const navigate = useNavigate();
     const [taskData, setTaskData] = useState<WritingAnswer | null>(null);
     const [selectedTask, setSelectedTask] = useState<"task1" | "task2">("task1")
     const { id } = useParams<{ id: string }>();
@@ -528,6 +529,9 @@ export default function TeacherScoringPage() {
 
             const result = await response.json();
             console.log("Gửi thành công:", result);
+            // Hiển thị thông báo thành công
+            alert("Đã gửi kết quả và thông báo cho học sinh thành công!");
+            navigate("/teacher-scored-list");
         } catch (error) {
             console.error("Lỗi khi gửi:", error);
         }

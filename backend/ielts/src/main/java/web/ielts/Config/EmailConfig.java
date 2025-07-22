@@ -23,4 +23,25 @@ public class EmailConfig {
 
         mailSender.send(message);
     }
+
+    public void sendNotificationToStudent(String studentEmail, String testId, double bandScore) {
+
+        String languageUrl = "http://localhost:5173/";
+        // Gửi email thông báo
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(studentEmail);
+        message.setSubject("Kết quả bài Writing IELTS của bạn đã có");
+        message.setText(String.format(
+                "Bài Writing IELTS của bạn (ID: %s) đã được chấm điểm.\n\n" +
+                        "Điểm tổng: %.1f\n\n" +
+                        "Vui lòng đăng nhập vào hệ thống để xem chi tiết.\n\n" +
+                        languageUrl,
+
+                testId, bandScore
+        ));
+
+        mailSender.send(message);
+
+        // Có thể thêm gửi thông báo trong hệ thống ở đây nếu cần
+    }
 }

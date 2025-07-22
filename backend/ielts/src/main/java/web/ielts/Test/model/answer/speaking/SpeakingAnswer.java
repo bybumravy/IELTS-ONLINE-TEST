@@ -3,7 +3,7 @@ package web.ielts.Test.model.answer.speaking;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Document(collection = "SpeakingAnswer")
 public class SpeakingAnswer {
@@ -18,7 +18,7 @@ public class SpeakingAnswer {
     private SpeakingAnswerPart2 part2;
     private SpeakingAnswerPart13 part3;
     private double band;
-    private LocalDateTime submittedAt;
+    private LocalDate submittedAt;
 
 
     public SpeakingAnswer(String testId) {
@@ -114,11 +114,11 @@ public class SpeakingAnswer {
         this.band = band;
     }
 
-    public LocalDateTime getSubmittedAt() {
+    public LocalDate getSubmittedAt() {
         return submittedAt;
     }
 
-    public void setSubmittedAt(LocalDateTime submittedAt) {
+    public void setSubmittedAt(LocalDate submittedAt) {
         this.submittedAt = submittedAt;
     }
 }

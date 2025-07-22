@@ -67,6 +67,7 @@ public class DoTestController {
     }
     @PostMapping("/reading/submit")
     public ResponseEntity<ReadingAnswer> saveReadingAnswer(@RequestBody ReadingAnswer answer) {
+        System.out.println("hi");
         return ResponseEntity.ok(doTestService.saveReadingAnswer(answer));
     }
 
@@ -79,7 +80,6 @@ public class DoTestController {
 
     @PostMapping("/listening/submit")
     public ResponseEntity<ListeningAnswer> saveListeningAnswer(@RequestBody ListeningAnswer answer) {
-        System.out.println("hi");
         return ResponseEntity.ok(doTestService.saveListeningAnswer(answer));
     }
     @PostMapping("/speaking/submit")

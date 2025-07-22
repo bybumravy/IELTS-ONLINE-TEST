@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import web.ielts.Test.model.answer.writing.WritingAnswer;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 @Service
@@ -19,7 +19,7 @@ public class DoTestTeacherService {
         return writingAnswerRepository.findById(testId);
     }
     public WritingAnswer saveWritingAnswer(WritingAnswer writingAnswer) {
-        writingAnswer.setSubmittedAt(LocalDateTime.now());
+        writingAnswer.setSubmittedAt(LocalDate.now());
         System.out.println(writingAnswerRepository.save(writingAnswer));
         return writingAnswerRepository.save(writingAnswer);
     }

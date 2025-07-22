@@ -4,7 +4,8 @@ package web.ielts.Test.model.answer.reading;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "ReadingAnswer")
@@ -12,15 +13,18 @@ public class ReadingAnswer {
     @Id
     private String id;
     private String testId;
-    private List<TaskReadingAnswer> taskReadingAnswers;
+    private List<TaskReadingAnswer> taskReadingAnswers = new ArrayList<>();
     private String username;
     private String skill;
     private int totalQuestions;
     private int totalCorrect;
     private double band;
-    private LocalDateTime submittedAt;
+    private LocalDate submittedAt;
 
-    public ReadingAnswer(String id, String testId, List<TaskReadingAnswer> taskReadingAnswers, String username, String skill, int totalQuestions, int totalCorrect, double band, LocalDateTime submittedAt) {
+    public ReadingAnswer() {
+    }
+
+    public ReadingAnswer(String id, String testId, List<TaskReadingAnswer> taskReadingAnswers, String username, String skill, int totalQuestions, int totalCorrect, double band, LocalDate submittedAt) {
         this.id = id;
         this.testId = testId;
         this.taskReadingAnswers = taskReadingAnswers;
@@ -96,14 +100,26 @@ public class ReadingAnswer {
         this.band = band;
     }
 
-    public LocalDateTime getSubmittedAt() {
+    public LocalDate getSubmittedAt() {
         return submittedAt;
     }
 
-    public void setSubmittedAt(LocalDateTime submittedAt) {
+    public void setSubmittedAt(LocalDate submittedAt) {
         this.submittedAt = submittedAt;
     }
 
-    public ReadingAnswer() {
+    @Override
+    public String toString() {
+        return "ReadingAnswer{" +
+                "id='" + id + '\'' +
+                ", testId='" + testId + '\'' +
+                ", taskReadingAnswers=" + taskReadingAnswers +
+                ", username='" + username + '\'' +
+                ", skill='" + skill + '\'' +
+                ", totalQuestions=" + totalQuestions +
+                ", totalCorrect=" + totalCorrect +
+                ", band=" + band +
+                ", submittedAt=" + submittedAt +
+                '}';
     }
 }
