@@ -48,7 +48,7 @@ const ForgetPasswordPage = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     email,
-                    redirectUrl: redirectPath, // ✅ đưa vào body
+
                 }),
             });
 

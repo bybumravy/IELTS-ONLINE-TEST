@@ -267,6 +267,17 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                     "Band 3: Limited ability to link ideas or develop topics logically. Often incoherent or fragmented.\n" +
                     "Band 2: No meaningful progression of ideas. Utterances are isolated with no logical sequence.\n" +
                     "Band 1: No coherence at all. Utterances are unrelated or unintelligible.\n";
+    private static final String IELTS_STRICT_FLUENCY_ONLY =
+            "- IELTS Fluency Descriptors (strict, based on acoustic features):\n" +
+                    "Band 9: SpeechRate ≥ 5.0 wps, PauseCount ≤ 1, MeanIntensity ≥ 68 dB. Fully fluent, no hesitation, natural speed and volume throughout.\n" +
+                    "Band 8: SpeechRate ≥ 4.5 wps, PauseCount ≤ 3, MeanIntensity ≥ 66 dB. Smooth and fast delivery with only minor natural pauses.\n" +
+                    "Band 7: SpeechRate ≥ 4.0 wps, PauseCount ≤ 5, MeanIntensity ≥ 63 dB. Mostly fluent with occasional hesitation or repetition.\n" +
+                    "Band 6: SpeechRate ≥ 3.5 wps, PauseCount ≤ 7, MeanIntensity ≥ 60 dB. Noticeable hesitation and repetition, moderate fluency.\n" +
+                    "Band 5: SpeechRate ≥ 3.0 wps, PauseCount ≤ 10, MeanIntensity ≥ 57 dB. Frequent pauses and disrupted flow, especially on complex ideas.\n" +
+                    "Band 4: SpeechRate ≥ 2.5 wps, PauseCount ≤ 13, MeanIntensity ≥ 55 dB. Hesitant speech with frequent stops and slow pace.\n" +
+                    "Band 3: SpeechRate ≥ 2.0 wps, PauseCount ≤ 16, MeanIntensity ≥ 52 dB. Disjointed delivery with poor connection between ideas.\n" +
+                    "Band 2: SpeechRate ≥ 1.5 wps, PauseCount ≤ 20, MeanIntensity ≥ 50 dB. Very slow and halting speech with little fluency.\n" +
+                    "Band 1: SpeechRate < 1.5 wps, PauseCount > 20, MeanIntensity < 50 dB. No fluency at all. Isolated words or unintelligible output.\n";
     private static final String IELTS_PUBLIC_Pronunciation =
             "- IELTS Public Descriptors:\n" +
                     "Band 9: Uses a full range of phonological features to convey precise and/or subtle meaning. Flexible use of features of connected speech is sustained throughout. Can be effortlessly understood throughout. Accent has no effect on intelligibility.\n" +
@@ -299,8 +310,22 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             "- Vocabulary: informal expression\n" +
             "- Vocabulary: vague expression\n" +
             "- Vocabulary: repetition\n"
-
+            +
+            "• Coherence-related:\n" +
+            "- Coherence: unclear progression of ideas\n" +
+            "- Coherence: lack of logical connectors\n" +
+            "- Coherence: abrupt transitions\n" +
+            "- Coherence: off-topic response\n" +
+            "- Coherence: ideas not fully developed\n" +
+            "- Coherence: poor paragraph structure or sequencing\n";
             ;
+            private static final String errorTypeCOHERENCE = "• Coherence-related:\n" +
+                    "- Coherence: unclear progression of ideas\n" +
+                    "- Coherence: lack of logical connectors\n" +
+                    "- Coherence: abrupt transitions\n" +
+                    "- Coherence: off-topic response\n" +
+                    "- Coherence: ideas not fully developed\n" +
+                    "- Coherence: poor paragraph structure or sequencing\n";
 
     public String buildSpeakingPart1Prompt(
             String questions,
@@ -341,7 +366,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "1. EVALUATION (Official IELTS Criteria + Public Descriptors):\n" +
                         "\n" +
                         "• Lexical Resource (25%):\n" +
-                        " If any single errorType occurs more than 3 times,\n" +
+                        " If any single errorType occurs more than 2 times,\n" +
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_DESCRIPTORSLexicalResource + "\n" +
@@ -352,16 +377,9 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
                         "Fluency and Coherence 25%"+
                         "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
-                        "Scoring rules:\n" +
-                        "- +0.25 if meanIntensity is between 50–60 dB (clear and stable voice).\n Only add once." +
-                        "- +0.25 if meanIntensity is between 60–65 dB (slightly strong but acceptable).\n Only add once." +
-                        "- -0.25 if meanIntensity < 45 dB (voice too weak).\n Only add once." +
-                        "- +0.25 if speechRate is between 2.0–3.0 words/sec (smooth and fluent).\n Only add once." +
-                        "- -0.25 if speechRate < 1.5 words/sec (slow, hesitant).\n Only add once." +
-                        "- +0.25 if pauseCount == 0.0 (no unnatural hesitation).\n Only add once." +
-                        "- -0.25 if pauseCount > 2 (frequent unnatural pauses).Only add once."+
+                        IELTS_STRICT_FLUENCY_ONLY+
                         "Coherence  "+
-                        "→ Deduct 0.5 point in total for that error type (only once) for Coherence"+
+                        "→ Deduct 0.5 point in total for that error type (only once) for Coherence basedd on"+errorTypeCOHERENCE+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_COHERENCE_ONLY+
                         "2. SCORING SYSTEM:\n" +
@@ -403,8 +421,8 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "Do NOT provide generic or vague comments.\n" +
                         "\n" +
                         "Your feedback must explicitly mention and evaluate the following:\n" +
-                        "\n" +
-                        "meanIntensity"+
+
+                        "- **Mean Intensity**:  Comment on whether the volume was loud, soft, or appropriately consistent throughout.n"+
                         "- **Speech rate**: Was the candidate’s speech fast, slow, or appropriately paced?\n" +
                         "- **Number and nature of pauses**: Were there frequent unnatural pauses or hesitations?\n" +
                         "- **Logical progression of ideas**: Did the candidate present ideas in a logical and connected manner?\n" +

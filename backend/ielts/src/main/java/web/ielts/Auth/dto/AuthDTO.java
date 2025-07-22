@@ -6,6 +6,7 @@ public class AuthDTO {
     private String email;
     private String password;
     private String fromPath;
+    private String role;
     public AuthDTO() {
     }
 
@@ -13,6 +14,14 @@ public class AuthDTO {
         this.email = email;
         this.password = password;
         this.fromPath = fromPath;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getEmail() {

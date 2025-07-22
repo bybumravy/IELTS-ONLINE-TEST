@@ -25,11 +25,7 @@ public class AuthController {
 
     @Autowired
     private AuthService authservice;
-    @PostMapping("/refreshtoken")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
 
-        return authservice.refreshToken(request, response);
-    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User newUser) {
@@ -39,17 +35,17 @@ public class AuthController {
     @PostMapping("/forgotpassword")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
          String email = request.get("email");
-        String redirectUrl = request.get("redirectUrl");
 
-        return authservice.forgotpassword(email,redirectUrl);
+
+        return authservice.forgotpassword(email);
 
     }
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
         String token = request.get("token");
         String newPassword = request.get("newPassword");
-        String redirectURL = request.get("redirectURL");
-        return authservice.resetPassword(token, newPassword,redirectURL);
+
+        return authservice.resetPassword(token, newPassword);
     }
     @GetMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
@@ -63,8 +59,9 @@ public class AuthController {
        // in ra /loginadmin
         return authservice.login(
                 loginRequest.getEmail(),
-                loginRequest.getPassword()
-                ,loginRequest.getFromPath()
+                loginRequest.getPassword(),
+                loginRequest.getRole()
+
         );
     }
 

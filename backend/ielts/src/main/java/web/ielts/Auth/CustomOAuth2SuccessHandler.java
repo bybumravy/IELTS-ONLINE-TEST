@@ -63,17 +63,11 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
 
         // Gửi cookie về trình duyệt
         response.addHeader("Set-Cookie", cookie.toString());
-        String refreshToken = JwtToken.generateRefreshToken(email, roleFromQuery,isPremium);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(7 * 24 * 60 * 60) // 7 ngày
-                .sameSite("Lax")
-                .build();
 
-        response.addHeader("Set-Cookie", refreshCookie.toString());
+
+
+
         String redirectUrl;
 
         switch (roleFromQuery.toUpperCase()) {

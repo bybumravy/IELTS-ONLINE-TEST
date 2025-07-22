@@ -50,7 +50,7 @@ const ResetPassword = () => {
                 body: JSON.stringify({
                     token,
                     newPassword: password,
-                    redirectURL, // 👈 thêm dòng này
+
                 }),
             });
 

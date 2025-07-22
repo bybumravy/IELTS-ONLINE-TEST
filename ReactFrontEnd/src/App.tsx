@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { AuthProvider } from "@/contexts/AuthContext"
-import ErrorBoundary from "@/components/ErrorBoundary"
+
 
 // Layouts
 import { MainLayout } from "@/components/layout/MainLayout"
