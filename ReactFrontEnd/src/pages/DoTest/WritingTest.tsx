@@ -2,7 +2,7 @@ import {useState, useEffect, useRef} from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
     Dialog,
     DialogContent,
@@ -32,6 +32,9 @@ interface WritingData {
 export default function WritingTest() {
     const { user } = useAuth();
     const { testId } = useParams<{ testId: string }>();
+    const [searchParams] = useSearchParams();
+    const testAnswerId = searchParams.get("testAnswerId");
+    const mode = searchParams.get("mode");
     const [currentTask, setCurrentTask] = useState(1);
     const [essayTask1, setEssayTask1] = useState("");
     const [essayTask2, setEssayTask2] = useState("");
@@ -78,10 +81,12 @@ export default function WritingTest() {
 
     const handleSubmit = async () => {
         if (!writingData || writingData.tasks.length < 2) return;
-
+        if (!testAnswerId) {
+            alert("Thiếu testAnswerId, vui lòng quay lại bước đầu tiên.");
+            return;
+        }
         const task1Data = writingData.tasks[0];
         const task2Data = writingData.tasks[1];
-
         const task1Submission = essayTask1.trim()
             ? {
                   type: task1Data.type,
@@ -91,7 +96,6 @@ export default function WritingTest() {
                   wordCount: wordCountTask1.toString(),
               }
             : null;
-
         const task2Submission = essayTask2.trim()
             ? {
                   type: task2Data.type,
@@ -100,18 +104,14 @@ export default function WritingTest() {
                   wordCount: wordCountTask2.toString(),
               }
             : null;
-
         if (!task1Submission && !task2Submission) {
             alert("You haven't written anything.");
             return;
         }
-
         const MAX_WORDS_TASK1 = 500;
         const MAX_WORDS_TASK2 = 500;
-
         const { valid: valid1, error: error1 } = validateWordLimit(essayTask1, MAX_WORDS_TASK1);
         const { valid: valid2, error: error2 } = validateWordLimit(essayTask2, MAX_WORDS_TASK2);
-
         if (!valid1) {
           alert(error1);
           return;
@@ -120,7 +120,6 @@ export default function WritingTest() {
           alert(error2);
           return;
         }
-
         const payload = {
             testId: writingData.testId,
             username: user?.username,
@@ -129,27 +128,26 @@ export default function WritingTest() {
             task2: task2Submission,
             gradingMethod,
         };
-
         setIsSubmitting(true);
         setShowGradingDialog(false);
         setIsGrading(true); // Bắt đầu overlay loading
-
         try {
-            const response = await fetch(`${API_URL}/verify/writing/submit`, {
+            const response = await fetch(`${API_URL}/verify/writing/submit?testAnswerId=${testAnswerId}`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
-
             if (!response.ok) throw new Error("Failed to submit writing");
-
             const result = await response.json();
             if (gradingMethod === "ai") {
-                // Tắt overlay trước khi chuyển trang
                 setIsGrading(false);
-                navigate(`/writing-result/${result.id}`);
-                alert("Bài viết đã được chấm bằng AI! Your essay has been submitted successfully!");
+                if (mode === "fulltest") {
+                    navigate(`/test/speaking/${testId}?testAnswerId=${testAnswerId}&mode=fulltest`);
+                } else {
+                    navigate(`/writing-result/${result.id}`);
+                    alert("Bài viết đã được chấm bằng AI! Your essay has been submitted successfully!");
+                }
             } else {
                 setIsGrading(false);
                 alert("Bài viết đã gửi đến giáo viên. Bạn sẽ nhận kết quả trong vòng 3-5 ngày tới.");
@@ -217,9 +215,9 @@ export default function WritingTest() {
                     }}
                 >
                     <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center">
-                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald -600 border-t-blue-600 mb-6"></div>
-                        <div className="text-xl font-bold text-blue-700 mb-2">Scoring</div>
-                        <div className="text-gray-600">Please wait while AI scores your essay</div>
+                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald-200 border-t-emerald-600 mb-6"></div>
+                        <div className="text-xl font-bold text-emerald-700 mb-2">Scoring...</div>
+                        <div className="text-gray-600">Waiting for AI to score your answer</div>
                     </div>
                 </div>
             )}

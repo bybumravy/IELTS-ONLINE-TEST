@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {customFetch} from "@/components/sections/customFetch";
 export interface Question {
@@ -39,6 +39,9 @@ interface QuestionWithStudentAnswer extends Question {
 
 export default function ReadingTest() {
     const { testId } = useParams<{ testId: string }>();
+    const [searchParams] = useSearchParams();
+    const testAnswerId = searchParams.get("testAnswerId");
+    const mode = searchParams.get("mode");
     const [currentPart, setCurrentPart] = useState(1);
     const [readingTest, setReadingTest] = useState<ReadingTest | null>(null);
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -151,32 +154,29 @@ export default function ReadingTest() {
 
     const handleSubmit = async () => {
         if (!readingTest) return;
-
+        if (!testAnswerId) {
+            alert("Thiếu testAnswerId, vui lòng quay lại bước đầu tiên.");
+            return;
+        }
         const dataToSend = structuredClone(readingTest);
         if (user?.username) dataToSend.username = user.username;
         dataToSend.skill = "reading";
-
         dataToSend.tasks.forEach((task) => {
             delete (task as any).title;
-
             task.sections.forEach((section) => {
                 delete (section as any).introduction;
                 delete (section as any).imageUrl;
-
                 section.questions.forEach((q) => {
                     const question = q as QuestionWithStudentAnswer;
                     question.studentAnswer = question.studentAnswer || null;
-
                     delete (question as any).explanation;
                     delete (question as any).options;
                 });
             });
         });
-
         setIsSubmitted(true);
-
         try {
-            const dataToSend = {
+            const dataToSendFinal = {
                 ...readingTest,
                 tasks: readingTest.tasks.map((task) => ({
                     ...task,
@@ -189,20 +189,20 @@ export default function ReadingTest() {
                     })),
                 })),
             };
-
-            const response = await fetch(`${API_URL}/verify/reading/submit`, {
+            const response = await fetch(`${API_URL}/verify/reading/submit?testAnswerId=${testAnswerId}`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSend),
+                body: JSON.stringify(dataToSendFinal),
             });
-
             if (!response.ok) throw new Error("Submit failed");
-
             const result = await response.json();
-            console.log("Saved:", result);
             alert("🎉 Submitted successfully!");
-            navigate(`/reading-result/${result.id}`);
+            if (mode === "fulltest") {
+                navigate(`/test/writing/${testId}?testAnswerId=${testAnswerId}&mode=fulltest`);
+            } else {
+                navigate(`/reading-result/${result.id}`);
+            }
         } catch (error) {
             console.error(error);
             alert("❌ Error submitting");

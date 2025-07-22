@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
  interface Tip {
-    id: string
+    testId: string
     skill: string
     type: string
     description: string

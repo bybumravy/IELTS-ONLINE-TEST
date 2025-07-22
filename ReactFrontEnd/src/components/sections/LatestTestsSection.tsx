@@ -2,9 +2,10 @@ import { Play} from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useNavigate } from "react-router-dom";
 
 export interface IELTSTest {
-    id: string
+    testId: string
     testTitle: string
     tags: string[]
     createdAt: string
@@ -15,6 +16,7 @@ interface LatestTestsSectionProps {
 }
 
 export function LatestTestsSection({ tests }: LatestTestsSectionProps) {
+    const navigate = useNavigate();
     return (
         <section className="py-16 bg-white ">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -43,7 +45,9 @@ export function LatestTestsSection({ tests }: LatestTestsSectionProps) {
                             </CardHeader>
 
                             <CardContent>
-                                <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+                                <Button className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                    onClick={() => navigate(`/test/full/${test.testId}`)}
+                                >
                                     <Play className="w-4 h-4 mr-2" />
                                     Start Test
                                 </Button>

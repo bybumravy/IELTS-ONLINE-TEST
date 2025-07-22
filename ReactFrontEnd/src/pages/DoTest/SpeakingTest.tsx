@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Mic, Square, ChevronRight, CheckCircle, AlertCircle, Volume2, Brain } from "lucide-react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 import { customFetch } from "@/components/sections/customFetch"
 import { DoTestSpeakingHeader } from "@/components/layout/doTest/DoTestSpeakingHeader"
@@ -51,6 +51,9 @@ type Part = "part1" | "part2" | "part3"
 
 const SpeakingTest = () => {
     const { testId } = useParams<{ testId: string }>()
+    const [searchParams] = useSearchParams();
+    const testAnswerId = searchParams.get("testAnswerId");
+    const mode = searchParams.get("mode");
     const { user } = useAuth()
     const TOTAL_TEST_TIME = 600 // 10 phút (600 giây)
     const [speaking, setSpeaking] = useState<Speaking | null>(null)
@@ -72,8 +75,7 @@ const SpeakingTest = () => {
     const [liveTranscript, setLiveTranscript] = useState<string>("");
     const recognitionRef = useRef<any>(null); // dùng any nếu TS báo lỗi SpeechRecognition
     const [_recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
-    const [gradingMethod, setGradingMethod] = useState<"ai" | "teacher">("ai");
-    const [showGradingDialog, setShowGradingDialog] = useState(false);
+    const [isGrading, setIsGrading] = useState(false); // Thêm state loading overlay
     const [totalRecordingTime, setTotalRecordingTime] = useState<{ [key in Part]: number }>({
         part1: 0,
         part2: 0,
@@ -86,7 +88,6 @@ const SpeakingTest = () => {
     const testTimerRef = useRef<number | null>(null)
     const [showMinRecordingWarning, setShowMinRecordingWarning] = useState(false)
     const [minRecordingWarningMsg, setMinRecordingWarningMsg] = useState("")
-    const [isGrading, setIsGrading] = useState(false); // Thêm state loading overlay
 
     const MIN_RECORDING_TIMES = {
         part1: 1,
@@ -353,9 +354,9 @@ const SpeakingTest = () => {
             audioAnswer: audioUrls[`part3-${i + 1}`] ? `part3-${i + 1}.webm` : "",
             duration: recordingTimes[`part3-${i + 1}`] || 0,
         }))
-        cloned.gradingMethod = gradingMethod
         return cloned
     }
+
     const handleSubmitClick = async () => {
         // Dừng timer khi bắt đầu submit
         if (testTimerRef.current) {
@@ -373,7 +374,7 @@ const SpeakingTest = () => {
             })
         }
 
-        // Kiểm tra điều kiện tối thiểu trước khi hiển thị dialog
+        // Kiểm tra điều kiện tối thiểu trước khi submit
         if (!timeUp && totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3) {
             setMinRecordingWarningMsg(
                 `Bạn cần ghi âm tổng cộng ít nhất ${MIN_RECORDING_TIMES.part3} giây cho PART3 trước khi nộp bài. Hiện tại: ${Math.floor(totalRecordingTime.part3)} giây`,
@@ -382,8 +383,8 @@ const SpeakingTest = () => {
             return; // Dừng lại nếu không đủ điều kiện
         }
 
-        // Chỉ hiển thị dialog khi đủ điều kiện
-        setShowGradingDialog(true);
+        // Gọi submit trực tiếp (không hiển thị dialog)
+        handleSubmit();
     }
 
     const handleSubmit = async () => {
@@ -393,49 +394,47 @@ const SpeakingTest = () => {
             testTimerRef.current = null;
         }
         setIsSubmitting(true); // Bây giờ mới set submitting
-        setShowGradingDialog(false);
         setIsGrading(true); // Bắt đầu overlay loading
-
-
+        if (!testAnswerId) {
+            alert("Thiếu testAnswerId, vui lòng quay lại bước đầu tiên.");
+            setIsGrading(false);
+            setIsSubmitting(false);
+            return;
+        }
         const submissionData = prepareSubmissionData()
         if (!submissionData) return
-
         const formData = new FormData()
         formData.append(
             "metadata",
             new Blob([JSON.stringify(submissionData)], { type: "application/json" }),
             "metadata.json",
         )
-
         await Promise.all(
             Object.entries(audioUrls).map(async ([key, url]) => {
                 const blob = await fetch(url).then((res) => res.blob())
                 formData.append("files", blob, `${key}.webm`)
             }),
         )
-
         try {
-            const res = await customFetch(`${API_URL}/verify/speaking/submit`, {
+            const res = await customFetch(`${API_URL}/verify/speaking/submit?testAnswerId=${testAnswerId}`, {
                 method: "POST",
                 body: formData,
             })
             const result = await res.json();
-
-                // Nếu chọn AI: chuyển đến trang kết quả ngay
-                setIsGrading(false); // Tắt overlay trước khi chuyển trang
+            setIsGrading(false); // Tắt overlay trước khi chuyển trang
+            if (mode === "fulltest") {
+                navigate(`/test/fulltest-result/${testAnswerId}`);
+            } else {
                 navigate(`/speaking-result/${result.id}`);
                 alert("Bài viết đã được chấm bằng AI!.Your essay has been submitted successfully!");
-
-
+            }
             if (!res.ok) throw new Error("Lỗi khi gửi bài!")
             alert("✅ Bài đã được nộp!")
-
         } catch (err) {
             console.error(err)
             setIsGrading(false); // Tắt overlay nếu lỗi
             alert("❌ Gửi bài thất bại!")
         }
-
         setIsSubmitting(false)
     }
 
@@ -632,46 +631,6 @@ const SpeakingTest = () => {
                 <DoTestSpeakingHeader initialTime={testTimeLeft} />
             </div>
             {/* Dialog chọn phương thức chấm bài */}
-            <Dialog open={showGradingDialog} onOpenChange={setShowGradingDialog}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Chọn phương thức chấm bài</DialogTitle>
-                        <DialogDescription>
-                            Vui lòng chọn cách bạn muốn bài viết của mình được chấm điểm
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <RadioGroup
-                            defaultValue="ai"
-                            onValueChange={(value) => setGradingMethod(value as "ai" | "teacher")}
-                        >
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="ai" id="ai" />
-                                <Label htmlFor="ai">Chấm bằng AI (Nhanh chóng)</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="teacher" id="human" />
-                                <Label htmlFor="teacher">Chấm bởi giáo viên (Chính xác hơn)</Label>
-                            </div>
-                        </RadioGroup>
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => setShowGradingDialog(false)}
-                        >
-                            Hủy
-                        </Button>
-                        <Button
-
-                            onClick={handleSubmit}
-
-                        >
-                            {isSubmitting ? "Đang gửi..." : "Xác nhận"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
             {/*/!* Part Header - Compact *!/*/}
             <div className="max-w-6xl mx-auto">
                 <div className="">

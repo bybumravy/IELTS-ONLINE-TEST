@@ -15,6 +15,7 @@ import web.ielts.Test.model.answer.reading.ReadingAnswer;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswer;
 import web.ielts.Test.model.answer.writing.WritingAnswer;
 import web.ielts.Test.service.DoTestService;
+import web.ielts.Test.service.TestAnswerService;
 import web.ielts.User.User;
 
 import java.io.IOException;
@@ -32,7 +33,10 @@ public class DoTestController {
     @Autowired
     private DoTestService doTestService;
 
-    @GetMapping("writing/{testId}")
+    @Autowired
+    private TestAnswerService testAnswerService;
+
+    @GetMapping("/writing/{testId}")
     public ResponseEntity<Writing> getWritingByTestId(@PathVariable String testId) {
         return doTestService.getWritingByTestId(testId)
                 .map(ResponseEntity::ok)
@@ -60,32 +64,42 @@ public class DoTestController {
             return ResponseEntity.notFound().build();
         }
     }
-    @GetMapping("/fulltest/{testId}")
-    public ResponseEntity<Test> getFullTestByTestId(@PathVariable String testId) {
+    @GetMapping("/fullTest/{testId}")
+    public ResponseEntity<Test> getFullTestByTestId(@PathVariable String testId, @AuthenticationPrincipal User user) {
+        // Không tạo TestAnswer ở đây nữa, chỉ trả về test
         Test test = doTestService.getTestByTestId(testId);
         return test != null ? ResponseEntity.ok(test) : ResponseEntity.notFound().build();
     }
+    @PostMapping("/test-answer/create")
+    public ResponseEntity<TestAnswer> createTestAnswer(@RequestParam String testId, @RequestParam String username) {
+        TestAnswer testAnswer = testAnswerService.createTestAnswer(testId, username);
+        return ResponseEntity.ok(testAnswer);
+    }
     @PostMapping("/reading/submit")
-    public ResponseEntity<ReadingAnswer> saveReadingAnswer(@RequestBody ReadingAnswer answer) {
-        return ResponseEntity.ok(doTestService.saveReadingAnswer(answer));
+    public ResponseEntity<ReadingAnswer> saveReadingAnswer(@RequestBody ReadingAnswer answer, @RequestParam String testAnswerId) {
+        ReadingAnswer saved = doTestService.saveReadingAnswer(answer);
+        testAnswerService.updateReadingAnswer(testAnswerId, saved.getId());
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/writing/submit")
-    public ResponseEntity<WritingAnswer> saveWritingAnswer(@RequestBody WritingAnswer answer) {
-
-        System.out.println(answer.toString());
-        return ResponseEntity.ok(doTestService.saveWritingAnswer(answer));
+    public ResponseEntity<WritingAnswer> saveWritingAnswer(@RequestBody WritingAnswer answer, @RequestParam String testAnswerId) {
+        WritingAnswer saved = doTestService.saveWritingAnswer(answer);
+        testAnswerService.updateWritingAnswer(testAnswerId, saved.getId());
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/listening/submit")
-    public ResponseEntity<ListeningAnswer> saveListeningAnswer(@RequestBody ListeningAnswer answer) {
-        System.out.println("hi");
-        return ResponseEntity.ok(doTestService.saveListeningAnswer(answer));
+    public ResponseEntity<ListeningAnswer> saveListeningAnswer(@RequestBody ListeningAnswer answer, @RequestParam String testAnswerId) {
+        ListeningAnswer saved = doTestService.saveListeningAnswer(answer);
+        testAnswerService.updateListeningAnswer(testAnswerId, saved.getId());
+        return ResponseEntity.ok(saved);
     }
     @PostMapping("/speaking/submit")
     public ResponseEntity<Map<String, Object>> uploadFiles(
             @RequestPart("metadata") MultipartFile metadataJson,
             @RequestPart(value = "files", required = false) MultipartFile[] files,
+            @RequestParam String testAnswerId,
             @AuthenticationPrincipal User user
     ) {
         String studentUsername = user.getUsername();
@@ -141,6 +155,7 @@ public class DoTestController {
         response.put("id", saved.getId());
         response.put("message", "✅ Upload và cập nhật thành công!");
 
+        testAnswerService.updateSpeakingAnswer(testAnswerId, saved.getId());
         return ResponseEntity.ok(response);
     }
 

@@ -1,16 +1,15 @@
 import { HeroSection } from "@/components/sections/HeroSection"
 import { LatestTestsSection } from "@/components/sections/LatestTestsSection"
 import { TipsSection } from "@/components/sections/TipsSection"
-// import { FAQSection } from "@/components/sections/FAQSection"
 import {useEffect, useState} from "react";
 interface Tip {
-    id: string;
+    testId: string;
     skill: string;
     type: string;
     description: string;
 }
 interface IELTSTest {
-    id: string
+    testId: string
     testTitle: string
     tags: string[]
     createdAt: string
