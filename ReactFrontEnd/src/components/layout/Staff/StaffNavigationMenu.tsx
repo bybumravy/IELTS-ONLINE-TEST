@@ -20,7 +20,7 @@ interface StaffNavigationMenuProps {
 export function StaffNavigationMenu({ role, onLogout }: StaffNavigationMenuProps) {
   const handleLogout = () => {
     if (onLogout) onLogout();
-    else window.location.href = "/logout";
+    window.location.href = "/";
   };
 
   return (
@@ -56,6 +56,13 @@ export function StaffNavigationMenu({ role, onLogout }: StaffNavigationMenuProps
                 <Link to="/add-vocabulary">
                   <Button variant="ghost" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
                     Add Vocabulary
+                  </Button>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/teacher-scored-list">
+                  <Button variant="ghost" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    Scored Writing
                   </Button>
                 </Link>
               </NavigationMenuItem>

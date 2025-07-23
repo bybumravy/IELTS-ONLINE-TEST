@@ -1,11 +1,8 @@
 package web.ielts.Test.model.answer.listening;
 
-
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Document("ListeningAnswer")
@@ -19,9 +16,9 @@ public class ListeningAnswer {
     private int totalQuestions;
     private int totalCorrect;
     private double band;
-    private LocalDateTime submittedAt;
+    private LocalDate submittedAt;
 
-    public ListeningAnswer(String id, String testId, List<TaskListeningAnswer> tasks, String username, String skill, int totalQuestions, int totalCorrect, double band, LocalDateTime submittedAt) {
+    public ListeningAnswer(String id, String testId, List<TaskListeningAnswer> tasks, String username, String skill, int totalQuestions, int totalCorrect, double band, LocalDate submittedAt) {
         this.id = id;
         this.testId = testId;
         this.tasks = tasks;
@@ -100,11 +97,11 @@ public class ListeningAnswer {
         this.band = band;
     }
 
-    public LocalDateTime getSubmittedAt() {
+    public LocalDate getSubmittedAt() {
         return submittedAt;
     }
 
-    public void setSubmittedAt(LocalDateTime submittedAt) {
+    public void setSubmittedAt(LocalDate submittedAt) {
         this.submittedAt = submittedAt;
     }
 }

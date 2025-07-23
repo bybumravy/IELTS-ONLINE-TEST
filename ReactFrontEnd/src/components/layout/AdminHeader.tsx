@@ -13,7 +13,7 @@ export function AdminHeader() {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/login-admin");
+    navigate("/");
   };
 
   return (

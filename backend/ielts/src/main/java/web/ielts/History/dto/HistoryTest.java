@@ -1,18 +1,18 @@
 package web.ielts.History.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class HistoryTest {
     private String testID;
     private String username;
     private String skill;
-    private LocalDateTime submittedAt;
+    private LocalDate submittedAt;
     private double band;
 
     public HistoryTest() {
     }
 
-    public HistoryTest(String testID, String username, String skill, LocalDateTime submittedAt, double band) {
+    public HistoryTest(String testID, String username, String skill, LocalDate submittedAt, double band) {
         this.testID = testID;
         this.username = username;
         this.skill = skill;
@@ -44,11 +44,11 @@ public class HistoryTest {
         this.skill = skill;
     }
 
-    public LocalDateTime getSubmittedAt() {
+    public LocalDate getSubmittedAt() {
         return submittedAt;
     }
 
-    public void setSubmittedAt(LocalDateTime submittedAt) {
+    public void setSubmittedAt(LocalDate submittedAt) {
         this.submittedAt = submittedAt;
     }
 

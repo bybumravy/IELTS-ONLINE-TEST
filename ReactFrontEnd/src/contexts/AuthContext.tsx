@@ -58,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = async () => {
         await authService.logout();
         setUser(null);
+        // Không redirect ở đây, để các component tự điều hướng
     };
 
     const register = async (email: string, password: string) => {

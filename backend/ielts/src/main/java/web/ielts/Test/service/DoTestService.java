@@ -29,7 +29,7 @@ import java.io.InputStream;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -106,25 +106,21 @@ public class DoTestService {
     }
 
     public ReadingAnswer saveReadingAnswer(ReadingAnswer answer) {
-        return readingAnswerRepository.save(answer);
-    }
-
-    public ListeningAnswer saveListeningAnswer(ListeningAnswer answer) {
 
         int totalQuestions = 0;
         int correctAnswers = 0;
 
-        for (var task : answer.getTasks()) {
+        for (var task : answer.getTaskReadingAnswers()) {
             for (var section : task.getSections()) {
+                String type = section.getType();
                 for (var q : section.getQuestions()) {
                     totalQuestions++;
-                    if (q.getAnswer() != null && q.getAnswer().equals(q.getStudentAnswer())) {
+                    if (isAnswerCorrect(type, q.getAnswer(), q.getStudentAnswer())) {
                         correctAnswers++;
                     }
                 }
             }
         }
-
         answer.setTotalQuestions(totalQuestions);
         answer.setTotalCorrect(correctAnswers);
 
@@ -142,12 +138,66 @@ public class DoTestService {
         answer.setBand(band);
 
         if (answer.getSubmittedAt() == null) {
-            answer.setSubmittedAt(LocalDateTime.now());
+            answer.setSubmittedAt(LocalDate.now());
+        }
+
+        return readingAnswerRepository.save(answer);
+    }
+
+    public ListeningAnswer saveListeningAnswer(ListeningAnswer answer) {
+
+        int totalQuestions = 0;
+        int correctAnswers = 0;
+
+        for (var task : answer.getTasks()) {
+            for (var section : task.getSections()) {
+                String type = section.getType(); // lấy type trước
+                for (var q : section.getQuestions()) {
+                    totalQuestions++;
+                    if (isAnswerCorrect(type, q.getAnswer(), q.getStudentAnswer())) {
+                        correctAnswers++;
+                    }
+                }
+            }
+        }
+        answer.setTotalQuestions(totalQuestions);
+        answer.setTotalCorrect(correctAnswers);
+
+        double percent = totalQuestions == 0 ? 0.0 : (double) correctAnswers / totalQuestions;
+
+        double band;
+        if (percent >= 0.9) band = 9;
+        else if (percent >= 0.85) band = 8;
+        else if (percent >= 0.8) band = 7.5;
+        else if (percent >= 0.7) band = 7;
+        else if (percent >= 0.6) band = 6;
+        else if (percent >= 0.5) band = 5;
+        else band = 4;
+
+        answer.setBand(band);
+
+        if (answer.getSubmittedAt() == null) {
+            answer.setSubmittedAt(LocalDate.now());
         }
 
         return listeningAnswerRepository.save(answer);
     }
 
+    private boolean isAnswerCorrect(String type, String correctAnswer, String studentAnswer) {
+        if (correctAnswer == null || studentAnswer == null) return false;
+
+        correctAnswer = correctAnswer.trim().toLowerCase();
+        studentAnswer = studentAnswer.trim().toLowerCase();
+
+        switch (type.toLowerCase()) {
+            case "multiple-choice":
+            case "dropdown":
+                // So sánh ký tự đầu tiên của đáp án
+                return correctAnswer.charAt(0) == studentAnswer.charAt(0);
+            default:
+                return correctAnswer.equals(studentAnswer);
+        }
+    }
 
     public WritingAnswer saveWritingAnswer(WritingAnswer answer) {
         WritingAnswer savedAnswer = writingAnswerRepository.save(answer);

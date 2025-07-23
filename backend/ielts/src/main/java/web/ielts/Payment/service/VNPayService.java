@@ -15,6 +15,9 @@ import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,11 +46,13 @@ public class VNPayService {
         params.put("vnp_ReturnUrl", vnPayConfig.getReturnUrl());
 
         // Thời gian giao dịch
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        params.put("vnp_CreateDate", formatter.format(cal.getTime()));
-        cal.add(Calendar.MINUTE, 15);
-        params.put("vnp_ExpireDate", formatter.format(cal.getTime()));
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        ZonedDateTime expire = now.plusMinutes(15);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
+        params.put("vnp_CreateDate", now.format(formatter));
+        params.put("vnp_ExpireDate", expire.format(formatter));
+
 
         return params;
     }

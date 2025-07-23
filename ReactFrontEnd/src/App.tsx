@@ -59,7 +59,7 @@ import ReviewReport from "@/pages/ReviewReport.tsx";
 import UserManagementPage from "./pages/UserManagementPage";
 import ManageStudentsPage from "./pages/ManageStudentsPage";
 import ManageTeachersPage from "./pages/ManageTeachersPage";
-
+import TeacherScoredList from "./pages/TeacherScoredList"
 import ManagerTeacherScoreList from "@/pages/ManagerTeacherScore";
 import TeacherScoringPage from "@/pages/TeacherScoring.tsx";
 import TransactionHistory from "@/pages/ReviewTransactions.tsx";
@@ -83,9 +83,9 @@ export default function App() {
 
                         {/* ========== Public Routes (No login required) ========== */}
                         <Route path="/" element={
-                            <SoftProtectedLayout allowRoles={["student"]}>
+                            // <SoftProtectedLayout allowRoles={["student"]}>
                                 <MainLayout><HomePage /></MainLayout>
-                            </SoftProtectedLayout>
+                            //</SoftProtectedLayout>
                         } />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<RegisterPage />} />
@@ -210,7 +210,7 @@ export default function App() {
                         <Route path="/grade-writing" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><ManagerTeacherScoreList /></StaffLayout></ProtectedLayout>} />
                         <Route path="/teacher-scoring/:id" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><TeacherScoringPage /></StaffLayout></ProtectedLayout>} />
                         <Route path="/transactions-history" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><TransactionHistory /></StaffLayout></ProtectedLayout>} />
-
+                        <Route path="/teacher-scored-list" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><TeacherScoredList /></StaffLayout></ProtectedLayout>} />
                         <Route path="*" element={<NotFoundPage />} />
 
                     </Routes>
