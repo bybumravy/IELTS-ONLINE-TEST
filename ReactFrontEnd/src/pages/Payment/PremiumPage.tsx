@@ -87,6 +87,7 @@ export default function PremiumPage() {
         })
             .then((res) => res.json())
             .then((data) => {
+                console.log(data)
                 const expiry = data.premiumExpiry || null;
                 setPremiumExpiry(expiry);
 

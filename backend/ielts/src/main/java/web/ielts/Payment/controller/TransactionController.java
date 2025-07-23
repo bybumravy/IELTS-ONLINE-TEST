@@ -11,6 +11,7 @@ import web.ielts.Payment.service.TransactionService;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
@@ -92,7 +93,7 @@ public class TransactionController {
         for (PaymentTransactions tx : all) {
             if (tx.getCreatedAt() == null) continue;
 
-            LocalDate date = tx.getCreatedAt();
+            LocalDateTime date = tx.getCreatedAt();
             String key;
 
             switch (type) {
