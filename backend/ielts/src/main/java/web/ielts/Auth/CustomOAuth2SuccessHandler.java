@@ -12,6 +12,9 @@ import web.ielts.Auth.repository.AuthRepository;
 import web.ielts.User.User;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
     @Autowired
@@ -26,32 +29,33 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
         DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
         String googleId = oAuth2User.getAttribute("sub");
-
+        String roleFromQuery = (String) request.getSession().getAttribute("oauth2_role");
         User user = loginRepository.findByEmail(email);
         if (user == null) {
             user = new User();
             user.setEmail(email);
-            user.setRole("student");
+            user.setRole(new ArrayList<>(List.of("student")));
             user.setPassword(null);
             user.setGoogleID(googleId);
             user.setPremium(false);
+            roleFromQuery = "student";
         } else {
-            if (user.getRole() == null) {
-                user.setRole("student");
+            if (!user.getRole().contains(roleFromQuery)) {
+                return;
             }
         }
         user = loginRepository.save(user);
-        String role = user.getRole();
+
         boolean isPremium = user.isPremium();
         System.out.println(isPremium);
 // Tạo JWT với role user vừa lấy (hoặc mới tạo)
-        String token = JwtToken.generateAccessToken(email,role,isPremium );
+        String token = JwtToken.generateAccessToken(email,roleFromQuery,isPremium );
 
 
         // Tạo Cookie
         ResponseCookie cookie = ResponseCookie.from("jwt_token", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(24 * 60 * 60)
                 .sameSite("Lax")
@@ -59,29 +63,28 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
 
         // Gửi cookie về trình duyệt
         response.addHeader("Set-Cookie", cookie.toString());
-        String refreshToken = JwtToken.generateRefreshToken(email, role,isPremium);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(7 * 24 * 60 * 60) // 7 ngày
-                .sameSite("Lax")
-                .build();
+        
+        String redirectUrl;
 
-        response.addHeader("Set-Cookie", refreshCookie.toString());
-        if(user.getRole().equalsIgnoreCase("STUDENT")){
-            response.sendRedirect("http://localhost:5173");
+        switch (roleFromQuery.toUpperCase()) {
+            case "STUDENT":
+                redirectUrl = "https://www.languages.io.vn/";
+                break;
+            case "ADMIN":
+                redirectUrl = "https://www.languages.io.vn/admin-page";
+                break;
+            case "TEACHER":
+                redirectUrl = "https://www.languages.io.vn/staff-page";
+                break;
+            default:
+                redirectUrl = "https://www.languages.io.vn/staff-page";
+                break;
         }
-        else if(user.getRole().equalsIgnoreCase("ADMIN")){
-            response.sendRedirect("http://localhost:5173/admin-page");
-        }
-        else if(user.getRole().equalsIgnoreCase("TEAcher")){
-            response.sendRedirect("http://localhost:5173/staff-page");
-        }
-        else{
-            response.sendRedirect("http://localhost:5173/staff-page");
-        }
+
+        response.sendRedirect(redirectUrl);
+
+
         // Redirect về frontend (không cần token trên URL nữa)
 
     }

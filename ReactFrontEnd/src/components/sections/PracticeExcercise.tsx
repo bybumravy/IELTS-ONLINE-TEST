@@ -8,12 +8,9 @@ interface PracticeExerciseProps {
 }
 export function PracticeExercise({ exercises, skill }: PracticeExerciseProps) {
     const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isSubmitted] = useState(false);
     const [isSubmittedPerQuestion, setIsSubmittedPerQuestion] = useState<Record<string, boolean>>({});
 
-    const handleSubmitAll = () => {
-        setIsSubmitted(true);
-    };
 
     const handleAnswerChange = (key: string, value: string) => {
         setUserAnswers(prev => ({ ...prev, [key]: value.trim() }));

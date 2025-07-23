@@ -103,7 +103,7 @@ export default function TeacherScoringPage() {
     useEffect(() => {
         if (!id) return;
 
-        fetch(`http://localhost:8080/verify/writingbyteacher/${id}`, {
+        fetch(`${API_URL}/verify/writingbyteacher/${id}`, {
             credentials: "include",
         })
             .then((res) => res.json())
@@ -468,26 +468,28 @@ export default function TeacherScoringPage() {
             errorCorrections: task1ErrorCorrections,
             sentenceImprovements: task1SentenceImprovements,
             overallComment: allComments.task1.overall,
-            evaluation: {
-                TaskAchievement: {
-                    scoreEva: allScores.task1.taskResponse,
-                    reviewEva: allComments.task1.taskResponse,
-                },
-                CoherenceCohesion: {
-                    scoreEva: allScores.task1.coherenceCohesion,
-                    reviewEva: allComments.task1.coherenceCohesion,
-                },
-                LexicalResource: {
-                    scoreEva: allScores.task1.lexicalResource,
-                    reviewEva: allComments.task1.lexicalResource,
-                },
-                Grammar: {
-                    scoreEva: allScores.task1.grammaticalRange,
-                    reviewEva: allComments.task1.grammaticalRange,
-                }
-            }
 
-        };
+
+        }
+        dataSubmit.task1.evaluation = {
+            TaskAchievement: {
+                scoreEva: allScores.task1.taskResponse,
+                reviewEva: allComments.task1.taskResponse,
+            },
+            CoherenceCohesion: {
+                scoreEva: allScores.task1.coherenceCohesion,
+                reviewEva: allComments.task1.coherenceCohesion,
+            },
+            LexicalResource: {
+                scoreEva: allScores.task1.lexicalResource,
+                reviewEva: allComments.task1.lexicalResource,
+            },
+            Grammar: {
+                scoreEva: allScores.task1.grammaticalRange,
+                reviewEva: allComments.task1.grammaticalRange,
+            }
+        }
+
 
         // Task 2
         dataSubmit.task2.score = calculateOverallScoreByTask("task2"); // ✅ tính đúng cho task2
@@ -495,25 +497,25 @@ export default function TeacherScoringPage() {
             errorCorrections: task2ErrorCorrections,
             sentenceImprovements: task2SentenceImprovements,
             overallComment: allComments.task2.overall,
-            evaluation: {
-                TaskAchievement: {
-                    scoreEva: allScores.task2.taskResponse,
-                    reviewEva: allComments.task2.taskResponse,
-                },
-                CoherenceCohesion: {
-                    scoreEva: allScores.task2.coherenceCohesion,
-                    reviewEva: allComments.task2.coherenceCohesion,
-                },
-                LexicalResource: {
-                    scoreEva: allScores.task2.lexicalResource,
-                    reviewEva: allComments.task2.lexicalResource,
-                },
-                Grammar: {
-                    scoreEva: allScores.task2.grammaticalRange,
-                    reviewEva: allComments.task2.grammaticalRange,
-                }
-            }
 
+        }
+        dataSubmit.task2.evaluation = {
+            TaskAchievement: {
+                scoreEva: allScores.task2.taskResponse,
+                reviewEva: allComments.task2.taskResponse,
+            },
+            CoherenceCohesion: {
+                scoreEva: allScores.task2.coherenceCohesion,
+                reviewEva: allComments.task2.coherenceCohesion,
+            },
+            LexicalResource: {
+                scoreEva: allScores.task2.lexicalResource,
+                reviewEva: allComments.task2.lexicalResource,
+            },
+            Grammar: {
+                scoreEva: allScores.task2.grammaticalRange,
+                reviewEva: allComments.task2.grammaticalRange,
+            }
         };
         dataSubmit.band = (parseFloat(calculateOverallScoreByTask("task1"))+ parseFloat(calculateOverallScoreByTask("task2")))/2
         try {
@@ -896,7 +898,7 @@ export default function TeacherScoringPage() {
                                                                                 />
 
                                                                                 <p className="text-sm text-muted-foreground mt-1 text-right">
-                                                                                    {newError.comment.length}/100 characters
+                                                                                    {newError.comment.length}/100 charactkkers
                                                                                 </p>
                                                                             </div>
                                                                             <Button

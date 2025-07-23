@@ -1,11 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { AuthProvider } from "@/contexts/AuthContext"
-import ErrorBoundary from "@/components/ErrorBoundary"
 
 // Layouts
 import { MainLayout } from "@/components/layout/MainLayout"
 import { StaffLayout } from "@/components/layout/Staff/StaffLayout"
-
+import { AdminLayout } from "./components/layout/AdminLayout"
 //Payment
 import VnPayResultPage from "./pages/Payment/VNPayResultPage"
 import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
@@ -48,7 +47,7 @@ import SpeakingResult from "@/pages/Result/SpeakingResult.tsx";
 // Admin
 
 import LoginAdmin from "./components/sections/admin/LoginAdmin"
-// import AdminPage from "./pages/AdminPage"
+import AdminPage from "./pages/AdminPage"
 
 // Staff
 import StaffLogin from "./components/sections/StaffLogin"
@@ -61,10 +60,9 @@ import ReviewReport from "@/pages/ReviewReport.tsx";
 import UserManagementPage from "./pages/UserManagementPage";
 import ManageStudentsPage from "./pages/ManageStudentsPage";
 import ManageTeachersPage from "./pages/ManageTeachersPage";
-
+import TeacherScoredList from "./pages/TeacherScoredList"
 import ManagerTeacherScoreList from "@/pages/ManagerTeacherScore";
 import TeacherScoringPage from "@/pages/TeacherScoring.tsx";
-import TeacherScoredList from "@/pages/TeacherScoredList.tsx";
 import TransactionHistory from "@/pages/ReviewTransactions.tsx";
 
 // Protected Layouts
@@ -73,6 +71,7 @@ import ProtectedLayout from "@/components/sections/ProtectedLayout"
 import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
 import ReadingResult from "@/pages/Result/ReadingResult.tsx";
 import TransactionPage from "./pages/TransactionPage"
+import ManagerLogin from "@/components/sections/ManagerLogin";
 
 
 
@@ -85,9 +84,9 @@ export default function App() {
 
                         {/* ========== Public Routes (No login required) ========== */}
                         <Route path="/" element={
-                            <SoftProtectedLayout allowRoles={["student"]}>
+                            // <SoftProtectedLayout allowRoles={["student"]}>
                                 <MainLayout><HomePage /></MainLayout>
-                            </SoftProtectedLayout>
+                            //</SoftProtectedLayout>
                         } />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<RegisterPage />} />
@@ -188,16 +187,17 @@ export default function App() {
 
                         <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
                         <Route path="/vnpay-result" element={<MainLayout><VnPayResultPage /></MainLayout>} />
-                        {/*/!* ========== Admin Routes ========== *!/*/}
-                        {/*<Route path="/login-admin" element={<LoginAdmin />} />*/}
-                        {/*<Route path="/admin-page" element={*/}
-                        {/*    <ProtectedLayoutRole allowRoles={["admin"]}>*/}
-                        {/*        <AdminPage />*/}
-                        {/*    </ProtectedLayoutRole>*/}
-                        {/*} />*/}
+                        {/* ========== Admin Routes ========== */}
+                        <Route path="/login-admin" element={<LoginAdmin />} />
+                        <Route path="/admin-page" element={
+                            <ProtectedLayoutRole allowRoles={["admin"]}>
+                                <AdminLayout><AdminPage /></AdminLayout>
+                            </ProtectedLayoutRole>
+                        } />
 
                         {/* ========== Staff Routes ========== */}
                         <Route path="/staff-login" element={<StaffLogin />} />
+                        <Route path="/manager-login" element={<ManagerLogin />} />
                         <Route path="/staff-page" element={<ProtectedLayoutRole allowRoles={["teacher", "manager"]}><StaffLayout><StaffPage /></StaffLayout></ProtectedLayoutRole>} />
                         <Route path="/add-test" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><AddTest /></StaffLayout></ProtectedLayout>} />
                         <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />
@@ -210,12 +210,8 @@ export default function App() {
                         <Route path="/manage-teachers" element={<ProtectedLayoutRole allowRoles={["manager"]}><StaffLayout><ManageTeachersPage /></StaffLayout></ProtectedLayoutRole>} />
                         <Route path="/grade-writing" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><ManagerTeacherScoreList /></StaffLayout></ProtectedLayout>} />
                         <Route path="/teacher-scoring/:id" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><TeacherScoringPage /></StaffLayout></ProtectedLayout>} />
-                        <Route path="/transactions-report" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><TransactionHistory /></StaffLayout></ProtectedLayout>} />
+                        <Route path="/transactions-history" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><TransactionHistory /></StaffLayout></ProtectedLayout>} />
                         <Route path="/teacher-scored-list" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><TeacherScoredList /></StaffLayout></ProtectedLayout>} />
-                        {/* ========== Error Pages ========== */}
-                        <Route path="/error" element={<ErrorPage />} />
-
-                        {/* ========== 404 Not Found (Catch-all) ========== */}
                         <Route path="*" element={<NotFoundPage />} />
 
                     </Routes>

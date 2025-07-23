@@ -19,6 +19,7 @@ import web.ielts.Test.model.*;
 import web.ielts.Test.repository.*;
 import web.ielts.Test.repository.add.AddTestRepository;
 import web.ielts.Test.service.AI.ProsodyService;
+import web.ielts.Test.service.AI.AIService;
 import web.ielts.Test.service.TestService;
 
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -35,6 +36,8 @@ public class TestsController {
     private TestRepository testRepo;
     @Autowired
     private AddTestRepository addTestRepo;
+    @Autowired
+    private AIService aiService;
 
 
     @GetMapping("/test/all-skill")
@@ -74,6 +77,49 @@ public class TestsController {
     @GetMapping("/health")
     public ResponseEntity<String> healthCheck() {
         return ResponseEntity.ok("OK");
+    }
+
+    @PostMapping("/ai-chat")
+    public ResponseEntity<String> aiChat(@RequestBody Map<String, Object> body) {
+        // Nhận mảng messages từ frontend
+        Object messagesObj = body.get("messages");
+        String prompt = (String) body.getOrDefault("prompt", "");
+        try {
+            // System prompt: chỉ trả lời bằng tiếng Việt, chỉ thêm tiếng Anh nếu học sinh yêu cầu ví dụ, đặt câu, hoặc dịch sang tiếng Anh
+            String systemPrompt = "Bạn là trợ lý AI cho học sinh Việt Nam. Mặc định, bạn CHỈ trả lời bằng tiếng Việt. Nếu học sinh yêu cầu ví dụ, " +
+                    "đặt câu, hoặc dịch sang tiếng Anh thì mới trả lời thêm tiếng Anh. Nếu không, tuyệt đối không trả lời song ngữ." +
+                    " Nếu học sinh hỏi nghĩa từ, giải thích, ngữ pháp, ... chỉ trả lời tiếng Việt. Nếu học sinh hỏi 'đặt câu', 'ví dụ', 'example', 'sentence', " +
+                    "'dịch sang tiếng Anh', 'translate to English'... thì trả lời cả hai ngôn ngữ, trong đó tiếng Việt trước, tiếng Anh sau.\n\n" +
+                    "Ví dụ:\nQ: Nghĩa của từ 'flow'?\nA: 'Flow' nghĩa là sự chuyển động liên tục của chất lỏng, khí hoặc điện. " +
+                    "Nó cũng có thể chỉ sự tiến triển trôi chảy của một quá trình hoặc ý tưởng.\n---\nQ: Đặt câu với từ 'flow'?\nA:" +
+                    "" +
+                    " Tiếng Việt: Dòng sông chảy rất mạnh sau cơn mưa lớn.\nTiếng Anh: The river flows very strongly after the heavy rain.\n---";
+            // Xây dựng mảng messages cho OpenAI
+            List<Map<String, String>> messages = new java.util.ArrayList<>();
+            messages.add(Map.of("role", "system", "content", systemPrompt));
+            if (messagesObj instanceof List<?>) {
+                for (Object m : (List<?>) messagesObj) {
+                    if (m instanceof Map) {
+                        Map<?,?> mm = (Map<?,?>) m;
+                        String role = String.valueOf(mm.get("role"));
+                        String content = String.valueOf(mm.get("content"));
+                        if (role != null && content != null && !content.trim().isEmpty()) {
+                            // Chuyển role user/assistant đúng chuẩn OpenAI
+                            if (role.equals("user") || role.equals("assistant")) {
+                                messages.add(Map.of("role", role, "content", content));
+                            }
+                        }
+                    }
+                }
+            } else if (prompt != null && !prompt.trim().isEmpty()) {
+                messages.add(Map.of("role", "user", "content", prompt));
+            }
+            // Gọi AIService với mảng messages
+            String result = aiService.callChatWithMessages(messages);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("AI error: " + e.getMessage());
+        }
     }
 //    @GetMapping("/evaluate")
 //    public void evaluate() throws IOException {

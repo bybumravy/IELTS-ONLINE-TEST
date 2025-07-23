@@ -75,7 +75,7 @@ const LoginAdmin = () => {
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = `${API_URL}/oauth2/authorization/google`;
+        window.location.href = `${API_URL}/oauth2/authorization/google?role=admin`;
     };
 
     return (
@@ -119,7 +119,10 @@ const LoginAdmin = () => {
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Password</Label>
-                                <Link to="/forgot-password" className="text-sm text-emerald-600 hover:text-emerald-700">
+                                <Link
+                                    to={`/forgot-password?redirect=${encodeURIComponent(location.pathname)}`}
+                                    className="text-sm text-emerald-600 hover:text-emerald-700"
+                                >
                                     Forgot password?
                                 </Link>
                             </div>

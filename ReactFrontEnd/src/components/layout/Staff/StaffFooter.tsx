@@ -1,94 +1,66 @@
 import { Link } from "react-router-dom";
+import { BookOpen, Mail, Phone, Clock } from "lucide-react";
 
 export function StaffFooter() {
   return (
-    <footer className="bg-emerald-700 border-t border-emerald-800">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Quick Links */}
+    <footer className="bg-gray-900 text-white py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-sm font-semibold text-emerald-100 mb-3">Quick Links</h3>
-            <ul className="space-y-2">
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold">LANGUAGES</span>
+            </div>
+            <p className="text-gray-400">Staff portal for managing tests, grading, and resources.</p>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-4">Quick Links</h3>
+            <ul className="space-y-2 text-gray-400">
               <li>
-                <Link to="/staff-page" className="text-sm text-emerald-100 hover:text-white">
-                  Dashboard
-                </Link>
+                <Link to="/handle-reports" className="hover:text-white">Handle Report</Link>
               </li>
               <li>
-                <Link to="/add-test" className="text-sm text-emerald-100 hover:text-white">
-                  Add Test
-                </Link>
+                <Link to="/transactions" className="hover:text-white">Transaction Report</Link>
+              </li>
+
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-4">Quick Links</h3>
+            <ul className="space-y-2 text-gray-400">
+              <li>
+                <Link to="/transactions-history" className="hover:text-white">Transaction History</Link>
               </li>
               <li>
-                <Link to="/grade-writing" className="text-sm text-emerald-100 hover:text-white">
-                  Grade Writing
-                </Link>
+                <Link to="/accept-tests" className="hover:text-white">Accept Tests</Link>
               </li>
             </ul>
           </div>
-
-          {/* Resources */}
           <div>
-            <h3 className="text-sm font-semibold text-emerald-100 mb-3">Resources</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/staff-guide" className="text-sm text-emerald-100 hover:text-white">
-                  Staff Guide
-                </Link>
-              </li>
-              <li>
-                <Link to="/faq" className="text-sm text-emerald-100 hover:text-white">
-                  FAQ
-                </Link>
-              </li>
-              <li>
-                <Link to="/support" className="text-sm text-emerald-100 hover:text-white">
-                  Support
-                </Link>
-              </li>
-            </ul>
-          </div>
 
-          {/* Legal */}
-          <div>
-            <h3 className="text-sm font-semibold text-emerald-100 mb-3">Legal</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/privacy" className="text-sm text-emerald-100 hover:text-white">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="text-sm text-emerald-100 hover:text-white">
-                  Terms of Service
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h3 className="text-sm font-semibold text-emerald-100 mb-3">Contact</h3>
-            <ul className="space-y-2">
-              <li className="text-sm text-emerald-100">
-                Email: support@languages.com
-              </li>
-              <li className="text-sm text-emerald-100">
-                Phone: (123) 456-7890
-              </li>
-              <li className="text-sm text-emerald-100">
-                Hours: Mon-Fri 9:00 AM - 5:00 PM
-              </li>
-            </ul>
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center text-sm gap-2 text-gray-400">
+                <Mail className="w-4 h-4 text-emerald-400" />
+                <span>Email: support@languages.com</span>
+              </div>
+              <div className="flex items-center text-sm gap-2 text-gray-400">
+                <Phone className="w-4 h-4 text-emerald-400" />
+                <span>Phone: (123) 456-7890</span>
+              </div>
+              <div className="flex items-center text-sm gap-2 text-gray-400">
+                <Clock className="w-4 h-4 text-emerald-400" />
+                <span>Hours: Mon-Fri 9:00 AM - 5:00 PM</span>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div className="mt-8 pt-8 border-t border-emerald-800">
-          <p className="text-center text-sm text-emerald-100">
-            © {new Date().getFullYear()} LANGUAGES. All rights reserved.
-          </p>
+        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <p>&copy; {new Date().getFullYear()} LANGUAGES. All rights reserved.</p>
         </div>
       </div>
     </footer>
   );
 }
+

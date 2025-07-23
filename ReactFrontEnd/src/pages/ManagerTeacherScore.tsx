@@ -11,9 +11,9 @@ interface WritingAnswer {
 
 function ManagerTeacherScoreList() {
     const [writingAnswers, setWritingAnswers] = useState<WritingAnswer[]>([]);
-
+    const API_URL = import.meta.env.VITE_API_URL;
     useEffect(() => {
-        fetch("http://localhost:8080/verify/listwriting", {
+        fetch(`${API_URL}/api/verify/listwriting`, {
             credentials: "include",
         })
             .then((res) => res.json())

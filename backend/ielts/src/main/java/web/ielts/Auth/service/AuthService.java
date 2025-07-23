@@ -44,6 +44,7 @@ public class AuthService {
     // Đăng ký tài khoản mới và gửi email xác thực
     public ResponseEntity<?> register(User newUser) {
         if (authRepository.findByEmail(newUser.getEmail()) != null) {
+            System.out.println("dang bi loi gmail");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email đã được đăng ký");
         };
         // Tạo token xác thực
@@ -71,7 +72,7 @@ public class AuthService {
                 user.getEmail(),
                 user.getPassword(),
                 LocalDateTime.now().plusHours(24)
-                ,"student"
+                ,null
         );// giả định tìm theo token hoặc email
         tokenRepository.save(verificationToken);
 
@@ -81,51 +82,12 @@ public class AuthService {
 
                 return ResponseEntity.ok("Gửi email thành công, vui lòng kiểm tra email.");
             }
-    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token missing");
-        }
-
-        String refreshToken = null;
-        for (Cookie cookie : cookies) {
-            if ("refreshToken".equals(cookie.getName())) {
-                refreshToken = cookie.getValue();
-                break;
-            }
-        }
-
-        if (refreshToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token missing");
-        }
-
-        try {
-            // Kiểm tra token
-            String email = getUsernameFromToken(refreshToken);
-            User user = authRepository.findByEmail(email);
-
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
-            }
-            if (isTokenExpired(refreshToken)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token expired");
-            }
-
-            // Tạo access token và refresh token mới
-            ResponseCookie cookie = createJwtCookie(user.getEmail(), user.getRole(),user.isPremium());
-            ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), user.getRole(),user.isPremium());
-
-            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-            response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-
-            return ResponseEntity.ok(Map.of("status", "success"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
-        }
-    }
 
 
-    public ResponseEntity<?> resetPassword(String token, String newPassword) {
+
+
+
+        public ResponseEntity<?> resetPassword(String token, String newPassword) {
         VerificationToken verificationToken = tokenRepository.findByToken(token);
         if (verificationToken == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ");
@@ -148,7 +110,7 @@ public class AuthService {
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "Đặt lại mật khẩu thành công");
-        response.put("role", user.getRole().toLowerCase());
+
 
         return ResponseEntity.ok(response);
     }
@@ -163,16 +125,7 @@ public class AuthService {
                 .sameSite("Lax")
                 .build();
     }
-    public ResponseCookie createRefreshTokenCookie(String email, String role,boolean isPremium) {
-        String refreshToken = generateRefreshToken(email, role,isPremium);
-        return ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(7 * 24 * 60 * 60) // 7 ngày
-                .sameSite("Strict")
-                .build();
-    }
+
     public ResponseEntity<?> verifyEmail(String token) {
         VerificationToken verificationToken = tokenRepository.findByToken(token);
         System.out.println(verificationToken.toString());
@@ -184,48 +137,76 @@ public class AuthService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn");
         }
 
-        User user = new User(verificationToken.getUserEmail(),verificationToken.getPassword(),verificationToken.getRole());
+        User user = new User(
+                verificationToken.getUserEmail(),
+                verificationToken.getPassword(),
+                List.of(verificationToken.getRole()) // tạo list chứa 1 phần tử role
+        );
         if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Không tìm thấy tài khoản");
         }
         user.setPassword(encoder.encode(user.getPassword()));
 
         authRepository.save(user);
-        ResponseCookie cookie = createJwtCookie(user.getEmail(), user.getRole(),user.isPremium());
-        ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), user.getRole(),user.isPremium());
+        ResponseCookie cookie = createJwtCookie(user.getEmail(),"student",user.isPremium());
+
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
-        headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
 
         return ResponseEntity.ok()
                 .headers(headers)
                 .body("Xác thực email thành công! Bạn có thể đăng nhập.");
     }
 
-    public ResponseEntity<Map<String, Object>> login(String email, String password,String path) {
+    public ResponseEntity<Map<String, Object>> login(String email, String password, String role) {
         Map<String, Object> response = new HashMap<>();
 
         User user = authRepository.findByEmail(email);
-        String role = user.getRole();
+        if (user != null && encoder.matches(password, user.getPassword())) {
+            List<String> roles = user.getRole(); // ["student", "teacher", "admin"]
+
+            if (!roles.contains(role)) {
+                response.put("status", "fail");
+                response.put("message", "You do not have the required role to log in");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+            }
+
+            // ✅ Tạo token
+            ResponseCookie accessTokenCookie = createJwtCookie(user.getEmail(), role, user.isPremium());
 
 
+            // ✅ Chọn URL redirect tương ứng với từng role
+            String redirectUrl;
+            switch (role) {
+                case "student":
+                    redirectUrl = "/";
+                    break;
+                case "teacher":
+                    redirectUrl = "/staff-page";
+                    break;
+                case "admin":
+                    redirectUrl = "/admin-page";
+                    break;
+                default:
+                    redirectUrl = "/staff-page"; // fallback nếu có lỗi
+                    break;
+            }
 
-        if (user != null && encoder.matches(password, user.getPassword()) ) {
-            ResponseCookie cookie = createJwtCookie(user.getEmail(), role,user.isPremium());
-            ResponseCookie refreshTokenCookie = createRefreshTokenCookie(user.getEmail(), role,user.isPremium());
             response.put("status", "success");
             response.put("message", "Login successful");
+            response.put("redirectUrl", redirectUrl);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
-            headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+            headers.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+
 
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(response);
         } else {
             response.put("status", "fail");
-            response.put("message", "Invalid email/account or password");
+            response.put("message", "Invalid email or password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
@@ -253,7 +234,7 @@ public class AuthService {
     }
    public List<ResponseCookie> logout(HttpServletRequest request) {
     // Xoá session
-   
+
 
     // Xoá jwt_token
     ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", "")

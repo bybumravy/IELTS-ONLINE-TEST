@@ -84,8 +84,18 @@ public class TransactionController {
 
     // API trả về thống kê tổng tiền theo ngày/tuần/tháng/năm
     @GetMapping("/payment/transactions/statistics")
-    public List<Stat> getStatistics(@RequestParam(defaultValue = "month") String type) {
+    public List<Stat> getStatistics(
+            @RequestParam(defaultValue = "month") String type,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
         List<PaymentTransactions> all = service.getAll();
+        if (startDate != null) {
+            all = all.stream().filter(tx -> tx.getCreatedAt() != null && !tx.getCreatedAt().isBefore(startDate)).collect(Collectors.toList());
+        }
+        if (endDate != null) {
+            all = all.stream().filter(tx -> tx.getCreatedAt() != null && !tx.getCreatedAt().isAfter(endDate)).collect(Collectors.toList());
+        }
         Map<String, Long> keyToTotal = new HashMap<>();
         DateTimeFormatter fmt;
 

@@ -22,7 +22,6 @@ import {
   Search,
   Filter,
   Download,
-  FileText,
   Printer,
   ArrowUpDown,
   ArrowUp,
@@ -37,6 +36,8 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
+
+// Mock data
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -64,7 +65,7 @@ const formatDate = (dateString: string) => {
 
 export default function TransactionHistory() {
   const [transactions, setTransactions] = useState<any[]>([])
-  const [filterTransactionId, setFilterTransactionId] = useState("");
+  const [filterTransactionId] = useState("");
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -86,9 +87,9 @@ export default function TransactionHistory() {
     },
     {} as Record<string, number>,
   )
-
+    const API_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
-    fetch("http://localhost:8080/api/user/transactions", { credentials: "include" })
+    fetch(`${API_URL}/api/user/transactions`, { credentials: "include" })
         .then((res) => res.json())
         .then((data) => {
           setTransactions(data)
@@ -251,10 +252,14 @@ export default function TransactionHistory() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {Object.entries(paymentMethods).sort(([, a], [, b]) => b - a)[0]?.[0] || "N/A"}
+              {Object.entries(paymentMethods)
+                .sort(([, a], [, b]) => Number(b) - Number(a))[0]?.[0] || "N/A"}
             </div>
             <p className="text-xs text-muted-foreground">
-              {Object.entries(paymentMethods).sort(([, a], [, b]) => b - a)[0]?.[1] || 0} giao dịch
+              {(
+                Object.entries(paymentMethods)
+                  .sort(([, a], [, b]) => Number(b) - Number(a))[0]?.[1] ?? 0
+              ).toString()} giao dịch
             </p>
           </CardContent>
         </Card>

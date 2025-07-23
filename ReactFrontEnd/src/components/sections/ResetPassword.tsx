@@ -15,11 +15,10 @@ const ResetPassword = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
-
-    const navigate = useNavigate();
-
+    const redirectURL = searchParams.get("redirectURL"); // "/login"
+    console.log(redirectURL)
     const API_URL = import.meta.env.VITE_API_URL;
-
+    const navigate = useNavigate();
     const validate = () => {
         let hasError = false;
 
@@ -39,7 +38,7 @@ const ResetPassword = () => {
 
         return !hasError;
     };
-
+    console.log(redirectURL)
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validate()) return;
@@ -48,7 +47,11 @@ const ResetPassword = () => {
             const res = await fetch(`${API_URL}/api/reset-password`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token, newPassword: password }),
+                body: JSON.stringify({
+                    token,
+                    newPassword: password,
+
+                }),
             });
 
             if (!res.ok) {
@@ -60,7 +63,9 @@ const ResetPassword = () => {
 
             alert("Mật khẩu đã được đặt lại thành công. Vui lòng đăng nhập lại.");
 
-            if (role === "student" || !role) {
+            if (redirectURL) {
+                navigate(redirectURL); // 👈 chuyển hướng chính xác đến nơi người dùng muốn
+            } else if (role === "student" || !role) {
                 navigate("/login");
             } else {
                 navigate(`/login${role}`);

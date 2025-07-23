@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import web.ielts.User.repository.UserRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
@@ -21,7 +20,7 @@ public class UserService {
     }
 
     public User resetPremiumIfExpired(User user) {
-        if (user.isPremiumExpired()) {
+        if (user != null  && user.isPremiumActive()) {
             user.setPremium(false);
             user.setPremiumExpiry(null);
             userRepository.save(user);
@@ -32,11 +31,8 @@ public class UserService {
 
     public void upgradeToPremium(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-
-        System.out.println("Day la "+user.toString());
         user.setPremium(true);
-        System.out.println("After la "+user.toString());
-        user.setPremiumExpiry(LocalDateTime.now(ZoneOffset.UTC).plusMonths(1));
+        user.setPremiumExpiry(LocalDate.now(ZoneOffset.UTC).plusDays(1));
         userRepository.save(user);
     }
     public User save(User user) {

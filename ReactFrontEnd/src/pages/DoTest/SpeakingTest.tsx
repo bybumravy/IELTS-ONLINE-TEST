@@ -72,7 +72,7 @@ const SpeakingTest = () => {
     const timerRef = useRef<number | null>(null)
     const mediaRecorderRef = useRef<MediaRecorder | null>(null)
     const audioChunksRef = useRef<Blob[]>([])
-    const [liveTranscript, setLiveTranscript] = useState<string>("");
+    const [_liveTranscript, setLiveTranscript] = useState<string>("");
     const recognitionRef = useRef<any>(null); // dùng any nếu TS báo lỗi SpeechRecognition
     const [_recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
     const [isGrading, setIsGrading] = useState(false); // Thêm state loading overlay

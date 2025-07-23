@@ -31,15 +31,16 @@ export default function TransactionPage() {
   const [_loading, setLoading] = useState(true);
   const [chartType, setChartType] = useState<ChartType>("bar");
   const [statType, setStatType] = useState<StatType>("month");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      let statUrl = "/api/payment/transactions/statistics";
-      if (statType === "year") statUrl = "/api/payment/transactions/statistics?type=year";
-      if (statType === "week") statUrl = "/api/payment/transactions/statistics?type=week";
-      if (statType === "day") statUrl = "/api/payment/transactions/statistics?type=day";
+      let statUrl = `/api/payment/transactions/statistics?type=${statType}`;
+      if (startDate) statUrl += `&startDate=${startDate}`;
+      if (endDate) statUrl += `&endDate=${endDate}`;
       const res1 = await fetch(`${API_URL}${statUrl}`);
       const res2 = await fetch(`${API_URL}/api/payment/transactions`);
       const statsData = await res1.json();
@@ -49,7 +50,7 @@ export default function TransactionPage() {
       setLoading(false);
     };
     fetchData();
-  }, [API_URL, statType]);
+  }, [API_URL, statType, startDate, endDate]);
 
   const renderChart = () => {
     if (chartType === "bar") {
@@ -58,7 +59,7 @@ export default function TransactionPage() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="key" />
           <YAxis />
-          <Tooltip formatter={(value: number) => value.toLocaleString() + " ₫"} />
+          <Tooltip formatter={(value: number) => [Number(value), '₫']} />
           <Bar dataKey="totalAmount" fill="#10b981" radius={[6, 6, 0, 0]} />
         </BarChart>
       );
@@ -69,7 +70,7 @@ export default function TransactionPage() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="key" />
           <YAxis />
-          <Tooltip formatter={(value: number) => value.toLocaleString() + " ₫"} />
+          <Tooltip formatter={(value: number) => [Number(value), '₫']} />
           <Line type="monotone" dataKey="totalAmount" stroke="#10b981" strokeWidth={3} dot={{ r: 5 }} />
         </LineChart>
       );
@@ -80,12 +81,18 @@ export default function TransactionPage() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="key" />
           <YAxis />
-          <Tooltip formatter={(value: number) => value.toLocaleString() + " ₫"} />
+          <Tooltip formatter={(value: number) => [Number(value), '₫']} />
           <Area type="monotone" dataKey="totalAmount" stroke="#10b981" fill="#6ee7b7" strokeWidth={3} />
         </AreaChart>
       );
     }
-    return null;
+    return <BarChart data={[]} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="key" />
+      <YAxis />
+      <Tooltip formatter={(value: number) => [Number(value), '₫']} />
+      <Bar dataKey="totalAmount" fill="#10b981" radius={[6, 6, 0, 0]} />
+    </BarChart>;
   };
 
   return (
@@ -111,6 +118,12 @@ export default function TransactionPage() {
                 <option value="week">Week</option>
                 <option value="day">Day</option>
               </select>
+            </div>
+            <div className="flex gap-2 items-center">
+              <span className="font-semibold text-emerald-700">From:</span>
+              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="border border-emerald-200 rounded px-2 py-1" />
+              <span className="font-semibold text-emerald-700">To:</span>
+              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="border border-emerald-200 rounded px-2 py-1" />
             </div>
           </div>
           <div className="w-full h-72">

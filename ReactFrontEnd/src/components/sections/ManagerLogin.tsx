@@ -1,40 +1,82 @@
 import React, { useState } from "react";
-
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Mail, Lock, ArrowRight } from "lucide-react";
-import {Link} from "react-router-dom";
-
-const RegisterPage = () => {
+import { useLocation } from "react-router-dom";
+const ManagerLogin  = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
-    const { register } = useAuth();
+    const getEmailErrorMessage = (value: string): string => {
+        if (!value) return "Email is required";
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (password !== confirmPassword) {
-            alert("Passwords do not match");
-            return;
+        // Email regex chuẩn RFC 5322 simplified
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+        if (!emailRegex.test(value)) {
+            return "Please enter a valid email address (e.g. you@example.com)";
         }
 
-        try {
+        return "";
+    };
 
-            await register(email, password);
-            alert("Hay check duong link trong gmail")
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setEmail(value);
 
-        } catch (error: any) {
-            alert(error.message || "");
+        const errorMsg = getEmailErrorMessage(value);
+        setEmailError(errorMsg);
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setPassword(value);
+
+        if (!value) {
+            setPasswordError("Password is required");
+        } else {
+            setPasswordError("");
         }
     };
 
-    const handleGoogleSignup = () => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        // Validate email
+        const emailMsg = getEmailErrorMessage(email);
+        setEmailError(emailMsg);
+
+        // Validate password
+        let passwordMsg = "";
+        if (!password) {
+            passwordMsg = "Password is required";
+        }
+        setPasswordError(passwordMsg);
+
+        // If no errors, proceed login
+        if (!emailMsg && !passwordMsg) {
+            try {
+                await login(email, password);
+                navigate("/staff-page");
+            } catch (error) {
+                alert("Login failed");
+                console.error(error);
+            }
+        }
+    };
+
+    const handleGoogleLogin = () => {
         const API_URL = import.meta.env.VITE_API_URL;
-        window.location.href = `${API_URL}/oauth2/authorization/google?role=student`;
+        window.location.href = `${API_URL}/oauth2/authorization/google?role=manager`;
     };
 
     return (
@@ -48,13 +90,14 @@ const RegisterPage = () => {
 
             <Card className="w-full max-w-md">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-center">Manager Login</CardTitle>
                     <CardDescription className="text-center">
-                        Enter your email and password to create your account
+                        Enter your email and password to access your account
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Email field */}
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <div className="relative">
@@ -64,14 +107,26 @@ const RegisterPage = () => {
                                     type="email"
                                     placeholder="you@example.com"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="pl-9"
-                                    required
+                                    onChange={handleEmailChange}
+                                    className={`pl-9 ${emailError ? "border-red-500" : ""}`}
                                 />
                             </div>
+                            {emailError && (
+                                <p className="text-red-500 text-sm mt-1">{emailError}</p>
+                            )}
                         </div>
+
+                        {/* Password field */}
                         <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="password">Password</Label>
+                                <Link
+                                    to={`/forgot-password?redirect=${encodeURIComponent(location.pathname)}`}
+                                    className="text-sm text-emerald-600 hover:text-emerald-700"
+                                >
+                                    Forgot password?
+                                </Link>
+                            </div>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                                 <Input
@@ -79,31 +134,22 @@ const RegisterPage = () => {
                                     type="password"
                                     placeholder="••••••••"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="pl-9"
-                                    required
+                                    onChange={handlePasswordChange}
+                                    className={`pl-9 ${passwordError ? "border-red-500" : ""}`}
                                 />
                             </div>
+                            {passwordError && (
+                                <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                            )}
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="confirm-password">Confirm Password</Label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                                <Input
-                                    id="confirm-password"
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="pl-9"
-                                    required
-                                />
-                            </div>
-                        </div>
+
+                        {/* Submit button */}
                         <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
-                            Create Account
+                            Sign In
                             <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
+
+                        {/* Divider */}
                         <div className="relative my-4">
                             <div className="absolute inset-0 flex items-center">
                                 <div className="w-full border-t border-gray-200"></div>
@@ -112,27 +158,24 @@ const RegisterPage = () => {
                                 <span className="bg-white px-2 text-gray-500">Or continue with</span>
                             </div>
                         </div>
+
+                        {/* Google login button */}
                         <Button
                             type="button"
                             variant="outline"
                             className="w-full border-2"
-                            onClick={handleGoogleSignup}
+                            onClick={handleGoogleLogin}
                         >
                             <img src="/src/assets/google.png" alt="Google" className="mr-2 h-4 w-4" />
                             Google
                         </Button>
                     </form>
 
-                    <div className="mt-6 text-center text-sm">
-                        <span className="text-gray-500">Already have an account?</span>{" "}
-                        <Link to="/login" className="text-emerald-600 hover:text-emerald-700 font-semibold">
-                            Sign in
-                        </Link>
-                    </div>
+                    {/* Sign up link */}
+
                 </CardContent>
             </Card>
         </div>
     );
 };
-
-export default RegisterPage;
+export default ManagerLogin;

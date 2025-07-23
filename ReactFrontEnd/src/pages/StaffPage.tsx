@@ -3,7 +3,7 @@ import { BookOpen, ClipboardList, Zap } from "lucide-react";
 export function StaffPage() {
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 rounded-2xl p-8 mb-8 shadow-lg">
+      <div className="bg-emerald-600 rounded-2xl p-8 mb-8 shadow-lg">
         <h1 className="text-3xl font-bold text-white mb-2">Welcome to Staff Portal</h1>
         <p className="text-emerald-50">Manage your tasks and monitor your activities efficiently</p>
       </div>
