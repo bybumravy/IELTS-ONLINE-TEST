@@ -4,6 +4,7 @@ import net.minidev.json.annotate.JsonIgnore;
 
 public class FleCohAnswer {
 
+
     private double score;
     @JsonIgnore
     private String meanIntensity;
@@ -48,6 +49,7 @@ public class FleCohAnswer {
     public String getComment() {
         return comment;
     }
+
 
     public void setComment(String comment) {
         this.comment = comment;
