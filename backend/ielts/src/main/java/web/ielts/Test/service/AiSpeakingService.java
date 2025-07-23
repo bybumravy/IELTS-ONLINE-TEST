@@ -31,6 +31,7 @@ public class AiSpeakingService {
             JsonNode transcriptText,
             String question,
             int partNumber,
+            FleCohAnswer basicFluent,
             double FluentScore,
             List<String> cueCard
     ) {
@@ -39,6 +40,7 @@ public class AiSpeakingService {
                 partNumber,
                 question,
                 transcriptText,
+                basicFluent,
                 FluentScore,
                 cueCard
 
