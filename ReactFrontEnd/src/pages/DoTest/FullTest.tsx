@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {Lightbulb, Monitor} from "lucide-react";
 import type { Test } from "@/types/apiTypes";
+import { useAuth } from "@/contexts/AuthContext";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -15,6 +16,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 export default function FullTest() {
     const { testId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const [test, setTest] = useState<Test | null>(null);
     const [loading, setLoading] = useState(true);
@@ -23,7 +25,7 @@ export default function FullTest() {
     useEffect(() => {
         (async () => {
             try {
-                const res = await fetch(`${API_URL}/verify/fulltest/${testId}`, {
+                const res = await fetch(`${API_URL}/verify/fullTest/${testId}`, {
                     method: "GET",
                     credentials: "include",
                 });
@@ -45,9 +47,24 @@ export default function FullTest() {
         })();
     }, [testId]);
 
-    const handleConfirmStart = () => {
-        console.log("Test confirmed");
-        navigate(`/test/listening/${testId}?mode=fulltest`);
+    const handleConfirmStart = async () => {
+        if (!user?.username) {
+            alert("Bạn cần đăng nhập để làm bài test.");
+            return;
+        }
+        try {
+            const res = await fetch(`${API_URL}/verify/test-answer/create?testId=${testId}&username=${user.username}`, {
+                method: "POST",
+                credentials: "include",
+            });
+            if (!res.ok) throw new Error("Không thể tạo lần làm bài mới");
+            const data = await res.json();
+            const testAnswerId = data.id || data._id || data.testAnswerId;
+            if (!testAnswerId) throw new Error("Không nhận được testAnswerId");
+            navigate(`/test/listening/${testId}?testAnswerId=${testAnswerId}&mode=fulltest`);
+        } catch (err) {
+            alert("Lỗi khi bắt đầu test: " + err);
+        }
     };
 
     if (loading) {

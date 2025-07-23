@@ -62,9 +62,6 @@ public class SpeakingAnswerQuestion {
     }
 
 
-
-
-
     public GrammarAnswer getGrammarAnswer() {
         return grammarAnswer;
     }

@@ -57,10 +57,6 @@ export function UserMenu({ onLogout }: UserMenuProps) {
                     <Crown className="mr-2 h-4 w-4" />
                     <span>Premium</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/settings")}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setIsFeedbackOpen(true)}>
                     <AlertCircle className="mr-2 h-4 w-4" />
                     <span>Report</span>

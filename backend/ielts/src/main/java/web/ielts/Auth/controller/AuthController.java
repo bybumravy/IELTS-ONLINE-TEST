@@ -25,11 +25,7 @@ public class AuthController {
 
     @Autowired
     private AuthService authservice;
-    @PostMapping("/refreshtoken")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
-        System.out.println("helllo refresh token");
-        return authservice.refreshToken(request, response);
-    }
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User newUser) {
@@ -39,7 +35,8 @@ public class AuthController {
     @PostMapping("/forgotpassword")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
          String email = request.get("email");
-         System.out.println(email);
+
+
         return authservice.forgotpassword(email);
 
     }
@@ -58,16 +55,19 @@ public class AuthController {
     }
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO loginRequest) {
+
        // in ra /loginadmin
         return authservice.login(
                 loginRequest.getEmail(),
-                loginRequest.getPassword()
-                ,loginRequest.getFromPath()
+                loginRequest.getPassword(),
+                loginRequest.getRole()
+
         );
     }
 
     @GetMapping("/user-info")
     public ResponseEntity<?> getUserInfo(@CookieValue(value = "jwt_token", required = false) String token) {
+
         try {
             String username = authservice.getUsernameFromToken(token);
             String role = authservice.getRoleFromToken(token);

@@ -36,6 +36,7 @@ const typeColors: TypeColors = {
 };
 
 export default function ReviewReport() {
+    const API_URL = import.meta.env.VITE_API_URL;
     const [reports, setReports] = useState<Report[]>([])
     const [filteredReports, setFilteredReports] = useState<Report[]>([])
     const [loading, setLoading] = useState(true)
@@ -47,8 +48,6 @@ export default function ReviewReport() {
     const [newNote, setNewNote] = useState("")
     const [responseMessage, setResponseMessage] = useState("")
     const [dailyStats, setDailyStats] = useState<{ date: string; count: number }[]>([])
-
-
     // Filter function
     const applyFilters = () => {
         const filtered = reports.filter((report) => {
@@ -69,6 +68,10 @@ export default function ReviewReport() {
 
         setFilteredReports(filtered)
     }
+    useEffect(() => {
+        applyFilters()
+    }, [searchTerm])
+
 
     // Add note to report
     const addNoteToReport = (reportId: string, note: string) => {
@@ -110,7 +113,10 @@ export default function ReviewReport() {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const response = await fetch("http://localhost:8080/api/report")
+                const response = await fetch(`${API_URL}/api/report`);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch reports");
+                }
                 const data = await response.json()
                 setReports(data)
                 setFilteredReports(data)
@@ -138,7 +144,7 @@ export default function ReviewReport() {
                     <h1 className="text-3xl font-bold">Student Report Management</h1>
                     <p className="text-muted-foreground">View and manage reports from IELTS students</p>
                 </div>
-                <Button className="gap-2 bg-green-800">
+                <Button className="gap-2 bg-green-800 hover:bg-green-500">
                     <Download className="h-4 w-4 " />
                     Export Reports
                 </Button>
@@ -166,6 +172,7 @@ export default function ReviewReport() {
                                     <div className="relative">
                                         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                         <Input
+                                            type="search"
                                             placeholder="Name, subject..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -220,14 +227,15 @@ export default function ReviewReport() {
                                 </div>
                             </div>
 
-                            <Button onClick={applyFilters} className="w-full md:w-auto bg-green-800">
+                            <Button onClick={applyFilters} className="w-full md:w-auto bg-green-800 hover:bg-green-900">
                                 Apply Filters
                             </Button>
                         </CardContent>
                     </Card>
 
                     {/* Reports Table */}
-                    <Card>
+                    <div>
+                        <Card>
                         <CardHeader>
                             <CardTitle>Report List ({filteredReports.length})</CardTitle>
                         </CardHeader>
@@ -238,6 +246,7 @@ export default function ReviewReport() {
                                         <TableHead>Student</TableHead>
                                         <TableHead>Date Submitted</TableHead>
                                         <TableHead>Subject</TableHead>
+                                        <TableHead>Content</TableHead>
                                         <TableHead>Category</TableHead>
                                         <TableHead>Actions</TableHead>
                                     </TableRow>
@@ -253,6 +262,9 @@ export default function ReviewReport() {
                                                 </TableCell>
                                                 <TableCell>{format(new Date(report.createdAt), "dd/MM/yyyy")}</TableCell>
                                                 <TableCell className="max-w-xs truncate">{report.subject}</TableCell>
+                                                <TableCell className="max-w-xs truncate">
+                                                    {report.message.length > 10 ? `${report.message.slice(0, 10)}...` : report.message}
+                                                </TableCell>
                                                 <TableCell>
                                                     <Badge className={typeColors[report.category]}>{report.category}</Badge>
                                                 </TableCell>
@@ -391,6 +403,7 @@ export default function ReviewReport() {
                             </Table>
                         </CardContent>
                     </Card>
+                    </div>
                 </TabsContent>
 
                 <TabsContent value="statistics" className="space-y-6">

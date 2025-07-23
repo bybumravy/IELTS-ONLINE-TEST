@@ -5,9 +5,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import web.ielts.Test.model.answer.listening.ListeningAnswer;
 import web.ielts.Test.model.answer.reading.ReadingAnswer;
+import web.ielts.Test.model.answer.speaking.SpeakingAnswer;
 import web.ielts.Test.model.answer.writing.WritingAnswer;
+import web.ielts.Test.model.TestAnswer;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
 import web.ielts.Test.service.ResultService;
+import web.ielts.Test.service.TestAnswerService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import web.ielts.User.User;
 
 import java.util.Map;
 
@@ -19,9 +24,18 @@ public class ResultTestController {
     WritingAnswerRepository writingAnswerRepository;
     @Autowired
     private ResultService resultService;
+    @Autowired
+    private TestAnswerService testAnswerService;
     @GetMapping("/{id}")
     public ResponseEntity<WritingAnswer> getWritingById(@PathVariable String id) {
         return writingAnswerRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/speaking/{id}")
+    public ResponseEntity<SpeakingAnswer> getSpeakingAnswerById(@PathVariable String id) {
+        return resultService.findSpeakingById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -58,5 +72,29 @@ public class ResultTestController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/fulltest/{testAnswerId}")
+    public ResponseEntity<?> getFullTestResult(@PathVariable String testAnswerId, @AuthenticationPrincipal web.ielts.User.User user) {
+        if (user == null) return ResponseEntity.status(401).body("Unauthorized");
+        TestAnswer testAnswer = testAnswerService.getById(testAnswerId).orElse(null);
+        if (testAnswer == null) return ResponseEntity.notFound().build();
+        // Lấy từng answer nếu có
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("testAnswerId", testAnswer.getId());
+        if (testAnswer.getListeningAnswerId() != null) {
+            result.put("listening", resultService.findListeningById(testAnswer.getListeningAnswerId()).orElse(null));
+        }
+        if (testAnswer.getReadingAnswerId() != null) {
+            result.put("reading", resultService.findReadingById(testAnswer.getReadingAnswerId()).orElse(null));
+        }
+        if (testAnswer.getWritingAnswerId() != null) {
+            result.put("writing", writingAnswerRepository.findById(testAnswer.getWritingAnswerId()).orElse(null));
+        }
+        if (testAnswer.getSpeakingAnswerId() != null) {
+            result.put("speaking", resultService.findSpeakingById(testAnswer.getSpeakingAnswerId()).orElse(null));
+        }
+        return ResponseEntity.ok(result);
+    }
+
 
 }

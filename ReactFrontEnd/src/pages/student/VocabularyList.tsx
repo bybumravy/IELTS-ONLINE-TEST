@@ -4,7 +4,9 @@ import type { Vocabulary as VocabularyType } from '@/lib/type';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { VocabularyItemStudent } from '@/components/VocabularyItemStudent';
+import { VocabularyItemStudent } from '@/components/ui/vocabulary/VocabularyItemStudent.tsx';
+import { useNavigate } from 'react-router-dom';
+
 
 const VocabularyList: React.FC = () => {
     const { user } = useAuth();
@@ -26,6 +28,16 @@ const VocabularyList: React.FC = () => {
     const [selectedVocab, setSelectedVocab] = useState<VocabularyType | null>(null);
 
     const API_URL = import.meta.env.VITE_API_URL;
+    const navigate = useNavigate();
+
+    const goToGame = () => {
+        navigate('/student/vocabulary-game', {
+            state: {
+                vocabList: vocabularies
+            }
+        });
+    };
+
 
     // --- NEW: State for topics/bands fetched from backend ---
     const [topics, setTopics] = useState<{ value: string, label: string }[]>([{ value: '', label: 'All Topics' }]);
@@ -159,6 +171,7 @@ const VocabularyList: React.FC = () => {
                                 className="hover:bg-emerald-600 hover:text-white">Apply Filters</Button>
                         <Button onClick={resetFilters} variant="outline"
                                 className="hover:bg-emerald-600 hover:text-white">Reset</Button>
+                        <Button onClick={goToGame} variant="outline" className="hover:bg-blue-600 hover:text-white">🎮 Play Game</Button>
                     </div>
                 </div>
             </Card>
@@ -175,7 +188,7 @@ const VocabularyList: React.FC = () => {
                     ))
                 )}
             </div>
-            {/* Modal detail giữ nguyên */}
+            {/* Modal detail: bổ sung phiên âm và loại từ */}
             {selectedVocab && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
                     <Card className="relative w-full max-w-xl mx-2 p-8">
@@ -185,7 +198,19 @@ const VocabularyList: React.FC = () => {
                             aria-label="Close"
                         >×
                         </button>
-                        <h2 className="font-bold text-xl mb-3">{selectedVocab.word}</h2>
+                        <h2 className="font-bold text-xl mb-3 flex items-center gap-2">
+                            {selectedVocab.word}
+                            {selectedVocab.partOfSpeech && (
+                                <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-xs ml-2">
+                                    {selectedVocab.partOfSpeech}
+                                </span>
+                            )}
+                        </h2>
+                        {selectedVocab.pronunciation && (
+                            <div className="mb-2 text-gray-700">
+                                <b>Transcription:</b> <span className="italic text-gray-500 text-base">{selectedVocab.pronunciation}</span>
+                            </div>
+                        )}
                         <div className="mb-2 text-gray-700">
                             <b>Translate:</b> {selectedVocab.translate}
                         </div>
@@ -199,10 +224,10 @@ const VocabularyList: React.FC = () => {
                                     {selectedVocab.exp.map((ex, i) => (
                                         <React.Fragment key={i}>
                                             <li>
-                                                <span className="text-gray-800">English: {ex.esentence}</span>
+                                                <span className="text-gray-800"> {ex.esentence}</span>
                                             </li>
-                                            <li>
-                                                <span className="text-gray-800">Vietnamese: {ex.vsentence}</span>
+                                            <li className="list-none pl-6"> {/* Lùi vào và loại bỏ dấu chấm */}
+                                                <span className="text-gray-800"> {ex.vsentence}</span>
                                             </li>
                                         </React.Fragment>
                                     ))}

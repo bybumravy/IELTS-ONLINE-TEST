@@ -166,3 +166,30 @@
   color: #fff !important;
   border-color: #059669 !important;
 }
+body.modal-open {
+  overflow: hidden;
+}
+/* File: VocabularyGame.module.css hoặc global.css */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-6px); }
+  100% { transform: translateX(0); }
+}
+
+.shake {
+  animation: shake 0.4s ease-in-out;
+  background-color: #fee2e2; /* light red */
+  border: 1px solid #f87171;
+}
+/*@keyframes shake {*/
+/*  0%, 100% { transform: translateX(0); }*/
+/*  25% { transform: translateX(-5px); }*/
+/*  75% { transform: translateX(5px); }*/
+/*}*/
+
+/*.shake {*/
+/*  animation: shake 0.4s ease-in-out;*/
+/*}*/
+

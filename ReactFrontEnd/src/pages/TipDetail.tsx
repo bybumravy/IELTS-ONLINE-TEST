@@ -4,7 +4,6 @@ import {Button} from "@/components/ui/button.tsx";
 import {PracticeExercise} from "@/components/sections/PracticeExcercise.tsx";
 import type {Exercises} from "@/types/apiTypes"
 import {StrategyAndTip} from "@/components/sections/StrategyAndTip.tsx";
-
 interface TipDetail {
     id: string | number;
     type: string;
@@ -16,9 +15,10 @@ interface TipDetail {
 }
 
 function TipDetail() {
-    const [detail, setDetail] = useState<TipDetail | null>(null);
-    const { skill, id } = useParams<{ skill: string; id: string }>();
     const API_URL = import.meta.env.VITE_API_URL;
+    const { skill, id } = useParams<{ skill: string; id: string }>();
+    const [detail, setDetail] = useState<TipDetail | null>(null);
+
 
     useEffect(() => {
         if (!id) return;
@@ -32,13 +32,13 @@ function TipDetail() {
                 console.error("Lỗi khi gọi API chi tiết tip:", error);
                 setDetail(null);
             });
-        console.log("Dât ne:" + data);
-    }, [id, skill, API_URL]);
+        console.log("Data ne:" + data);
+    }, [id, skill]);
 
     if (!detail) {
         return (
             <div className="min-h-screen flex items-center justify-center text-red-500">
-                Không tìm thấy dữ liệu.
+                {/*Không tìm thấy dữ liệu.*/}
             </div>
         );
     }

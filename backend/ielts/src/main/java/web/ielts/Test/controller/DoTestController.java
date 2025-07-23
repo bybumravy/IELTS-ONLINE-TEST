@@ -15,6 +15,7 @@ import web.ielts.Test.model.answer.reading.ReadingAnswer;
 import web.ielts.Test.model.answer.speaking.SpeakingAnswer;
 import web.ielts.Test.model.answer.writing.WritingAnswer;
 import web.ielts.Test.service.DoTestService;
+import web.ielts.Test.service.TestAnswerService;
 import web.ielts.User.User;
 
 import java.io.IOException;
@@ -32,7 +33,10 @@ public class DoTestController {
     @Autowired
     private DoTestService doTestService;
 
-    @GetMapping("writing/{testId}")
+    @Autowired
+    private TestAnswerService testAnswerService;
+
+    @GetMapping("/writing/{testId}")
     public ResponseEntity<Writing> getWritingByTestId(@PathVariable String testId) {
         return doTestService.getWritingByTestId(testId)
                 .map(ResponseEntity::ok)
@@ -60,32 +64,48 @@ public class DoTestController {
             return ResponseEntity.notFound().build();
         }
     }
-    @GetMapping("/fulltest/{testId}")
-    public ResponseEntity<Test> getFullTestByTestId(@PathVariable String testId) {
+    @GetMapping("/fullTest/{testId}")
+    public ResponseEntity<Test> getFullTestByTestId(@PathVariable String testId, @AuthenticationPrincipal User user) {
+        // Không tạo TestAnswer ở đây nữa, chỉ trả về test
         Test test = doTestService.getTestByTestId(testId);
         return test != null ? ResponseEntity.ok(test) : ResponseEntity.notFound().build();
     }
+    @PostMapping("/test-answer/create")
+    public ResponseEntity<TestAnswer> createTestAnswer(@RequestParam String testId, @RequestParam String username) {
+        TestAnswer testAnswer = testAnswerService.createTestAnswer(testId, username);
+        return ResponseEntity.ok(testAnswer);
+    }
     @PostMapping("/reading/submit")
-    public ResponseEntity<ReadingAnswer> saveReadingAnswer(@RequestBody ReadingAnswer answer) {
-        return ResponseEntity.ok(doTestService.saveReadingAnswer(answer));
+    public ResponseEntity<ReadingAnswer> saveReadingAnswer(@RequestBody ReadingAnswer answer, @RequestParam(required = false) String testAnswerId) {
+        ReadingAnswer saved = doTestService.saveReadingAnswer(answer);
+        if (testAnswerId != null && !testAnswerId.isEmpty()) {
+            testAnswerService.updateReadingAnswer(testAnswerId, saved.getId());
+        }
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/writing/submit")
-    public ResponseEntity<WritingAnswer> saveWritingAnswer(@RequestBody WritingAnswer answer) {
-
-        System.out.println(answer.toString());
-        return ResponseEntity.ok(doTestService.saveWritingAnswer(answer));
+    public ResponseEntity<WritingAnswer> saveWritingAnswer(@RequestBody WritingAnswer answer, @RequestParam(required = false) String testAnswerId) {
+        WritingAnswer saved = doTestService.saveWritingAnswer(answer);
+        if (testAnswerId != null && !testAnswerId.isEmpty()) {
+            testAnswerService.updateWritingAnswer(testAnswerId, saved.getId());
+        }
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/listening/submit")
-    public ResponseEntity<ListeningAnswer> saveListeningAnswer(@RequestBody ListeningAnswer answer) {
-        System.out.println("hi");
-        return ResponseEntity.ok(doTestService.saveListeningAnswer(answer));
+    public ResponseEntity<ListeningAnswer> saveListeningAnswer(@RequestBody ListeningAnswer answer, @RequestParam(required = false) String testAnswerId) {
+        ListeningAnswer saved = doTestService.saveListeningAnswer(answer);
+        if (testAnswerId != null && !testAnswerId.isEmpty()) {
+            testAnswerService.updateListeningAnswer(testAnswerId, saved.getId());
+        }
+        return ResponseEntity.ok(saved);
     }
     @PostMapping("/speaking/submit")
-    public ResponseEntity<String> uploadFiles(
+    public ResponseEntity<Map<String, Object>> uploadFiles(
             @RequestPart("metadata") MultipartFile metadataJson,
             @RequestPart(value = "files", required = false) MultipartFile[] files,
+            @RequestParam(required = false) String testAnswerId,
             @AuthenticationPrincipal User user
     ) {
         String studentUsername = user.getUsername();
@@ -109,7 +129,9 @@ public class DoTestController {
             System.out.println(saved);
 
         } catch (IOException e) {
-            return ResponseEntity.badRequest().body("Lỗi khi đọc hoặc lưu metadata JSON: " + e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Lỗi khi đọc hoặc lưu metadata JSON: " + e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         }
 
         String folderPath = "audio/user/" + studentUsername + "/" + testId + "_" + saved.getId();
@@ -123,8 +145,9 @@ public class DoTestController {
                     fileUrlMap.put(file.getOriginalFilename(), url);
                     System.out.println("Uploaded: " + url);
                 } catch (IOException e) {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body("Upload failed: " + e.getMessage());
+                    Map<String, Object> errorResponse = new HashMap<>();
+                    errorResponse.put("error", "Upload failed: " + e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
                 }
             }
         } else {
@@ -133,7 +156,15 @@ public class DoTestController {
 
         doTestService.updateAnswerUrls(saved, fileUrlMap);
         doTestService.saveSubmission(saved);
-        return ResponseEntity.ok("✅ Upload và cập nhật thành công!");
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("id", saved.getId());
+        response.put("message", "✅ Upload và cập nhật thành công!");
+
+        if (testAnswerId != null && !testAnswerId.isEmpty()) {
+            testAnswerService.updateSpeakingAnswer(testAnswerId, saved.getId());
+        }
+        return ResponseEntity.ok(response);
     }
 
 

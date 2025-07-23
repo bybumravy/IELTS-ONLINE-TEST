@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Mic, Square, ChevronRight, CheckCircle, AlertCircle, Volume2, Brain } from "lucide-react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 import { customFetch } from "@/components/sections/customFetch"
 import { DoTestSpeakingHeader } from "@/components/layout/doTest/DoTestSpeakingHeader"
@@ -51,8 +51,10 @@ type Part = "part1" | "part2" | "part3"
 
 const SpeakingTest = () => {
     const { testId } = useParams<{ testId: string }>()
+    const [searchParams] = useSearchParams();
+    const testAnswerId = searchParams.get("testAnswerId");
+    const mode = searchParams.get("mode");
     const { user } = useAuth()
-    const {isPremium} = useAuth()
     const TOTAL_TEST_TIME = 600 // 10 phút (600 giây)
     const [speaking, setSpeaking] = useState<Speaking | null>(null)
     const [loading, setLoading] = useState(true)
@@ -70,11 +72,10 @@ const SpeakingTest = () => {
     const timerRef = useRef<number | null>(null)
     const mediaRecorderRef = useRef<MediaRecorder | null>(null)
     const audioChunksRef = useRef<Blob[]>([])
-    const [liveTranscript, setLiveTranscript] = useState<string>("");
+    const [_liveTranscript, setLiveTranscript] = useState<string>("");
     const recognitionRef = useRef<any>(null); // dùng any nếu TS báo lỗi SpeechRecognition
-    const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
-    const [gradingMethod, setGradingMethod] = useState<"ai" | "teacher">("ai");
-    const [showGradingDialog, setShowGradingDialog] = useState(false);
+    const [_recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
+    const [isGrading, setIsGrading] = useState(false); // Thêm state loading overlay
     const [totalRecordingTime, setTotalRecordingTime] = useState<{ [key in Part]: number }>({
         part1: 0,
         part2: 0,
@@ -250,29 +251,7 @@ const SpeakingTest = () => {
 
                 reader.readAsArrayBuffer(audioBlob)
             }
-            if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-                const SpeechRecognition =
-                    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                const recognition = new SpeechRecognition();
-                recognition.continuous = true;
-                recognition.interimResults = true;
-                recognition.lang = "en-US"; // hoặc "vi-VN"
 
-                recognition.onresult = (event: any) => {
-                    let transcript = "";
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        transcript += event.results[i][0].transcript;
-                    }
-                    setLiveTranscript(transcript);
-                };
-
-                recognition.onerror = (e: any) => {
-                    console.error("Speech recognition error:", e);
-                };
-
-                recognition.start();
-                recognitionRef.current = recognition;
-            }
             mediaRecorder.start()
         } catch (error) {
             console.error("Error accessing microphone:", error)
@@ -375,10 +354,15 @@ const SpeakingTest = () => {
             audioAnswer: audioUrls[`part3-${i + 1}`] ? `part3-${i + 1}.webm` : "",
             duration: recordingTimes[`part3-${i + 1}`] || 0,
         }))
-        cloned.gradingMethod = gradingMethod
         return cloned
     }
+
     const handleSubmitClick = async () => {
+        // Dừng timer khi bắt đầu submit
+        if (testTimerRef.current) {
+            clearInterval(testTimerRef.current);
+            testTimerRef.current = null;
+        }
         if (recordingKey) {
             stopRecording()
             await new Promise((resolve) => {
@@ -390,7 +374,7 @@ const SpeakingTest = () => {
             })
         }
 
-        // Kiểm tra điều kiện tối thiểu trước khi hiển thị dialog
+        // Kiểm tra điều kiện tối thiểu trước khi submit
         if (!timeUp && totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3) {
             setMinRecordingWarningMsg(
                 `Bạn cần ghi âm tổng cộng ít nhất ${MIN_RECORDING_TIMES.part3} giây cho PART3 trước khi nộp bài. Hiện tại: ${Math.floor(totalRecordingTime.part3)} giây`,
@@ -399,53 +383,60 @@ const SpeakingTest = () => {
             return; // Dừng lại nếu không đủ điều kiện
         }
 
-        // Chỉ hiển thị dialog khi đủ điều kiện
-        setShowGradingDialog(true);
+        // Gọi submit trực tiếp (không hiển thị dialog)
+        handleSubmit();
     }
 
     const handleSubmit = async () => {
+        // Dừng timer khi thực sự submit (phòng trường hợp gọi trực tiếp)
+        if (testTimerRef.current) {
+            clearInterval(testTimerRef.current);
+            testTimerRef.current = null;
+        }
         setIsSubmitting(true); // Bây giờ mới set submitting
-        setShowGradingDialog(false);
-
-
-
+        setIsGrading(true); // Bắt đầu overlay loading
         const submissionData = prepareSubmissionData()
         if (!submissionData) return
-
         const formData = new FormData()
         formData.append(
             "metadata",
             new Blob([JSON.stringify(submissionData)], { type: "application/json" }),
             "metadata.json",
         )
-
         await Promise.all(
             Object.entries(audioUrls).map(async ([key, url]) => {
                 const blob = await fetch(url).then((res) => res.blob())
                 formData.append("files", blob, `${key}.webm`)
             }),
         )
-
         try {
-            const res = await customFetch(`${API_URL}/verify/speaking/submit`, {
-                method: "POST",
-                body: formData,
-            })
+            let res;
+            if (testAnswerId) {
+                res = await customFetch(`${API_URL}/verify/speaking/submit?testAnswerId=${testAnswerId}`, {
+                    method: "POST",
+                    body: formData,
+                });
+            } else {
+                res = await customFetch(`${API_URL}/verify/speaking/submit`, {
+                    method: "POST",
+                    body: formData,
+                });
+            }
             const result = await res.json();
-
-            // Nếu chọn AI: chuyển đến trang kết quả ngay
-            navigate(`/speaking-result/${result.id}`);
-            alert("Bài viết đã được chấm bằng AI!.Your essay has been submitted successfully!");
-
-
+            setIsGrading(false); // Tắt overlay trước khi chuyển trang
+            if (mode === "fulltest") {
+                navigate(`/test/fulltest-result/${testAnswerId}`);
+            } else {
+                navigate(`/speaking-result/${result.id}`);
+                alert("Bài viết đã được chấm bằng AI!.Your essay has been submitted successfully!");
+            }
             if (!res.ok) throw new Error("Lỗi khi gửi bài!")
             alert("✅ Bài đã được nộp!")
-
         } catch (err) {
             console.error(err)
+            setIsGrading(false); // Tắt overlay nếu lỗi
             alert("❌ Gửi bài thất bại!")
         }
-
         setIsSubmitting(false)
     }
 
@@ -471,11 +462,6 @@ const SpeakingTest = () => {
     const getQuestionNumber = () => {
         if (currentPart === "part2") return ""
         return currentQuestionIndex + 1
-    }
-
-    const getPartTitle = () => {
-        if (!speaking) return ""
-        return `PART ${speaking[currentPart].partNumber} ${speaking[currentPart].title.toUpperCase()}`
     }
 
     if (loading) {
@@ -622,51 +608,31 @@ const SpeakingTest = () => {
 
     return (
         <div className="h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col overflow-hidden">
+            {/* Overlay loading khi đang chấm điểm AI */}
+            {isGrading && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 9999,
+                        background: "rgba(0,0,0,0.4)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center">
+                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald-200 border-t-emerald-600 mb-6"></div>
+                        <div className="text-xl font-bold text-emerald-700 mb-2">Scoring...</div>
+                        <div className="text-gray-600">Waiting for AI to score your answer</div>
+                    </div>
+                </div>
+            )}
             {/* Compact Header */}
             <div className="flex-shrink-0">
                 <DoTestSpeakingHeader initialTime={testTimeLeft} />
             </div>
             {/* Dialog chọn phương thức chấm bài */}
-            <Dialog open={showGradingDialog} onOpenChange={setShowGradingDialog}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Chọn phương thức chấm bài</DialogTitle>
-                        <DialogDescription>
-                            Vui lòng chọn cách bạn muốn bài viết của mình được chấm điểm
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <RadioGroup
-                            defaultValue="ai"
-                            onValueChange={(value) => setGradingMethod(value as "ai" | "teacher")}
-                        >
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="ai" id="ai" />
-                                <Label htmlFor="ai">Chấm bằng AI (Nhanh chóng)</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="teacher" id="human" />
-                                <Label htmlFor="teacher">Chấm bởi giáo viên (Chính xác hơn)</Label>
-                            </div>
-                        </RadioGroup>
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => setShowGradingDialog(false)}
-                        >
-                            Hủy
-                        </Button>
-                        <Button
-
-                            onClick={handleSubmit}
-
-                        >
-                            {isSubmitting ? "Đang gửi..." : "Xác nhận"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
             {/*/!* Part Header - Compact *!/*/}
             <div className="max-w-6xl mx-auto">
                 <div className="">
@@ -742,12 +708,7 @@ const SpeakingTest = () => {
                                         )}
 
                                     </div>
-                                    {recordingKey && (
-                                        <div className="bg-yellow-50 p-3 border border-yellow-400 rounded mt-2">
-                                            <strong>🗣 Script:</strong>
-                                            <p className="mt-1 text-gray-800">{liveTranscript || <em>Đang nghe...</em>}</p>
-                                        </div>
-                                    )}
+
                                 </CardContent>
                             </Card>
                         </div>

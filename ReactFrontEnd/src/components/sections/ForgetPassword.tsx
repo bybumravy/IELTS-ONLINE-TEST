@@ -5,15 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Mail } from "lucide-react";
-
+import { useLocation } from "react-router-dom";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const ForgetPasswordPage = () => {
     const [email, setEmail] = useState("");
     const [emailError, setEmailError] = useState("");
     const [message] = useState("");
+    const location = useLocation();
 
 
+    // ⏬ Lấy redirect URL từ query string (nếu có)
+    const searchParams = new URLSearchParams(location.search);
+    const redirectPath = searchParams.get("redirect") || "/";
+    console.log(redirectPath)
 
     const getEmailErrorMessage = (value: string): string => {
         if (!value) return "Email is required";
@@ -41,7 +46,10 @@ const ForgetPasswordPage = () => {
             const res = await fetch(`${API_URL}/api/forgotpassword`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({
+                    email,
+
+                }),
             });
 
             if (!res.ok) {

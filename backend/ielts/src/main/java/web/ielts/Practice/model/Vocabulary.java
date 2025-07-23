@@ -14,16 +14,20 @@ public class Vocabulary {
     private String topic;
     private String band;
     private List<ExampleSentence> exp;
+    private String partOfSpeech;
+    private String pronunciation;
 
     public Vocabulary() {}
 
-    public Vocabulary(String word, String translate, String explanation, String topic, String band, List<ExampleSentence> exp) {
+    public Vocabulary(String word, String translate, String explanation, String topic, String band, List<ExampleSentence> exp, String partOfSpeech, String pronunciation) {
         this.word = word;
         this.translate = translate;
         this.explanation = explanation;
         this.topic = topic;
         this.band = band;
         this.exp = exp;
+        this.partOfSpeech = partOfSpeech;
+        this.pronunciation = pronunciation;
     }
 
     // Getter & Setter
@@ -48,4 +52,10 @@ public class Vocabulary {
 
     public List<ExampleSentence> getExp() { return exp; }
     public void setExp(List<ExampleSentence> exp) { this.exp = exp; }
+
+    public String getPartOfSpeech() { return partOfSpeech; }
+    public void setPartOfSpeech(String partOfSpeech) { this.partOfSpeech = partOfSpeech; }
+
+    public String getPronunciation() { return pronunciation; }
+    public void setPronunciation(String pronunciation) { this.pronunciation = pronunciation; }
 }

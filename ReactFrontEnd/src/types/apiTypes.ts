@@ -58,13 +58,17 @@ export interface User {
 
 export interface AuthContextType {
     user: User | null;
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string, role : string) => Promise<LoginResponse>;
     logout: () => void;
     register: (email: string, password: string, role?: string) => Promise<void>;
     isLoading: boolean;
     fetchUser: () => Promise<void>;
 }
-
+export interface LoginResponse {
+    status: string;
+    message?: string;
+    redirectUrl?: string;
+}
 
 export interface ListeningQuestion {
     id: number;
@@ -140,6 +144,13 @@ export type WritingTask = {
   imageUrl?: string;
   prompt?: string;
 };
+export interface Vocabulary {
+    id: string;
+    word: string;
+    translate: string;
+    partOfSpeech?: string;
+    pronunciation?: string;
+}
 
 export interface SkillColors {
   [key: string]: {
@@ -189,7 +200,7 @@ export type QuestionUpdateHandler = {
   (field: 'options', value: string[]): void;
   (field: 'question' | 'answer' | 'explanation', value: string): void;
   (field: QuestionField, value: QuestionValue): void;
-}; 
+};
 
 export interface SpeakingTask {
   prompt?: string;

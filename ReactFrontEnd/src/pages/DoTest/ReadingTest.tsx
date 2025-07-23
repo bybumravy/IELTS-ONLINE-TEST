@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { DoTestHeader } from "@/components/layout/doTest/DoTestHeader";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {customFetch} from "@/components/sections/customFetch";
 export interface Question {
@@ -33,12 +33,15 @@ export interface ReadingTest {
 }
 
 interface QuestionWithStudentAnswer extends Question {
-    studentAnswer: string | null;
-    questionId: number;
+    studentAnswer?: string | null;
+    questionId?: number;
 }
 
 export default function ReadingTest() {
     const { testId } = useParams<{ testId: string }>();
+    const [searchParams] = useSearchParams();
+    const testAnswerId = searchParams.get("testAnswerId");
+    const mode = searchParams.get("mode");
     const [currentPart, setCurrentPart] = useState(1);
     const [readingTest, setReadingTest] = useState<ReadingTest | null>(null);
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -48,8 +51,8 @@ export default function ReadingTest() {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const containerRef = useRef<HTMLDivElement>(null);
-    const paragraphRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const paragraphRef = useRef<HTMLDivElement | null>(null);
 
     const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
     const [isHighlightMode, setIsHighlightMode] = useState(false);
@@ -143,7 +146,7 @@ export default function ReadingTest() {
     const handleFullscreen = () => {
         if (!containerRef.current) return;
         if (!document.fullscreenElement) {
-            containerRef.current.requestFullscreen().catch((err) => console.error(err));
+            containerRef.current?.requestFullscreen().catch((err) => console.error(err));
         } else {
             document.exitFullscreen();
         }
@@ -151,21 +154,19 @@ export default function ReadingTest() {
 
     const handleSubmit = async () => {
         if (!readingTest) return;
-
         const dataToSend = structuredClone(readingTest);
         if (user?.username) dataToSend.username = user.username;
         dataToSend.skill = "reading";
-
         dataToSend.tasks.forEach((task) => {
             delete (task as any).title;
-
             task.sections.forEach((section) => {
                 delete (section as any).introduction;
                 delete (section as any).imageUrl;
-
                 section.questions.forEach((q) => {
                     const question = q as QuestionWithStudentAnswer;
                     question.studentAnswer = question.studentAnswer || null;
+                    const qid = question.questionId!;
+                    question.studentAnswer = answers[qid] || null;
 
                     delete (question as any).explanation;
                     delete (question as any).options;
@@ -176,7 +177,7 @@ export default function ReadingTest() {
         setIsSubmitted(true);
 
         try {
-            const dataToSend = {
+            const dataToSendFinal = {
                 ...readingTest,
                 tasks: readingTest.tasks.map((task) => ({
                     ...task,
@@ -189,20 +190,32 @@ export default function ReadingTest() {
                     })),
                 })),
             };
-
-            const response = await fetch(`${API_URL}/verify/reading/submit`, {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSend),
-            });
-
+            let response;
+            if(testAnswerId != null) {
+                response = await fetch(`${API_URL}/verify/reading/submit?testAnswerId=${testAnswerId}`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(dataToSendFinal),
+                });
+            }
+            else {
+                response = await fetch(`${API_URL}/verify/reading/submit`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(dataToSendFinal),
+                });
+            }
             if (!response.ok) throw new Error("Submit failed");
-
             const result = await response.json();
             console.log("Saved:", result);
             alert("🎉 Submitted successfully!");
-            navigate(`/reading-result/${result.id}`);
+            if (mode === "fulltest") {
+                navigate(`/test/writing/${testId}?testAnswerId=${testAnswerId}&mode=fulltest`);
+            } else {
+                navigate(`/reading-result/${result.id}`);
+            }
         } catch (error) {
             console.error(error);
             alert("❌ Error submitting");

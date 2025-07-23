@@ -55,9 +55,7 @@ public class JwtToken {
     }
 
     // Tạo Refresh Token
-    public static String generateRefreshToken(String email, String role,boolean isPremium) {
-        return generateToken(email, role, REFRESH_TOKEN_EXPIRATION,isPremium);
-    }
+
 
     public static String extractUsername(String token) {
         return extractAllClaims(token).getSubject();

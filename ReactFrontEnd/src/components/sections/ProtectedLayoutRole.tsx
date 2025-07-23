@@ -22,7 +22,7 @@ export default function ProtectedLayoutRole({
         if (!user) {
             // Tùy theo role cho phép, điều hướng tới đúng trang login
             if (allowRoles.includes("admin")) {
-                navigate("/loginadmin", { state: { from: location.pathname } });
+                navigate("/login-admin", { state: { from: location.pathname } });
             } else if (allowRoles.includes("teacher")) {
                 navigate("/staff-login", { state: { from: location.pathname } });
             }else if (allowRoles.includes("manager")) {

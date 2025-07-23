@@ -1,741 +1,743 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ChevronDown, ChevronUp, Award, FileText, BookOpen, Target, Zap, Mic, Volume2, Play, Pause } from "lucide-react"
+import {
+    FileText,
+    BookOpen,
+    Target,
+    Zap,
+    Mic,
+    Volume2,
+    Play,
+    Pause,
+    Clock,
+    AlertCircle,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Badge } from "@/components/ui/badge"
-import { useParams } from "react-router-dom"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {useParams} from "react-router-dom";
+import { urlDecrypt } from "@/lib/utils"
 
-interface Review {
-    scoreEva: string
-    reviewEva: string
+interface StressMismatch {
+    word: string
+    detectedPosition?: number | string
+    standardPosition?: number | string
+    start: number
+    end: number
+    index?: number | string
 }
 
-interface ErrorCorrection {
-    originalText: string
-    correctedText: string
+interface PronunciationEvaluation {
+    word: string
+    feedback?: string
+    isCorrect?: boolean
+    stress?: string
+}
+
+interface GrammarAnswer {
+    score?: number
+    errorText: string
+    correctText: string
+    sentenceText: string
     errorType: string
     explanation: string
-    sentenceContext: string
 }
 
-interface PronunciationWord {
-    word: string
-    stress: "primary" | "secondary" | "none"
-    phonetic?: string
-    isCorrect: boolean
-    feedback?: string
+interface FleCohAnswer {
+    score?: number
+    meanIntensity: string
+    pauseCount: string
+    speechRate: string
+    comment: string
 }
 
-interface SpeakingEvaluation {
-    Grammar: Review & { errorCorrections?: ErrorCorrection[] }
-    FluencyCoherence: Review
-    LexicalResource: Review & { errorCorrections?: ErrorCorrection[] }
-    Pronunciation: Review & {
-        script: string
-        pronunciationWords: PronunciationWord[]
-        overallFeedback: string
-    }
+interface PronunciationAnswer {
+    score: number
+    stressTranscript: string
+    stressMismatchesDetailed: StressMismatch[]
+    pronunciationEvaluation: PronunciationEvaluation[]
+    transcript: string;
+    overEmphasis: { index: number }[];
+    missingEmphasis: { index: number }[];
+    correctEmphasizedWords: { index: number }[];
+    comment?: string; // Added comment field
 }
 
-interface SpeakingPartAnswer {
-    id: string
-    partNumber: number
+interface SpeakingAnswerQuestion {
     question: string
-    audioUrl: string
     transcript: string
-    duration: string
-    score: string
-    evaluation: SpeakingEvaluation
-    sampleAnswer: string
+    audioAnswer: string
+    score: number
+    grammarAnswer: GrammarAnswer
+    lexicalAnswer: GrammarAnswer
+    pronunciationAnswer: PronunciationAnswer
+    fluencyCohAnswer: FleCohAnswer
+}
+
+interface SpeakingAnswerPart13 {
+    partNumber: number
+    title: string
+    instruction: string
+    questions?: SpeakingAnswerQuestion[]
+    averageScore: number
+}
+
+interface SpeakingAnswerPart2 {
+    partNumber: number
+    title: string
+    question: string
+    transcript: string
+    audioAnswer: string
+    score: number
+    grammarAnswer: GrammarAnswer
+    lexicalAnswer: GrammarAnswer
+    pronunciationAnswer: PronunciationAnswer
+    fluencyCohAnswer: FleCohAnswer
+    cueCards: string[]
 }
 
 interface SpeakingAnswer {
     id: string
-    username?: string
     testId: string
-    part1: SpeakingPartAnswer
-    part2: SpeakingPartAnswer
-    part3: SpeakingPartAnswer
+    username?: string
+    skill: string
+    part1: SpeakingAnswerPart13
+    part2: SpeakingAnswerPart2
+    part3: SpeakingAnswerPart13
+    band?: number
+    submittedAt?: string
 }
 
+// Đặt hàm renderWordByWordHighlight ở đầu file, trước export default function SpeakingResult hoặc ít nhất trước renderPronunciationDetail
+const renderWordByWordHighlight = (
+  transcript: string,
+  overEmphasis: { index: number }[],
+  missingEmphasis: { index: number }[],
+  correctEmphasizedWords: { index: number }[]
+) => {
+  // Tách transcript thành mảng từ giống backend
+  const words = transcript.split(/(\s+|(?=[,.!?;:]))/).filter(w => w.trim() !== '' || /[,.!?;:]/.test(w));
+  // Tạo map index -> { style, label }
+  const colorMap: { [idx: number]: { style: string, label: string } } = {};
+  overEmphasis.forEach(w => colorMap[w.index] = { style: 'bg-red-100 text-red-700 border border-red-300 font-semibold shadow-sm', label: 'Over Emphasis: Student emphasized unnecessarily' });
+  missingEmphasis.forEach(w => colorMap[w.index] = { style: 'bg-yellow-100 text-yellow-900 border border-yellow-300 font-semibold shadow-sm', label: 'Missing Emphasis: Should be emphasized' });
+  correctEmphasizedWords.forEach(w => colorMap[w.index] = { style: 'bg-green-100 text-green-800 border border-green-300 font-semibold shadow-sm', label: 'Correct Emphasis' });
+
+  return (
+    <div>
+      {/* Legend */}
+      <div className="flex gap-4 mb-4 text-sm">
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-block w-4 h-4 rounded bg-green-100 border border-green-300"></span> Correct
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-block w-4 h-4 rounded bg-yellow-100 border border-yellow-300"></span> Missing
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-block w-4 h-4 rounded bg-red-100 border border-red-300"></span> Over
+        </span>
+      </div>
+      <div className="whitespace-pre-wrap text-lg leading-relaxed flex flex-wrap gap-y-2">
+        {words.map((word, idx) => {
+          const color = colorMap[idx];
+          // Nếu là dấu cách thì render bình thường
+          if (/^\\s+$/.test(word)) return <span key={idx}>{word}</span>;
+          return (
+            <span
+              key={idx}
+              className={`inline-block px-2 py-1 mx-[1px] rounded-lg transition-all cursor-pointer ${color?.style || 'bg-gray-50'}`}
+              title={color?.label || ''}
+              style={{ minWidth: '1.5em', textAlign: 'center' }}
+            >
+              {word}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 export default function SpeakingResult() {
+    const API_URL = import.meta.env.VITE_API_URL;
+
     const [data, setData] = useState<SpeakingAnswer | null>(null)
     const [loading, setLoading] = useState(true)
     const [activePart, setActivePart] = useState<"part1" | "part2" | "part3">("part1")
-    const [openSections, setOpenSections] = useState<{
-        question: boolean
-        review: boolean
-        scoring: boolean
-        sample: boolean
-    }>({
-        question: false,
-        review: true,
-        scoring: false,
-        sample: false,
-    })
-    const [feedbackView, setFeedbackView] = useState<"grammar" | "lexical" | "fluency" | "pronunciation">("grammar")
     const [isPlaying, setIsPlaying] = useState(false)
     const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null)
+    // State for current question index in part1/part3
+    const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
 
-    const { resultId } = useParams<{ resultId: string }>()
+    const { resultId } = useParams  <{ resultId: string }>();
 
-    // Mock data for demonstration
     useEffect(() => {
-        // Simulate API call
-        setTimeout(() => {
-            const mockData: SpeakingAnswer = {
-                id: "1",
-                testId: "test-123",
-                username: "john_doe",
-                part1: {
-                    id: "p1",
-                    partNumber: 1,
-                    question: "Let's talk about your hometown. Where are you from?",
-                    audioUrl: "/audio/part1.mp3",
-                    transcript:
-                        "I am from Ho Chi Minh City, which is the largest city in Vietnam. It's a very bustling and vibrant place with lots of opportunities for young people like me.",
-                    duration: "2:30",
-                    score: "6.5",
-                    evaluation: {
-                        Grammar: {
-                            scoreEva: "6.0",
-                            reviewEva: "Generally accurate grammar with some minor errors in complex structures.",
-                            errorCorrections: [
-                                {
-                                    originalText: "lots of opportunities",
-                                    correctedText: "many opportunities",
-                                    errorType: "Word Choice",
-                                    explanation: "In formal contexts, 'many' is preferred over 'lots of'",
-                                    sentenceContext:
-                                        "It's a very bustling and vibrant place with lots of opportunities for young people like me.",
-                                },
-                            ],
-                        },
-                        FluencyCoherence: {
-                            scoreEva: "7.0",
-                            reviewEva: "Speech is generally fluent with natural pauses. Ideas are well-connected and easy to follow.",
-                        },
-                        LexicalResource: {
-                            scoreEva: "6.5",
-                            reviewEva: "Good range of vocabulary with some less common words used appropriately.",
-                            errorCorrections: [
-                                {
-                                    originalText: "bustling",
-                                    correctedText: "busy",
-                                    errorType: "Word Choice",
-                                    explanation: "While 'bustling' is correct, 'busy' might be more natural in this context",
-                                    sentenceContext:
-                                        "It's a very bustling and vibrant place with lots of opportunities for young people like me.",
-                                },
-                            ],
-                        },
-                        Pronunciation: {
-                            scoreEva: "6.0",
-                            reviewEva: "Generally clear pronunciation with some issues in word stress and intonation.",
-                            script:
-                                "I am from Ho Chi Minh City, which is the largest city in Vietnam. It's a very bustling and vibrant place with lots of opportunities for young people like me.",
-                            pronunciationWords: [
-                                { word: "I", stress: "none", isCorrect: true },
-                                { word: "am", stress: "none", isCorrect: true },
-                                { word: "from", stress: "none", isCorrect: true },
-                                { word: "Ho", stress: "primary", isCorrect: true },
-                                { word: "Chi", stress: "none", isCorrect: true },
-                                { word: "Minh", stress: "none", isCorrect: true },
-                                { word: "City", stress: "primary", isCorrect: false, feedback: "Stress should be on first syllable" },
-                                { word: "which", stress: "none", isCorrect: true },
-                                { word: "is", stress: "none", isCorrect: true },
-                                { word: "the", stress: "none", isCorrect: true },
-                                { word: "largest", stress: "primary", isCorrect: true },
-                                { word: "city", stress: "primary", isCorrect: true },
-                                { word: "in", stress: "none", isCorrect: true },
-                                {
-                                    word: "Vietnam",
-                                    stress: "secondary",
-                                    isCorrect: false,
-                                    feedback: "Primary stress should be on 'nam'",
-                                },
-                            ],
-                            overallFeedback: "Work on word stress patterns, especially in proper nouns and compound words.",
-                        },
-                    },
-                    sampleAnswer:
-                        "I'm originally from Manchester, which is a major city in the north of England. It's quite an industrial city, known for its football teams and music scene. What I love most about Manchester is its rich cultural diversity and the friendly nature of the people there.",
-                },
-                part2: {
-                    id: "p2",
-                    partNumber: 2,
-                    question:
-                        "Describe a memorable journey you have taken. You should say: where you went, who you went with, what you did there, and explain why it was memorable.",
-                    audioUrl: "/audio/part2.mp3",
-                    transcript:
-                        "I'd like to talk about a trip I took to Japan last year with my family. We visited Tokyo and Kyoto, and it was absolutely amazing experience.",
-                    duration: "2:00",
-                    score: "7.0",
-                    evaluation: {
-                        Grammar: {
-                            scoreEva: "7.0",
-                            reviewEva: "Good control of grammar with occasional minor errors.",
-                            errorCorrections: [
-                                {
-                                    originalText: "amazing experience",
-                                    correctedText: "an amazing experience",
-                                    errorType: "Article",
-                                    explanation: "Missing article 'an' before 'amazing experience'",
-                                    sentenceContext: "We visited Tokyo and Kyoto, and it was absolutely amazing experience.",
-                                },
-                            ],
-                        },
-                        FluencyCoherence: {
-                            scoreEva: "7.5",
-                            reviewEva:
-                                "Speaks fluently with only occasional hesitation. Ideas are well-organized and coherently presented.",
-                        },
-                        LexicalResource: {
-                            scoreEva: "7.0",
-                            reviewEva: "Good range of vocabulary with some sophisticated words used naturally.",
-                        },
-                        Pronunciation: {
-                            scoreEva: "6.5",
-                            reviewEva: "Clear pronunciation with good intonation patterns.",
-                            script:
-                                "I'd like to talk about a trip I took to Japan last year with my family. We visited Tokyo and Kyoto, and it was absolutely amazing experience.",
-                            pronunciationWords: [
-                                { word: "I'd", stress: "none", isCorrect: true },
-                                { word: "like", stress: "none", isCorrect: true },
-                                { word: "to", stress: "none", isCorrect: true },
-                                { word: "talk", stress: "none", isCorrect: true },
-                                { word: "about", stress: "secondary", isCorrect: true },
-                                { word: "a", stress: "none", isCorrect: true },
-                                { word: "trip", stress: "none", isCorrect: true },
-                                { word: "I", stress: "none", isCorrect: true },
-                                { word: "took", stress: "none", isCorrect: true },
-                                { word: "to", stress: "none", isCorrect: true },
-                                { word: "Japan", stress: "secondary", isCorrect: false, feedback: "Primary stress should be on 'pan'" },
-                                { word: "last", stress: "none", isCorrect: true },
-                                { word: "year", stress: "none", isCorrect: true },
-                            ],
-                            overallFeedback: "Good overall pronunciation with minor stress issues in some words.",
-                        },
-                    },
-                    sampleAnswer:
-                        "I'd like to describe a fascinating journey I took to Iceland last summer with my best friend. We spent two weeks exploring the dramatic landscapes, including the famous Golden Circle route. What made this trip particularly memorable was witnessing the Northern Lights on our final night - it was absolutely breathtaking and something I'll never forget.",
-                },
-                part3: {
-                    id: "p3",
-                    partNumber: 3,
-                    question: "How do you think travel has changed in recent years?",
-                    audioUrl: "/audio/part3.mp3",
-                    transcript:
-                        "Well, I think travel has become much more accessible nowadays due to budget airlines and online booking platforms. However, there are also new challenges like overtourism in popular destinations.",
-                    duration: "1:45",
-                    score: "7.5",
-                    evaluation: {
-                        Grammar: {
-                            scoreEva: "7.5",
-                            reviewEva: "Wide range of grammatical structures used accurately with only minor errors.",
-                        },
-                        FluencyCoherence: {
-                            scoreEva: "8.0",
-                            reviewEva:
-                                "Speaks fluently with natural and appropriate linking. Ideas are well-developed and logically organized.",
-                        },
-                        LexicalResource: {
-                            scoreEva: "7.5",
-                            reviewEva: "Wide range of vocabulary used flexibly and precisely with some less common items.",
-                        },
-                        Pronunciation: {
-                            scoreEva: "7.0",
-                            reviewEva: "Clear and effective pronunciation with good stress and intonation patterns.",
-                            script:
-                                "Well, I think travel has become much more accessible nowadays due to budget airlines and online booking platforms. However, there are also new challenges like overtourism in popular destinations.",
-                            pronunciationWords: [
-                                { word: "Well", stress: "none", isCorrect: true },
-                                { word: "I", stress: "none", isCorrect: true },
-                                { word: "think", stress: "none", isCorrect: true },
-                                { word: "travel", stress: "primary", isCorrect: true },
-                                { word: "has", stress: "none", isCorrect: true },
-                                { word: "become", stress: "secondary", isCorrect: true },
-                                { word: "much", stress: "none", isCorrect: true },
-                                { word: "more", stress: "none", isCorrect: true },
-                                { word: "accessible", stress: "secondary", isCorrect: true },
-                                { word: "nowadays", stress: "primary", isCorrect: true },
-                            ],
-                            overallFeedback: "Excellent pronunciation with natural stress patterns and clear articulation.",
-                        },
-                    },
-                    sampleAnswer:
-                        "I believe travel has undergone significant transformation in recent decades. The advent of low-cost carriers has democratized air travel, making it accessible to a broader demographic. Additionally, digital platforms have revolutionized how we plan and book trips, offering unprecedented convenience and choice. However, this accessibility has also led to challenges such as overtourism, which threatens the sustainability of popular destinations and impacts local communities.",
-                },
-            }
-            setData(mockData)
-            setLoading(false)
-        }, 1000)
-    }, [resultId])
+        fetch(`${API_URL}/api/result/speaking/${resultId}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to fetch data");
+                return res.json();
+            })
+            .then(json => setData(json))
+            .catch(err => console.error("Fetch error:", err))
+            .finally(() => setLoading(false));
+    }, [resultId]);
 
-    const getScoreColor = (score: string) => {
-        const numScore = Number.parseFloat(score)
-        if (numScore >= 7.0) return "text-emerald-600 bg-emerald-100"
-        if (numScore >= 6.0) return "text-amber-600 bg-amber-100"
-        return "text-red-600 bg-red-100"
-    }
 
-    const calculateOverallScore = () => {
-        if (!data) return "0.0"
-        const part1Score = Number.parseFloat(data.part1.score)
-        const part2Score = Number.parseFloat(data.part2.score)
-        const part3Score = Number.parseFloat(data.part3.score)
-        return ((part1Score + part2Score + part3Score) / 3).toFixed(1)
-    }
+    // const calculateOverallScore = () => {
+    //     if (!data) return 0
+    //     const scores = [data.part1?.averageScore ?? 0, data.part2?.score ?? 0, data.part3?.averageScore ?? 0]
+    //     const validScores = scores.filter((s) => typeof s === "number" && !isNaN(s))
+    //     if (validScores.length === 0) return 0
+    //     const avg = validScores.reduce((a, b) => a + b, 0) / validScores.length
+    //     return Math.round(avg * 10) / 10
+    // }
 
     const playAudio = (audioUrl: string) => {
-        if (currentAudio) {
-            currentAudio.pause()
+        // Nếu đang phát audio này, thì pause
+        if (currentAudio && !currentAudio.paused) {
+            currentAudio.pause();
+            setIsPlaying(false);
+            return;
         }
-
-        const audio = new Audio(audioUrl)
+        // Nếu đang phát audio khác, dừng lại
+        if (currentAudio) {
+            currentAudio.pause();
+        }
+        // Giải mã nếu là mã hóa base64url
+        let url = audioUrl;
+        if (!/^https?:\/\//.test(audioUrl)) {
+            try {
+                url = urlDecrypt(audioUrl)
+            } catch (e) {
+                url = audioUrl
+            }
+        }
+        if (!url) return
+        const audio = new Audio(url)
         audio.onplay = () => setIsPlaying(true)
         audio.onpause = () => setIsPlaying(false)
         audio.onended = () => setIsPlaying(false)
-
+        audio.onerror = () => setIsPlaying(false)
         setCurrentAudio(audio)
-        audio.play()
+        audio.play().catch(() => setIsPlaying(false))
     }
 
-    const renderErrorCorrections = (originalText: string, corrections: ErrorCorrection[]) => {
-        if (!corrections || corrections.length === 0) {
-            return (
-                <div className="bg-emerald-100 p-4 rounded-xl border border-green-200">
-                    <p className="text-green-700 text-sm font-medium">✓ No errors found</p>
-                </div>
-            )
-        }
-
-        const sentences = originalText.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g) || [originalText]
-        const sentenceUsed: Record<number, boolean> = {}
-        const highlightedSentences = [...sentences]
-
-        corrections.forEach((correction, idx) => {
-            const contextIdx = sentences.findIndex(
-                (s, i) => !sentenceUsed[i] && s.trim() === correction.sentenceContext.trim(),
-            )
-            if (contextIdx === -1) return
-
-            sentenceUsed[contextIdx] = true
-            const context = sentences[contextIdx]
-            const wordIdx = context.indexOf(correction.originalText)
-            if (wordIdx === -1) return
-
-            const before = context.slice(0, wordIdx)
-            const errorWord = context.slice(wordIdx, wordIdx + correction.originalText.length)
-            const after = context.slice(wordIdx + correction.originalText.length)
-
-            highlightedSentences[contextIdx] = (
-                <span key={`sentence-${idx}`}>
-          {before}
-                    <mark className="bg-red-100 text-red-800 font-medium rounded-md px-2 py-1 cursor-help transition-colors hover:bg-red-200 relative">
-            {errorWord}
-                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-              {idx + 1}
-            </span>
-          </mark>
-                    {after}
-        </span>
-            ) as string
-        })
-
+    // Hiển thị chi tiết Pronunciation (đầy đủ trường mới)
+    const renderPronunciationDetail = (pronunciationAnswer?: PronunciationAnswer) => {
+        if (!pronunciationAnswer) return <div className="text-red-500">No pronunciation data.</div>;
+        const { stressTranscript, stressMismatchesDetailed} = pronunciationAnswer;
         return (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                    <div className="whitespace-pre-line p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
-                        <div className="leading-relaxed">
-                            {highlightedSentences.map((s, i) => (
-                                <span key={i}>{s}</span>
-                            ))}
+            <div className="space-y-6">
+                {/* Stress Transcript */}
+                <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                    <h4 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <Mic className="h-5 w-5 text-green-600" />
+                        Stress Transcript
+                    </h4>
+                    <div className="whitespace-pre-line text-base text-gray-700 font-mono bg-gray-50 rounded-xl p-4 border border-gray-100">
+                        {stressTranscript || <span className="italic text-gray-400">No stress transcript available.</span>}
+                    </div>
+                </div>
+                {/* Stress Mismatches Table */}
+                <div className="bg-white border border-red-200 rounded-2xl p-6">
+                    <h4 className="font-semibold text-red-700 mb-4 flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5 text-red-600" />
+                        Stress Mismatches
+                    </h4>
+                    {stressMismatchesDetailed && stressMismatchesDetailed.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full text-sm border border-slate-200 rounded-xl">
+                                <thead>
+                                    <tr className="bg-red-50">
+                                        <th className="px-3 py-2 text-left">Word</th>
+                                        <th className="px-3 py-2 text-left">Detected Position</th>
+                                        <th className="px-3 py-2 text-left">Standard Position</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {stressMismatchesDetailed.map((m, idx) => (
+                                        <tr key={idx} className="border-t border-slate-100">
+                                            <td className="px-3 py-2 font-semibold text-slate-800">{m.word}</td>
+                                            <td className="px-3 py-2">{m.detectedPosition}</td>
+                                            <td className="px-3 py-2">{m.standardPosition}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="text-green-600">No stress mismatches detected.</div>
+                    )}
+                </div>
+                {/* Word-by-word analysis */}
+                <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                    <h4 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <Mic className="h-5 w-5 text-green-600" />
+                        Word-by-Word Analysis
+                    </h4>
+                    {renderWordByWordHighlight(
+                        pronunciationAnswer.transcript || '',
+                        pronunciationAnswer.overEmphasis || [],
+                        pronunciationAnswer.missingEmphasis || [],
+                        pronunciationAnswer.correctEmphasizedWords || []
+                    )}
+                </div>
+                {/* Pronunciation Feedback */}
+                <div className="bg-purple-50 border border-purple-200 rounded-2xl p-6">
+                    <h4 className="font-semibold text-purple-800 mb-4 flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5 text-purple-600" />
+                        Examiner Feedback
+                    </h4>
+                    <div className="text-base text-gray-800">
+                        {pronunciationAnswer.comment ? (
+                            <span>{pronunciationAnswer.comment}</span>
+                        ) : (
+                            <span className="italic text-gray-400">No feedback available.</span>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Thêm hàm mới để highlight lỗi trong transcript cho SpeakingResult (like WritingResult)
+    const renderTranscriptWithCorrections = (transcript: string | undefined | null, grammarAnswer: GrammarAnswer, lexicalAnswer: GrammarAnswer) => {
+        // Bảo vệ nếu transcript null/undefined
+        if (!transcript || typeof transcript !== "string") {
+            return (
+                <div className="p-6 text-red-500">No transcript available.</div>
+            );
+        }
+        // Gom các lỗi lại (grammar và lexical)
+        const errors: Array<GrammarAnswer & { type: string }> = [];
+        if (grammarAnswer?.errorText) errors.push({ ...grammarAnswer, type: "Grammar" });
+        if (lexicalAnswer?.errorText) errors.push({ ...lexicalAnswer, type: "Lexical" });
+        if (errors.length === 0) {
+            return (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                        <div className="whitespace-pre-line p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
+                            <p className="text-slate-700 leading-relaxed">{transcript}</p>
+                        </div>
+                    </div>
+                    <div className="lg:col-span-1">
+                        <div className="bg-emerald-100 p-4 rounded-xl border border-green-200">
+                            <p className="text-green-700 text-sm font-medium">✓ No errors found</p>
                         </div>
                     </div>
                 </div>
+            )
+        }
+        // Tách transcript thành các câu
+        const sentences = transcript.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g) || [transcript];
+        // Gom lỗi theo từng câu (ưu tiên sentenceText, fallback errorText xuất hiện trong câu)
+        let highlightedSentences: React.ReactNode[] = sentences.map((sentence, sIdx) => {
+            // Lấy các lỗi thuộc về câu này (ưu tiên sentenceText, nếu không có thì errorText xuất hiện trong câu)
+            const matchedErrors = errors
+                .map((error, idx) => ({ error, idx }))
+                .filter(({ error }) => {
+                    if (error.sentenceText && error.sentenceText.trim() === sentence.trim()) return true;
+                    return sentence.includes(error.errorText);
+
+                });
+            if (matchedErrors.length === 0) return sentence;
+            // Tìm tất cả vị trí xuất hiện của từng errorText trong câu, highlight lần lượt
+            let parts: React.ReactNode[] = [];
+            let lastIdx = 0;
+            // Tạo mảng các lỗi với vị trí xuất hiện (có thể trùng lặp)
+            let errorSpans: { start: number, end: number, error: typeof errors[0], idx: number }[] = [];
+            matchedErrors.forEach(({ error, idx }) => {
+                let searchStart = 0;
+                while (searchStart < sentence.length) {
+                    const foundIdx = sentence.indexOf(error.errorText, searchStart);
+                    if (foundIdx === -1) break;
+                    errorSpans.push({ start: foundIdx, end: foundIdx + error.errorText.length, error, idx });
+                    searchStart = foundIdx + error.errorText.length;
+                }
+            });
+            // Sắp xếp theo vị trí xuất hiện
+            errorSpans.sort((a, b) => a.start - b.start);
+            // Loại bỏ highlight lồng nhau
+            let filteredSpans: typeof errorSpans = [];
+            let lastEnd = 0;
+            errorSpans.forEach(span => {
+                if (span.start >= lastEnd) {
+                    filteredSpans.push(span);
+                    lastEnd = span.end;
+                }
+            });
+            // Tạo các phần tử highlight
+            lastIdx = 0;
+            filteredSpans.forEach((span, i) => {
+                if (span.start > lastIdx) {
+                    parts.push(<span key={`before-${span.idx}-${i}`}>{sentence.slice(lastIdx, span.start)}</span>);
+                }
+                parts.push(
+                    <mark
+                        key={`err-${span.idx}-${i}`}
+                        className="bg-red-100 text-red-800 font-medium rounded-md px-2 py-1 cursor-help transition-colors hover:bg-red-200 relative"
+                        title={span.error.explanation}
+                    >
+                        {sentence.slice(span.start, span.end)}
+                        <span
+                            className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                            {span.idx + 1}
+                        </span>
+                    </mark>
+                );
+                lastIdx = span.end;
+            });
+            if (lastIdx < sentence.length) {
+                parts.push(<span key={`after-last-${sIdx}`}>{sentence.slice(lastIdx)}</span>);
+            }
+            return <span key={`sentence-${sIdx}`}>{parts}</span>;
+        });
+        return (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Text with highlights */}
+                <div className="lg:col-span-2">
+                    <div className="whitespace-pre-line p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
+                        <div className="leading-relaxed">
+                            {highlightedSentences.map((s, i) => <span key={i}>{s}</span>)}
+                        </div>
+                    </div>
+                </div>
+                {/* Error list */}
                 <div className="lg:col-span-1 space-y-3">
-                    <h4 className="font-semibold text-slate-800 mb-3">Error Details</h4>
-                    {corrections.map((error, index) => (
-                        <div key={index} className="bg-red-50 border border-red-200 rounded-lg p-4 relative">
-                            <div className="absolute -top-2 -left-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+                    {errors.map((error, index) => (
+                        <div key={index} className="bg-red-50 border border-red-200 rounded-md p-2 relative group text-[12px] space-y-1" style={{ overflow: 'visible' }}>
+                            <div className="absolute -top-2 -left-2 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                                 {index + 1}
                             </div>
-                            <div className="space-y-2 ml-2">
-                                <Badge variant="outline" className="text-xs border-red-300 text-red-700 mb-2">
-                                    {error.errorType}
-                                </Badge>
-                                <div className="space-y-1">
-                                    <p className="text-sm">
+                            {/* Dấu hỏi ở góc trên phải */}
+                            <div className="absolute top-1 right-1">
+                                <button
+                                    className="text-blue-500 hover:text-blue-700 focus:outline-none"
+                                    tabIndex={0}
+                                    style={{ verticalAlign: 'top' }}
+                                    onFocus={e => e.currentTarget.classList.add('ring-2', 'ring-blue-300')}
+                                    onBlur={e => e.currentTarget.classList.remove('ring-2', 'ring-blue-300')}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="inline h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#fff" />
+                                        <text x="12" y="16" textAnchor="middle" fontSize="10" fill="#3b82f6" fontWeight="bold">?</text>
+                                    </svg>
+                                </button>
+                                <div className="hidden group-hover:block group-focus-within:block absolute z-50 bottom-full mb-2 right-0 min-w-[140px] max-w-xs bg-white border border-slate-300 rounded-md shadow-lg p-2 text-[11px] text-slate-700 whitespace-pre-line">
+                                    {error.explanation}
+                                </div>
+                            </div>
+                            <span className="text-[11px] border-red-300 text-red-700 mb-1 font-semibold">{error.type} Error</span>
+                            <div className="flex justify-between items-start w-full">
+                                <div className="flex-1 space-y-0.5">
+                                    <p className="text-[11px]">
                                         <span className="font-medium text-slate-700">Error:</span>{" "}
-                                        <span className="text-red-600 font-medium">{error.originalText}</span>
+                                        <span className="text-red-600 font-medium">{error.errorText}</span>
                                     </p>
-                                    <p className="text-sm">
+                                    <p className="text-[11px]">
                                         <span className="font-medium text-slate-700">Fix:</span>{" "}
-                                        <span className="text-green-600 font-medium">{error.correctedText}</span>
+                                        <span className="text-green-600 font-medium">{error.correctText}</span>
                                     </p>
                                 </div>
-                                <p className="text-xs text-slate-600 bg-white p-2 rounded border">{error.explanation}</p>
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
-        )
-    }
+        );
+    };
 
-    const renderPronunciationScript = (words: PronunciationWord[]) => {
-        return (
-            <div className="space-y-4">
-                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <div className="flex flex-wrap gap-1 leading-relaxed">
-                        {words.map((wordObj, index) => (
-                            <span
-                                key={index}
-                                className={`inline-block px-1 py-0.5 rounded transition-colors cursor-help ${
-                                    !wordObj.isCorrect
-                                        ? "bg-red-100 text-red-800 border border-red-200"
-                                        : wordObj.stress === "primary"
-                                            ? "bg-blue-100 text-blue-800 font-bold"
-                                            : wordObj.stress === "secondary"
-                                                ? "bg-blue-50 text-blue-700 font-medium"
-                                                : "text-slate-700"
-                                }`}
-                                title={wordObj.feedback || `Stress: ${wordObj.stress}`}
+    const renderPartContent = (part: SpeakingAnswerPart13 | SpeakingAnswerPart2, isPart2 = false) => {
+        if (isPart2) {
+            // part2: render 1 question
+            const currentQuestion: SpeakingAnswerPart2 = part as SpeakingAnswerPart2;
+            return (
+                <div className="space-y-6">
+                    {/* Question Section */}
+                    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-2">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <BookOpen className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-gray-800">Question</h3>
+                                <Button
+                                    onClick={() => playAudio(currentQuestion.audioAnswer)}
+                                    className="ml-2 bg-green-600 hover:bg-green-700 w-9 h-9 rounded-full shadow"
+                                    size="icon"
+                                >
+                                    {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="bg-green-50 border-l-4 border-l-green-500 rounded-r-xl p-4 mb-2">
+                            <p className="text-gray-800 leading-relaxed font-medium text-base">{currentQuestion.question}</p>
+                        </div>
+                        {currentQuestion.cueCards && (
+                            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mt-2">
+                                <h4 className="font-semibold text-amber-800 mb-2 flex items-center gap-2 text-sm">
+                                    <FileText className="h-4 w-4" />
+                                    Cue Card Points
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    {currentQuestion.cueCards.map((cue: string, index: number) => (
+                                        <div key={index} className="flex items-center gap-2 bg-white rounded-lg p-2 border border-amber-200">
+                                            <div className="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                                {index + 1}
+                                            </div>
+                                            <span className="text-amber-800 font-medium text-sm">{cue}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    {/* Your Response - full width */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col justify-center">
+                        <h4 className="text-base font-semibold text-gray-800 mb-1">Your Response</h4>
+                        <p className="text-gray-700 leading-relaxed text-base italic">
+                            "{currentQuestion.transcript}"
+                        </p>
+                    </div>
+                    {/* Analysis Tabs - giống part1/part3 */}
+                    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                        <Tabs defaultValue="grammar" className="w-full">
+                            <TabsList className="grid w-full grid-cols-4 bg-gray-50 rounded-none border-b">
+                                <TabsTrigger
+                                    value="grammar"
+                                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-red-600"
+                                >
+                                    <Target className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Grammar</span>
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="lexical"
+                                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-amber-600"
+                                >
+                                    <BookOpen className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Vocabulary</span>
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="fluency"
+                                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
+                                >
+                                    <Zap className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Fluency</span>
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="pronunciation"
+                                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-purple-600"
+                                >
+                                    <Mic className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Pronunciation</span>
+                                </TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="grammar" className="p-4 space-y-3">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                        <Target className="h-5 w-5 text-red-600" />
+                                        Grammar & Accuracy
+                                    </h3>
+                                    <div className="text-xl font-bold text-red-600">{currentQuestion.grammarAnswer?.score ?? "-"}</div>
+                                </div>
+                                {renderTranscriptWithCorrections(
+                                    currentQuestion.transcript,
+                                    currentQuestion.grammarAnswer,
+                                    { ...currentQuestion.lexicalAnswer, errorText: "" },
+                                )}
+                            </TabsContent>
+                            <TabsContent value="lexical" className="p-4 space-y-3">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                        <BookOpen className="h-5 w-5 text-amber-600" />
+                                        Lexical Resource
+                                    </h3>
+                                    <div className="text-xl font-bold text-amber-600">{currentQuestion.lexicalAnswer?.score ?? "-"}</div>
+                                </div>
+                                {renderTranscriptWithCorrections(
+                                    currentQuestion.transcript,
+                                    { ...currentQuestion.grammarAnswer, errorText: "" },
+                                    currentQuestion.lexicalAnswer,
+                                )}
+                            </TabsContent>
+                            <TabsContent value="fluency" className="p-4 space-y-3">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                        <Zap className="h-5 w-5 text-blue-600" />
+                                        Fluency & Coherence
+                                    </h3>
+                                    <div className="text-xl font-bold text-blue-600">{currentQuestion.fluencyCohAnswer?.score ?? "-"}</div>
+                                </div>
+                                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+                                    <div className="bg-white rounded-xl p-3 border border-blue-200">
+                                        <h4 className="font-semibold text-blue-800 mb-2 text-sm">Examiner Feedback</h4>
+                                        <p className="text-gray-700 leading-relaxed text-base">{currentQuestion.fluencyCohAnswer?.comment ?? ""}</p>
+                                    </div>
+                                </div>
+                            </TabsContent>
+                            <TabsContent value="pronunciation" className="p-4 space-y-3">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                        <Mic className="h-5 w-5 text-purple-600" />
+                                        Pronunciation Assessment
+                                    </h3>
+                                    <div className="text-xl font-bold text-purple-600">{currentQuestion.pronunciationAnswer?.score ?? "-"}</div>
+                                </div>
+                                {renderPronunciationDetail(currentQuestion.pronunciationAnswer)}
+                            </TabsContent>
+                        </Tabs>
+                    </div>
+                </div>
+            )
+        } else {
+            // part1 or part3: chỉ hiển thị 1 câu hỏi, có thanh chọn câu hỏi
+            const questions = (part as SpeakingAnswerPart13).questions ?? [];
+            const question = questions[currentQuestionIdx];
+            return (
+                <div className="space-y-6">
+                    {/* Thanh chọn câu hỏi */}
+                    <div className="flex flex-wrap gap-2 justify-center mb-2">
+                        {questions.map((_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setCurrentQuestionIdx(idx)}
+                                className={`px-4 py-2 rounded-lg border text-sm font-semibold transition-all ${currentQuestionIdx === idx ? 'bg-green-600 text-white border-green-600 shadow' : 'bg-white text-green-700 border-green-200 hover:bg-green-50'}`}
                             >
-                {wordObj.word}
-                                {wordObj.stress === "primary" && <span className="text-blue-600 ml-0.5">ˈ</span>}
-                                {wordObj.stress === "secondary" && <span className="text-blue-500 ml-0.5">ˌ</span>}
-              </span>
+                                Question {idx + 1}
+                            </button>
                         ))}
                     </div>
+                    {/* Question Section + Audio + Transcript */}
+                    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-2">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <BookOpen className="h-5 w-5 text-green-600" />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                Question {currentQuestionIdx + 1}
+                                <Button
+                                    onClick={() => playAudio(question.audioAnswer)}
+                                    className="ml-2 bg-green-600 hover:bg-green-700 w-9 h-9 rounded-full shadow"
+                                    size="icon"
+                                >
+                                    {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                                </Button>
+                            </h3>
+                        </div>
+                        <div className="bg-green-50 border-l-4 border-l-green-500 rounded-r-xl p-4 mb-2">
+                            <p className="text-gray-800 leading-relaxed font-medium text-base">{question.question}</p>
+                        </div>
+                        {/* Your Response ngay dưới câu hỏi */}
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mt-4">
+                            <h4 className="text-base font-semibold text-gray-800 mb-1">Your Response</h4>
+                            <p className="text-gray-700 leading-relaxed text-base italic">
+                                "{question.transcript}"
+                            </p>
+                        </div>
+                    </div>
+                    {/* Analysis Tabs giữ nguyên */}
+                    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                        {/* ... giữ nguyên phần Tabs ... */}
+                        <Tabs defaultValue="grammar" className="w-full">
+                            <TabsList className="grid w-full grid-cols-4 bg-gray-50 rounded-none border-b">
+                                <TabsTrigger
+                                    value="grammar"
+                                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-red-600"
+                                >
+                                    <Target className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Grammar</span>
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="lexical"
+                                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-amber-600"
+                                >
+                                    <BookOpen className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Vocabulary</span>
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="fluency"
+                                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
+                                >
+                                    <Zap className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Fluency</span>
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="pronunciation"
+                                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-purple-600"
+                                >
+                                    <Mic className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Pronunciation</span>
+                                </TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="grammar" className="p-4 space-y-3">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                        <Target className="h-5 w-5 text-red-600" />
+                                        Grammar & Accuracy
+                                    </h3>
+                                    <div className="text-xl font-bold text-red-600">{question.grammarAnswer?.score ?? "-"}</div>
+                                </div>
+                                {renderTranscriptWithCorrections(
+                                    question.transcript,
+                                    question.grammarAnswer,
+                                    { ...question.lexicalAnswer, errorText: "" },
+                                )}
+                            </TabsContent>
+                            <TabsContent value="lexical" className="p-4 space-y-3">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                        <BookOpen className="h-5 w-5 text-amber-600" />
+                                        Lexical Resource
+                                    </h3>
+                                    <div className="text-xl font-bold text-amber-600">{question.lexicalAnswer?.score ?? "-"}</div>
+                                </div>
+                                {renderTranscriptWithCorrections(
+                                    question.transcript,
+                                    { ...question.grammarAnswer, errorText: "" },
+                                    question.lexicalAnswer,
+                                )}
+                            </TabsContent>
+                            <TabsContent value="fluency" className="p-4 space-y-3">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                        <Zap className="h-5 w-5 text-blue-600" />
+                                        Fluency & Coherence
+                                    </h3>
+                                    <div className="text-xl font-bold text-blue-600">{question.fluencyCohAnswer?.score ?? "-"}</div>
+                                </div>
+                                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+                                    <div className="bg-white rounded-xl p-3 border border-blue-200">
+                                        <h4 className="font-semibold text-blue-800 mb-2 text-sm">Examiner Feedback</h4>
+                                        <p className="text-gray-700 leading-relaxed text-base">{question.fluencyCohAnswer?.comment ?? ""}</p>
+                                    </div>
+                                </div>
+                            </TabsContent>
+                            <TabsContent value="pronunciation" className="p-4 space-y-3">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                        <Mic className="h-5 w-5 text-purple-600" />
+                                        Pronunciation Assessment
+                                    </h3>
+                                    <div className="text-xl font-bold text-purple-600">{question.pronunciationAnswer?.score ?? "-"}</div>
+                                </div>
+                                {renderPronunciationDetail(question.pronunciationAnswer)}
+                            </TabsContent>
+                        </Tabs>
+                    </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="w-3 h-3 bg-blue-600 rounded"></span>
-                            <span className="font-medium text-blue-800">Primary Stress (ˈ)</span>
-                        </div>
-                        <p className="text-sm text-blue-700">Main stressed syllable</p>
-                    </div>
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="w-3 h-3 bg-blue-500 rounded"></span>
-                            <span className="font-medium text-blue-700">Secondary Stress (ˌ)</span>
-                        </div>
-                        <p className="text-sm text-blue-600">Weaker stressed syllable</p>
-                    </div>
-                    <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="w-3 h-3 bg-red-600 rounded"></span>
-                            <span className="font-medium text-red-800">Needs Improvement</span>
-                        </div>
-                        <p className="text-sm text-red-700">Incorrect pronunciation</p>
-                    </div>
-                </div>
-            </div>
-        )
+            )
+        }
     }
-
-    const renderFeedback = (part: SpeakingPartAnswer) => (
-        <div className="space-y-6">
-            {/* Audio Player */}
-            <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-                <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                        <Button onClick={() => playAudio(part.audioUrl)} className="bg-purple-600 hover:bg-purple-700" size="lg">
-                            {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                        </Button>
-                        <div>
-                            <p className="font-medium text-purple-800">Listen to Recording</p>
-                            <p className="text-sm text-purple-600">Duration: {part.duration}</p>
-                        </div>
-                        <Volume2 className="h-5 w-5 text-purple-600 ml-auto" />
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Transcript */}
-            <Card className="border-slate-200">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-slate-700">
-                        <FileText className="h-5 w-5" />
-                        Your Response Transcript
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="bg-slate-50 p-4 rounded-lg">
-                        <p className="text-slate-700 leading-relaxed italic">"{part.transcript}"</p>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Feedback Navigation */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 bg-slate-100 p-1 rounded-lg">
-                <button
-                    onClick={() => setFeedbackView("grammar")}
-                    className={`py-3 px-4 rounded-md font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                        feedbackView === "grammar" ? "bg-white text-red-600 shadow-sm" : "text-slate-600 hover:text-slate-800"
-                    }`}
-                >
-                    <Target className="h-4 w-4" />
-                    <span className="hidden sm:inline">Grammar</span>
-                </button>
-                <button
-                    onClick={() => setFeedbackView("lexical")}
-                    className={`py-3 px-4 rounded-md font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                        feedbackView === "lexical" ? "bg-white text-amber-600 shadow-sm" : "text-slate-600 hover:text-slate-800"
-                    }`}
-                >
-                    <BookOpen className="h-4 w-4" />
-                    <span className="hidden sm:inline">Lexical</span>
-                </button>
-                <button
-                    onClick={() => setFeedbackView("fluency")}
-                    className={`py-3 px-4 rounded-md font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                        feedbackView === "fluency" ? "bg-white text-blue-600 shadow-sm" : "text-slate-600 hover:text-slate-800"
-                    }`}
-                >
-                    <Zap className="h-4 w-4" />
-                    <span className="hidden sm:inline">Fluency</span>
-                </button>
-                <button
-                    onClick={() => setFeedbackView("pronunciation")}
-                    className={`py-3 px-4 rounded-md font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                        feedbackView === "pronunciation"
-                            ? "bg-white text-purple-600 shadow-sm"
-                            : "text-slate-600 hover:text-slate-800"
-                    }`}
-                >
-                    <Mic className="h-4 w-4" />
-                    <span className="hidden sm:inline">Pronunciation</span>
-                </button>
-            </div>
-
-            {/* Content based on selected view */}
-            {feedbackView === "grammar" && (
-                <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                        <Target className="h-5 w-5 text-red-600" />
-                        Grammar Analysis
-                    </h3>
-                    {part.evaluation.Grammar.errorCorrections && part.evaluation.Grammar.errorCorrections.length > 0 ? (
-                        renderErrorCorrections(part.transcript, part.evaluation.Grammar.errorCorrections)
-                    ) : (
-                        <div className="bg-green-50 p-6 rounded-xl border border-green-200 text-center">
-                            <Target className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                            <p className="text-green-700 font-medium">✓ No grammar errors found</p>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {feedbackView === "lexical" && (
-                <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                        <BookOpen className="h-5 w-5 text-amber-600" />
-                        Lexical Resource Analysis
-                    </h3>
-                    {part.evaluation.LexicalResource.errorCorrections &&
-                    part.evaluation.LexicalResource.errorCorrections.length > 0 ? (
-                        renderErrorCorrections(part.transcript, part.evaluation.LexicalResource.errorCorrections)
-                    ) : (
-                        <div className="bg-green-50 p-6 rounded-xl border border-green-200 text-center">
-                            <BookOpen className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                            <p className="text-green-700 font-medium">✓ Good lexical resource usage</p>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {feedbackView === "fluency" && (
-                <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                        <Zap className="h-5 w-5 text-blue-600" />
-                        Fluency & Coherence
-                    </h3>
-                    <Card className="border-blue-200 bg-blue-50/50">
-                        <CardContent className="p-6">
-                            <p className="text-slate-700 leading-relaxed">{part.evaluation.FluencyCoherence.reviewEva}</p>
-                        </CardContent>
-                    </Card>
-                </div>
-            )}
-
-            {feedbackView === "pronunciation" && (
-                <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                        <Mic className="h-5 w-5 text-purple-600" />
-                        Pronunciation Analysis
-                    </h3>
-                    {renderPronunciationScript(part.evaluation.Pronunciation.pronunciationWords)}
-                    <Card className="border-purple-200 bg-purple-50/50">
-                        <CardContent className="p-6">
-                            <p className="text-slate-700 leading-relaxed">{part.evaluation.Pronunciation.overallFeedback}</p>
-                        </CardContent>
-                    </Card>
-                </div>
-            )}
-        </div>
-    )
-
-    const renderPartContent = (part: SpeakingPartAnswer) => (
-        <Card className="overflow-hidden shadow-lg border-0">
-            {/* Question Section */}
-            <Collapsible
-                open={openSections.question}
-                onOpenChange={(v) => setOpenSections((prev) => ({ ...prev, question: v }))}
-            >
-                <CollapsibleTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        className="w-full justify-between p-6 h-auto bg-slate-50 hover:bg-slate-100 border-b border-slate-200 rounded-none"
-                    >
-                        <div className="flex items-center gap-3">
-                            <BookOpen className="h-5 w-5 text-slate-600" />
-                            <span className="font-semibold text-slate-700">Question</span>
-                        </div>
-                        {openSections.question ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                    </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                    <div className="p-6 bg-white border-b border-slate-200">
-                        <p className="text-slate-700 leading-relaxed font-medium">{part.question}</p>
-                    </div>
-                </CollapsibleContent>
-            </Collapsible>
-
-            {/* Review Section */}
-            <Collapsible open={openSections.review} onOpenChange={(v) => setOpenSections((prev) => ({ ...prev, review: v }))}>
-                <CollapsibleTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        className="w-full justify-between p-6 h-auto bg-emerald-600 hover:bg-emerald-700 text-white rounded-none"
-                    >
-                        <div className="flex items-center gap-3">
-                            <Mic className="h-5 w-5" />
-                            <span className="font-semibold">Detailed Analysis & Feedback</span>
-                        </div>
-                        {openSections.review ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                    </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                    <div className="p-6 bg-gradient-to-br from-orange-50 to-amber-50">{renderFeedback(part)}</div>
-                </CollapsibleContent>
-            </Collapsible>
-
-            {/* Scoring Breakdown */}
-            <Collapsible
-                open={openSections.scoring}
-                onOpenChange={(v) => setOpenSections((prev) => ({ ...prev, scoring: v }))}
-            >
-                <CollapsibleTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        className="w-full justify-between p-6 h-auto bg-slate-50 hover:bg-slate-100 border-b border-slate-200 rounded-none"
-                    >
-                        <div className="flex items-center gap-3">
-                            <Award className="h-5 w-5 text-slate-600" />
-                            <span className="font-semibold text-slate-700">Scoring Breakdown</span>
-                        </div>
-                        {openSections.scoring ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                    </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                    <div className="p-6 bg-white border-b border-slate-200">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-4">
-                                {/* Grammar */}
-                                <div className="p-3 bg-slate-50 rounded-lg space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-medium text-slate-700">Grammar</span>
-                                        <Badge className={getScoreColor(part.evaluation.Grammar.scoreEva)}>
-                                            {part.evaluation.Grammar.scoreEva}
-                                        </Badge>
-                                    </div>
-                                    <p className="text-sm text-slate-600 bg-white p-2 rounded border">
-                                        {part.evaluation.Grammar.reviewEva}
-                                    </p>
-                                </div>
-                                {/* Fluency & Coherence */}
-                                <div className="p-3 bg-slate-50 rounded-lg space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-medium text-slate-700">Fluency & Coherence</span>
-                                        <Badge className={getScoreColor(part.evaluation.FluencyCoherence.scoreEva)}>
-                                            {part.evaluation.FluencyCoherence.scoreEva}
-                                        </Badge>
-                                    </div>
-                                    <p className="text-sm text-slate-600 bg-white p-2 rounded border">
-                                        {part.evaluation.FluencyCoherence.reviewEva}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                {/* Lexical Resource */}
-                                <div className="p-3 bg-slate-50 rounded-lg space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-medium text-slate-700">Lexical Resource</span>
-                                        <Badge className={getScoreColor(part.evaluation.LexicalResource.scoreEva)}>
-                                            {part.evaluation.LexicalResource.scoreEva}
-                                        </Badge>
-                                    </div>
-                                    <p className="text-sm text-slate-600 bg-white p-2 rounded border">
-                                        {part.evaluation.LexicalResource.reviewEva}
-                                    </p>
-                                </div>
-                                {/* Pronunciation */}
-                                <div className="p-3 bg-slate-50 rounded-lg space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-medium text-slate-700">Pronunciation</span>
-                                        <Badge className={getScoreColor(part.evaluation.Pronunciation.scoreEva)}>
-                                            {part.evaluation.Pronunciation.scoreEva}
-                                        </Badge>
-                                    </div>
-                                    <p className="text-sm text-slate-600 bg-white p-2 rounded border">
-                                        {part.evaluation.Pronunciation.reviewEva}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </CollapsibleContent>
-            </Collapsible>
-
-            {/* Sample Answer */}
-            <Collapsible open={openSections.sample} onOpenChange={(v) => setOpenSections((prev) => ({ ...prev, sample: v }))}>
-                <CollapsibleTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        className="w-full justify-between p-6 h-auto bg-slate-50 hover:bg-slate-100 rounded-none rounded-b-lg"
-                    >
-                        <div className="flex items-center gap-3">
-                            <BookOpen className="h-5 w-5 text-slate-600" />
-                            <span className="font-semibold text-slate-700">Sample Answer</span>
-                        </div>
-                        {openSections.sample ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                    </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                    <div className="p-6 bg-white">
-                        <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-200 shadow-sm">
-                            <p className="text-slate-700 leading-relaxed italic">"{part.sampleAnswer}"</p>
-                        </div>
-                    </div>
-                </CollapsibleContent>
-            </Collapsible>
-        </Card>
-    )
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-                <div className="text-center space-y-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="text-slate-600 font-medium">Loading your results...</p>
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="text-center space-y-6">
+                    <div className="animate-spin rounded-full h-20 w-20 border-4 border-green-200 border-t-green-600 mx-auto"></div>
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2">Loading Your Results</h2>
+                        <p className="text-gray-600">Please wait while we prepare your detailed analysis...</p>
+                    </div>
                 </div>
             </div>
         )
@@ -743,128 +745,103 @@ export default function SpeakingResult() {
 
     if (!data) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-                <Card className="max-w-md mx-auto">
-                    <CardContent className="p-8 text-center">
-                        <Mic className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                        <p className="text-slate-600 font-medium">No results found</p>
-                    </CardContent>
-                </Card>
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-12 text-center">
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Mic className="h-10 w-10 text-gray-400" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">No Results Found</h2>
+                    <p className="text-gray-600">Please check your result ID and try again</p>
+                </div>
             </div>
         )
     }
 
-    const overallScore = calculateOverallScore()
+    const overallScore = data.band ?? "-";
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                {/* Score Overview */}
-                <Card className="mb-8 overflow-hidden shadow-2xl border-0 bg-gradient-to-r from-emerald-600 to-emerald-700">
-                    <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-8">
-                        <div className="text-center mb-8">
-                            <div className="text-sm text-blue-100 uppercase tracking-wide font-medium">Final Score</div>
-                            <div className="text-3xl font-bold mt-2">IELTS Speaking Results</div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            <Card className="bg-lime-50 border-white/20">
-                                <CardContent className="p-6 text-center">
-                                    <div className="text-sm text-emerald-600 mb-2">Overall Score</div>
-                                    <div className="text-5xl font-bold text-emerald-900 mb-2">{overallScore}</div>
-                                    <div className="text-xs text-emerald-500">Average Score</div>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-lime-50 border-white/20">
-                                <CardContent className="p-6 text-center">
-                                    <div className="text-sm text-emerald-600 mb-2">Part 1</div>
-                                    <div className="text-5xl font-bold text-emerald-900 mb-2">{data.part1.score}</div>
-                                    <div className="text-xs text-emerald-500">Introduction</div>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-lime-50 border-white/20">
-                                <CardContent className="p-6 text-center">
-                                    <div className="text-sm text-emerald-600 mb-2">Part 2</div>
-                                    <div className="text-5xl font-bold text-emerald-900 mb-2">{data.part2.score}</div>
-                                    <div className="text-xs text-emerald-500">Long Turn</div>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-lime-50 border-white/20">
-                                <CardContent className="p-6 text-center">
-                                    <div className="text-sm text-emerald-600 mb-2">Part 3</div>
-                                    <div className="text-5xl font-bold text-emerald-900 mb-2">{data.part3.score}</div>
-                                    <div className="text-xs text-emerald-500">Discussion</div>
-                                </CardContent>
-                            </Card>
-                        </div>
+        <div className="min-h-screen bg-gray-100 flex flex-col items-center">
+            <div className="w-full max-w-4xl mx-auto px-2 sm:px-8 py-8">
+                {/* Header Section - Matching the design */}
+                <div className="bg-green-600 rounded-2xl p-4 mb-6 text-white">
+                    <div className="text-center mb-4">
+                        <p className="text-green-100 text-xs font-medium mb-1 uppercase tracking-wide">FINAL SCORE</p>
+                        <h1 className="text-2xl font-bold mb-4">AI Examiner Evaluation</h1>
                     </div>
-                </Card>
-
-                {/* Part Tabs */}
-                <div className="mb-8">
-                    <div className="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-                        <button
-                            onClick={() => setActivePart("part1")}
-                            className={`flex-1 py-4 px-6 rounded-lg font-semibold transition-all duration-200 ${
-                                activePart === "part1"
-                                    ? "bg-white text-emerald-600 shadow-md"
-                                    : "text-emerald-700 hover:text-emerald-900"
-                            }`}
-                        >
-                            <div className="flex items-center justify-center gap-3">
-                                <Mic className="h-5 w-5" />
-                                <div>
-                                    <div className="text-lg">Part 1</div>
-                                    <div className="text-sm opacity-75">Introduction</div>
-                                </div>
-                                <div className={`px-3 py-1 rounded-full text-sm font-bold ${getScoreColor(data.part1.score)}`}>
-                                    {data.part1.score}
-                                </div>
-                            </div>
-                        </button>
-                        <button
-                            onClick={() => setActivePart("part2")}
-                            className={`flex-1 py-4 px-6 rounded-lg font-semibold transition-all duration-200 ${
-                                activePart === "part2"
-                                    ? "bg-white text-emerald-600 shadow-md"
-                                    : "text-emerald-700 hover:text-emerald-900"
-                            }`}
-                        >
-                            <div className="flex items-center justify-center gap-3">
-                                <Mic className="h-5 w-5" />
-                                <div>
-                                    <div className="text-lg">Part 2</div>
-                                    <div className="text-sm opacity-75">Long Turn</div>
-                                </div>
-                                <div className={`px-3 py-1 rounded-full text-sm font-bold ${getScoreColor(data.part2.score)}`}>
-                                    {data.part2.score}
-                                </div>
-                            </div>
-                        </button>
-                        <button
-                            onClick={() => setActivePart("part3")}
-                            className={`flex-1 py-4 px-6 rounded-lg font-semibold transition-all duration-200 ${
-                                activePart === "part3"
-                                    ? "bg-white text-emerald-600 shadow-md"
-                                    : "text-emerald-700 hover:text-emerald-900"
-                            }`}
-                        >
-                            <div className="flex items-center justify-center gap-3">
-                                <Mic className="h-5 w-5" />
-                                <div>
-                                    <div className="text-lg">Part 3</div>
-                                    <div className="text-sm opacity-75">Discussion</div>
-                                </div>
-                                <div className={`px-3 py-1 rounded-full text-sm font-bold ${getScoreColor(data.part3.score)}`}>
-                                    {data.part3.score}
-                                </div>
-                            </div>
-                        </button>
+                    <div className="flex justify-center">
+                        <div className="bg-green-50 rounded-2xl p-3 text-center w-32">
+                            <p className="text-green-600 text-xs font-medium mb-1">Overall Score</p>
+                            <div className="text-3xl font-bold text-green-800 mb-1">{overallScore}</div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Active Part Content */}
-                <div className="space-y-6">
-                    {renderPartContent(activePart === "part1" ? data.part1 : activePart === "part2" ? data.part2 : data.part3)}
+                {/* Part Navigation - Matching the design */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-6">
+                    <button
+                        onClick={() => setActivePart("part1")}
+                        className={`bg-white rounded-2xl p-3 text-left border-2 transition-all text-xs ${
+                            activePart === "part1" ? "border-green-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
+                        }`}
+                    >
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <FileText className="h-3 w-3 text-green-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-green-600 text-xs">Part 1</h3>
+                                <p className="text-gray-600 text-[10px]">Introduction & Interview</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-lg font-bold text-green-600">{data.part1.averageScore}</span>
+                        </div>
+                    </button>
+                    <button
+                        onClick={() => setActivePart("part2")}
+                        className={`bg-white rounded-2xl p-3 text-left border-2 transition-all text-xs ${
+                            activePart === "part2" ? "border-green-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
+                        }`}
+                    >
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <FileText className="h-3 w-3 text-green-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-green-600 text-xs">Part 2</h3>
+                                <p className="text-gray-600 text-[10px]">Long Turn</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-lg font-bold text-green-600">{data.part2.score}</span>
+                        </div>
+                    </button>
+                    <button
+                        onClick={() => setActivePart("part3")}
+                        className={`bg-white rounded-2xl p-3 text-left border-2 transition-all text-xs ${
+                            activePart === "part3" ? "border-green-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
+                        }`}
+                    >
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <FileText className="h-3 w-3 text-green-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-green-600 text-xs">Part 3</h3>
+                                <p className="text-gray-600 text-[10px]">Two-way Discussion</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-lg font-bold text-green-600">{data.part3.averageScore}</span>
+                        </div>
+                    </button>
+                </div>
+
+                {/* Content */}
+                <div>
+                    {activePart === "part1" && renderPartContent(data.part1, false)}
+                    {activePart === "part2" && renderPartContent(data.part2, true)}
+                    {activePart === "part3" && renderPartContent(data.part3, false)}
                 </div>
             </div>
         </div>

@@ -310,8 +310,8 @@ export default function RequestTestDetailPage() {
     const [actionError, setActionError] = useState<string | null>(null);
     const [showDebug, setShowDebug] = useState(false);
 
-    const API_BASE_URL = "http://localhost:8080/api";
 
+    const API_URL = import.meta.env.VITE_API_URL;
     useEffect(() => {
       if (!testId) {
         setStatus('error');
@@ -322,7 +322,7 @@ export default function RequestTestDetailPage() {
       const fetchTestDetail = async () => {
         setStatus('loading');
         try {
-          const response = await axios.get(`${API_BASE_URL}/manager/request-test/${testId}`, { withCredentials: true });
+          const response = await axios.get(`${API_URL}/api/manager/request-test/${testId}`, { withCredentials: true });
           
           // Validate response data
           if (!response.data || !response.data.test) {
@@ -345,8 +345,8 @@ export default function RequestTestDetailPage() {
         if (!testId) return;
 
         const url = action === 'accept' 
-            ? `${API_BASE_URL}/manager/accept-test/${testId}` 
-            : `${API_BASE_URL}/manager/request-test/${testId}`;
+            ? `${API_URL}/api/manager/accept-test/${testId}` 
+            : `${API_URL}/api/manager/request-test/${testId}`;
         const method = action === 'accept' ? 'post' : 'delete';
 
         setActionStatus('loading');

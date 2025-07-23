@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Mail, Lock, ArrowRight } from "lucide-react";
-
-const LoginAdmin = () => {
+import { useLocation } from "react-router-dom";
+const ManagerLogin  = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
-
+    const location = useLocation();
     const navigate = useNavigate();
     const { login } = useAuth();
 
@@ -66,7 +66,7 @@ const LoginAdmin = () => {
         if (!emailMsg && !passwordMsg) {
             try {
                 await login(email, password);
-                navigate("/adminpage");
+                navigate("/staff-page");
             } catch (error) {
                 alert("Login failed");
                 console.error(error);
@@ -75,7 +75,8 @@ const LoginAdmin = () => {
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        const API_URL = import.meta.env.VITE_API_URL;
+        window.location.href = `${API_URL}/oauth2/authorization/google?role=manager`;
     };
 
     return (
@@ -84,12 +85,12 @@ const LoginAdmin = () => {
                 <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
                     <BookOpen className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold text-gray-900">Admin Login</span>
+                <span className="text-2xl font-bold text-gray-900">LANGUAGES</span>
             </div>
 
             <Card className="w-full max-w-md">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-center">Manager Login</CardTitle>
                     <CardDescription className="text-center">
                         Enter your email and password to access your account
                     </CardDescription>
@@ -119,7 +120,10 @@ const LoginAdmin = () => {
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Password</Label>
-                                <Link to="/forgot-password" className="text-sm text-emerald-600 hover:text-emerald-700">
+                                <Link
+                                    to={`/forgot-password?redirect=${encodeURIComponent(location.pathname)}`}
+                                    className="text-sm text-emerald-600 hover:text-emerald-700"
+                                >
                                     Forgot password?
                                 </Link>
                             </div>
@@ -162,14 +166,16 @@ const LoginAdmin = () => {
                             className="w-full border-2"
                             onClick={handleGoogleLogin}
                         >
-                            <img  alt="Google" className="mr-2 h-4 w-4" />
+                            <img src="/src/assets/google.png" alt="Google" className="mr-2 h-4 w-4" />
                             Google
                         </Button>
                     </form>
+
+                    {/* Sign up link */}
 
                 </CardContent>
             </Card>
         </div>
     );
 };
-export default LoginAdmin;
+export default ManagerLogin;

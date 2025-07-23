@@ -123,12 +123,34 @@ export default function WritingResult() {
     }
 
     const calculateOverallScore = () => {
-        const task1Score = Number.parseFloat(data.task1.score)
-        const task2Score = Number.parseFloat(data.task2.score)
-        return ((task1Score + task2Score * 2) / 3).toFixed(1)
+        const task1Score = data.task1 && data.task1.score ? Number.parseFloat(data.task1.score) : 0;
+        const task2Score = data.task2 && data.task2.score ? Number.parseFloat(data.task2.score) : 0;
+        // Nếu cả hai task đều không có thì trả về "_"
+        if (!data.task1 && !data.task2) return "_";
+        // Nếu chỉ có 1 task thì lấy điểm task đó
+        if (!data.task1) return roundIeltsScore(task2Score);
+        if (!data.task2) return roundIeltsScore(task1Score);
+        // Nếu có cả hai thì tính bình thường
+        const avg = (task1Score + task2Score * 2) / 3;
+        return roundIeltsScore(avg);
     }
 
-    const overallScore = calculateOverallScore()
+    // Quy tắc làm tròn điểm IELTS
+    function roundIeltsScore(score: number) {
+        const decimal = score - Math.floor(score);
+        let rounded;
+        if (decimal < 0.25) {
+            rounded = Math.floor(score);
+        } else if (decimal < 0.75) {
+            rounded = Math.floor(score) + 0.5;
+        } else {
+            rounded = Math.ceil(score);
+        }
+        // Đảm bảo luôn có 1 số thập phân
+        return rounded.toFixed(1);
+    }
+
+    const overallScore = calculateOverallScore();
     // Highlight errors by matching originalText only in the correct sentenceContext
     const renderTextWithCorrectionsBySentenceContext = (answer: string, corrections: ErrorCorrection[]) => {
         if (!corrections || corrections.length === 0) {
@@ -585,7 +607,7 @@ export default function WritingResult() {
                             <Card className="bg-lime-50 border-white/20">
                                 <CardContent className="p-6 text-center">
                                     <div className="text-sm text-emerald-600 mb-2">Overall Score</div>
-                                    <div className="text-5xl font-bold text-emerald-900 mb-2">{overallScore}</div>
+                                    <div className="text-5xl font-bold text-emerald-900 mb-2">{overallScore || "_"}</div>
                                     <div className="text-xs text-emerald-500">Weighted Average</div>
                                 </CardContent>
                             </Card>
@@ -593,7 +615,7 @@ export default function WritingResult() {
                             <Card className="bg-lime-50 border-white/20">
                                 <CardContent className="p-6 text-center">
                                     <div className="text-sm text-emerald-600 mb-2">Task 1</div>
-                                    <div className="text-5xl font-bold text-emerald-900 mb-2">{data.task1.score}</div>
+                                    <div className="text-5xl font-bold text-emerald-900 mb-2">{data.task1 && data.task1.score ? data.task1.score : "_"}</div>
                                     <div className="text-xs text-emerald-500">Academic Writing</div>
                                 </CardContent>
                             </Card>
@@ -601,7 +623,7 @@ export default function WritingResult() {
                             <Card className="bg-lime-50 border-white/20">
                                 <CardContent className="p-6 text-center">
                                     <div className="text-sm text-emerald-600 mb-2">Task 2</div>
-                                    <div className="text-5xl font-bold text-emerald-900 mb-2">{data.task2.score}</div>
+                                    <div className="text-5xl font-bold text-emerald-900 mb-2">{data.task2 && data.task2.score ? data.task2.score : "_"}</div>
                                     <div className="text-xs text-emerald-500">Essay Writing</div>
                                 </CardContent>
                             </Card>
@@ -624,8 +646,8 @@ export default function WritingResult() {
                                     <div className="text-lg">Task 1</div>
                                     <div className="text-sm opacity-75">Academic Writing</div>
                                 </div>
-                                <div className={`px-3 py-1 rounded-full text-sm font-bold ${getScoreColor(data.task1.score)}`}>
-                                    {data.task1.score}
+                                <div className={`px-3 py-1 rounded-full text-sm font-bold ${getScoreColor(data.task1 && data.task1.score ? data.task1.score : "0")}`}>
+                                    {data.task1 && data.task1.score ? data.task1.score : "_"}
                                 </div>
                             </div>
                         </button>
@@ -642,8 +664,8 @@ export default function WritingResult() {
                                     <div className="text-lg">Task 2</div>
                                     <div className="text-sm opacity-75">Essay Writing</div>
                                 </div>
-                                <div className={`px-3 py-1 rounded-full text-sm font-bold ${getScoreColor(data.task2.score)}`}>
-                                    {data.task2.score}
+                                <div className={`px-3 py-1 rounded-full text-sm font-bold ${getScoreColor(data.task2 && data.task2.score ? data.task2.score : "0")}`}>
+                                    {data.task2 && data.task2.score ? data.task2.score : "_"}
                                 </div>
                             </div>
                         </button>
@@ -651,7 +673,11 @@ export default function WritingResult() {
                 </div>
 
                 {/* Active Task Content */}
-                <div className="space-y-6">{renderTaskContent(activeTask === "task1" ? data.task1 : data.task2)}</div>
+                <div className="space-y-6">
+                  {activeTask === "task1"
+                    ? (data.task1 ? renderTaskContent(data.task1) : <Card className="p-8 text-center">No data for Task 1</Card>)
+                    : (data.task2 ? renderTaskContent(data.task2) : <Card className="p-8 text-center">No data for Task 2</Card>)}
+                </div>
 
             </div>
         </div>

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import {Link, useNavigate} from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -24,7 +24,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   };
 
  const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8080/oauth2/authorization/google";
+    const API_URL = import.meta.env.VITE_API_URL;
+    window.location.href = `${API_URL}/oauth2/authorization/google?role=teacher`;
   };
 
   return (
@@ -74,6 +75,14 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   required
                 />
               </div>
+                <div className="flex items-center justify-between">
+                    <Link
+                        to={`/forgot-password?redirect=${encodeURIComponent(location.pathname)}`}
+                        className="text-sm text-emerald-600 hover:text-emerald-700 ml-auto"
+                    >
+                        Forgot password?
+                    </Link>
+                </div>
             </div>
             <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
               Sign In
@@ -86,14 +95,14 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
               <div className="relative flex justify-center text-sm">
                 <span className="bg-white px-2 text-gray-500">Or continue with</span>
               </div>
-            </div> 
-            <Button 
-              type="button" 
-              variant="outline" 
+            </div>
+            <Button
+              type="button"
+              variant="outline"
               className="w-full border-2"
               onClick={handleGoogleLogin}
             >
-              <img src="./assets/google.svg" alt="Google" className="mr-2 h-4 w-4" />
+              <img src="/src/assets/google.png" alt="Google" className="mr-2 h-4 w-4" />
               Google
             </Button>
           </form>

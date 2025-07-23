@@ -72,6 +72,15 @@ public class WritingAIResponse {
         public void setOverallComment(String overallComment) {
             this.overallComment = overallComment;
         }
+
+        @Override
+        public String toString() {
+            return "Feedback{" +
+                    "errorCorrections=" + errorCorrections +
+                    ", sentenceImprovements=" + sentenceImprovements +
+                    ", overallComment='" + overallComment + '\'' +
+                    '}';
+        }
     }
 
     public static class ErrorCorrection {
@@ -120,14 +129,33 @@ public class WritingAIResponse {
         public void setSentenceContext(String sentenceContext) {
             this.sentenceContext = sentenceContext;
         }
+
+        @Override
+        public String toString() {
+            return "ErrorCorrection{" +
+                    "originalText='" + originalText + '\'' +
+                    ", correctedText='" + correctedText + '\'' +
+                    ", errorType='" + errorType + '\'' +
+                    ", explanation='" + explanation + '\'' +
+                    ", sentenceContext='" + sentenceContext + '\'' +
+                    '}';
+        }
     }
 
     public static class SentenceImprovement {
         private String originalSentence;
         private String improvedSentence;
         private List<String> techniquesUsed; // academic vocab/complex structures/logical flow
+        private String explanation;
         private String bandBoost; // Estimated band improvement
 
+        public String getExplanation() {
+            return explanation;
+        }
+
+        public void setExplanation(String explanation) {
+            this.explanation = explanation;
+        }
 
         public String getOriginalSentence() {
             return originalSentence;
@@ -160,5 +188,15 @@ public class WritingAIResponse {
         public void setBandBoost(String bandBoost) {
             this.bandBoost = bandBoost;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "WritingAIResponse{" +
+                "feedback=" + feedback +
+                ", evaluation=" + evaluation +
+                ", sampleAnswer='" + sampleAnswer + '\'' +
+                ", score='" + score + '\'' +
+                '}';
     }
 }

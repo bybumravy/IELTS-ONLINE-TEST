@@ -1,11 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { AuthProvider } from "@/contexts/AuthContext"
-import ErrorBoundary from "@/components/ErrorBoundary"
 
 // Layouts
 import { MainLayout } from "@/components/layout/MainLayout"
 import { StaffLayout } from "@/components/layout/Staff/StaffLayout"
-
+import { AdminLayout } from "./components/layout/AdminLayout"
 //Payment
 import VnPayResultPage from "./pages/Payment/VNPayResultPage"
 import PremiumPage from "@/pages/Payment/PremiumPage.tsx";
@@ -32,11 +31,13 @@ import WritingTest from "@/pages/DoTest/WritingTest"
 import SpeakingTest from "@/pages/DoTest/SpeakingTest"
 
 import FulllTest from "@/pages/DoTest/FullTest"
+import FullTestResult from "@/pages/Result/FullTestResult";
 
 //Vocab
 import Vocabulary from "./pages/practice/Vocabulary"
 import ForgetPassword from "@/components/sections/ForgetPassword";
 import ResetPassword from "@/components/sections/ResetPassword";
+import VocabularyGame from "@/pages/student/VocabularyGame.tsx";
 
 // Result
 import WritingResult from "@/pages/Result/WritingResult"
@@ -45,37 +46,47 @@ import HistoryPage from "@/pages/HistoryPage"
 import SpeakingResult from "@/pages/Result/SpeakingResult.tsx";
 // Admin
 
-import LoginAdmin from "@/components/sections/LoginAdmin"
+import LoginAdmin from "./components/sections/admin/LoginAdmin"
 import AdminPage from "./pages/AdminPage"
 
 // Staff
-import StaffLogin from "@/components/sections/StaffLogin"
+import StaffLogin from "./components/sections/StaffLogin"
 import { StaffPage } from "@/pages/StaffPage"
 import AddTest from "@/pages/AddTest"
 import AcceptTestPage from "@/pages/AcceptTestPage"
 import RequestTestDetailPage from "@/pages/RequestTestDetailPage"
 import VocabularyList from "./pages/student/VocabularyList"
 import ReviewReport from "@/pages/ReviewReport.tsx";
+import UserManagementPage from "./pages/UserManagementPage";
+import ManageStudentsPage from "./pages/ManageStudentsPage";
+import ManageTeachersPage from "./pages/ManageTeachersPage";
+import TeacherScoredList from "./pages/TeacherScoredList"
+import ManagerTeacherScoreList from "@/pages/ManagerTeacherScore";
+import TeacherScoringPage from "@/pages/TeacherScoring.tsx";
+import TransactionHistory from "@/pages/ReviewTransactions.tsx";
 
 // Protected Layouts
 import SoftProtectedLayout from "@/components/sections/SoftProtectedLayout"
 import ProtectedLayout from "@/components/sections/ProtectedLayout"
 import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
 import ReadingResult from "@/pages/Result/ReadingResult.tsx";
+import TransactionPage from "./pages/TransactionPage"
+import ManagerLogin from "@/components/sections/ManagerLogin";
+
 
 
 export default function App() {
     return (
-        <ErrorBoundary>
+
             <AuthProvider>
                 <Router>
                     <Routes>
 
                         {/* ========== Public Routes (No login required) ========== */}
                         <Route path="/" element={
-                            <SoftProtectedLayout allowRoles={["student"]}>
+                            // <SoftProtectedLayout allowRoles={["student"]}>
                                 <MainLayout><HomePage /></MainLayout>
-                            </SoftProtectedLayout>
+                            //</SoftProtectedLayout>
                         } />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<RegisterPage />} />
@@ -111,6 +122,7 @@ export default function App() {
                                 <MainLayout><ListTestPage /></MainLayout>
                             </SoftProtectedLayout>
                         } />
+                        <Route path="/student/vocabulary-game" element={<MainLayout><VocabularyGame /></MainLayout>} />
 
 
                         <Route path="/practice/vocabulary" element={<SoftProtectedLayout allowRoles={["student"]}><MainLayout><VocabularyList /></MainLayout></SoftProtectedLayout>} />
@@ -133,7 +145,7 @@ export default function App() {
                         } />
                         <Route path="/test/speaking/:testId" element={
                             <ProtectedLayout allowRoles={["student"]} requirePremium={true}>
-                                <SpeakingTest/>
+                                <SpeakingTest />
                             </ProtectedLayout>
                         } />
                         <Route path="/checkMic/:testId" element={
@@ -146,6 +158,7 @@ export default function App() {
                                 <FulllTest />
                             </ProtectedLayout>
                         } />
+                        <Route path="/test/fulltest-result/:testId" element={<FullTestResult />} />
                         <Route path="/writing-result/:resultId" element={
                             <ProtectedLayout allowRoles={["student"]}>
                                 <MainLayout><WritingResult /></MainLayout>
@@ -161,6 +174,11 @@ export default function App() {
                                 <MainLayout><ReadingResult /></MainLayout>
                             </ProtectedLayout>
                         } />
+                        <Route path="/speaking-result/:resultId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><SpeakingResult /></MainLayout>
+                            </ProtectedLayout>
+                        } />
                         <Route path="/test-history" element={
                             <ProtectedLayout allowRoles={["student"]}>
                                 <MainLayout><HistoryPage /></MainLayout>
@@ -170,32 +188,35 @@ export default function App() {
                         <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
                         <Route path="/vnpay-result" element={<MainLayout><VnPayResultPage /></MainLayout>} />
                         {/* ========== Admin Routes ========== */}
-                        <Route path="/loginadmin" element={<LoginAdmin />} />
-                        <Route path="/adminpage" element={
+                        <Route path="/login-admin" element={<LoginAdmin />} />
+                        <Route path="/admin-page" element={
                             <ProtectedLayoutRole allowRoles={["admin"]}>
-                                <AdminPage />
+                                <AdminLayout><AdminPage /></AdminLayout>
                             </ProtectedLayoutRole>
                         } />
 
                         {/* ========== Staff Routes ========== */}
                         <Route path="/staff-login" element={<StaffLogin />} />
+                        <Route path="/manager-login" element={<ManagerLogin />} />
                         <Route path="/staff-page" element={<ProtectedLayoutRole allowRoles={["teacher", "manager"]}><StaffLayout><StaffPage /></StaffLayout></ProtectedLayoutRole>} />
                         <Route path="/add-test" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><AddTest /></StaffLayout></ProtectedLayout>} />
                         <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />
                         <Route path="/request-test-detail" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><RequestTestDetailPage /></StaffLayout></ProtectedLayout>} />
+                        <Route path="/transactions" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><TransactionPage /></StaffLayout></ProtectedLayout>} />
                         <Route path="/add-vocabulary" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><Vocabulary /></StaffLayout></ProtectedLayout>} />
-                        <Route path="/review-report" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><ReviewReport /></StaffLayout></ProtectedLayout>} />
-                        {/* ========== Error Pages ========== */}
-                        <Route path="/error" element={<ErrorPage />} />
-
-                        <Route path="/speakingResult" element={<SpeakingResult />} />
-
-                        {/* ========== 404 Not Found (Catch-all) ========== */}
+                        <Route path="/handle-reports" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><ReviewReport /></StaffLayout></ProtectedLayout>} />
+                        <Route path="/user-management" element={<ProtectedLayoutRole allowRoles={["manager"]}><StaffLayout><UserManagementPage /></StaffLayout></ProtectedLayoutRole>} />
+                        <Route path="/manage-students" element={<ProtectedLayoutRole allowRoles={["manager"]}><StaffLayout><ManageStudentsPage /></StaffLayout></ProtectedLayoutRole>} />
+                        <Route path="/manage-teachers" element={<ProtectedLayoutRole allowRoles={["manager"]}><StaffLayout><ManageTeachersPage /></StaffLayout></ProtectedLayoutRole>} />
+                        <Route path="/grade-writing" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><ManagerTeacherScoreList /></StaffLayout></ProtectedLayout>} />
+                        <Route path="/teacher-scoring/:id" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><TeacherScoringPage /></StaffLayout></ProtectedLayout>} />
+                        <Route path="/transactions-history" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><TransactionHistory /></StaffLayout></ProtectedLayout>} />
+                        <Route path="/teacher-scored-list" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><TeacherScoredList /></StaffLayout></ProtectedLayout>} />
                         <Route path="*" element={<NotFoundPage />} />
 
                     </Routes>
                 </Router>
             </AuthProvider>
-        </ErrorBoundary>
+
     )
 }

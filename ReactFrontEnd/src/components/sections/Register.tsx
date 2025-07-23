@@ -23,16 +23,18 @@ const RegisterPage = () => {
         }
 
         try {
-            alert("Hay check duong link trong gmail")
+
             await register(email, password);
+            alert("Hay check duong link trong gmail")
 
         } catch (error: any) {
-            alert(error.message || "Registration failed");
+            alert(error.message || "");
         }
     };
 
     const handleGoogleSignup = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        const API_URL = import.meta.env.VITE_API_URL;
+        window.location.href = `${API_URL}/oauth2/authorization/google?role=student`;
     };
 
     return (
@@ -116,7 +118,7 @@ const RegisterPage = () => {
                             className="w-full border-2"
                             onClick={handleGoogleSignup}
                         >
-                            <img  alt="Google" className="mr-2 h-4 w-4" />
+                            <img src="/src/assets/google.png" alt="Google" className="mr-2 h-4 w-4" />
                             Google
                         </Button>
                     </form>
