@@ -8,6 +8,9 @@ public class SectionReadingAnswer {
     private String introduction;
     private List<QuestionReadingAnswer> questions;
 
+    public SectionReadingAnswer() {
+    }
+
     public SectionReadingAnswer(int sectionNumber, String type, String introduction, List<QuestionReadingAnswer> questions) {
         this.sectionNumber = sectionNumber;
         this.type = type;

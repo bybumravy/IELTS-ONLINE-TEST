@@ -2,11 +2,21 @@ package web.ielts.Test.model.answer.reading;
 
 import java.util.List;
 
-class TaskReadingAnswer {
+public class TaskReadingAnswer {
     private int taskNumber;
     private String title;
     private String paragraph;
     private List<SectionReadingAnswer> sections;
+
+    public TaskReadingAnswer() {
+    }
+
+    public TaskReadingAnswer(int taskNumber, String title, String paragraph, List<SectionReadingAnswer> sections) {
+        this.taskNumber = taskNumber;
+        this.title = title;
+        this.paragraph = paragraph;
+        this.sections = sections;
+    }
 
     public int getTaskNumber() {
         return taskNumber;
@@ -38,5 +48,15 @@ class TaskReadingAnswer {
 
     public void setSections(List<SectionReadingAnswer> sections) {
         this.sections = sections;
+    }
+
+    @Override
+    public String toString() {
+        return "TaskReadingAnswer{" +
+                "taskNumber=" + taskNumber +
+                ", title='" + title + '\'' +
+                ", paragraph='" + paragraph + '\'' +
+                ", sections=" + sections +
+                '}';
     }
 }

@@ -1,5 +1,5 @@
 "use client"
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate  } from "react-router-dom";
 import {useEffect, useState} from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -96,6 +96,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export default function TeacherScoringPage() {
 
+    const navigate = useNavigate();
     const [taskData, setTaskData] = useState<WritingAnswer | null>(null);
     const [selectedTask, setSelectedTask] = useState<"task1" | "task2">("task1")
     const { id } = useParams<{ id: string }>();
@@ -141,6 +142,23 @@ export default function TeacherScoringPage() {
     });
     const scores = allScores[selectedTask];
     console.log(scores)
+    function handleLimitedTextareaChange(
+        e: React.ChangeEvent<HTMLTextAreaElement>,
+        field: string
+    ) {
+        const input = e.target.value;
+        const charCount = input.length;
+
+        if (charCount <= 10) {
+            setAllComments(prev => ({
+                ...prev,
+                [selectedTask]: {
+                    ...prev[selectedTask],
+                    [field]: input,
+                },
+            }));
+        }
+    }
     const [allComments, setAllComments] = useState<{
         task1: CommentSet,
         task2: CommentSet
@@ -423,15 +441,18 @@ export default function TeacherScoringPage() {
         )
         return stats
     }
-    const updateComment = (field: keyof CommentSet, value: string) => {
-        setAllComments(prev => ({
-            ...prev,
-            [selectedTask]: {
-                ...prev[selectedTask],
-                [field]: value
-            }
-        }))
-    }
+    const handleLimitedCharacterChange = (
+        key: keyof typeof newSentenceCorrection,
+        value: string,
+        maxLength = 100
+    ) => {
+        if (value.length <= maxLength) {
+            setNewSentenceCorrection(prev => ({
+                ...prev,
+                [key]: value,
+            }));
+        }
+    };
     const handleSubmit = async () => {
         const dataSubmit = JSON.parse(JSON.stringify(taskData));
 
@@ -508,6 +529,9 @@ export default function TeacherScoringPage() {
 
             const result = await response.json();
             console.log("Gửi thành công:", result);
+            // Hiển thị thông báo thành công
+            alert("Đã gửi kết quả và thông báo cho học sinh thành công!");
+            navigate("/teacher-scored-list");
         } catch (error) {
             console.error("Lỗi khi gửi:", error);
         }
@@ -579,7 +603,7 @@ export default function TeacherScoringPage() {
                                             }}
                                         >
                                             <Edit3 className="mr-2 h-4 w-4" />
-                                            {isEditMode ? "Xong" : "Sửa từ"}
+                                            {isEditMode ? "Done" : "Fix word"}
                                         </Button>
                                         <Button
                                             variant={isSentenceMode ? "default" : "outline"}
@@ -590,17 +614,17 @@ export default function TeacherScoringPage() {
                                             }}
                                         >
                                             <Type className="mr-2 h-4 w-4" />
-                                            {isSentenceMode ? "Xong" : "Sửa câu"}
+                                            {isSentenceMode ? "Done" : "Fix sentence"}
                                         </Button>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <span>  Số từ: {taskData?.[selectedTask as "task1" | "task2"]?.wordCount || 0}</span>
+                                    <span>  Cou: {taskData?.[selectedTask as "task1" | "task2"]?.wordCount || 0}</span>
                                     <Separator orientation="vertical" className="h-4" />
 
-                                    <span className="text-red-600">Lỗi từ: {errors.length}</span>
+                                    <span className="text-red-600">Error word: {errors.length}</span>
                                     <Separator orientation="vertical" className="h-4" />
-                                    <span className="text-orange-600">Sửa câu: {sentenceCorrections.length}</span>
+                                    <span className="text-orange-600">Fix sentence: {sentenceCorrections.length}</span>
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -648,31 +672,31 @@ export default function TeacherScoringPage() {
                                                                     </DialogTrigger>
                                                                     <DialogContent className="max-w-2xl">
                                                                         <DialogHeader>
-                                                                            <DialogTitle>{correction ? "Chỉnh sửa câu" : "Thêm sửa câu"}</DialogTitle>
+                                                                            <DialogTitle>{correction ? "Fix sentence" : "Add sentence"}</DialogTitle>
                                                                         </DialogHeader>
                                                                         <div className="space-y-4">
                                                                             <div>
-                                                                                <label className="text-sm font-medium">Câu gốc:</label>
+                                                                                <label className="text-sm font-medium">Origin text:</label>
                                                                                 <div className="mt-1 p-3 bg-gray-50 rounded text-sm">{sentence}</div>
                                                                             </div>
 
                                                                             {correction ? (
                                                                                 <div className="space-y-4">
                                                                                     <div>
-                                                                                        <label className="text-sm font-medium">Loại sửa:</label>
+                                                                                        <label className="text-sm font-medium">Eror type:</label>
                                                                                         <p className="text-sm capitalize flex items-center gap-2">
                                                                                             <span>{getSentenceTypeIcon(correction.type)}</span>
                                                                                             {correction.type}
                                                                                         </p>
                                                                                     </div>
                                                                                     <div>
-                                                                                        <label className="text-sm font-medium">Câu đã sửa:</label>
+                                                                                        <label className="text-sm font-medium">Correct text:</label>
                                                                                         <div className="mt-1 p-3 bg-green-50 rounded text-sm">
                                                                                             {correction.correction}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div>
-                                                                                        <label className="text-sm font-medium">Giải thích:</label>
+                                                                                        <label className="text-sm font-medium">Explain:</label>
                                                                                         <p className="text-sm text-gray-700">{correction.comment}</p>
                                                                                     </div>
                                                                                     <Button
@@ -681,13 +705,13 @@ export default function TeacherScoringPage() {
                                                                                         onClick={() => removeSentenceCorrection(correction!.id)}
                                                                                     >
                                                                                         <X className="mr-2 h-4 w-4" />
-                                                                                        Xóa sửa câu
+                                                                                       Delete sentece
                                                                                     </Button>
                                                                                 </div>
                                                                             ) : (
                                                                                 <div className="space-y-4">
                                                                                     <div>
-                                                                                        <label className="text-sm font-medium">Loại sửa:</label>
+                                                                                        <label className="text-sm font-medium">Eror type:</label>
                                                                                         <Select
                                                                                             value={newSentenceCorrection.type}
                                                                                             onValueChange={(value: any) =>
@@ -698,43 +722,49 @@ export default function TeacherScoringPage() {
                                                                                                 <SelectValue />
                                                                                             </SelectTrigger>
                                                                                             <SelectContent>
-                                                                                                <SelectItem value="structure">🏗️ Structure (Cấu trúc)</SelectItem>
-                                                                                                <SelectItem value="clarity">💡 Clarity (Rõ ràng)</SelectItem>
-                                                                                                <SelectItem value="coherence">🔗 Coherence (Mạch lạc)</SelectItem>
-                                                                                                <SelectItem value="conciseness">✂️ Conciseness (Súc tích)</SelectItem>
+                                                                                                <SelectItem value="structure">🏗️ Structure </SelectItem>
+                                                                                                <SelectItem value="clarity">💡 Clarity </SelectItem>
+                                                                                                <SelectItem value="coherence">🔗 Coherence </SelectItem>
+                                                                                                <SelectItem value="conciseness">✂️ Conciseness </SelectItem>
                                                                                                 <SelectItem value="academic_tone">
-                                                                                                    🎓 Academic Tone (Giọng điệu học thuật)
+                                                                                                    🎓 Academic Tone
                                                                                                 </SelectItem>
                                                                                             </SelectContent>
                                                                                         </Select>
                                                                                     </div>
                                                                                     <div>
-                                                                                        <label className="text-sm font-medium">Câu sửa:</label>
+                                                                                        <label className="text-sm font-medium">Correct sentence:</label>
                                                                                         <Textarea
                                                                                             value={newSentenceCorrection.correction}
-                                                                                            onChange={(e) =>
+                                                                                            onChange={(e) => {
+                                                                                                const value = e.target.value.slice(0, 100); // cắt nếu > 100 ký tự
                                                                                                 setNewSentenceCorrection({
                                                                                                     ...newSentenceCorrection,
-                                                                                                    correction: e.target.value,
-                                                                                                })
-                                                                                            }
-                                                                                            placeholder="Viết lại câu đã sửa..."
+                                                                                                    correction: value,
+                                                                                                });
+                                                                                            }}
+                                                                                            maxLength={100}
+                                                                                            placeholder="Correct sentence..."
                                                                                             className="min-h-[80px]"
                                                                                         />
+
+                                                                                        <p className="text-sm text-right text-muted-foreground mt-1">
+                                                                                            {newSentenceCorrection.correction.length} / 100 characters
+                                                                                        </p>
                                                                                     </div>
                                                                                     <div>
-                                                                                        <label className="text-sm font-medium">Giải thích:</label>
+                                                                                        <label className="text-sm font-medium">Explain:</label>
                                                                                         <Textarea
                                                                                             value={newSentenceCorrection.comment}
                                                                                             onChange={(e) =>
-                                                                                                setNewSentenceCorrection({
-                                                                                                    ...newSentenceCorrection,
-                                                                                                    comment: e.target.value,
-                                                                                                })
+                                                                                                handleLimitedCharacterChange("comment", e.target.value)
                                                                                             }
-                                                                                            placeholder="Giải thích lý do sửa và cách cải thiện..."
+                                                                                            placeholder="Explain..."
                                                                                             className="min-h-[60px]"
                                                                                         />
+                                                                                        <p className="text-sm text-right text-muted-foreground mt-1">
+                                                                                            {newSentenceCorrection.comment.trim().split(/\s+/).filter(Boolean).length} / 100 words
+                                                                                        </p>
                                                                                     </div>
                                                                                     <Button
                                                                                         onClick={() => addSentenceCorrection(index, sentence)}
@@ -743,7 +773,7 @@ export default function TeacherScoringPage() {
                                                                                         }
                                                                                     >
                                                                                         <RefreshCw className="mr-2 h-4 w-4" />
-                                                                                        Thêm sửa câu
+                                                                                        Add sentence
                                                                                     </Button>
                                                                                 </div>
                                                                             )}
@@ -779,25 +809,25 @@ export default function TeacherScoringPage() {
                                                                         <DialogHeader>
                                                                             <DialogTitle className="flex items-center gap-2">
                                                                                 <span>{getErrorTypeIcon(error.type)}</span>
-                                                                                Chi tiết lỗi - {error.type}
+                                                                                Error detail - {error.type}
                                                                             </DialogTitle>
                                                                         </DialogHeader>
                                                                         <div className="space-y-4">
                                                                             <div>
-                                                                                <label className="text-sm font-medium">Từ gốc:</label>
+                                                                                <label className="text-sm font-medium">Origin word:</label>
                                                                                 <p className="text-red-600 font-mono">{error.original}</p>
                                                                             </div>
                                                                             <div>
-                                                                                <label className="text-sm font-medium">Sửa thành:</label>
+                                                                                <label className="text-sm font-medium">Fix word:</label>
                                                                                 <p className="text-green-600 font-mono">{error.correction}</p>
                                                                             </div>
                                                                             <div>
-                                                                                <label className="text-sm font-medium">Giải thích:</label>
+                                                                                <label className="text-sm font-medium">Explain:</label>
                                                                                 <p className="text-gray-700">{error.comment}</p>
                                                                             </div>
                                                                             <Button variant="destructive" size="sm" onClick={() => removeError(error!.id)}>
                                                                                 <X className="mr-2 h-4 w-4" />
-                                                                                Xóa lỗi
+                                                                                Delete error
                                                                             </Button>
                                                                         </div>
                                                                     </DialogContent>
@@ -813,11 +843,11 @@ export default function TeacherScoringPage() {
                                                                     </DialogTrigger>
                                                                     <DialogContent>
                                                                         <DialogHeader>
-                                                                            <DialogTitle>Thêm lỗi cho từ: "{word}"</DialogTitle>
+                                                                            <DialogTitle>Add error word: "{word}"</DialogTitle>
                                                                         </DialogHeader>
                                                                         <div className="space-y-4">
                                                                             <div>
-                                                                                <label className="text-sm font-medium">Loại lỗi:</label>
+                                                                                <label className="text-sm font-medium">Error type:</label>
                                                                                 <Select
                                                                                     value={newError.type}
                                                                                     onValueChange={(value: any) => setNewError({ ...newError, type: value })}
@@ -835,27 +865,46 @@ export default function TeacherScoringPage() {
                                                                                 </Select>
                                                                             </div>
                                                                             <div>
-                                                                                <label className="text-sm font-medium">Sửa thành:</label>
+                                                                                <label className="text-sm font-medium">Fix:</label>
                                                                                 <Input
                                                                                     value={newError.correction}
-                                                                                    onChange={(e) => setNewError({ ...newError, correction: e.target.value })}
-                                                                                    placeholder="Từ/cụm từ đúng"
+                                                                                    onChange={(e) => {
+                                                                                        const input = e.target.value;
+                                                                                        if (input.length <= 100) {
+                                                                                            setNewError({ ...newError, correction: input });
+                                                                                        }
+                                                                                    }}
+                                                                                    placeholder="Correct word"
                                                                                 />
+                                                                                <p className="text-sm text-muted-foreground mt-1 text-right">
+                                                                                    {newError.correction.length}/100 characters
+                                                                                </p>
                                                                             </div>
                                                                             <div>
-                                                                                <label className="text-sm font-medium">Giải thích:</label>
+                                                                                <label className="text-sm font-medium">Explain:</label>
                                                                                 <Textarea
                                                                                     value={newError.comment}
-                                                                                    onChange={(e) => setNewError({ ...newError, comment: e.target.value })}
-                                                                                    placeholder="Giải thích lỗi và cách sửa"
+                                                                                    onChange={(e) => {
+                                                                                        const input = e.target.value;
+                                                                                        if (input.length <= 100) {
+                                                                                            setNewError({ ...newError, comment: input });
+                                                                                        }
+                                                                                    }}
+                                                                                    placeholder="Explain"
+                                                                                    maxLength={100}
+                                                                                    className="min-h-[80px]"
                                                                                 />
+
+                                                                                <p className="text-sm text-muted-foreground mt-1 text-right">
+                                                                                    {newError.comment.length}/100 characters
+                                                                                </p>
                                                                             </div>
                                                                             <Button
                                                                                 onClick={() => addError(index, word)}
                                                                                 disabled={!newError.correction || !newError.comment}
                                                                             >
                                                                                 <AlertCircle className="mr-2 h-4 w-4" />
-                                                                                Thêm lỗi
+                                                                                Add error
                                                                             </Button>
                                                                         </div>
                                                                     </DialogContent>
@@ -907,7 +956,7 @@ export default function TeacherScoringPage() {
                                                 {errors.length === 0 && (
                                                     <div className="text-center py-8 text-gray-500">
                                                         <CheckCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                                                        <p>Chưa có lỗi từ nào được đánh dấu</p>
+                                                        <p>No word error</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -963,7 +1012,7 @@ export default function TeacherScoringPage() {
                                                 {sentenceCorrections.length === 0 && (
                                                     <div className="text-center py-8 text-gray-500">
                                                         <CheckCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                                                        <p>Chưa có câu nào được sửa</p>
+                                                        <p>No error sentence</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -979,7 +1028,7 @@ export default function TeacherScoringPage() {
                         {/* Scoring Section */}
                         <Card className="shadow-lg border-0 rounded-2xl bg-white">
                             <CardHeader>
-                                <CardTitle className="text-lg font-semibold text-emerald-700">Chấm điểm theo tiêu chí</CardTitle>
+                                <CardTitle className="text-lg font-semibold text-emerald-700">Grade according to the criteria</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 {/* Task Achievement */}
@@ -1016,11 +1065,16 @@ export default function TeacherScoringPage() {
                                         </Select>
                                     </div>
                                     <Textarea
-                                        placeholder="Nhận xét về Task Response..."
+                                        placeholder="Comments on TaskResponse..."
+
+                                        maxLength={100}
                                         value={comments.taskResponse}
-                                        onChange={(e) => updateComment("taskResponse", e.target.value)}
+                                        onChange={(e) => handleLimitedTextareaChange(e, "taskResponse")}
                                         className="min-h-[80px]"
                                     />
+                                    <div className="text-sm text-right text-gray-500">
+                                        {comments.taskResponse.length} /100 character
+                                    </div>
                                 </div>
 
                                 <Separator />
@@ -1059,11 +1113,14 @@ export default function TeacherScoringPage() {
                                         </Select>
                                     </div>
                                     <Textarea
-                                        placeholder="Nhận xét về Coherence & Cohesion..."
+                                        placeholder="Comments Coherence & Cohesion..."
                                         value={comments.coherenceCohesion}
-                                        onChange={(e) => updateComment("coherenceCohesion", e.target.value)}
+                                        onChange={(e) => handleLimitedTextareaChange(e, "coherenceCohesion")}
                                         className="min-h-[80px]"
                                     />
+                                    <div className="text-sm text-right text-gray-500">
+                                        {comments.coherenceCohesion.length} /100 character
+                                    </div>
                                 </div>
 
                                 <Separator />
@@ -1102,11 +1159,14 @@ export default function TeacherScoringPage() {
                                         </Select>
                                     </div>
                                     <Textarea
-                                        placeholder="Nhận xét về Lexical Resource..."
+                                        placeholder="Comments on Lexical Resource..."
                                         value={comments.lexicalResource}
-                                        onChange={(e) => updateComment("lexicalResource", e.target.value)}
+                                        onChange={(e) => handleLimitedTextareaChange(e, "lexicalResource")}
                                         className="min-h-[80px]"
                                     />
+                                    <div className="text-right text-sm text-muted-foreground">
+                                        {comments.lexicalResource.length} / 100 characters
+                                    </div>
                                 </div>
 
                                 <Separator />
@@ -1145,18 +1205,14 @@ export default function TeacherScoringPage() {
                                         </Select>
                                     </div>
                                     <Textarea
-                                        placeholder="Nhận xét về Grammatical Range and Accuracy..."
+                                        placeholder="Comments on Grammatical Range and Accuracy..."
                                         value={comments.grammaticalRange}
-                                        onChange={(e) =>
-                                            setAllComments(prev => ({
-                                                ...prev,
-                                                [selectedTask]: {
-                                                    ...prev[selectedTask],
-                                                    grammaticalRange: e.target.value,
-                                                },
-                                            }))
-                                        }
+                                        onChange={(e) => handleLimitedTextareaChange(e, "grammaticalRange")}
+                                        className="min-h-[100px]"
                                     />
+                                    <div className="text-sm text-right text-gray-500 mt-1">
+                                        {comments.grammaticalRange.length}/100 character
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -1164,30 +1220,25 @@ export default function TeacherScoringPage() {
                         {/* Overall Score and Comments */}
                         <Card className="shadow-lg border-0 rounded-2xl bg-white">
                             <CardHeader>
-                                <CardTitle className="text-lg font-semibold text-emerald-700">Tổng kết</CardTitle>
+                                <CardTitle className="text-lg font-semibold text-emerald-700">Total</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4">
-                                    <span className="font-medium text-emerald-700">Điểm tổng kết:</span>
+                                    <span className="font-medium text-emerald-700">Total score:</span>
                                     <span className="text-2xl font-bold text-emerald-600">{calculateOverallScoreByTask(selectedTask)}</span>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="font-medium text-emerald-700">Nhận xét tổng quan:</label>
+                                    <label className="font-medium text-emerald-700">Overall comment:</label>
                                     <Textarea
-                                        placeholder="Nhận xét tổng quan về bài làm..."
+                                        placeholder="Overall comments on the work..."
                                         value={comments.overall}
-                                        onChange={(e) =>
-                                            setAllComments(prev => ({
-                                                ...prev,
-                                                [selectedTask]: {
-                                                    ...prev[selectedTask],
-                                                    overall: e.target.value,
-                                                }
-                                            }))
-                                        }
+                                        onChange={(e) => handleLimitedTextareaChange(e, "overall")}
                                         className="min-h-[100px]"
                                     />
+                                    <p className="text-sm text-right text-gray-500 mt-1">
+                                        {comments.overall.length} / 100 character
+                                    </p>
                                 </div>
                             </CardContent>
                         </Card>
@@ -1196,7 +1247,7 @@ export default function TeacherScoringPage() {
                         <div className="flex gap-3">
                             <Button className="flex-1" onClick={handleSubmit}>
                                 <Send className="mr-2 h-4 w-4" />
-                                Hoàn thành chấm
+                                Submitted
                             </Button>
                         </div>
 
@@ -1207,7 +1258,7 @@ export default function TeacherScoringPage() {
                                 size="sm"
                                 onClick={() => setSelectedTask('task1')}
                             >
-                                Bài truoc
+                                Previous part
                                 <ChevronLeft className="ml-2 h-4 w-4" />
                             </Button>
 
@@ -1216,7 +1267,7 @@ export default function TeacherScoringPage() {
                                 size="sm"
                                 onClick={() => setSelectedTask('task2')}
                             >
-                                Bài tiếp
+                                Next part
                                 <ChevronRight className="ml-2 h-4 w-4" />
                             </Button>
                         </div>

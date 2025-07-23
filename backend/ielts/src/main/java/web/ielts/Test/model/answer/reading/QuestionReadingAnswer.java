@@ -11,6 +11,9 @@ public class QuestionReadingAnswer {
     private String studentAnswer;
     private int questionId;
 
+    public QuestionReadingAnswer() {
+    }
+
     public QuestionReadingAnswer(String question, String answer, List<String> options, String explanation, String studentAnswer, int questionId) {
         this.question = question;
         this.answer = answer;

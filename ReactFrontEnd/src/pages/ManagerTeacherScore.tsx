@@ -24,7 +24,7 @@ function ManagerTeacherScoreList() {
     return (
         <div className="container mx-auto py-8 px-4">
             <div className="bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 rounded-2xl p-8 mb-8 shadow-lg">
-                <h2 className="text-3xl font-bold text-white mb-2">Danh sách bài viết đã được giáo viên chấm</h2>
+                <h2 className="text-3xl font-bold text-white mb-2">Danh sách bài viết để giáo viên chấm</h2>
                 <p className="text-emerald-50">Quản lý và chấm điểm các bài viết của học viên</p>
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-emerald-100 hover:border-emerald-300 transition-colors duration-300 overflow-x-auto">

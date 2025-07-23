@@ -17,6 +17,9 @@ import java.util.Optional;
         private ListeningAnswerRepository listeningAnswerRepository;
 
         @Autowired
+        private ReadingAnswerRepository readingAnswerRepository;
+
+        @Autowired
         private SpeakingAnswerRepository speakingAnswerRepository;
         public ListeningAnswer saveAnswer(ListeningAnswer answer) {
             return listeningAnswerRepository.save(answer); // trả về answer có ID
@@ -33,8 +36,6 @@ import java.util.Optional;
                     .findFirst();
         }
 
-        @Autowired
-        private ReadingAnswerRepository readingAnswerRepository;
         public ReadingAnswer saveAnswer(ReadingAnswer answer) {
             return readingAnswerRepository.save(answer); // trả về answer có ID
         }
@@ -42,16 +43,15 @@ import java.util.Optional;
         public Optional<ReadingAnswer> findReadingById(String answerId) {
             return readingAnswerRepository.findById(answerId);
         }
-
-        public Optional<SpeakingAnswer> findSpeakingById(String answerId) {
-            return speakingAnswerRepository.findById(answerId);
-        }
         public Optional<ReadingAnswer> getReadingResult(String testId, String username) {
             // Giả sử mỗi user chỉ có 1 answer cho 1 testId
             return readingAnswerRepository.findByUsername(username)
                     .stream()
                     .filter(ans -> ans.getTestId().equals(testId))
                     .findFirst();
+        }
+        public Optional<SpeakingAnswer> findSpeakingById(String answerId) {
+            return speakingAnswerRepository.findById(answerId);
         }
 
         public Optional<SpeakingAnswer> getSpeakingResult(String testId, String username) {

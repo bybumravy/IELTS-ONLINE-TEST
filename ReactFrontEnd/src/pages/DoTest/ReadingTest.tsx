@@ -33,8 +33,8 @@ export interface ReadingTest {
 }
 
 interface QuestionWithStudentAnswer extends Question {
-    studentAnswer: string | null;
-    questionId: number;
+    studentAnswer?: string | null;
+    questionId?: number;
 }
 
 export default function ReadingTest() {
@@ -51,8 +51,8 @@ export default function ReadingTest() {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const containerRef = useRef<HTMLDivElement>(null);
-    const paragraphRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const paragraphRef = useRef<HTMLDivElement | null>(null);
 
     const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
     const [isHighlightMode, setIsHighlightMode] = useState(false);
@@ -146,7 +146,7 @@ export default function ReadingTest() {
     const handleFullscreen = () => {
         if (!containerRef.current) return;
         if (!document.fullscreenElement) {
-            containerRef.current.requestFullscreen().catch((err) => console.error(err));
+            containerRef.current?.requestFullscreen().catch((err) => console.error(err));
         } else {
             document.exitFullscreen();
         }
@@ -165,12 +165,17 @@ export default function ReadingTest() {
                 section.questions.forEach((q) => {
                     const question = q as QuestionWithStudentAnswer;
                     question.studentAnswer = question.studentAnswer || null;
+                    const qid = question.questionId!;
+                    question.studentAnswer = answers[qid] || null;
+
                     delete (question as any).explanation;
                     delete (question as any).options;
                 });
             });
         });
+
         setIsSubmitted(true);
+
         try {
             const dataToSendFinal = {
                 ...readingTest,
@@ -204,6 +209,7 @@ export default function ReadingTest() {
             }
             if (!response.ok) throw new Error("Submit failed");
             const result = await response.json();
+            console.log("Saved:", result);
             alert("🎉 Submitted successfully!");
             if (mode === "fulltest") {
                 navigate(`/test/writing/${testId}?testAnswerId=${testAnswerId}&mode=fulltest`);

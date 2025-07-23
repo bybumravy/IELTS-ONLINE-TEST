@@ -2,15 +2,10 @@ package web.ielts.User;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -27,7 +22,7 @@ public class User implements UserDetails {
     private String role;
 
 
-    private LocalDate premiumExpiry;
+    private LocalDateTime premiumExpiry;
 
     private boolean premium;
 
@@ -47,7 +42,7 @@ public class User implements UserDetails {
     }
 
     public User(String firstName, String lastName, String email, String password, String role,
-                LocalDate premiumExpiry, boolean premium, String googleID,
+                LocalDateTime premiumExpiry, boolean premium, String googleID,
                 String createdAt, String birthDate, String gender, String phone) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -63,8 +58,8 @@ public class User implements UserDetails {
         this.phone = phone;
     }
 
-    public boolean isPremiumActive() {
-        return premiumExpiry != null && premiumExpiry.isBefore(LocalDate.now());
+    public boolean isPremiumExpired() {
+        return premiumExpiry != null && premiumExpiry.isBefore(LocalDateTime.now());
     }
 
     // --- Getters & Setters ---
@@ -110,11 +105,11 @@ public class User implements UserDetails {
         this.role = role;
     }
 
-    public LocalDate getPremiumExpiry() {
+    public LocalDateTime getPremiumExpiry() {
         return premiumExpiry;
     }
 
-    public void setPremiumExpiry(LocalDate premiumExpiry) {
+    public void setPremiumExpiry(LocalDateTime premiumExpiry) {
         this.premiumExpiry = premiumExpiry;
     }
 

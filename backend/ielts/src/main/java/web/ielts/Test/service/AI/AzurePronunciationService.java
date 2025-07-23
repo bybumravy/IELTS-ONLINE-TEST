@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import web.ielts.Test.model.answer.speaking.AzurePronunciationResult;
-import web.ielts.Test.repository.answer.speaking.AzurePronunciationResultRepository;
-
 import java.io.File;
 import java.util.concurrent.Future;
 
@@ -22,9 +20,6 @@ public class AzurePronunciationService {
 
     @Value("${azure.speech.region}")
     private String azureRegion;
-
-    @Autowired
-    private AzurePronunciationResultRepository azurePronunciationResultRepository;
 
     public AzurePronunciationResult assessAndSave(File audioFile, String referenceText, String audioUrl) throws Exception {
         SpeechConfig config = SpeechConfig.fromSubscription(azureKey, azureRegion);
@@ -118,6 +113,6 @@ public class AzurePronunciationService {
         audioConfig.close();
         config.close();
 
-        return azurePronunciationResultRepository.save(entity);
+        return entity;
     }
 } 

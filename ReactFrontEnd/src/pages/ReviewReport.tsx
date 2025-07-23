@@ -242,6 +242,7 @@ export default function ReviewReport() {
                                         <TableHead>Student</TableHead>
                                         <TableHead>Date Submitted</TableHead>
                                         <TableHead>Subject</TableHead>
+                                        <TableHead>Content</TableHead>
                                         <TableHead>Category</TableHead>
                                         <TableHead>Actions</TableHead>
                                     </TableRow>
@@ -257,6 +258,9 @@ export default function ReviewReport() {
                                                 </TableCell>
                                                 <TableCell>{format(new Date(report.createdAt), "dd/MM/yyyy")}</TableCell>
                                                 <TableCell className="max-w-xs truncate">{report.subject}</TableCell>
+                                                <TableCell className="max-w-xs truncate">
+                                                    {report.message.length > 10 ? `${report.message.slice(0, 10)}...` : report.message}
+                                                </TableCell>
                                                 <TableCell>
                                                     <Badge className={typeColors[report.category]}>{report.category}</Badge>
                                                 </TableCell>

@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "ReadingAnswer")
@@ -12,13 +13,16 @@ public class ReadingAnswer {
     @Id
     private String id;
     private String testId;
-    private List<TaskReadingAnswer> taskReadingAnswers;
+    private List<TaskReadingAnswer> taskReadingAnswers = new ArrayList<>();
     private String username;
     private String skill;
     private int totalQuestions;
     private int totalCorrect;
     private double band;
     private LocalDateTime submittedAt;
+
+    public ReadingAnswer() {
+    }
 
     public ReadingAnswer(String id, String testId, List<TaskReadingAnswer> taskReadingAnswers, String username, String skill, int totalQuestions, int totalCorrect, double band, LocalDateTime submittedAt) {
         this.id = id;
@@ -104,6 +108,18 @@ public class ReadingAnswer {
         this.submittedAt = submittedAt;
     }
 
-    public ReadingAnswer() {
+    @Override
+    public String toString() {
+        return "ReadingAnswer{" +
+                "id='" + id + '\'' +
+                ", testId='" + testId + '\'' +
+                ", taskReadingAnswers=" + taskReadingAnswers +
+                ", username='" + username + '\'' +
+                ", skill='" + skill + '\'' +
+                ", totalQuestions=" + totalQuestions +
+                ", totalCorrect=" + totalCorrect +
+                ", band=" + band +
+                ", submittedAt=" + submittedAt +
+                '}';
     }
 }
