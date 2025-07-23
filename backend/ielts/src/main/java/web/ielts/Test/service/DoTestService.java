@@ -313,8 +313,10 @@ public class DoTestService {
                         //Azure
                         AzurePronunciationResult azureResult = azurePronunciationService.assessAndSave(wavFile, transcriptText, s3UrlNotEncrypt);
 
+                        //ThongSoCoBanProsody
+                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
                         //PHan Viet
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,azureResult.getFluencyScore()/10,null);
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,azureResult.getFluencyScore(),null);
 
                         // Tích hợp Azure Pronunciation Assessment
 
@@ -374,8 +376,10 @@ public class DoTestService {
                         //Azure
                         AzurePronunciationResult azureResult = azurePronunciationService.assessAndSave(wavFile, transcriptText, s3UrlNotEncrypt);
 
+                        //ThongSoCoBanProsody
+                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
                         //PHan Viet
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),1,azureResult.getFluencyScore()/10,null);
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, part2.getQuestion(),1,prosodyFeatures,azureResult.getFluencyScore(),null);
 
                         // Tích hợp Azure Pronunciation Assessment
 
@@ -440,9 +444,10 @@ public class DoTestService {
                         //Azure
                         AzurePronunciationResult azureResult = azurePronunciationService.assessAndSave(wavFile, transcriptText, s3UrlNotEncrypt);
 
+                        //ThongSoCoBanProsody
+                        FleCohAnswer prosodyFeatures = prosodyService.analyzeProsodyFeatures(s3UrlNotEncrypt, transcript);
                         //PHan Viet
-                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,azureResult.getFluencyScore()/10,null);
-
+                        SpeakingAnswerQuestion sp = aiSpeakingService.evaluateSpeaking(transcript, qa.getQuestion(),1,prosodyFeatures,azureResult.getFluencyScore(),null);
                         // Tích hợp Azure Pronunciation Assessment
 
                         //Praat va AI

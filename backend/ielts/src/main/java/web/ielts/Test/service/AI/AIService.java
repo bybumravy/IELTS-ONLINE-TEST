@@ -206,7 +206,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             int partNumber,
             String question,
             JsonNode transcript,
-
+            FleCohAnswer basicFluent,
             double FluenScore,
 
             List<String> cueCard
@@ -216,13 +216,14 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                 return buildSpeakingPart1Prompt(
                         question,
                         transcript,
+                        basicFluent,
                         FluenScore
 
                 );
             case 2:
-                return buildSpeakingPart2Prompt(question, transcript, cueCard,FluenScore);
+                return buildSpeakingPart2Prompt(question, transcript, cueCard,basicFluent, FluenScore);
             case 3:
-                return buildSpeakingPart3Prompt(question, transcript, FluenScore);
+                return buildSpeakingPart3Prompt(question, transcript,basicFluent, FluenScore);
             default:
                 throw new IllegalArgumentException("Invalid part number: " + partNumber);
         }
@@ -330,6 +331,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
     public String buildSpeakingPart1Prompt(
             String questions,
             JsonNode transcript,
+            FleCohAnswer basicFluent,
             double FluenScore
 
     ) {
@@ -441,7 +443,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
     }
 
 
-    public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards,double FluenScore){
+    public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards,FleCohAnswer basicFluent, double FluenScore){
         String speakingPart2 =
                 "You must return response strictly in JSON format.\n" +
                         "You are an official IELTS Speaking examiner. You are evaluating a real IELTS Part 2 speaking response. Extremely strict grading.\n" +
@@ -537,7 +539,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "Original Answer:\n" + transcipt;
         return speakingPart2;
     }
-    public String buildSpeakingPart3Prompt(String questions, JsonNode transcipt,double FluenScore) {
+    public String buildSpeakingPart3Prompt(String questions, JsonNode transcipt,FleCohAnswer basicFluent, double FluenScore) {
         String speakingPart3 =
                 "You must return response strictly in JSON format only — do not include any explanation or extra text.\n\n" +
 
