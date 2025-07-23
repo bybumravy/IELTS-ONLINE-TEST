@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-export const login = async (email: string, password: string) => {
+export const login = async (email: string, password: string, role: string) => {
     const res = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -8,13 +8,20 @@ export const login = async (email: string, password: string) => {
         body: JSON.stringify({
             email,
             password,
-            fromPath: window.location.pathname   // 👈 Gửi thêm path
+            role,
+
         }),
     });
 
-    console.log(res);
-    if (!res.ok) throw new Error("Login failed");
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Login failed");
+    }
+
+    // ✅ Trả JSON để frontend xử lý
+    return await res.json();
 };
+
 
 export const logout = async () => {
     await fetch(`${API_URL}/api/logout`, {

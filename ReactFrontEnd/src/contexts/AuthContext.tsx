@@ -10,27 +10,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // ✅ Gọi refresh-token 1 lần khi khởi động
     useEffect(() => {
-        const init = async () => {
-            try {
-                const res = await fetch(`${API_URL}/api/refreshtoken`, {
-                    method: "POST",
-                    credentials: "include",
-                });
-
-                if (res.ok) {
-                    // ✅ Sau khi refresh thành công, lấy thông tin user từ backend
-                    await fetchUser();
-                } else {
-                    setUser(null);
-                    setIsLoading(false);
-                }
-            } catch {
-                setUser(null);
-                setIsLoading(false);
-            }
-        };
-
-        init();
+        fetchUser();
     }, []);
 
     // ✅ Hàm gọi API getMe
@@ -50,9 +30,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const login = async (email: string, password: string) => {
-        await authService.login(email, password);
+    const login = async (email: string, password: string,role : string) => {
+        const response = await authService.login(email, password,role);
         await fetchUser();
+        return response;
     };
 
     const logout = async () => {

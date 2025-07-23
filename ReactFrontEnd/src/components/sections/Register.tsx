@@ -28,7 +28,7 @@ const RegisterPage = () => {
             alert("Hay check duong link trong gmail")
 
         } catch (error: any) {
-            alert(error.message || "Email da duoc dang ki");
+            alert(error.message || "");
         }
     };
 

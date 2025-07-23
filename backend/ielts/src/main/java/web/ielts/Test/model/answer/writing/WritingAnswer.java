@@ -2,7 +2,7 @@ package web.ielts.Test.model.answer.writing;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Document(collection = "WritingAnswer")
 public class WritingAnswer {
@@ -16,7 +16,10 @@ public class WritingAnswer {
 
     private String skill;
     private double band;
-    private LocalDate submittedAt;
+    private LocalDateTime submittedAt;
+
+    public WritingAnswer() {
+    }
 
     public String getGradingMethod() {
         return gradingMethod;
@@ -96,11 +99,11 @@ public class WritingAnswer {
         this.band = band;
     }
 
-    public LocalDate getSubmittedAt() {
+    public LocalDateTime getSubmittedAt() {
         return submittedAt;
     }
 
-    public void setSubmittedAt(LocalDate submittedAt) {
+    public void setSubmittedAt(LocalDateTime submittedAt) {
         this.submittedAt = submittedAt;
     }
 }
