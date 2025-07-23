@@ -11,6 +11,7 @@ export interface Question {
 }
 
 export interface Section {
+    imageUrl?: string; // sửa lại từ String -> string
     sectionNumber: number;
     type: string;
     introduction: string;
@@ -35,6 +36,7 @@ export interface ReadingTest {
 }
 
 interface QuestionWithStudentAnswer extends Question {
+
     studentAnswer: string | null;
     questionId: number;
 }
@@ -95,6 +97,7 @@ export default function ReadingTest() {
                 setReadingTest(updatedData);
 
                 setTasks(updatedData.tasks);
+           
             } catch (err) {
                 console.error("Failed to load reading test:", err);
             }
@@ -406,6 +409,13 @@ export default function ReadingTest() {
                                     {section.introduction && (
                                         <p className="text-gray-700 italic mb-4 dark:text-gray-400">{section.introduction}</p>
                                     )}
+                                    {section.imageUrl && (
+                                        <img
+                                            src={section.imageUrl}
+                                            alt="Section related"
+                                            className="my-2 rounded-md max-w-full md:max-w-md"
+                                        />
+                                    )}
 
                                     {section.questions.map((question, qIdx) => {
                                         if (!question.question) return null;
@@ -413,13 +423,16 @@ export default function ReadingTest() {
                                         const questionId = q.questionId!;
                                         const currentAnswer = answers[questionId] || "";
 
+                                        // Tính số thứ tự câu hỏi đúng tổng thể
+                                        let questionNumber = questionId;
+
                                         return (
                                             <div key={questionId} className="mb-6">
                                                 <p className="text-gray-800 font-medium mb-3 dark:text-gray-200">
-                                                    {qIdx + 1}. {q.question}
+                                                    {questionNumber}. {q.question}
                                                 </p>
-
-                                                {section.type === "True/False/Not Given" || section.type === "Yes/No/Not Given" ? (
+                                                {/* Đã loại bỏ hiển thị ảnh ở từng câu hỏi */}
+                                                {section.type === "True/False/Not Given" || section.type === "Yes/No/Not Given" || section.type === "dropdown" ? (
                                                     <select
                                                         value={currentAnswer}
                                                         onChange={(e) => handleAnswerChange(questionId, e.target.value)}
