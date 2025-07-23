@@ -1,6 +1,7 @@
 package web.ielts.Test.model.answer.reading;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,7 +13,8 @@ public class ReadingAnswer {
     @Id
     private String id;
     private String testId;
-    private List<TaskReadingAnswer> taskReadingAnswers;
+    @JsonProperty("tasks")
+    private List<TaskReadingAnswer> taskReadingAnswer;
     private String username;
     private String skill;
     private int totalQuestions;
@@ -23,7 +25,7 @@ public class ReadingAnswer {
     public ReadingAnswer(String id, String testId, List<TaskReadingAnswer> taskReadingAnswers, String username, String skill, int totalQuestions, int totalCorrect, double band, LocalDateTime submittedAt) {
         this.id = id;
         this.testId = testId;
-        this.taskReadingAnswers = taskReadingAnswers;
+        this.taskReadingAnswer = taskReadingAnswers;
         this.username = username;
         this.skill = skill;
         this.totalQuestions = totalQuestions;
@@ -31,6 +33,8 @@ public class ReadingAnswer {
         this.band = band;
         this.submittedAt = submittedAt;
     }
+
+
 
     public String getId() {
         return id;
@@ -48,12 +52,27 @@ public class ReadingAnswer {
         this.testId = testId;
     }
 
-    public List<TaskReadingAnswer> getTaskReadingAnswers() {
-        return taskReadingAnswers;
+    public List<TaskReadingAnswer> getTaskReadingAnswer() {
+        return taskReadingAnswer;
     }
 
-    public void setTaskReadingAnswers(List<TaskReadingAnswer> taskReadingAnswers) {
-        this.taskReadingAnswers = taskReadingAnswers;
+    public void setTaskReadingAnswer(List<TaskReadingAnswer> taskReadingAnswer) {
+        this.taskReadingAnswer = taskReadingAnswer;
+    }
+
+    @Override
+    public String toString() {
+        return "ReadingAnswer{" +
+                "id='" + id + '\'' +
+                ", testId='" + testId + '\'' +
+                ", taskReadingAnswer=" + taskReadingAnswer +
+                ", username='" + username + '\'' +
+                ", skill='" + skill + '\'' +
+                ", totalQuestions=" + totalQuestions +
+                ", totalCorrect=" + totalCorrect +
+                ", band=" + band +
+                ", submittedAt=" + submittedAt +
+                '}';
     }
 
     public String getUsername() {

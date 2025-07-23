@@ -25,11 +25,13 @@ export interface Task {
 }
 
 export interface ReadingTest {
+    submittedAt: any;
     idReading: string;
     testId: string;
     tasks: Task[];
     username: string;
     skill: string;
+    
 }
 
 interface QuestionWithStudentAnswer extends Question {
@@ -91,6 +93,7 @@ export default function ReadingTest() {
                 };
 
                 setReadingTest(updatedData);
+
                 setTasks(updatedData.tasks);
             } catch (err) {
                 console.error("Failed to load reading test:", err);
@@ -152,10 +155,10 @@ export default function ReadingTest() {
     const handleSubmit = async () => {
         if (!readingTest) return;
 
-        const dataToSend = structuredClone(readingTest);
+        const dataToSend = structuredClone(readingTest); // clone gốc để không thay đổi state
         if (user?.username) dataToSend.username = user.username;
         dataToSend.skill = "reading";
-
+        dataToSend.submittedAt = new Date().toISOString();
         dataToSend.tasks.forEach((task) => {
             delete (task as any).title;
 
@@ -173,23 +176,14 @@ export default function ReadingTest() {
             });
         });
 
+
+        // ✅ In ra dữ liệu JSON để kiểm tra trước khi submit
+        console.log("✅ Data to be submitted:");
+        console.log(JSON.stringify(dataToSend, null, 2));
+
         setIsSubmitted(true);
 
         try {
-            const dataToSend = {
-                ...readingTest,
-                tasks: readingTest.tasks.map((task) => ({
-                    ...task,
-                    sections: task.sections.map((section) => ({
-                        ...section,
-                        questions: section.questions.map((question) => ({
-                            ...question,
-                            studentAnswer: (question as QuestionWithStudentAnswer).studentAnswer || null,
-                        })),
-                    })),
-                })),
-            };
-
             const response = await fetch(`${API_URL}/verify/reading/submit`, {
                 method: "POST",
                 credentials: "include",
@@ -200,11 +194,11 @@ export default function ReadingTest() {
             if (!response.ok) throw new Error("Submit failed");
 
             const result = await response.json();
-            console.log("Saved:", result);
+            console.log("✅ Saved to backend:", result);
             alert("🎉 Submitted successfully!");
             navigate(`/reading-result/${result.id}`);
         } catch (error) {
-            console.error(error);
+            console.error("❌ Error submitting:", error);
             alert("❌ Error submitting");
         } finally {
             setIsSubmitted(false);

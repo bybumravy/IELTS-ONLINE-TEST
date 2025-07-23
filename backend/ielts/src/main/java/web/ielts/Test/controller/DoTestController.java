@@ -67,6 +67,7 @@ public class DoTestController {
     }
     @PostMapping("/reading/submit")
     public ResponseEntity<ReadingAnswer> saveReadingAnswer(@RequestBody ReadingAnswer answer) {
+        System.out.println(answer);
         return ResponseEntity.ok(doTestService.saveReadingAnswer(answer));
     }
 

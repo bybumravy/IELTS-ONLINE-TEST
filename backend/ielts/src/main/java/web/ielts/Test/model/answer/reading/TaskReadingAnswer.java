@@ -2,7 +2,7 @@ package web.ielts.Test.model.answer.reading;
 
 import java.util.List;
 
-class TaskReadingAnswer {
+public class TaskReadingAnswer {
     private int taskNumber;
     private String title;
     private String paragraph;
@@ -10,6 +10,9 @@ class TaskReadingAnswer {
 
     public int getTaskNumber() {
         return taskNumber;
+    }
+
+    public TaskReadingAnswer() {
     }
 
     public void setTaskNumber(int taskNumber) {
