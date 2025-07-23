@@ -156,7 +156,7 @@ export default function WritingTest() {
                 }
             } else {
                 setIsGrading(false);
-                alert("Bài viết đã gửi đến giáo viên. Bạn sẽ nhận kết quả trong vòng 3-5 ngày tới.");
+                alert("Bài viết đã đến giáo viên. Bạn sẽ nhận kết quả trong vòng 3-5 ngày tới.");
                 navigate("/");
             }
         } catch (error) {
