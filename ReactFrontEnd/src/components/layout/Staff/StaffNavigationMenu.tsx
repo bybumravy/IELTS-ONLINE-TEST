@@ -100,6 +100,13 @@ export function StaffNavigationMenu({ role, onLogout }: StaffNavigationMenuProps
               <NavigationMenuItem>
                 <Link to="/transactions">
                   <Button variant="ghost" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    Transaction Report
+                  </Button>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/transactions-history">
+                  <Button variant="ghost" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
                     Transaction History
                   </Button>
                 </Link>

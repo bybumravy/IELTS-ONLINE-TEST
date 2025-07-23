@@ -209,7 +209,7 @@ export default function App() {
                         <Route path="/manage-teachers" element={<ProtectedLayoutRole allowRoles={["manager"]}><StaffLayout><ManageTeachersPage /></StaffLayout></ProtectedLayoutRole>} />
                         <Route path="/grade-writing" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><ManagerTeacherScoreList /></StaffLayout></ProtectedLayout>} />
                         <Route path="/teacher-scoring/:id" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><TeacherScoringPage /></StaffLayout></ProtectedLayout>} />
-                        <Route path="/transactions-report" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><TransactionHistory /></StaffLayout></ProtectedLayout>} />
+                        <Route path="/transactions-history" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><TransactionHistory /></StaffLayout></ProtectedLayout>} />
 
                         <Route path="*" element={<NotFoundPage />} />
 
