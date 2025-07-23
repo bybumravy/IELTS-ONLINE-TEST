@@ -16,8 +16,8 @@ interface WritingResult {
     _id: string
     username: string
     testId: string
-    task1: { score: string }
-    task2: { score: string }
+    task1: { score?: string }
+    task2: { score?: string }
     band: number
     submittedAt: string
     gradingMethod: string
@@ -304,13 +304,17 @@ export default function TeacherScoredList() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <span className="font-semibold text-blue-600">{item.task1.score}</span>
+                                                <span className="font-semibold text-blue-600">
+                                                    {item.task1?.score ?? "-"}
+                                                </span>
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <span className="font-semibold text-blue-600">{item.task2.score}</span>
+                                                <span className="font-semibold text-blue-600">
+                                                    {item.task2?.score ?? "-"}
+                                                </span>
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <span className={getBandColor(item.band)}>{item.band}</span>
+                                                <span className={getBandColor(item.band)}>{item.band.toFixed(1)}</span>
                                             </TableCell>
                                             <TableCell className="text-gray-600">
                                                 {item.submittedAt ? format(new Date(item.submittedAt), "dd/MM/yyyy") : ""}

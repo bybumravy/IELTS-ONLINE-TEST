@@ -29,7 +29,7 @@ import java.io.InputStream;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -133,7 +133,7 @@ public class DoTestService {
         answer.setBand(band);
 
         if (answer.getSubmittedAt() == null) {
-            answer.setSubmittedAt(LocalDate.now());
+            answer.setSubmittedAt(LocalDateTime.now());
         }
 
         return readingAnswerRepository.save(answer);
@@ -172,7 +172,7 @@ public class DoTestService {
         answer.setBand(band);
 
         if (answer.getSubmittedAt() == null) {
-            answer.setSubmittedAt(LocalDate.now());
+            answer.setSubmittedAt(LocalDateTime.now());
         }
 
         return listeningAnswerRepository.save(answer);
