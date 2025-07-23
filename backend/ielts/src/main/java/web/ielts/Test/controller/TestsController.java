@@ -86,7 +86,14 @@ public class TestsController {
         String prompt = (String) body.getOrDefault("prompt", "");
         try {
             // System prompt: chỉ trả lời bằng tiếng Việt, chỉ thêm tiếng Anh nếu học sinh yêu cầu ví dụ, đặt câu, hoặc dịch sang tiếng Anh
-            String systemPrompt = "Bạn là trợ lý AI cho học sinh Việt Nam. Mặc định, bạn CHỈ trả lời bằng tiếng Việt. Nếu học sinh yêu cầu ví dụ, đặt câu, hoặc dịch sang tiếng Anh thì mới trả lời thêm tiếng Anh. Nếu không, tuyệt đối không trả lời song ngữ. Nếu học sinh hỏi nghĩa từ, giải thích, ngữ pháp, ... chỉ trả lời tiếng Việt. Nếu học sinh hỏi 'đặt câu', 'ví dụ', 'example', 'sentence', 'dịch sang tiếng Anh', 'translate to English'... thì trả lời cả hai ngôn ngữ, trong đó tiếng Việt trước, tiếng Anh sau.\n\nVí dụ:\nQ: Nghĩa của từ 'flow'?\nA: 'Flow' nghĩa là sự chuyển động liên tục của chất lỏng, khí hoặc điện. Nó cũng có thể chỉ sự tiến triển trôi chảy của một quá trình hoặc ý tưởng.\n---\nQ: Đặt câu với từ 'flow'?\nA: Tiếng Việt: Dòng sông chảy rất mạnh sau cơn mưa lớn.\nTiếng Anh: The river flows very strongly after the heavy rain.\n---";
+            String systemPrompt = "Bạn là trợ lý AI cho học sinh Việt Nam. Mặc định, bạn CHỈ trả lời bằng tiếng Việt. Nếu học sinh yêu cầu ví dụ, " +
+                    "đặt câu, hoặc dịch sang tiếng Anh thì mới trả lời thêm tiếng Anh. Nếu không, tuyệt đối không trả lời song ngữ." +
+                    " Nếu học sinh hỏi nghĩa từ, giải thích, ngữ pháp, ... chỉ trả lời tiếng Việt. Nếu học sinh hỏi 'đặt câu', 'ví dụ', 'example', 'sentence', " +
+                    "'dịch sang tiếng Anh', 'translate to English'... thì trả lời cả hai ngôn ngữ, trong đó tiếng Việt trước, tiếng Anh sau.\n\n" +
+                    "Ví dụ:\nQ: Nghĩa của từ 'flow'?\nA: 'Flow' nghĩa là sự chuyển động liên tục của chất lỏng, khí hoặc điện. " +
+                    "Nó cũng có thể chỉ sự tiến triển trôi chảy của một quá trình hoặc ý tưởng.\n---\nQ: Đặt câu với từ 'flow'?\nA:" +
+                    "" +
+                    " Tiếng Việt: Dòng sông chảy rất mạnh sau cơn mưa lớn.\nTiếng Anh: The river flows very strongly after the heavy rain.\n---";
             // Xây dựng mảng messages cho OpenAI
             List<Map<String, String>> messages = new java.util.ArrayList<>();
             messages.add(Map.of("role", "system", "content", systemPrompt));
