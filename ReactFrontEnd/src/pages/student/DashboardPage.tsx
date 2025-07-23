@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 interface StudentResult {
+    averageBand: number;
     username: string;
     skill: string;
     band: number;
@@ -64,7 +65,7 @@ const DashboardPage = () => {
                         <tr key={index} className="hover:bg-gray-50">
                             <td className="px-6 py-4">{index + 1}</td>
                             <td className="px-6 py-4">{student.username}</td>
-                            <td className="px-6 py-4">{student.totalCorrect}</td>
+                            <td className="px-6 py-4">  {student.averageBand != null ? student.averageBand.toFixed(2) : 'N/A'}</td>
                         </tr>
                     ))}
                     </tbody>

@@ -3,6 +3,7 @@ package web.ielts.Student.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity; //
 import org.springframework.web.bind.annotation.*;
+import web.ielts.Student.dto.AggregatedStudent;
 import web.ielts.Student.model.StudentResult;
 import web.ielts.Student.service.DashboardService;
 
@@ -20,7 +21,7 @@ public class DashboardController {
     @GetMapping("/top10")
     public ResponseEntity<?> getTop10() {
         {
-            List<StudentResult> result = dashboardService.getTop10Students();
+            List<AggregatedStudent> result = dashboardService.getTop10Students();
             return ResponseEntity.ok(result);
         }
     }

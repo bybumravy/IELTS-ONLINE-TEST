@@ -10,6 +10,9 @@ import {
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import type { TestHistory } from '../../services/historyService';
+import { useNavigate } from 'react-router-dom';
+
+
 
 interface HistoryCardProps {
   item: TestHistory;
@@ -17,6 +20,10 @@ interface HistoryCardProps {
 
 const HistoryCard: React.FC<HistoryCardProps> = ({ item }) => {
   const [expanded, setExpanded] = React.useState(false);
+  const navigate = useNavigate();
+  const handleRedoTest = () => {
+    navigate(`/do-test/${item.skill}/${item.testID}`);
+  };
 
   const getSkillIcon = () => {
     switch (item.skill) {
@@ -110,6 +117,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item }) => {
         </div>
       </div>
 
+
       <div className="mt-4">
         <div className="flex justify-between items-center mb-1">
           <span className="text-gray-500 text-sm">
@@ -128,18 +136,30 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item }) => {
       </div>
 
       {expanded && (
-        <div className="mt-4">
-          <div className="text-gray-600 text-sm space-y-1">
-            <p><strong>Test ID:</strong> {item.testID}</p>
-            <p><strong>Username:</strong> {item.username}</p>
-            <p><strong>Skill:</strong> {getSkillText()}</p>
-            <p><strong>Band Score:</strong> {item.band.toFixed(1)}</p>
-            <p><strong>Submitted:</strong> {format(new Date(item.submittedAt), 'dd/MM/yyyy HH:mm:ss', { locale: vi })}</p>
+          <div className="mt-4">
+            <div className="flex justify-between items-center mb-2">
+              <div className="text-gray-600 text-sm space-y-1">
+                <p><strong>Test ID:</strong> {item.testID}</p>
+                <p><strong>Username:</strong> {item.username}</p>
+                <p><strong>Skill:</strong> {getSkillText()}</p>
+                <p><strong>Band Score:</strong> {item.band.toFixed(1)}</p>
+                <p><strong>Submitted:</strong> {format(new Date(item.submittedAt), 'dd/MM/yyyy HH:mm:ss', { locale: vi })}</p>
+              </div>
+
+              <div>
+                <button
+                    onClick={handleRedoTest}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                >
+                  Làm lại bài thi
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
       )}
+
     </div>
   );
 };
 
-export default HistoryCard; 
+export default HistoryCard;

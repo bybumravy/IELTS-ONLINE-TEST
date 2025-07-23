@@ -93,7 +93,7 @@ export default function MatchingGamePage() {
                 </a>
             </div>
 
-            <h1 className="text-3xl font-bold mb-6">🔗 Ghép từ và nghĩa</h1>
+            <h1 className="text-3xl font-bold mb-6">Ghép từ và nghĩa</h1>
 
             <div className="grid grid-cols-4 gap-4">
                 {cards.map((card, index) => (
@@ -119,11 +119,11 @@ export default function MatchingGamePage() {
                             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                             onClick={handleNextBatch}
                         >
-                            👉 Tiếp tục 6 từ tiếp theo
+                            Tiếp tục các từ tiếp theo
                         </button>
                     ) : (
                         <div className="text-2xl font-bold text-green-600 mt-10">
-                            🎉 Bạn đã hoàn thành tất cả cặp từ! <br />
+                            Chúc mừng bạn đã hoàn thành tất cả cặp từ! <br />
                             <span className="text-xl text-green-700">Chúc mừng bạn nhé!</span>
                         </div>
                     )}
@@ -132,7 +132,7 @@ export default function MatchingGamePage() {
 
             {gameCompleted && (
                 <div className="text-2xl font-bold text-green-600 mt-10">
-                    🎉 Bạn đã hoàn thành tất cả cặp từ! <br />
+                    Chúc mừng bạn đã hoàn thành tất cả cặp từ! <br />
                     <span className="text-xl text-green-700">Chúc mừng bạn nhé!</span>
                 </div>
             )}

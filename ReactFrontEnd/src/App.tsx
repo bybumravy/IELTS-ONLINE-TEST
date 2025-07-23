@@ -69,6 +69,7 @@ import ReadingResult from "@/pages/Result/ReadingResult.tsx";
 import TransactionPage from "./pages/TransactionPage"
 import MatchingGamePage from '@/pages/student/MatchingGamePage';
 import DashboardPage from "@/pages/student/DashboardPage.tsx";
+import DoTestPage from '@/pages/student/DoTestPage.tsx';
 export default function App() {
     return (
         <ErrorBoundary>
@@ -173,6 +174,14 @@ export default function App() {
                                 <MainLayout><HistoryPage /></MainLayout>
                             </ProtectedLayout>
                         } />
+                        <Route path="/do-test/:skill/:testId" element={
+                            <ProtectedLayout allowRoles={["student"]}>
+                                <MainLayout><DoTestPage /></MainLayout>
+                            </ProtectedLayout>
+                        } />
+
+
+
 
                         <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
                         <Route path="/vnpay-result" element={<MainLayout><VnPayResultPage /></MainLayout>} />

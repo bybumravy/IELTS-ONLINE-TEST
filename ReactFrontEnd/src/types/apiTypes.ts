@@ -215,12 +215,12 @@ export interface StudentSkillResult {
 }
 
 export interface AggregatedStudent {
-    _id: string; // hoặc username nếu bạn muốn đồng bộ tên trường
-    avgTotalCorrect: number;
+    _id: string;
+    username: string;
+    averageBand: number;
     bandWriting: number;
     bandReading: number;
     bandSpeaking: number;
     bandListening: number;
-    listeningTotalCorrect: number;
-    readingTotalCorrect: number;
+
 }
