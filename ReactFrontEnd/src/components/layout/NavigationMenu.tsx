@@ -94,7 +94,7 @@ export function NavigationMenu() {
             </Link>
 
             <Link
-                to="/result"
+                to="/student/dashboard"
                 className="text-gray-700 px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-600 rounded-md transition-colors"
             >
                 DASHBOARD

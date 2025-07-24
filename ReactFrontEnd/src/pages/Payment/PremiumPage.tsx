@@ -57,6 +57,7 @@ export default function PremiumPage() {
     const [premiumExpiry, setPremiumExpiry] = useState<string | null>(null);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         const fetchPlans = async () => {
             try {
                 const response = await fetch(`${API_URL}/api/courses`)
@@ -102,8 +103,6 @@ export default function PremiumPage() {
                 setPremiumExpiry(null);
             });
     }, []);
-
-
 
     const handlePay = async () => {
         if (!selectedPlan) return;

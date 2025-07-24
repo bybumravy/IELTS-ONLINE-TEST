@@ -7,6 +7,7 @@ import web.ielts.Payment.repository.PaymentTransactionRepository;
 import web.ielts.User.repository.UserRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
@@ -23,7 +24,7 @@ public class UserService {
     }
 
     public User resetPremiumIfExpired(User user) {
-        if (user != null  && user.isPremiumActive()) {
+        if (user != null  && user.isPremiumExpired()) {
             user.setPremium(false);
             user.setPremiumExpiry(null);
             userRepository.save(user);
@@ -51,7 +52,8 @@ public class UserService {
         int daysToAdd = getDaysFromType(latestTransaction.getType());
 
         user.setPremium(true);
-        user.setPremiumExpiry(LocalDate.now(ZoneOffset.UTC).plusDays(daysToAdd));
+        user.setPremiumExpiry(LocalDateTime.now().plusDays(daysToAdd));
+
 
 
         userRepository.save(user);

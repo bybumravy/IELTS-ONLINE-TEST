@@ -210,3 +210,21 @@ export interface SpeakingTask {
     points: string[];
   };
 }
+export interface StudentSkillResult {
+    username: string;
+    skill: string;
+    band: number;
+    totalCorrect: number;
+    submittedAt: string;
+}
+
+export interface AggregatedStudent {
+    _id: string;
+    username: string;
+    averageBand: number;
+    bandWriting: number;
+    bandReading: number;
+    bandSpeaking: number;
+    bandListening: number;
+
+}

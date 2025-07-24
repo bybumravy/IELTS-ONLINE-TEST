@@ -1,5 +1,3 @@
-"use client"
-
 import {useEffect, useState} from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -37,16 +35,14 @@ import {
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 
-// Mock data
-
 const getStatusBadge = (status: string) => {
   switch (status) {
     case "Success":
-      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Thành công</Badge>
+      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Success</Badge>
     case "Failed":
-      return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Thất bại</Badge>
+      return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Failed</Badge>
     case "Pending":
-      return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Đang xử lý</Badge>
+      return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pending</Badge>
     default:
       return <Badge variant="secondary">{status}</Badge>
   }
@@ -75,6 +71,8 @@ export default function TransactionHistory() {
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
   const [dateFrom, setDateFrom] = useState<Date>()
   const [dateTo, setDateTo] = useState<Date>()
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5
 
   // Statistics calculations
   const totalTransactions = transactions.length
@@ -89,17 +87,14 @@ export default function TransactionHistory() {
   )
     const API_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
-    fetch(`${API_URL}/api/user/transactions`, { credentials: "include" })
+    fetch(`${API_URL}/api/payment/transactions`, { credentials: "include" })
         .then((res) => res.json())
         .then((data) => {
           setTransactions(data)
-          setFilteredTransactions(data) // 👈 phải cập nhật luôn filteredTransactions
+          setFilteredTransactions(data)
         })
-        .catch((err) => console.error("Lỗi tải giao dịch:", err))
+        .catch((err) => console.error("Error to load transaction:", err))
   }, [])
-
-
-
 
   // Filter and search logic
   const applyFilters = () => {
@@ -165,13 +160,13 @@ export default function TransactionHistory() {
     })
 
     setFilteredTransactions(filtered)
+    setCurrentPage(1)
   }
 
   // Apply filters whenever dependencies change
   useEffect(() => {
     applyFilters()
   }, [transactions, searchTerm, userFilter])
-
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -183,30 +178,17 @@ export default function TransactionHistory() {
     applyFilters()
   }
 
-
-  const exportToPDF = () => {
-    // Mock export functionality
-    alert("PDF exported successfully!")
-  }
-
-  const printTransaction = (transaction: any) => {
-    // Mock print functionality
-    alert(`Print transaction slip ${transaction.transactionId}`)
-  }
-
+  const paginatedData = filteredTransactions.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+  )
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Lịch sử giao dịch</h1>
-          <p className="text-muted-foreground">Quản lý và theo dõi tất cả giao dịch</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={exportToPDF} variant="outline">
-            <Download className="w-4 h-4 mr-2" />
-            Xuất PDF
-          </Button>
+          <h1 className="text-3xl font-bold">Transaction History </h1>
+          <p className="text-muted-foreground">Manage and track all transactions</p>
         </div>
       </div>
 
@@ -214,40 +196,40 @@ export default function TransactionHistory() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-l-4 border-l-green-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng giao dịch</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalTransactions}</div>
-            <p className="text-xs text-muted-foreground">giao dịch</p>
+            <p className="text-xs text-muted-foreground">transactions</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-green-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng doanh thu</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalAmount)}</div>
-            <p className="text-xs text-muted-foreground">từ giao dịch thành công</p>
+            <p className="text-xs text-muted-foreground">from success transactions</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-green-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tỷ lệ thành công</CardTitle>
+            <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{successRate}%</div>
-            <p className="text-xs text-muted-foreground">giao dịch thành công</p>
+            <p className="text-xs text-muted-foreground">transaction successfully</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-green-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Phương thức phổ biến</CardTitle>
+            <CardTitle className="text-sm font-medium">Most Used Method</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -259,7 +241,7 @@ export default function TransactionHistory() {
               {(
                 Object.entries(paymentMethods)
                   .sort(([, a], [, b]) => Number(b) - Number(a))[0]?.[1] ?? 0
-              ).toString()} giao dịch
+              ).toString()} transactions
             </p>
           </CardContent>
         </Card>
@@ -270,18 +252,18 @@ export default function TransactionHistory() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="w-5 h-5" />
-            Bộ lọc và tìm kiếm
+            Filter and Search
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div className="space-y-2">
-              <Label>Tìm kiếm</Label>
+              <Label>Search</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Mã GD, tên người dùng, số tiền..."
+                  placeholder="Transaction ID, username, amount..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -291,29 +273,29 @@ export default function TransactionHistory() {
 
             {/* Status Filter */}
             <div className="space-y-2">
-              <Label>Trạng thái</Label>
+              <Label>Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tất cả</SelectItem>
-                  <SelectItem value="Success">Thành công</SelectItem>
-                  <SelectItem value="Failed">Thất bại</SelectItem>
-                  <SelectItem value="Pending">Đang xử lý</SelectItem>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="Success">Success</SelectItem>
+                  <SelectItem value="Failed">Failed</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* User Email Filter */}
             <div className="space-y-2">
-              <Label>Email người dùng</Label>
-              <Input placeholder="Nhập email..." value={userFilter} onChange={(e) => setUserFilter(e.target.value)} />
+              <Label>Email</Label>
+              <Input placeholder="Enter email..." value={userFilter} onChange={(e) => setUserFilter(e.target.value)} />
             </div>
 
             {/* Sort */}
             <div className="space-y-2">
-              <Label>Sắp xếp theo</Label>
+              <Label>Sort by</Label>
               <Select
                 value={`${sortBy}-${sortOrder}`}
                 onValueChange={(value) => {
@@ -326,10 +308,10 @@ export default function TransactionHistory() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="date-desc">Ngày (mới nhất)</SelectItem>
-                  <SelectItem value="date-asc">Ngày (cũ nhất)</SelectItem>
-                  <SelectItem value="amount-desc">Số tiền (cao nhất)</SelectItem>
-                  <SelectItem value="amount-asc">Số tiền (thấp nhất)</SelectItem>
+                  <SelectItem value="date-desc">Newest</SelectItem>
+                  <SelectItem value="date-asc">Oldest</SelectItem>
+                  <SelectItem value="amount-desc">Highest Amount</SelectItem>
+                  <SelectItem value="amount-asc">Lowest Amount</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -338,12 +320,12 @@ export default function TransactionHistory() {
           {/* Date Range */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Từ ngày</Label>
+              <Label>From date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal bg-transparent">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateFrom ? format(dateFrom, "dd/MM/yyyy", { locale: vi }) : "Chọn ngày"}
+                    {dateFrom ? format(dateFrom, "dd/MM/yyyy", { locale: vi }) : "Choose date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -353,12 +335,12 @@ export default function TransactionHistory() {
             </div>
 
             <div className="space-y-2">
-              <Label>Đến ngày</Label>
+              <Label>To date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal bg-transparent">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateTo ? format(dateTo, "dd/MM/yyyy", { locale: vi }) : "Chọn ngày"}
+                    {dateTo ? format(dateTo, "dd/MM/yyyy", { locale: vi }) : "Choose date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -371,7 +353,7 @@ export default function TransactionHistory() {
           <div className="flex gap-2">
             <Button onClick={applyFilters} className="bg-green-800">
               <Search className="w-4 h-4 mr-2" />
-              Áp dụng bộ lọc
+              Apply Filters
             </Button>
             <Button
               variant="outline"
@@ -387,7 +369,7 @@ export default function TransactionHistory() {
               }}
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Đặt lại
+              Reset
             </Button>
           </div>
         </CardContent>
@@ -396,10 +378,7 @@ export default function TransactionHistory() {
       {/* Transactions Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Danh sách giao dịch ({filteredTransactions.length})</CardTitle>
-          <CardDescription>
-            Hiển thị {filteredTransactions.length} trên tổng {totalTransactions} giao dịch
-          </CardDescription>
+          <CardTitle>List Transactions ({filteredTransactions.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -408,34 +387,34 @@ export default function TransactionHistory() {
                 <TableRow>
                   <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("id")}>
                     <div className="flex items-center gap-2">
-                      Mã giao dịch
+                      Transaction ID
                       <ArrowUpDown className="w-4 h-4" />
                     </div>
                   </TableHead>
-                  <TableHead>Người thực hiện</TableHead>
-                  <TableHead>Loại giao dịch</TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead>Transaction Type</TableHead>
                   <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("amount")}>
                     <div className="flex items-center gap-2">
-                      Số tiền
+                      Amount
                       {sortBy === "amount" &&
                         (sortOrder === "asc" ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />)}
                     </div>
                   </TableHead>
-                  <TableHead>Phương thức</TableHead>
-                  <TableHead>Trạng thái</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("date")}>
                     <div className="flex items-center gap-2">
-                      Thời gian
+                      Time
                       {sortBy === "date" &&
                         (sortOrder === "asc" ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />)}
                     </div>
                   </TableHead>
-                  <TableHead>Thao tác</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <>
-                  {filteredTransactions.map((transaction,index) => (
+                  {paginatedData.map((transaction,index) => (
                       <TableRow key={index} className="hover:bg-muted/50">
                         <TableCell className="font-medium">{transaction.transactionId}</TableCell>
                         <TableCell>
@@ -458,58 +437,45 @@ export default function TransactionHistory() {
                               </DialogTrigger>
                               <DialogContent className="max-w-2xl">
                                 <DialogHeader>
-                                  <DialogTitle>Chi tiết giao dịch {transaction.transactionId}</DialogTitle>
-                                  <DialogDescription>Thông tin chi tiết về giao dịch</DialogDescription>
+                                  <DialogTitle>Detailed Transaction {transaction.transactionId}</DialogTitle>
+                                  <DialogDescription>Detailed transaction information</DialogDescription>
+
                                 </DialogHeader>
                                 {selectedTransaction && (
                                     <div className="space-y-4">
                                       <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                          <Label className="text-sm font-medium">Mã giao dịch</Label>
+                                          <Label className="text-sm font-medium">Transaction ID</Label>
                                           <p className="text-sm">{selectedTransaction.transactionId}</p>
                                         </div>
                                         <div>
-                                          <Label className="text-sm font-medium">Trạng thái</Label>
+                                          <Label className="text-sm font-medium">Status</Label>
                                           <div className="mt-1">{getStatusBadge(selectedTransaction.status)}</div>
                                         </div>
                                         <div>
-                                          <Label className="text-sm font-medium">Người thực hiện</Label>
+                                          <Label className="text-sm font-medium">User</Label>
                                           <p className="text-xs text-muted-foreground">{selectedTransaction.email}</p>
                                         </div>
                                         <div>
-                                          <Label className="text-sm font-medium">Số tiền</Label>
+                                          <Label className="text-sm font-medium">Amount</Label>
                                           <p className="text-sm font-medium">{formatCurrency(selectedTransaction.amount)}</p>
                                         </div>
                                         <div>
-                                          <Label className="text-sm font-medium">Phương thức thanh toán</Label>
+                                          <Label className="text-sm font-medium">Transaction Method</Label>
                                           <p className="text-sm">{selectedTransaction.paymentMethod}</p>
                                         </div>
                                         <div>
-                                          <Label className="text-sm font-medium">Loại giao dịch</Label>
+                                          <Label className="text-sm font-medium">Transaction Type</Label>
                                           <p className="text-sm">{selectedTransaction.type}</p>
                                         </div>
                                         <div>
-                                          <Label className="text-sm font-medium">Thời gian tạo</Label>
+                                          <Label className="text-sm font-medium">Time</Label>
                                           <p className="text-sm">{formatDate(selectedTransaction.createdAt)}</p>
-                                        </div>
-                                        <div>
-                                          <Label className="text-sm font-medium">Thời gian hoàn tất</Label>
-                                          <p className="text-sm">
-                                            {selectedTransaction.completedAt
-                                                ? formatDate(selectedTransaction.completedAt)
-                                                : "Chưa hoàn tất"}
-                                          </p>
                                         </div>
                                       </div>
                                       <div>
-                                        <Label className="text-sm font-medium">Thông điệp phản hồi</Label>
+                                        <Label className="text-sm font-medium">Response Message</Label>
                                         <p className="text-sm bg-muted p-3 rounded-md mt-1">{selectedTransaction.message}</p>
-                                      </div>
-                                      <div className="flex gap-2 pt-4">
-                                        <Button onClick={() => printTransaction(selectedTransaction)}>
-                                          <Printer className="w-4 h-4 mr-2" />
-                                          In phiếu
-                                        </Button>
                                       </div>
                                     </div>
                                 )}
@@ -526,11 +492,33 @@ export default function TransactionHistory() {
           <>
             {filteredTransactions.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
-                  Không tìm thấy giao dịch nào phù hợp với bộ lọc
+                  No transactions found matching the filters.
                 </div>
             )}
           </>
         </CardContent>
+        {filteredTransactions.length > itemsPerPage && (
+            <div className="flex justify-center items-center gap-2 mt-6">
+              <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-gray-700">
+                              Page {currentPage} of {Math.ceil(filteredTransactions.length / itemsPerPage)}
+                            </span>
+              <Button
+                  variant="outline"
+                  onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(filteredTransactions.length / itemsPerPage)))}
+                  disabled={currentPage === Math.ceil(filteredTransactions.length / itemsPerPage)}
+              >
+                Next
+              </Button>
+            </div>
+        )}
       </Card>
     </div>
   )
