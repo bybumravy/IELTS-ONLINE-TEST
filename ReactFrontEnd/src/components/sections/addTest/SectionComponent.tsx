@@ -57,7 +57,7 @@ export const SectionComponent: FC<SectionComponentProps> = ({
         </div>
 
         {/* Image upload */}
-        {(section.type === 'sentence-completion' || section.type === 'map-labeling') && (
+        {(section.type === 'sentence-completion' || section.type === 'map-labeling' || section.type === 'dropdown') && (
           <div>
             <label className="block font-medium mb-2 font-sans">Image:</label>
             {section.imageUrl && (

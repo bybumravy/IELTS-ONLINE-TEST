@@ -210,8 +210,8 @@ export const AddReading: FC<AddReadingProps> = ({ onDataChange }) => {
 
   const handleImageChange = (taskNum: number, sectionNum: number, file: File | null) => {
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setUploadImageError('Image size should be less than 5MB');
+      if (file.size > 35 * 1024 * 1024) {
+        setUploadImageError('Image size should be less than 35MB');
         return;
       }
       setImageFile(file);

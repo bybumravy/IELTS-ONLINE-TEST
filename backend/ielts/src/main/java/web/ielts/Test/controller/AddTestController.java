@@ -152,7 +152,7 @@ public class AddTestController {
             test.setTestId(testService.generateNextTestId());
             test.setTestTitle(addTest.getTestTitle());
             test.setTags(addTest.getTags());
-            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd");
             test.setCreatedAt(isoFormat.format(addTest.getCreateAt()));
             testRepo.save(test);
 

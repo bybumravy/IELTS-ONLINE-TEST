@@ -49,18 +49,23 @@ export function UserMenu({ onLogout }: UserMenuProps) {
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/test-history")}>
-                    <History className="mr-2 h-4 w-4" />
-                    <span>Test History</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/premium")}>
-                    <Crown className="mr-2 h-4 w-4" />
-                    <span>Premium</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsFeedbackOpen(true)}>
-                    <AlertCircle className="mr-2 h-4 w-4" />
-                    <span>Report</span>
-                </DropdownMenuItem>
+                {/* Only show the following items if NOT teacher or manager */}
+                {user?.role !== 'teacher' && user?.role !== 'manager' && (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate("/test-history")}> 
+                        <History className="mr-2 h-4 w-4" />
+                        <span>Test History</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/premium")}> 
+                        <Crown className="mr-2 h-4 w-4" />
+                        <span>Premium</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsFeedbackOpen(true)}>
+                        <AlertCircle className="mr-2 h-4 w-4" />
+                        <span>Report</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />

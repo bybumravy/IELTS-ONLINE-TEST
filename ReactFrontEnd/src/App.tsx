@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { AuthProvider } from "@/contexts/AuthContext"
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 // Layouts
 import { MainLayout } from "@/components/layout/MainLayout"
@@ -45,11 +47,11 @@ import HistoryPage from "@/pages/HistoryPage"
 import SpeakingResult from "@/pages/Result/SpeakingResult.tsx";
 // Admin
 
-import LoginAdmin from "./components/sections/admin/LoginAdmin"
+//import LoginAdmin from "./components/sections/admin/LoginAdmin"
 import AdminPage from "./pages/AdminPage"
 
 // Staff
-import StaffLogin from "./components/sections/StaffLogin"
+//import StaffLogin from "./components/sections/StaffLogin"
 import { StaffPage } from "@/pages/StaffPage"
 import AddTest from "@/pages/AddTest"
 import AcceptTestPage from "@/pages/AcceptTestPage"
@@ -70,15 +72,25 @@ import ProtectedLayout from "@/components/sections/ProtectedLayout"
 import ProtectedLayoutRole from "@/components/sections/ProtectedLayoutRole"
 import ReadingResult from "@/pages/Result/ReadingResult.tsx";
 import TransactionPage from "./pages/TransactionPage"
-import ManagerLogin from "@/components/sections/ManagerLogin";
+//import ManagerLogin from "@/components/sections/ManagerLogin";
 
 
+
+// ScrollToTop component
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 export default function App() {
     return (
 
             <AuthProvider>
                 <Router>
+                    <ScrollToTop />
                     <Routes>
 
                         {/* ========== Public Routes (No login required) ========== */}
@@ -187,7 +199,7 @@ export default function App() {
                         <Route path="/premium" element={<MainLayout><PremiumPage /></MainLayout>} />
                         <Route path="/vnpay-result" element={<MainLayout><VnPayResultPage /></MainLayout>} />
                         {/* ========== Admin Routes ========== */}
-                        <Route path="/login-admin" element={<LoginAdmin />} />
+                        {/* <Route path="/login-admin" element={<LoginAdmin />} /> */}
                         <Route path="/admin-page" element={
                             <ProtectedLayoutRole allowRoles={["admin"]}>
                                 <AdminLayout><AdminPage /></AdminLayout>
@@ -195,8 +207,8 @@ export default function App() {
                         } />
 
                         {/* ========== Staff Routes ========== */}
-                        <Route path="/staff-login" element={<StaffLogin />} />
-                        <Route path="/manager-login" element={<ManagerLogin />} />
+                        {/* <Route path="/staff-login" element={<StaffLogin />} />
+                        <Route path="/manager-login" element={<ManagerLogin />} /> */}
                         <Route path="/staff-page" element={<ProtectedLayoutRole allowRoles={["teacher", "manager"]}><StaffLayout><StaffPage /></StaffLayout></ProtectedLayoutRole>} />
                         <Route path="/add-test" element={<ProtectedLayout allowRoles={["teacher"]}><StaffLayout><AddTest /></StaffLayout></ProtectedLayout>} />
                         <Route path="/accept-tests" element={<ProtectedLayout allowRoles={["manager"]}><StaffLayout><AcceptTestPage /></StaffLayout></ProtectedLayout>} />

@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import {Search, Download, Eye, MoreHorizontal, FileText, Users, TrendingUp, Calendar, RefreshCw} from "lucide-react"
+import {Search, Eye, FileText, TrendingUp, Calendar, RefreshCw} from "lucide-react"
 import {Label} from "@/components/ui/label.tsx";
 import {format} from "date-fns";
 
@@ -16,8 +15,8 @@ interface WritingResult {
     _id: string
     username: string
     testId: string
-    task1: { score: string }
-    task2: { score: string }
+    task1: { score?: string }
+    task2: { score?: string }
     band: number
     submittedAt: string
     gradingMethod: string
@@ -88,11 +87,11 @@ export default function TeacherScoredList() {
     }
 
     const stats = calculateStats()
-
+    const API_URL = import.meta.env.VITE_API_URL;
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch("http://localhost:8080/verify/allwriting", {
+                const res = await fetch(`${API_URL}/verify/allwriting`, {
                     credentials: "include", // nếu backend yêu cầu
                 });
                 if (!res.ok) throw new Error("Failed to fetch");
@@ -304,13 +303,17 @@ export default function TeacherScoredList() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <span className="font-semibold text-blue-600">{item.task1.score}</span>
+                                                <span className="font-semibold text-blue-600">
+                                                    {item.task1?.score ?? "-"}
+                                                </span>
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <span className="font-semibold text-blue-600">{item.task2.score}</span>
+                                                <span className="font-semibold text-blue-600">
+                                                    {item.task2?.score ?? "-"}
+                                                </span>
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <span className={getBandColor(item.band)}>{item.band}</span>
+                                                <span className={getBandColor(item.band)}>{item.band.toFixed(1)}</span>
                                             </TableCell>
                                             <TableCell className="text-gray-600">
                                                 {item.submittedAt ? format(new Date(item.submittedAt), "dd/MM/yyyy") : ""}
