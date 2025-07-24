@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { Vocabulary as VocabularyType } from '@/types/apiTypes';
+import {ArrowLeft} from "lucide-react";
 
 const VocabularyGame: React.FC = () => {
     const location = useLocation();
@@ -118,9 +119,13 @@ const VocabularyGame: React.FC = () => {
                 <div className="text-2xl font-bold text-green-600 mt-10">{message}</div>
             )}
 
-            <br /><Button className="mt-10 text-lg px-6 py-3" onClick={() => navigate('/practice/vocabulary')}>
-                ← Back to Vocabulary
-            </Button>
+            <button
+                onClick={() => navigate('/practice/vocabulary')}
+                className="inline-flex items-center gap-2 text-green-600 hover:underline text-base font-medium"
+            >
+                <ArrowLeft className="w-5 h-5" />
+                Back to Vocabulary
+            </button>
         </div>
     );
 };

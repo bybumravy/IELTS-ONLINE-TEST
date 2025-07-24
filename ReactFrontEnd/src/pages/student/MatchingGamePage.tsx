@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { Vocabulary as VocabularyType } from '@/types/apiTypes';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { ArrowLeft } from 'lucide-react'; // dùng icon mũi tên
+import { ArrowLeft } from 'lucide-react';
 
 type CardType = {
     id: string;
@@ -14,6 +14,7 @@ type CardType = {
 
 export default function MatchingGamePage() {
     const location = useLocation();
+    const navigate = useNavigate();
     const vocabList: VocabularyType[] = location.state?.vocabList || [];
 
     const batchSize = 6;
@@ -82,25 +83,15 @@ export default function MatchingGamePage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto text-center mt-10 px-4">
-            <div className="mb-4 text-left">
-                <a
-                    href="http://localhost:5173/practice/vocabulary"
-                    className="inline-flex items-center gap-2 text-blue-600 hover:underline text-base font-medium"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                    {gameCompleted && <span>Quay lại luyện tập từ vựng</span>}
-                </a>
-            </div>
+        <div className="max-w-5xl mx-auto text-center mt-10 px-4">
+            <h1 className="text-4xl font-bold mb-10">Matching words and meanings</h1>
 
-            <h1 className="text-3xl font-bold mb-6">Ghép từ và nghĩa</h1>
-
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-6">
                 {cards.map((card, index) => (
                     <Card
                         key={index}
                         className={cn(
-                            'p-4 text-lg font-semibold cursor-pointer transition-all',
+                            'p-6 text-xl font-semibold cursor-pointer transition-all rounded-xl shadow-sm border',
                             selected.includes(index) && 'border-blue-500 ring-2 ring-blue-300',
                             card.matched && 'bg-green-500 text-white pointer-events-none',
                             shakeIndexes.includes(index) && 'shake bg-red-100 border-red-400'
@@ -113,18 +104,18 @@ export default function MatchingGamePage() {
             </div>
 
             {cards.length > 0 && cards.every(c => c.matched) && !gameCompleted && (
-                <div className="mt-8">
+                <div className="mt-10">
                     {batchIndex < totalBatches - 1 ? (
                         <button
-                            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                            className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-lg"
                             onClick={handleNextBatch}
                         >
-                            Tiếp tục các từ tiếp theo
+                            Continue with the next words
                         </button>
                     ) : (
                         <div className="text-2xl font-bold text-green-600 mt-10">
-                            Chúc mừng bạn đã hoàn thành tất cả cặp từ! <br />
-                            <span className="text-xl text-green-700">Chúc mừng bạn nhé!</span>
+                            Congratulations you have completed all the word pairs! <br />
+                            <span className="text-xl text-green-700">Congratulations!</span>
                         </div>
                     )}
                 </div>
@@ -133,9 +124,20 @@ export default function MatchingGamePage() {
             {gameCompleted && (
                 <div className="text-2xl font-bold text-green-600 mt-10">
                     Chúc mừng bạn đã hoàn thành tất cả cặp từ! <br />
-                    <span className="text-xl text-green-700">Chúc mừng bạn nhé!</span>
+                    <span className="text-xl text-green-700">Congratulations!</span>
                 </div>
             )}
+
+            {/* Quay lại button */}
+            <div className="mt-12 text-left">
+                <button
+                    onClick={() => navigate('/practice/vocabulary')}
+                    className="inline-flex items-center gap-2 text-green-600 hover:underline text-base font-medium"
+                >
+                    <ArrowLeft className="w-5 h-5" />
+                    Back to Vocabulary
+                </button>
+            </div>
         </div>
     );
 }
