@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line, AreaChart, Area } from "recharts";
 
@@ -20,6 +20,7 @@ interface PaymentTransaction {
   payType: string;
   signature: string;
   verified: boolean;
+  status: string; // Added status field
 }
 
 type ChartType = "bar" | "line" | "area";
@@ -34,6 +35,16 @@ export default function TransactionPage() {
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const API_URL = import.meta.env.VITE_API_URL;
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Calculate paginated transactions
+  const paginatedTransactions = useMemo(() => {
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    return transactions.slice(startIdx, startIdx + itemsPerPage);
+  }, [transactions, currentPage]);
+
+  const totalPages = Math.ceil(transactions.length / itemsPerPage);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -146,17 +157,43 @@ export default function TransactionPage() {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map(tx => (
+                {paginatedTransactions.map(tx => (
                   <tr key={tx.orderId} className="border-b border-emerald-100 hover:bg-emerald-200/30 transition-colors">
                     <td className="px-4 py-2 text-sm text-gray-800">{tx.orderId}</td>
                     <td className="px-4 py-2 text-sm text-gray-800">{tx.amount.toLocaleString()} ₫</td>
                     <td className="px-4 py-2 text-sm text-gray-800">{tx.orderInfo}</td>
-                    <td className="px-4 py-2 text-sm text-gray-800">{tx.resultCode === 0 ? <span className="text-emerald-600 font-semibold">Success</span> : <span className="text-red-500 font-semibold">Fail</span>}</td>
-                    <td className="px-4 py-2 text-sm text-gray-800">{tx.verified ? <span className="text-emerald-600">✔</span> : <span className="text-red-500">✘</span>}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{String(tx.status).toLowerCase() === 'success' ? <span className="text-emerald-600 font-semibold">Success</span> : <span className="text-red-500 font-semibold">Fail</span>}</td>
+                    <td className="px-4 py-2 text-sm text-gray-800">{String(tx.status).toLowerCase() === 'success' ? <span className="text-emerald-600">✔</span> : <span className="text-red-500">✘</span>}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+          {/* Pagination controls */}
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <button
+              className="px-3 py-1 rounded border border-emerald-300 bg-white text-emerald-700 disabled:opacity-50"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                className={`px-3 py-1 rounded border ${currentPage === i + 1 ? 'bg-emerald-600 text-white' : 'bg-white text-emerald-700 border-emerald-300'}`}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              className="px-3 py-1 rounded border border-emerald-300 bg-white text-emerald-700 disabled:opacity-50"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
           </div>
         </Card>
       </div>
