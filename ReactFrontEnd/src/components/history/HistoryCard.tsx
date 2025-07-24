@@ -146,12 +146,12 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item }) => {
                       {format(new Date(item.submittedAt), 'dd/MM/yyyy HH:mm:ss', { locale: vi })}
                     </p>
                   </div>
-                  <div className="flex flex-col md:flex-row gap-2">
+                  <div className="flex flex-col md:flex-row gap-2 mt-20">
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleRedoTest}
-                        className="bg-green-500 hover:bg-green-400 text-white px-4 py-2 rounded-lg text-sm shadow-md transition"
+                        className="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs shadow transition"
                     >
                       Làm lại bài thi
                     </motion.button>
@@ -159,11 +159,12 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item }) => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleViewHistory}
-                        className="border bg-green-500 hover:bg-green-400 text-white px-4 py-2 rounded-lg text-sm shadow-md transition"
+                        className="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs shadow transition"
                     >
                       Lịch sử làm bài
                     </motion.button>
                   </div>
+
                 </div>
               </motion.div>
           )}

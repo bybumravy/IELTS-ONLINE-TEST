@@ -162,7 +162,7 @@ const Vocabulary: React.FC = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}>
 
-            <h1 className="text-3xl font-bold text-emerald-700 text-center mb-6">🌿 Vocabulary Management</h1>
+            <h1 className="text-3xl font-bold text-emerald-700 text-center mb-6"> Vocabulary Management</h1>
 
             <Card className="mb-6 p-6 shadow-md border border-emerald-200">
                 <div className="flex flex-col md:flex-row gap-4 items-center">

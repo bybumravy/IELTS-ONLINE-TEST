@@ -20,28 +20,25 @@ const HistoryStats: React.FC<HistoryStatsProps> = ({ items }) => {
                           title,
                           value,
                           icon,
-                          color,
                       }: {
         title: string;
         value: string;
         icon: React.ReactNode;
-        color: string;
     }) => (
         <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
-            className="flex flex-col items-center justify-center bg-gradient-to-br from-green-100 to-white rounded-2xl shadow-md p-6 cursor-pointer"
+            className="flex flex-col items-center justify-center bg-emerald-700 rounded-2xl shadow-md p-6 cursor-pointer"
         >
             <motion.div
-                className="text-4xl mb-3"
-                style={{ color }}
-                whileHover={{ rotate: [0, 10, -10, 0] }} // tạo hiệu ứng lắc nhẹ khi hover
+                className="text-4xl mb-3 text-white"
+                whileHover={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 0.6 }}
             >
                 {icon}
             </motion.div>
-            <div className="text-4xl font-extrabold text-green-700 mb-1">{value}</div>
-            <div className="text-gray-600 font-medium text-sm">{title}</div>
+            <div className="text-4xl font-extrabold text-white mb-1">{value}</div>
+            <div className="text-white font-medium text-sm">{title}</div>
         </motion.div>
     );
 
@@ -51,19 +48,16 @@ const HistoryStats: React.FC<HistoryStatsProps> = ({ items }) => {
                 title="Tổng số bài thi"
                 value={totalTests.toString()}
                 icon={<TrophyIcon fontSize="inherit" />}
-                color="#43A047"
             />
             <StatCard
                 title="Band trung bình"
                 value={averageBand.toFixed(1)}
                 icon={<TrendingIcon fontSize="inherit" />}
-                color="#388E3C"
             />
             <StatCard
                 title="Band cao nhất"
                 value={highestBand.toFixed(1)}
                 icon={<StarIcon fontSize="inherit" />}
-                color="#2E7D32"
             />
         </div>
     );
