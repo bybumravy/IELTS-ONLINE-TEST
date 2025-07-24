@@ -4,13 +4,15 @@ import type { Vocabulary as VocabularyType } from '@/types/apiTypes';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { ArrowLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-type CardType = {
+// Types
+interface CardType {
     id: string;
     text: string;
     type: 'word' | 'translate';
     matched: boolean;
-};
+}
 
 export default function MatchingGamePage() {
     const location = useLocation();
@@ -26,25 +28,28 @@ export default function MatchingGamePage() {
     const [shakeIndexes, setShakeIndexes] = useState<number[]>([]);
     const [gameCompleted, setGameCompleted] = useState(false);
 
-    const currentBatch = vocabList.slice(batchIndex * batchSize, (batchIndex + 1) * batchSize);
+    const currentBatch = vocabList.slice(
+        batchIndex * batchSize,
+        (batchIndex + 1) * batchSize
+    );
 
     useEffect(() => {
-        const wordCards: CardType[] = currentBatch.map(v => ({
+        const wordCards: CardType[] = currentBatch.map((v) => ({
             id: v.id,
             text: v.word,
             type: 'word',
             matched: false
         }));
 
-        const translateCards: CardType[] = currentBatch.map(v => ({
+        const translateCards: CardType[] = currentBatch.map((v) => ({
             id: v.id,
             text: v.translate,
             type: 'translate',
             matched: false
         }));
 
-        const shuffledCards = shuffleArray([...wordCards, ...translateCards]);
-        setCards(shuffledCards);
+        const shuffled = shuffleArray([...wordCards, ...translateCards]);
+        setCards(shuffled);
         setSelected([]);
         setShakeIndexes([]);
     }, [batchIndex, vocabList]);
@@ -83,66 +88,67 @@ export default function MatchingGamePage() {
     };
 
     return (
-        <div className="max-w-5xl mx-auto text-center mt-10 px-4">
-            <h1 className="text-4xl font-bold mb-10">Matching words and meanings</h1>
+        <div className="max-w-6xl mx-auto px-4 py-10 text-center">
+            <h1 className="text-4xl font-bold mb-10 text-green-600">
+                Match the Words with Their Meanings
+            </h1>
 
-            <div className="grid grid-cols-4 gap-6">
-                {cards.map((card, index) => (
-                    <Card
-                        key={index}
-                        className={cn(
-                            'p-6 text-xl font-semibold cursor-pointer transition-all rounded-xl shadow-sm border',
-                            selected.includes(index) && 'border-blue-500 ring-2 ring-blue-300',
-                            card.matched && 'bg-green-500 text-white pointer-events-none',
-                            shakeIndexes.includes(index) && 'shake bg-red-100 border-red-400'
-                        )}
-                        onClick={() => handleCardClick(index)}
-                    >
-                        {card.text}
-                    </Card>
-                ))}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                <AnimatePresence>
+                    {cards.map((card, index) => (
+                        <motion.div
+                            key={index}
+                            layout
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <Card
+                                className={cn(
+                                    'p-6 text-lg sm:text-xl font-medium cursor-pointer transition-all rounded-2xl shadow-md border text-green-700 bg-white',
+                                    selected.includes(index) && 'border-green-500 ring-2 ring-green-300',
+                                    card.matched && 'bg-green-500 text-white pointer-events-none',
+                                    shakeIndexes.includes(index) && 'shake border-red-400 bg-red-100'
+                                )}
+                                onClick={() => handleCardClick(index)}
+                            >
+                                {card.text}
+                            </Card>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
             </div>
 
-            {cards.length > 0 && cards.every(c => c.matched) && !gameCompleted && (
+            {cards.length > 0 && cards.every((c) => c.matched) && !gameCompleted && (
                 <div className="mt-10">
-                    {batchIndex < totalBatches - 1 ? (
-                        <button
-                            className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-lg"
-                            onClick={handleNextBatch}
-                        >
-                            Continue with the next words
-                        </button>
-                    ) : (
-                        <div className="text-2xl font-bold text-green-600 mt-10">
-                            Congratulations you have completed all the word pairs! <br />
-                            <span className="text-xl text-green-700">Congratulations!</span>
-                        </div>
-                    )}
+                    <button
+                        className="px-8 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition text-lg"
+                        onClick={handleNextBatch}
+                    >
+                        Continue with the next words
+                    </button>
                 </div>
             )}
 
             {gameCompleted && (
-                <div className="text-2xl font-bold text-green-600 mt-10">
-                    Chúc mừng bạn đã hoàn thành tất cả cặp từ! <br />
-                    <span className="text-xl text-green-700">Congratulations!</span>
+                <div className="text-2xl font-bold text-green-600 mt-10 animate-bounce">
+                    Congratulations! You have matched all the word pairs!
                 </div>
             )}
 
-            {/* Quay lại button */}
             <div className="mt-12 text-left">
                 <button
                     onClick={() => navigate('/practice/vocabulary')}
                     className="inline-flex items-center gap-2 text-green-600 hover:underline text-base font-medium"
                 >
-                    <ArrowLeft className="w-5 h-5" />
-                    Back to Vocabulary
+                    <ArrowLeft className="w-5 h-5" /> Back to Vocabulary
                 </button>
             </div>
         </div>
     );
 }
 
-// Shuffle helper
 function shuffleArray<T>(array: T[]): T[] {
     return [...array].sort(() => Math.random() - 0.5);
 }

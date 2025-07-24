@@ -77,7 +77,7 @@ const DashboardPage = () => {
 
     return (
         <div className="p-10 bg-emerald-50 min-h-screen text-gray-800">
-            <h1 className="text-4xl font-bold mb-10 text-green-700">📊 Thống Kê Tổng Quan</h1>
+            <h1 className="text-4xl font-bold mb-10 text-green-700"> Thống Kê Tổng Quan</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
                 {/* Tổng Quan Kết Quả */}
@@ -86,9 +86,9 @@ const DashboardPage = () => {
                         <UserRound className="text-green-600" /> Tổng Quan Kết Quả
                     </h2>
                     <ul className="space-y-2 text-green-700">
-                        <li>📝 Số lượng bài test: <strong>{overviewData.totalTests}</strong></li>
-                        <li>🎯 Band trung bình: <strong>{overviewData.averageBand}</strong></li>
-                        <li>🏆 Band cao nhất: <strong>{overviewData.highestBand}</strong></li>
+                        <li> Số lượng bài test: <strong>{overviewData.totalTests}</strong></li>
+                        <li> Band trung bình: <strong>{overviewData.averageBand}</strong></li>
+                        <li> Band cao nhất: <strong>{overviewData.highestBand}</strong></li>
                     </ul>
                 </div>
 

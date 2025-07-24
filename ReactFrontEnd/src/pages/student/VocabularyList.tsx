@@ -1,47 +1,42 @@
-import React, { useState, useEffect } from 'react';
+""// src/pages/Vocabulary.tsx
+
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Vocabulary as VocabularyType } from '@/lib/type';
+import VocabularyFormModal from '@/components/ui/vocabulary/VocabularyFormModal';
+import VocabularyItem from '@/components/ui/vocabulary/VocabularyItem';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { VocabularyItemStudent } from '@/components/ui/vocabulary/VocabularyItemStudent.tsx';
-import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"; // nếu dùng shadcn/ui
+import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
 
-
-
-const VocabularyList: React.FC = () => {
+const Vocabulary: React.FC = () => {
     const { user } = useAuth();
+
     const [vocabularies, setVocabularies] = useState<VocabularyType[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
     const [filters, setFilters] = useState({ topic: '', band: '' });
     const [appliedFilters, setAppliedFilters] = useState({ topic: '', band: '' });
 
-    // Search & Pagination states
     const [search, setSearch] = useState('');
     const [searchInput, setSearchInput] = useState('');
+
     const [page, setPage] = useState(0);
     const pageSize = 10;
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
 
-    // Detail modal state
-    const [selectedVocab, setSelectedVocab] = useState<VocabularyType | null>(null);
-
-    const API_BASE = "http://localhost:8080/api/practice";
-    const navigate = useNavigate();
-    const [gameModalOpen, setGameModalOpen] = useState(false);
-    const openGameModal = () => setGameModalOpen(true);
-
-
-
-
-    // --- NEW: State for topics/bands fetched from backend ---
     const [topics, setTopics] = useState<{ value: string, label: string }[]>([{ value: '', label: 'All Topics' }]);
     const [bands, setBands] = useState<{ value: string, label: string }[]>([{ value: '', label: 'All Bands' }]);
 
-    // --- Fetch topics/bands from backend ---
+    const [showAdd, setShowAdd] = useState(false);
+    const [editData, setEditData] = useState<VocabularyType | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+    const API_BASE = 'http://localhost:8080/api/practice';
+
     useEffect(() => {
         fetch(`${API_BASE}/vocabulary/topics`, { credentials: "include" })
             .then(res => res.json())
@@ -65,12 +60,12 @@ const VocabularyList: React.FC = () => {
             params.append('page', page.toString());
             params.append('size', pageSize.toString());
 
-            let url = `${API_BASE}/vocabulary/filter?${params.toString()}`;
-            const response = await fetch(url, {
-                headers: { 'Content-Type': 'application/json' },
-                credentials: "include"
+            const response = await fetch(`${API_BASE}/vocabulary/filter?${params.toString()}`, {
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
             });
-            if (!response.ok) throw new Error('Failed to fetch vocabularies');
+
+            if (!response.ok) throw new Error('Failed to fetch vocabulary');
             const data = await response.json();
             setVocabularies(data.content || []);
             setTotalPages(data.totalPages || 1);
@@ -82,29 +77,53 @@ const VocabularyList: React.FC = () => {
             setLoading(false);
         }
     };
-    const fetchAllFilteredVocabularies = async (): Promise<VocabularyType[]> => {
-        const { topic, band } = appliedFilters;
-        const params = new URLSearchParams();
-        if (search) params.append('keyword', search);
-        if (topic) params.append('topic', topic);
-        if (band) params.append('band', band);
-        params.append('page', '0');
-        params.append('size', '1000'); // hoặc số đủ lớn để lấy tất cả
-
-        const url = `${API_BASE}/vocabulary/filter?${params.toString()}`;
-        const response = await fetch(url, {
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-        });
-        const data = await response.json();
-        return data.content || [];
-    };
-
 
     useEffect(() => {
         if (user) fetchVocabularies();
-        // eslint-disable-next-line
-    }, [user, page, pageSize, appliedFilters.topic, appliedFilters.band, search]);
+    }, [user, page, search, appliedFilters]);
+
+    const handleAddVocabulary = async (vocab: Omit<VocabularyType, 'id'>) => {
+        try {
+            const response = await fetch(`${API_BASE}/vocabulary/add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(vocab)
+            });
+            if (!response.ok) throw new Error('Failed to add');
+            await fetchVocabularies();
+        } catch (err) {
+            setError('Failed to add vocabulary');
+        }
+    };
+
+    const handleEditVocabulary = async (id: string, vocab: Omit<VocabularyType, 'id'>) => {
+        try {
+            const response = await fetch(`${API_BASE}/vocabulary/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(vocab)
+            });
+            if (!response.ok) throw new Error('Failed to update');
+            await fetchVocabularies();
+        } catch {
+            setError('Failed to update vocabulary');
+        }
+    };
+
+    const handleDeleteVocabulary = async (id: string) => {
+        try {
+            const response = await fetch(`${API_BASE}/vocabulary/${id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            if (!response.ok) throw new Error('Failed to delete');
+            await fetchVocabularies();
+        } catch {
+            setError('Failed to delete vocabulary');
+        }
+    };
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -117,8 +136,12 @@ const VocabularyList: React.FC = () => {
         setPage(0);
     };
 
-    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchInput(e.target.value);
+    const resetFilters = () => {
+        setFilters({ topic: '', band: '' });
+        setAppliedFilters({ topic: '', band: '' });
+        setSearch('');
+        setSearchInput('');
+        setPage(0);
     };
 
     const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -128,191 +151,116 @@ const VocabularyList: React.FC = () => {
         }
     };
 
-    const resetFilters = () => {
-        setFilters({ topic: '', band: '' });
-        setAppliedFilters({ topic: '', band: '' });
-        setSearch('');
-        setSearchInput('');
-        setPage(0);
-        setTimeout(fetchVocabularies, 0);
-    };
-
-    if (!user) {
-        return <div className="text-center mt-12 text-lg text-gray-500">Please login to access vocabulary</div>;
-    }
-    if (loading) {
-        return <div className="text-center mt-12 text-lg text-gray-500">Loading...</div>;
-    }
-    if (error) {
-        return <div className="text-center mt-12 text-lg text-red-500">Error: {error}</div>;
-    }
-
+    if (!user) return <div className="text-center mt-12 text-lg text-gray-500">Please login to view vocabulary</div>;
+    if (loading) return <div className="text-center mt-12 text-lg text-gray-500">Loading...</div>;
+    if (error) return <div className="text-center mt-12 text-lg text-red-500">Error: {error}</div>;
 
     return (
-        <>
-            {/* Game Modal */}
-            <Dialog open={gameModalOpen} onOpenChange={setGameModalOpen}>
-                <DialogContent className="text-center">
-                    <DialogTitle>Chọn trò chơi</DialogTitle>
-                    <div className="flex flex-col gap-4 mt-4">
-                        <Button
-                            onClick={() => {
-                                navigate('/student/vocabulary-game', {
-                                    state: { vocabList: vocabularies }
-                                });
-                            }}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                        >
-                            🧠 Trắc nghiệm (Multiple Choice)
-                        </Button>
+        <motion.div
+            className="max-w-4xl mx-auto py-8 px-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}>
 
-                        <Button
-                            onClick={async () => {
-                                const allFilteredVocab = await fetchAllFilteredVocabularies();
-                                navigate('/student/vocabulary-matching-game', {
-                                    state: { vocabList: allFilteredVocab }
-                                });
-                            }}
-                            className="bg-green-600 hover:bg-green-700 text-white"
-                        >
-                            🔗 Ghép từ và nghĩa (Matching Game)
-                        </Button>
+            <h1 className="text-3xl font-bold text-emerald-700 text-center mb-6"> Vocabulary Management</h1>
 
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            {/* Trang chính Vocabulary */}
-            <div className="max-w-4xl mx-auto py-8 px-2 min-h-[80vh]">
-                <h1 className="text-2xl font-bold mb-6 text-center">Vocabulary</h1>
-                <Card className="mb-6 p-6">
-                    <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <div className="flex-1 flex gap-2">
-                            <Input
-                                type="text"
-                                placeholder="Search vocabulary..."
-                                value={searchInput}
-                                onChange={handleSearchInputChange}
-                                onKeyDown={handleSearchKeyDown}
-                                className="w-full px-2 py-2 rounded border border-gray-300"
-                            />
-                            <select
-                                name="topic"
-                                value={filters.topic}
-                                onChange={handleFilterChange}
-                                className="w-full px-2 py-2 rounded border border-gray-300"
-                            >
-                                {topics.map(t => (
-                                    <option key={t.value} value={t.value}>{t.label}</option>
-                                ))}
-                            </select>
-                            <select
-                                name="band"
-                                value={filters.band}
-                                onChange={handleFilterChange}
-                                className="w-full px-2 py-2 rounded border border-gray-300"
-                            >
-                                {bands.map(b => (
-                                    <option key={b.value} value={b.value}>{b.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="flex gap-2">
-                            <Button onClick={applyFilters} variant="outline"
-                                    className="hover:bg-emerald-600 hover:text-white">Apply Filters</Button>
-                            <Button onClick={resetFilters} variant="outline"
-                                    className="hover:bg-emerald-600 hover:text-white">Reset</Button>
-                            <Button onClick={openGameModal} variant="outline" className="hover:bg-blue-600 hover:text-white">🎮 Play Game</Button>
-                        </div>
-                    </div>
-                </Card>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-center">
-                    {vocabularies.length === 0 ? (
-                        <Card className="p-4 text-center text-gray-500 col-span-2">No vocabulary found.</Card>
-                    ) : (
-                        vocabularies.map((vocab) => (
-                            <VocabularyItemStudent
-                                key={vocab.id}
-                                vocabulary={vocab}
-                                onDetailClick={(v) => setSelectedVocab(v)}
-                            />
-                        ))
-                    )}
-                </div>
-
-                {/* Modal hiển thị chi tiết từ */}
-                {selectedVocab && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-                        <Card className="relative w-full max-w-xl mx-2 p-8">
-                            <button
-                                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl"
-                                onClick={() => setSelectedVocab(null)}
-                                aria-label="Close"
-                            >×</button>
-                            <h2 className="font-bold text-xl mb-3 flex items-center gap-2">
-                                {selectedVocab.word}
-                                {selectedVocab.partOfSpeech && (
-                                    <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-xs ml-2">
-                                    {selectedVocab.partOfSpeech}
-                                </span>
-                                )}
-                            </h2>
-                            {selectedVocab.pronunciation && (
-                                <div className="mb-2 text-gray-700">
-                                    <b>Transcription:</b> <span className="italic text-gray-500 text-base">{selectedVocab.pronunciation}</span>
-                                </div>
-                            )}
-                            <div className="mb-2 text-gray-700">
-                                <b>Translate:</b> {selectedVocab.translate}
-                            </div>
-                            <div className="mb-2 text-gray-700">
-                                <b>Explanation:</b> {selectedVocab.explanation}
-                            </div>
-                            {selectedVocab.exp?.length > 0 && (
-                                <div className="mt-2">
-                                    <div className="font-semibold text-gray-700 mb-1">Examples:</div>
-                                    <ul className="list-disc list-inside">
-                                        {selectedVocab.exp.map((ex, i) => (
-                                            <React.Fragment key={i}>
-                                                <li><span className="text-gray-800">{ex.esentence}</span></li>
-                                                <li className="list-none pl-6"><span className="text-gray-800">{ex.vsentence}</span></li>
-                                            </React.Fragment>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </Card>
-                    </div>
-                )}
-
-                <div className="flex justify-between items-center mt-6">
-                    <div>
-                    <span className="text-gray-600">
-                        Showing page {page + 1} of {totalPages} ({totalElements} items)
-                    </span>
+            <Card className="mb-6 p-6 shadow-md border border-emerald-200">
+                <div className="flex flex-col md:flex-row gap-4 items-center">
+                    <div className="flex-1 flex gap-2">
+                        <Input
+                            placeholder="Search word..."
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                            onKeyDown={handleSearchKeyDown}
+                        />
+                        <select name="topic" value={filters.topic} onChange={handleFilterChange} className="w-full px-2 py-2 border rounded">
+                            {topics.map(t => (
+                                <option key={t.value} value={t.value}>{t.label}</option>
+                            ))}
+                        </select>
+                        <select name="band" value={filters.band} onChange={handleFilterChange} className="w-full px-2 py-2 border rounded">
+                            {bands.map(b => (
+                                <option key={b.value} value={b.value}>{b.label}</option>
+                            ))}
+                        </select>
                     </div>
                     <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            disabled={page === 0}
-                            onClick={() => setPage(page - 1)}
-                        >
-                            Previous
-                        </Button>
-                        <Button
-                            variant="outline"
-                            disabled={page + 1 >= totalPages}
-                            onClick={() => setPage(page + 1)}
-                        >
-                            Next
-                        </Button>
+                        <Button onClick={applyFilters} className="bg-emerald-600 hover:bg-emerald-700 text-white">Apply</Button>
+                        <Button onClick={resetFilters} variant="outline" className="hover:bg-emerald-100 hover:text-emerald-700">Reset</Button>
+                        <Button onClick={() => setShowAdd(true)} className="bg-emerald-500 hover:bg-emerald-600 text-white">+ Add</Button>
                     </div>
                 </div>
-            </div>
-        </>
-    );
+            </Card>
 
+            <AnimatePresence>
+                {vocabularies.length === 0 ? (
+                    <Card className="p-4 text-center text-gray-500">No vocabulary found</Card>
+                ) : (
+                    <motion.div layout className="space-y-5">
+                        {vocabularies.map(vocab => (
+                            <VocabularyItem
+                                key={vocab.id}
+                                vocabulary={vocab}
+                                onEdit={(v) => setEditData(v)}
+                                onDelete={() => setConfirmDeleteId(vocab.id)}
+                            />
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <div className="flex justify-between items-center mt-6">
+                <span className="text-gray-600">Page {page + 1} / {totalPages} ({totalElements} words)</span>
+                <div className="flex gap-2">
+                    <Button variant="outline" disabled={page === 0} onClick={() => setPage(page - 1)}>Prev</Button>
+                    <Button variant="outline" disabled={page + 1 >= totalPages} onClick={() => setPage(page + 1)}>Next</Button>
+                </div>
+            </div>
+
+            <VocabularyFormModal
+                open={showAdd}
+                onClose={() => setShowAdd(false)}
+                onSubmit={handleAddVocabulary}
+                topics={topics}
+                bands={bands}
+            />
+            <VocabularyFormModal
+                open={!!editData}
+                onClose={() => setEditData(null)}
+                onSubmit={(updated) => {
+                    if (editData) handleEditVocabulary(editData.id, updated);
+                    setEditData(null);
+                }}
+                initialData={editData ? { ...editData, id: undefined } as any : undefined}
+                isEdit
+                topics={topics}
+                bands={bands}
+            />
+
+            {confirmDeleteId && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        className="bg-white rounded-lg shadow-lg p-6 w-[320px]">
+                        <h2 className="text-lg font-semibold mb-4 text-emerald-700">Confirm Delete</h2>
+                        <p className="text-gray-700 mb-6">Are you sure you want to delete this vocabulary?</p>
+                        <div className="flex justify-end gap-2">
+                            <Button variant="outline" className="hover:bg-emerald-100" onClick={() => setConfirmDeleteId(null)}>Cancel</Button>
+                            <Button className="bg-red-500 hover:bg-red-600 text-white"
+                                    onClick={() => {
+                                        handleDeleteVocabulary(confirmDeleteId);
+                                        setConfirmDeleteId(null);
+                                    }}>
+                                Delete
+                            </Button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </motion.div>
+    );
 };
 
-export default VocabularyList;
+export default Vocabulary;
