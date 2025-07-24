@@ -449,7 +449,7 @@ const SpeakingTest = () => {
         // Kiểm tra điều kiện tối thiểu trước khi submit
         if (!timeUp && totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3) {
             setMinRecordingWarningMsg(
-                `Bạn cần ghi âm tổng cộng ít nhất ${MIN_RECORDING_TIMES.part3} giây cho PART3 trước khi nộp bài. Hiện tại: ${Math.floor(totalRecordingTime.part3)} giây`,
+                `You need to record at least ${MIN_RECORDING_TIMES.part3} seconds for PART 3 before submitting. Current duration: ${Math.floor(totalRecordingTime.part3)} seconds.`,
             );
             setShowMinRecordingWarning(true);
             return; // Dừng lại nếu không đủ điều kiện
@@ -458,7 +458,7 @@ const SpeakingTest = () => {
         const answeredPart3 = countAnsweredPart3();
         if (answeredPart3 < 3) {
             setMinRecordingWarningMsg(
-                `Bạn cần trả lời (ghi âm) ít nhất 3 câu hỏi ở PART3 trước khi nộp bài. Hiện tại bạn mới trả lời ${answeredPart3} câu.`
+                `You need to answer (record) at least 3 questions in PART 3 before submitting. You have currently answered ${answeredPart3} question(s)`
             );
             setShowMinRecordingWarning(true);
             return;
