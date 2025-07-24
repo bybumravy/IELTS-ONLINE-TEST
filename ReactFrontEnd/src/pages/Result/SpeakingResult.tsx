@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import { urlDecrypt } from "@/lib/utils"
 
 interface StressMismatch {
@@ -160,7 +160,7 @@ const renderWordByWordHighlight = (
 
 export default function SpeakingResult() {
     const API_URL = import.meta.env.VITE_API_URL;
-
+    const navigate = useNavigate()
     const [data, setData] = useState<SpeakingAnswer | null>(null)
     const [loading, setLoading] = useState(true)
     const [activePart, setActivePart] = useState<"part1" | "part2" | "part3">("part1")
@@ -771,6 +771,13 @@ export default function SpeakingResult() {
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center">
             <div className="w-full max-w-4xl mx-auto px-2 sm:px-8 py-8">
+                <Button
+                    onClick={() => navigate(-1)}
+                    variant="outline"
+                    className="mb-4 border-green-600 text-green-600 hover:bg-green-50 bg-transparent"
+                >
+                    ← Back to Full Test
+                </Button>
                 {/* Header Section - Matching the design */}
                 <div className="bg-green-600 rounded-2xl p-4 mb-6 text-white">
                     <div className="text-center mb-4">

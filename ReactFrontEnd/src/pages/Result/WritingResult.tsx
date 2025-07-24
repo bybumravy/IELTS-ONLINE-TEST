@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Badge } from "@/components/ui/badge"
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 
 interface Review {
     scoreEva: string;
@@ -114,6 +114,7 @@ export default function WritingResult() {
             </div>
         )
     }
+    const navigate = useNavigate()
 
     const getScoreColor = (score: string) => {
         const numScore = Number.parseFloat(score)
@@ -589,6 +590,13 @@ export default function WritingResult() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ">
+                <Button
+                    onClick={() => navigate(-1)}
+                    variant="outline"
+                    className="mb-4 border-green-600 text-green-600 hover:bg-green-50 bg-transparent"
+                >
+                    ← Back to Full Test
+                </Button>
                 {/*/!* Header *!/*/}
                 {/*<div className="text-center mb-12">*/}
                 {/*    <h1 className="text-4xl font-bold text-slate-800 mb-4">IELTS Writing Results</h1>*/}
