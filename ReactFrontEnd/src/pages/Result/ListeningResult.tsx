@@ -1,44 +1,41 @@
 import { useEffect, useState } from "react"
-import { useAuth } from "@/contexts/AuthContext"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { CheckCircle, XCircle, Clock, Calendar, Target, TrendingUp, BookOpen, Download, Share2 } from "lucide-react"
-import { useNavigate, useParams } from "react-router-dom"
-const API_URL = import.meta.env.VITE_API_URL;
+import { CheckCircle, XCircle, Clock, Target, BookOpen, Headphones } from "lucide-react"
+import {useNavigate, useParams} from "react-router-dom"
+
+const API_URL = import.meta.env.VITE_API_URL
 
 export default function ListeningResult() {
-    const { user } = useAuth()
     const [result, setResult] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const { resultId } = useParams<{ resultId: string }>()
+    const [currentTaskIdx, setCurrentTaskIdx] = useState(0)
     const navigate = useNavigate()
 
     useEffect(() => {
-        if (!resultId) return;
-        setLoading(true);
+        if (!resultId) return
+        setLoading(true)
         fetch(`${API_URL}/api/result/listening/by-id?answerId=${resultId}`)
-            .then(res => {
-                if (!res.ok) throw new Error("Not found result");
-                return res.json();
+            .then((res) => {
+                if (!res.ok) throw new Error("Not found result")
+                return res.json()
             })
-            .then(data => {
-                setResult(data);
-                setLoading(false);
+            .then((data) => {
+                setResult(data)
+                setLoading(false)
             })
-            .catch(e => {
-                setError(e.message);
-                setLoading(false);
-            });
-    }, [resultId]);
+            .catch((e) => {
+                setError(e.message)
+                setLoading(false)
+            })
+    }, [resultId])
 
     // Total question, total correct, total incorrect, percentage
     const calcStats = (result: any) => {
         return {
-            percentage: result.totalQuestions ? Math.round((result.totalCorrect / result.totalQuestions) * 100) : 0
+            percentage: result.totalQuestions ? Math.round((result.totalCorrect / result.totalQuestions) * 100) : 0,
         }
     }
 
@@ -59,231 +56,255 @@ export default function ListeningResult() {
         if (band >= 5.0) return "Modest User"
         return "Limited User"
     }
+
     const isAnswerCorrect = (q: any, type: string) => {
         if (!q.studentAnswer || !q.answer) return false
-
-        const isSpecialType = type === 'multiple-choice' || type === 'dropdown'
-
+        const isSpecialType = type === "multiple-choice" || type === "dropdown"
         const extractFirstLetters = (ans: string) => {
             return ans
                 .split(",")
-                .map(s => s.trim().charAt(0).toUpperCase())
+                .map((s) => s.trim().charAt(0).toUpperCase())
                 .sort()
                 .join(",")
         }
-
         if (isSpecialType) {
             const student = extractFirstLetters(q.studentAnswer)
             const correct = extractFirstLetters(q.answer)
             return student === correct
         }
-
         const studentAns = q.studentAnswer.toString().trim().toLowerCase()
         const correctAns = q.answer.toString().trim().toLowerCase()
         return studentAns.includes(correctAns) || correctAns.includes(studentAns)
     }
 
-    if (loading) return <div className="p-8 text-center">Loading result...</div>
-    if (error) return <div className="p-8 text-center text-red-600">{error}</div>
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="text-center space-y-6">
+                    <div className="animate-spin rounded-full h-20 w-20 border-4 border-green-200 border-t-green-600 mx-auto"></div>
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2">Loading Your Results</h2>
+                        <p className="text-gray-600">Please wait while we prepare your detailed analysis...</p>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-12 text-center">
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Headphones className="h-10 w-10 text-gray-400" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">No Results Found</h2>
+                    <p className="text-gray-600">Please check your result ID and try again</p>
+                </div>
+            </div>
+        )
+    }
+
     if (!result) return null
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4">
-            <div className="max-w-6xl mx-auto space-y-6">
-                {/* Header */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <Avatar className="h-12 w-12">
-                                <AvatarImage src={"/placeholder.svg"} />
-                                <AvatarFallback>{user?.username?.charAt(0) || "U"}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <h1 className="text-2xl font-bold">IELTS Listening Result</h1>
-                                <p className="text-gray-600">
-                                    {user?.username}
-                                </p>
-                            </div>
+        <div className="min-h-screen bg-gray-100 flex flex-col items-center">
+            <div className="w-full max-w-4xl mx-auto px-2 sm:px-8 py-8">
+                <Button
+                    onClick={() => navigate(-1)}
+                    variant="outline"
+                    className="mb-4 border-green-600 text-green-600 hover:bg-green-50 bg-transparent"
+                >
+                    ← Back to Full Test
+                </Button>
+
+                {/* Header Section - Matching SpeakingResult design */}
+                <div className="bg-green-600 rounded-2xl p-4 mb-6 text-white">
+                    <div className="text-center mb-4">
+                        <p className="text-green-100 text-xs font-medium mb-1 uppercase tracking-wide">FINAL SCORE</p>
+                        <h1 className="text-2xl font-bold mb-4">IELTS Listening Result</h1>
+                    </div>
+                    <div className="flex justify-center">
+                        <div className="bg-green-50 rounded-2xl p-3 text-center w-32">
+                            <p className="text-green-600 text-xs font-medium mb-1">Band Score</p>
+                            <div className="text-3xl font-bold text-green-800 mb-1">{result.band}</div>
+                            <p className="text-green-600 text-xs">/9.0</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Test Info & Overall Score */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <CardTitle className="text-sm font-medium ml-2">Test Information</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-2">
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Submitted at:</span>
-                                    <span className="text-sm font-medium">{result.submittedAt}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Duration:</span>
-                                    <span className="text-sm font-medium">30 minutes</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Test ID:</span>
-                                    <span className="text-sm font-medium">{result.testId}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Total Questions:</span>
-                                    <span className="text-sm font-medium">{result.totalQuestions}</span>
-                                </div>
+                {/* Stats Navigation - Matching SpeakingResult design */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-6">
+                    <div className="bg-white rounded-2xl p-3 text-left border-2 border-gray-200">
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <Target className="h-3 w-3 text-green-600" />
                             </div>
-                        </CardContent>
-                    </Card>
+                            <div>
+                                <h3 className="font-bold text-green-600 text-xs">Accuracy</h3>
+                                <p className="text-gray-600 text-[10px]">{getBandDescription(result.band)}</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-lg font-bold text-green-600">{stats.percentage}%</span>
+                        </div>
+                    </div>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-                            <Target className="h-4 w-4 text-muted-foreground" />
-                            <CardTitle className="text-sm font-medium ml-2">Overall Band Score</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-center">
-                                <div className={`text-4xl font-bold ${getBandColor(result.band)}`}>{result.band}/9</div>
-                                <p className="text-sm text-gray-600 mt-1">{getBandDescription(result.band)}</p>
-                                <Progress value={stats.percentage} className="mt-3 [&>div]:bg-green-600" />
-                                <p className="text-xs text-gray-500 mt-1">{stats.percentage}% accuracy</p>
+                    <div className="bg-white rounded-2xl p-3 text-left border-2 border-gray-200">
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <CheckCircle className="h-3 w-3 text-green-600" />
                             </div>
-                        </CardContent>
-                    </Card>
+                            <div>
+                                <h3 className="font-bold text-green-600 text-xs">Correct</h3>
+                                <p className="text-gray-600 text-[10px]">Questions answered correctly</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-lg font-bold text-green-600">
+                            {result.totalCorrect}/{result.totalQuestions}
+                          </span>
+                        </div>
+                    </div>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                            <CardTitle className="text-sm font-medium ml-2">Results</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-2">
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Correct:</span>
-                                    <span className="text-sm font-medium text-green-600">{result.totalCorrect}/{result.totalQuestions}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Incorrect:</span>
-                                    <span className="text-sm font-medium text-red-600">{result.totalQuestions - result.totalCorrect}/{result.totalQuestions}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Accuracy:</span>
-                                    <span className="text-sm font-medium">{stats.percentage}%</span>
-                                </div>
+                    <div className="bg-white rounded-2xl p-3 text-left border-2 border-gray-200">
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <Clock className="h-3 w-3 text-green-600" />
                             </div>
-                        </CardContent>
-                    </Card>
+                            <div>
+                                <h3 className="font-bold text-green-600 text-xs">Duration</h3>
+                                <p className="text-gray-600 text-[10px]">Test completion time</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-lg font-bold text-green-600">60 min</span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Detailed Results */}
-                <Tabs defaultValue="sections" className="space-y-4">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="sections">By Section</TabsTrigger>
-                        <TabsTrigger value="detailed">Detailed View</TabsTrigger>
-                    </TabsList>
+                {/* Task Navigation Buttons */}
+                <div className="flex flex-wrap gap-2 justify-center mb-6">
+                    {result.tasks?.map((task: any, idx: number) => (
+                        <button
+                            key={idx}
+                            onClick={() => setCurrentTaskIdx(idx)}
+                            className={`px-4 py-2 rounded-lg border text-sm font-semibold transition-all ${
+                                currentTaskIdx === idx
+                                    ? "bg-green-600 text-white border-green-600 shadow"
+                                    : "bg-white text-green-700 border-green-200 hover:bg-green-50"}`}>
+                            Part {task.taskNumber}
+                        </button>
+                    ))}
+                </div>
 
-                    <TabsContent value="sections" className="space-y-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Performance by Task</CardTitle>
-                                <CardDescription>Breakdown of each section</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    {result.tasks?.map((task: any, tIdx: number) => (
-                                        <div key={tIdx} className="mb-4">
-                                            <div className="font-bold mb-2">Task {task.taskNumber}</div>
-                                            {task.sections?.map((section: any, sIdx: number) => {
-                                                const total = section.questions?.length || 0
-                                                const correct = section.questions?.filter((q: any) => isAnswerCorrect(q, section.type)).length || 0
+                {/* Combined Content - Performance Overview + Detailed Questions */}
+                <div className="space-y-6">
+                    {/* Performance Overview */}
+                    {result.tasks && result.tasks[currentTaskIdx] && (
+                        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <Target className="h-5 w-5 text-green-600" />
+                                Part {result.tasks[currentTaskIdx].taskNumber} - Performance Overview
+                            </h3>
 
-                                                const percent = total ? Math.round((correct / total) * 100) : 0
-                                                return (
-                                                    <div key={sIdx} className="space-y-2 mb-2">
-                                                        <div className="flex justify-between items-center">
-                                                            <div>
-                                                                <h4 className="font-medium">Section {section.sectionNumber} ({section.type})</h4>
-                                                                <p className="text-sm text-gray-600">Questions: {total}</p>
-                                                            </div>
-                                                            <div className="text-right">
-                                                                <p className="font-medium">{correct}/{total}</p>
-                                                                <p className="text-sm text-gray-600">{percent}%</p>
-                                                            </div>
-                                                        </div>
-                                                        <Progress value={percent} className="[&>div]:bg-green-600" />
-                                                    </div>
-                                                )
-                                            })}
+                            <div className="space-y-4">
+                                {result.tasks[currentTaskIdx].sections?.map((section: any, sIdx: number) => {
+                                    const total = section.questions?.length || 0
+                                    const correct = section.questions?.filter((q: any) => isAnswerCorrect(q, section.type)).length || 0
+                                    const percent = total ? Math.round((correct / total) * 100) : 0
+
+                                    return (
+                                        <div key={sIdx} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <div>
+                                                    <h5 className="font-medium text-gray-800">Section {section.sectionNumber}</h5>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-xl font-bold text-green-600">
+                                                        {correct}/{total}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600">{percent}%</p>
+                                                </div>
+                                            </div>
+                                            <Progress value={percent} className="[&>div]:bg-green-600" />
                                         </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    )}
 
-                    <TabsContent value="detailed" className="space-y-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Question Details</CardTitle>
-                                <CardDescription>Your answers, correct answers</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-6 max-h-96 overflow-y-auto">
-                                    {result.tasks?.flatMap((task: any) =>
-                                        task.sections?.flatMap((section: any) =>
-                                            section.questions?.map((q: any, idx: number) => {
-                                                const correct = isAnswerCorrect(q, section.type)
-                                                return (
-                                                    <div key={idx} className="border rounded-lg p-4 space-y-4">
-                                                        <div className="flex items-center gap-3 pb-2 border-b">
-                                                            {correct ? (
-                                                                <CheckCircle className="h-5 w-5 text-green-600" />
-                                                            ) : (
-                                                                <XCircle className="h-5 w-5 text-red-600" />
-                                                            )}
-                                                            <span className="font-bold text-lg">Question</span>
-                                                            <span
-                                                                className={`px-2 py-1 rounded text-xs font-medium 
-                                                                ${correct ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                                                                {correct ? "Correct" : "Incorrect"}
-                                                            </span>
+                    {/* Detailed Questions */}
+                    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                            <BookOpen className="h-5 w-5 text-green-600" />
+                            Part {result.tasks?.[currentTaskIdx]?.taskNumber} - Question Details
+                        </h3>
+
+                        <div className="space-y-4 max-h-96 overflow-y-auto">
+                            {result.tasks?.[currentTaskIdx]?.sections?.flatMap((section: any) =>
+                                    section.questions?.map((q: any, idx: number) => {
+                                        const correct = isAnswerCorrect(q, section.type)
+                                        return (
+                                            <div key={idx} className="bg-white border border-gray-200 rounded-2xl p-6">
+                                                <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
+                                                    <div
+                                                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                                            correct ? "bg-green-100" : "bg-red-100"
+                                                        }`}
+                                                    >
+                                                        {correct ? (
+                                                            <CheckCircle className="h-5 w-5 text-green-600" />
+                                                        ) : (
+                                                            <XCircle className="h-5 w-5 text-red-600" />
+                                                        )}
+                                                    </div>
+                                                    <span className="font-bold text-lg text-gray-800">Question {idx + 1}</span>
+                                                    <span
+                                                        className={`px-3 py-1 rounded-full text-xs font-medium ml-auto
+                                                     ${correct ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                                                                                >
+                                                      {correct ? "Correct" : "Incorrect"}
+                                                    </span>
+                                                </div>
+
+                                                <div className="space-y-4 mt-4">
+                                                    <div>
+                                                        <h4 className="font-medium text-gray-900 mb-2">Question:</h4>
+                                                        <p className="text-gray-700 bg-gray-50 rounded-xl p-4">{q.question}</p>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div className="bg-gray-50 rounded-xl p-4">
+                                                            <p className="text-sm font-medium text-gray-600 mb-2">Your answer:</p>
+                                                            <p className={`font-medium ${correct ? "text-green-600" : "text-red-600"}`}>
+                                                                {q.studentAnswer || <span className="italic text-gray-400">(Not answered)</span>}
+                                                            </p>
                                                         </div>
-                                                        <div className="space-y-2">
-                                                            <h4 className="font-medium text-gray-900">Question:</h4>
-                                                            <p className="text-gray-700">{q.question}</p>
-                                                        </div>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-gray-50 rounded">
-                                                            <div>
-                                                                <p className="text-sm text-gray-600">Your answer:</p>
-                                                                <p className={`font-medium ${correct ? "text-green-600" : "text-red-600"}`}>
-                                                                    {q.studentAnswer || <span className="italic text-gray-400">(Not answered)</span>}
-                                                                </p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm text-gray-600">Correct answer:</p>
-                                                                <p className="font-medium text-green-600">{q.answer}</p>
-                                                            </div>
-                                                            {q.explanation && (
-                                                                <div className="col-span-2">
-                                                                    <p className="text-sm text-gray-600 mt-3">Explanation:</p>
-                                                                    <div
-                                                                        className="text-sm text-gray-800 p-2 bg-gray-100 rounded"
-                                                                        dangerouslySetInnerHTML={{ __html: q.explanation }}
-                                                                    />
-                                                                </div>
-                                                            )}
+                                                        <div className="bg-green-50 rounded-xl p-4">
+                                                            <p className="text-sm font-medium text-gray-600 mb-2">Correct answer:</p>
+                                                            <p className="font-medium text-green-600">{q.answer}</p>
                                                         </div>
                                                     </div>
-                                                )
-                                            })
+
+                                                    {q.explanation && (
+                                                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                                            <p className="text-sm font-medium text-blue-800 mb-2">Explanation:</p>
+                                                            <div
+                                                                className="text-sm text-gray-800"
+                                                                dangerouslySetInnerHTML={{ __html: q.explanation }}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         )
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
+                                    }),
+                            )}
+                        </div>
+                    </div>
+                </div>
 
                 {/* Action Buttons */}
                 <div className="flex justify-center gap-4">

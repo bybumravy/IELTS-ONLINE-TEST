@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { VocabularyItemStudent } from '@/components/ui/vocabulary/VocabularyItemStudent.tsx';
 import { useNavigate } from 'react-router-dom';
+import {HeroSection} from "@/components/sections/HeroSection.tsx";
 
 
 const VocabularyList: React.FC = () => {
@@ -132,132 +133,135 @@ const VocabularyList: React.FC = () => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto py-8 px-2 min-h-[80vh]">
-            <h1 className="text-2xl font-bold mb-6 text-center">Vocabulary</h1>
-            <Card className="mb-6 p-6">
-                <div className="flex flex-col md:flex-row gap-4 items-center">
-                    <div className="flex-1 flex gap-2">
-                        <Input
-                            type="text"
-                            placeholder="Search vocabulary..."
-                            value={searchInput}
-                            onChange={handleSearchInputChange}
-                            onKeyDown={handleSearchKeyDown}
-                            className="w-full px-2 py-2 rounded border border-gray-300"
-                        />
-                        <select
-                            name="topic"
-                            value={filters.topic}
-                            onChange={handleFilterChange}
-                            className="w-full px-2 py-2 rounded border border-gray-300"
-                        >
-                            {topics.map(t => (
-                                <option key={t.value} value={t.value}>{t.label}</option>
-                            ))}
-                        </select>
-                        <select
-                            name="band"
-                            value={filters.band}
-                            onChange={handleFilterChange}
-                            className="w-full px-2 py-2 rounded border border-gray-300"
-                        >
-                            {bands.map(b => (
-                                <option key={b.value} value={b.value}>{b.label}</option>
-                            ))}
-                        </select>
+        <div className="min-h-screen bg-gray-50">
+            <HeroSection />
+            <div className="max-w-4xl mx-auto py-8 px-2 min-h-[80vh]">
+                <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Vocabulary</h1>
+                <Card className="mb-6 p-6">
+                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                        <div className="flex-1 flex gap-2">
+                            <Input
+                                type="text"
+                                placeholder="Search vocabulary..."
+                                value={searchInput}
+                                onChange={handleSearchInputChange}
+                                onKeyDown={handleSearchKeyDown}
+                                className="w-full px-2 py-2 rounded border border-gray-300"
+                            />
+                            <select
+                                name="topic"
+                                value={filters.topic}
+                                onChange={handleFilterChange}
+                                className="w-full px-2 py-2 rounded border border-gray-300"
+                            >
+                                {topics.map(t => (
+                                    <option key={t.value} value={t.value}>{t.label}</option>
+                                ))}
+                            </select>
+                            <select
+                                name="band"
+                                value={filters.band}
+                                onChange={handleFilterChange}
+                                className="w-full px-2 py-2 rounded border border-gray-300"
+                            >
+                                {bands.map(b => (
+                                    <option key={b.value} value={b.value}>{b.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex gap-2">
+                            <Button onClick={applyFilters} variant="outline"
+                                    className="hover:bg-emerald-600 hover:text-white">Apply Filters</Button>
+                            <Button onClick={resetFilters} variant="outline"
+                                    className="hover:bg-emerald-600 hover:text-white">Reset</Button>
+                            <Button onClick={goToGame} variant="outline" className="hover:bg-blue-600 hover:text-white">🎮 Play Game</Button>
+                        </div>
                     </div>
-                    <div className="flex gap-2">
-                        <Button onClick={applyFilters} variant="outline"
-                                className="hover:bg-emerald-600 hover:text-white">Apply Filters</Button>
-                        <Button onClick={resetFilters} variant="outline"
-                                className="hover:bg-emerald-600 hover:text-white">Reset</Button>
-                        <Button onClick={goToGame} variant="outline" className="hover:bg-blue-600 hover:text-white">🎮 Play Game</Button>
-                    </div>
+                </Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-center">
+                    {vocabularies.length === 0 ? (
+                        <Card className="p-4 text-center text-gray-500 col-span-2">No vocabulary found.</Card>
+                    ) : (
+                        vocabularies.map((vocab) => (
+                            <VocabularyItemStudent
+                                key={vocab.id}
+                                vocabulary={vocab}
+                                onDetailClick={(v) => setSelectedVocab(v)}
+                            />
+                        ))
+                    )}
                 </div>
-            </Card>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-center">
-                {vocabularies.length === 0 ? (
-                    <Card className="p-4 text-center text-gray-500 col-span-2">No vocabulary found.</Card>
-                ) : (
-                    vocabularies.map((vocab) => (
-                        <VocabularyItemStudent
-                            key={vocab.id}
-                            vocabulary={vocab}
-                            onDetailClick={(v) => setSelectedVocab(v)}
-                        />
-                    ))
-                )}
-            </div>
-            {/* Modal detail: bổ sung phiên âm và loại từ */}
-            {selectedVocab && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-                    <Card className="relative w-full max-w-xl mx-2 p-8">
-                        <button
-                            className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl"
-                            onClick={() => setSelectedVocab(null)}
-                            aria-label="Close"
-                        >×
-                        </button>
-                        <h2 className="font-bold text-xl mb-3 flex items-center gap-2">
-                            {selectedVocab.word}
-                            {selectedVocab.partOfSpeech && (
-                                <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-xs ml-2">
+                {/* Modal detail: bổ sung phiên âm và loại từ */}
+                {selectedVocab && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                        <Card className="relative w-full max-w-xl mx-2 p-8">
+                            <button
+                                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl"
+                                onClick={() => setSelectedVocab(null)}
+                                aria-label="Close"
+                            >×
+                            </button>
+                            <h2 className="font-bold text-xl mb-3 flex items-center gap-2">
+                                {selectedVocab.word}
+                                {selectedVocab.partOfSpeech && (
+                                    <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-xs ml-2">
                                     {selectedVocab.partOfSpeech}
                                 </span>
+                                )}
+                            </h2>
+                            {selectedVocab.pronunciation && (
+                                <div className="mb-2 text-gray-700">
+                                    <b>Transcription:</b> <span className="italic text-gray-500 text-base">{selectedVocab.pronunciation}</span>
+                                </div>
                             )}
-                        </h2>
-                        {selectedVocab.pronunciation && (
                             <div className="mb-2 text-gray-700">
-                                <b>Transcription:</b> <span className="italic text-gray-500 text-base">{selectedVocab.pronunciation}</span>
+                                <b>Translate:</b> {selectedVocab.translate}
                             </div>
-                        )}
-                        <div className="mb-2 text-gray-700">
-                            <b>Translate:</b> {selectedVocab.translate}
-                        </div>
-                        <div className="mb-2 text-gray-700">
-                            <b>Explanation:</b> {selectedVocab.explanation}
-                        </div>
-                        {selectedVocab.exp?.length > 0 && (
-                            <div className="mt-2">
-                                <div className="font-semibold text-gray-700 mb-1">Examples:</div>
-                                <ul className="list-disc list-inside">
-                                    {selectedVocab.exp.map((ex, i) => (
-                                        <React.Fragment key={i}>
-                                            <li>
-                                                <span className="text-gray-800"> {ex.esentence}</span>
-                                            </li>
-                                            <li className="list-none pl-6"> {/* Lùi vào và loại bỏ dấu chấm */}
-                                                <span className="text-gray-800"> {ex.vsentence}</span>
-                                            </li>
-                                        </React.Fragment>
-                                    ))}
-                                </ul>
+                            <div className="mb-2 text-gray-700">
+                                <b>Explanation:</b> {selectedVocab.explanation}
                             </div>
-                        )}
-                    </Card>
-                </div>
-            )}
-            <div className="flex justify-between items-center mt-6">
-                <div>
+                            {selectedVocab.exp?.length > 0 && (
+                                <div className="mt-2">
+                                    <div className="font-semibold text-gray-700 mb-1">Examples:</div>
+                                    <ul className="list-disc list-inside">
+                                        {selectedVocab.exp.map((ex, i) => (
+                                            <React.Fragment key={i}>
+                                                <li>
+                                                    <span className="text-gray-800"> {ex.esentence}</span>
+                                                </li>
+                                                <li className="list-none pl-6"> {/* Lùi vào và loại bỏ dấu chấm */}
+                                                    <span className="text-gray-800"> {ex.vsentence}</span>
+                                                </li>
+                                            </React.Fragment>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </Card>
+                    </div>
+                )}
+                <div className="flex justify-between items-center mt-6">
+                    <div>
                     <span className="text-gray-600">
                         Showing page {page + 1} of {totalPages} ({totalElements} items)
                     </span>
-                </div>
-                <div className="flex gap-2">
-                    <Button
-                        variant="outline"
-                        disabled={page === 0}
-                        onClick={() => setPage(page - 1)}
-                    >
-                        Previous
-                    </Button>
-                    <Button
-                        variant="outline"
-                        disabled={page + 1 >= totalPages}
-                        onClick={() => setPage(page + 1)}
-                    >
-                        Next
-                    </Button>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            disabled={page === 0}
+                            onClick={() => setPage(page - 1)}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            disabled={page + 1 >= totalPages}
+                            onClick={() => setPage(page + 1)}
+                        >
+                            Next
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -48,6 +48,8 @@ export default function ReviewReport() {
     const [newNote, setNewNote] = useState("")
     const [responseMessage, setResponseMessage] = useState("")
     const [dailyStats, setDailyStats] = useState<{ date: string; count: number }[]>([])
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPerPage = 3
     // Filter function
     const applyFilters = () => {
         const filtered = reports.filter((report) => {
@@ -67,6 +69,7 @@ export default function ReviewReport() {
         })
 
         setFilteredReports(filtered)
+        setCurrentPage(1)
     }
     useEffect(() => {
         applyFilters()
@@ -136,7 +139,10 @@ export default function ReviewReport() {
         return <p>Loading report data...</p>
     }
 
-
+    const paginatedData = filteredReports.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    )
     return (
         <div className="container mx-auto p-6 space-y-6">
             <div className="flex justify-between items-center">
@@ -144,10 +150,6 @@ export default function ReviewReport() {
                     <h1 className="text-3xl font-bold">Student Report Management</h1>
                     <p className="text-muted-foreground">View and manage reports from IELTS students</p>
                 </div>
-                <Button className="gap-2 bg-green-800 hover:bg-green-500">
-                    <Download className="h-4 w-4 " />
-                    Export Reports
-                </Button>
             </div>
 
             <Tabs defaultValue="reports" className="space-y-6">
@@ -253,7 +255,7 @@ export default function ReviewReport() {
                                 </TableHeader>
                                 <TableBody>
                                     <>
-                                        {filteredReports.map((report) => (
+                                        {paginatedData.map((report) => (
                                             <TableRow key={report.id}>
                                                 <TableCell>
                                                     <div>
@@ -279,7 +281,7 @@ export default function ReviewReport() {
                                                             </DialogTrigger>
                                                             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                                                                 <DialogHeader>
-                                                                    <DialogTitle>Detail Report #{report.id}</DialogTitle>
+                                                                    <DialogTitle>Detail Report</DialogTitle>
                                                                     <DialogDescription>
                                                                         From {report.username}
                                                                     </DialogDescription>
@@ -330,67 +332,6 @@ export default function ReviewReport() {
                                                                             <p className="mt-1 text-blue-600">{report.relatedLesson}</p>
                                                                         </div>
                                                                     )}
-
-                                                                    {/* Notes */}
-                                                                    <div>
-                                                                        <Label className="text-sm font-medium">Notes</Label>
-                                                                        <div className="mt-2 space-y-2">
-                                                                            {report.notes?.map((note, index) => (
-                                                                                <div key={index} className="p-3 bg-blue-50 rounded border-l-4 border-blue-400">
-                                                                                    <p className="text-sm">{note}</p>
-                                                                                    <p className="text-xs text-muted-foreground mt-1">
-                                                                                        {format(new Date(), "dd/MM/yyyy HH:mm")}
-                                                                                    </p>
-                                                                                </div>
-                                                                            ))}
-                                                                        </div>
-
-                                                                        <div className="mt-4 space-y-2">
-                                                                            <Textarea
-                                                                                placeholder="Add new note..."
-                                                                                value={newNote}
-                                                                                onChange={(e) => setNewNote(e.target.value)}
-                                                                            />
-                                                                            <Button
-                                                                                onClick={() => {
-                                                                                    if (newNote.trim()) {
-                                                                                        addNoteToReport(report.id, newNote)
-                                                                                        setNewNote("")
-                                                                                    }
-                                                                                }}
-                                                                                size="sm"
-                                                                            >
-                                                                                Add Note
-                                                                            </Button>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {/* Actions */}
-                                                                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4 pt-4 border-t">
-                                                                        {/* Send Response */}
-                                                                        <div className="space-y-2">
-                                                                            <Label>Send Response</Label>
-                                                                            <Textarea
-                                                                                placeholder="Response content..."
-                                                                                value={responseMessage}
-                                                                                onChange={(e) => setResponseMessage(e.target.value)}
-                                                                                rows={3}
-                                                                            />
-                                                                            <Button
-                                                                                onClick={() => {
-                                                                                    if (responseMessage.trim()) {
-                                                                                        // Send response logic here
-                                                                                        setResponseMessage("")
-                                                                                    }
-                                                                                }}
-                                                                                size="sm"
-                                                                                className="w-full"
-                                                                            >
-                                                                                <MessageSquare className="h-4 w-4 mr-2" />
-                                                                                Send Response
-                                                                            </Button>
-                                                                        </div>
-                                                                    </div>
                                                                 </div>
                                                             </DialogContent>
                                                         </Dialog>
@@ -402,6 +343,28 @@ export default function ReviewReport() {
                                 </TableBody>
                             </Table>
                         </CardContent>
+                            {filteredReports.length > itemsPerPage && (
+                                <div className="flex justify-center items-center gap-2 mt-6">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                    >
+                                        Previous
+                                    </Button>
+                                    <span className="text-sm text-gray-700">
+                              Page {currentPage} of {Math.ceil(filteredReports.length / itemsPerPage)}
+                            </span>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() =>
+                                            setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(filteredReports.length / itemsPerPage)))}
+                                        disabled={currentPage === Math.ceil(filteredReports.length / itemsPerPage)}
+                                    >
+                                        Next
+                                    </Button>
+                                </div>
+                            )}
                     </Card>
                     </div>
                 </TabsContent>
@@ -514,30 +477,6 @@ export default function ReviewReport() {
                             </CardContent>
                         </Card>
                     </div>
-
-                    {/* Export Options */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Report Export</CardTitle>
-                            <CardDescription>Generate detailed report about student report processing activities</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <Button variant="outline" className="justify-start bg-transparent">
-                                    <Download className="h-4 w-4 mr-2" />
-                                    Export Excel
-                                </Button>
-                                <Button variant="outline" className="justify-start bg-transparent">
-                                    <Download className="h-4 w-4 mr-2" />
-                                    Export PDF
-                                </Button>
-                                <Button variant="outline" className="justify-start bg-transparent">
-                                    <Download className="h-4 w-4 mr-2" />
-                                    Export CSV
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
                 </TabsContent>
             </Tabs>
         </div>

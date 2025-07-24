@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
+import {HeroSection} from "@/components/sections/HeroSection.tsx";
 
 type Skill = "Listening" | "Reading" | "Writing" | "Speaking";
 
@@ -86,6 +87,7 @@ function TipPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            <HeroSection />
             <div className="container mx-auto min-h-screen bg-gray-50">
                 <Card className="mb-8 shadow-md">
                     <CardContent className="py-8">

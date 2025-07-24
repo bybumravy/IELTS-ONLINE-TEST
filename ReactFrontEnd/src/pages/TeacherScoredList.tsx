@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {Search, Eye, FileText, TrendingUp, Calendar, RefreshCw} from "lucide-react"
+import {Search, Download, Eye, MoreHorizontal, FileText, Users, TrendingUp, Calendar, RefreshCw} from "lucide-react"
 import {Label} from "@/components/ui/label.tsx";
 import {format} from "date-fns";
 
@@ -30,6 +30,8 @@ export default function TeacherScoredList() {
     const [dateRange, setDateRange] = useState<{ from: string; to: string } | null>(null)
     const [dateFrom, setDateFrom] = useState<Date | null>(null)
     const [dateTo, setDateTo] = useState<Date | null>(null)
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPerPage = 5
 
 
     const handleFilter = () => {
@@ -47,6 +49,7 @@ export default function TeacherScoredList() {
             return matchesSearch && matchesBand && matchesDate
         })
         setFilteredData(filtered)
+        setCurrentPage(1)
     }
 
     useEffect(() => {
@@ -68,6 +71,10 @@ export default function TeacherScoredList() {
         console.log("Viewing details for:", id)
         // router.push(`/teacher/writing/${id}`)
     }
+    const paginatedData = filteredData.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    )
 
     const getBandColor = (band: number) => {
         if (band >= 8) return "text-green-600 font-bold"
@@ -87,11 +94,11 @@ export default function TeacherScoredList() {
     }
 
     const stats = calculateStats()
-    const API_URL = import.meta.env.VITE_API_URL;
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch(`${API_URL}/verify/allwriting`, {
+                const res = await fetch("http://localhost:8080/verify/allwriting", {
                     credentials: "include", // nếu backend yêu cầu
                 });
                 if (!res.ok) throw new Error("Failed to fetch");
@@ -290,11 +297,10 @@ export default function TeacherScoredList() {
                                         <TableHead className="font-semibold text-center">Task 2</TableHead>
                                         <TableHead className="font-semibold text-center">Band Score</TableHead>
                                         <TableHead className="font-semibold">Date</TableHead>
-                                        <TableHead className="font-semibold text-center">View Details</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {filteredData.map((item) => (
+                                    {paginatedData.map((item) => (
                                         <TableRow key={item._id} className="hover:bg-gray-50">
                                             <TableCell className="font-medium">{item.username}</TableCell>
                                             <TableCell>
@@ -318,13 +324,6 @@ export default function TeacherScoredList() {
                                             <TableCell className="text-gray-600">
                                                 {item.submittedAt ? format(new Date(item.submittedAt), "dd/MM/yyyy") : ""}
                                             </TableCell>
-                                            <TableCell className="text-center">
-                                                <Button variant="outline" size="sm" onClick={() => handleViewDetails(item._id)}>
-                                                    <Eye className="h-4 w-4 mr-2" />
-                                                    View
-                                                </Button>
-                                            </TableCell>
-
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -339,6 +338,28 @@ export default function TeacherScoredList() {
                             </div>
                         )}
                     </CardContent>
+                    {filteredData.length > itemsPerPage && (
+                        <div className="flex justify-center items-center gap-2 mt-6">
+                            <Button
+                                variant="outline"
+                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                            >
+                                Previous
+                            </Button>
+                            <span className="text-sm text-gray-700">
+                              Page {currentPage} of {Math.ceil(filteredData.length / itemsPerPage)}
+                            </span>
+                            <Button
+                                variant="outline"
+                                onClick={() =>
+                                    setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(filteredData.length / itemsPerPage)))}
+                                disabled={currentPage === Math.ceil(filteredData.length / itemsPerPage)}
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    )}
                 </Card>
             </div>
         </div>
