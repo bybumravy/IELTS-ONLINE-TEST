@@ -1,8 +1,7 @@
-// AI Chat Service đa năng cho box chat động
 export async function askAI(question: string, chatHistory: {role: "user"|"ai", text: string}[]): Promise<string> {
   const API_URL = import.meta.env.VITE_API_URL;
   try {
-    // Chuyển đổi chatHistory sang format OpenAI (role: user/assistant)
+    // Convert chatHistory to OpenAI format (role: user/assistant)
     const messages = chatHistory.map(m => ({
       role: m.role === "user" ? "user" : "assistant",
       content: m.text
@@ -16,6 +15,6 @@ export async function askAI(question: string, chatHistory: {role: "user"|"ai", t
     const text = await res.text();
     return text;
   } catch (e: any) {
-    return "[AI lỗi]: " + (e?.message || "Không thể kết nối AI backend");
+    return "[AI error]: " + (e?.message || "Cannot connect to AI backend");
   }
 } 

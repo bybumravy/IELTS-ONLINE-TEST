@@ -131,7 +131,7 @@ export default function Report({ isOpen, onClose }: FeedbackModalProps) {
                                 <MessageSquare className="w-5 h-5 text-orange-600" />
                             </div>
                             <div>
-                                <DialogTitle className="text-xl font-bold">Send Feedback to Manager</DialogTitle>
+                                <DialogTitle className="text-xl font-bold">Send Feedback</DialogTitle>
                                 <DialogDescription>Share your feedback, suggestions, or issues with us</DialogDescription>
                             </div>
                         </div>

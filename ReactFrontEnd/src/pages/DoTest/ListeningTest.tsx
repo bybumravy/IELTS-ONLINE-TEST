@@ -144,8 +144,8 @@ export default function ListeningTest() {
             audio.play()
                 .then(() => setIsPlaying(true))
                 .catch((err) => {
-                    console.error("Không thể phát âm thanh:", err);
-                    setIsPlaying(false); // giữ trạng thái đúng nếu lỗi
+                    console.error("Cannot play audio:", err);
+                    setIsPlaying(false); // keep correct state if error
                 });
         }
     };
@@ -226,7 +226,7 @@ export default function ListeningTest() {
                 });
             }
             const result = await res.json();
-            alert("Submit thành công!");
+            alert("Submit successful!");
             if (mode === "fulltest") {
                 navigate(`/test/reading/${testId}?testAnswerId=${testAnswerId}&mode=${mode}`);
             } else {
@@ -234,7 +234,7 @@ export default function ListeningTest() {
             }
         } catch (error) {
             console.error(error);
-            alert("Lỗi khi submit.");
+            alert("Error when submitting.");
         }
     };
 
@@ -256,7 +256,7 @@ export default function ListeningTest() {
                         onSubmit={handleSubmit}
                         isDarkMode={isDarkMode}
                         toggleDarkMode={toggleDarkMode}
-                        onFullscreenToggle={handleFullscreen} // truyền hàm fullscreen
+                        onFullscreenToggle={handleFullscreen} // pass fullscreen handler
                         isHighlightMode={isHighlightMode}
                         toggleHighlightMode={toggleHighlightMode}
                     />

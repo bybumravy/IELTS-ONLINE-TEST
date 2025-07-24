@@ -21,6 +21,17 @@ public class WritingAnswer {
     public WritingAnswer() {
     }
 
+    public WritingAnswer(String id, String username, String testId, TaskWritingAnswer task1, TaskWritingAnswer task2, String gradingMethod, double band, LocalDateTime submittedAt) {
+        this.id = id;
+        this.username = username;
+        this.testId = testId;
+        this.task1 = task1;
+        this.task2 = task2;
+        this.gradingMethod = gradingMethod;
+        this.band = band;
+        this.submittedAt = submittedAt;
+    }
+
     public String getGradingMethod() {
         return gradingMethod;
     }

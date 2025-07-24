@@ -58,7 +58,7 @@ const ForgetPasswordPage = () => {
             }
 
             // ✅ THÀNH CÔNG → Thông báo cứng
-            alert("Hãy kiểm tra Gmail để reset mật khẩu.");
+            alert("Please check your Gmail to reset your password.");
             setEmail(""); // Clear input
         } catch (err: any) {
             setEmailError(err.message || "Đã xảy ra lỗi");

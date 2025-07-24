@@ -22,7 +22,7 @@
     import java.util.regex.Matcher;
     import java.util.regex.Pattern;
     import java.util.stream.Collectors;
-    import org.springframework.beans.factory.annotation.Autowired;
+    import web.ielts.Test.model.answer.speaking.WordInfo;
 
 
 
@@ -215,10 +215,11 @@
             }
         }
 
-        private FeedBackAI callOpenAIScorePronunciation(String transcript, List<StressMismatch> stressMismatches, List<String> importantWords, List<String> emphasizedWords, String azureJsonResult) {
+        private FeedBackAI callOpenAIScorePronunciation(String transcript, List<StressMismatch> stressMismatches, List<String> importantWords, List<String> emphasizedWords, String azureJsonResult, int partNumber) {
             try {
                 StringBuilder prompt = new StringBuilder();
                 prompt.append("You are a certified IELTS Speaking examiner specializing in pronunciation assessment.\n")
+                        .append("This is Part ").append(partNumber).append(" of the IELTS Speaking test.\n")
                         .append("Your task is to assign a pronunciation band score (from 0.0 to 9.0, using 0.5 increments) for the candidate's spoken answer.\n")
                         .append("Use only the provided information below:\n")
                         .append("- The full transcript of the spoken answer.\n")
@@ -526,7 +527,7 @@
         }
 
 
-        public PronunciationAnswer analyze(AzurePronunciationResult azureResult, String audioUrl, JsonNode root) throws IOException, InterruptedException {
+        public PronunciationAnswer analyze(AzurePronunciationResult azureResult, String audioUrl, JsonNode root, int partNumber) throws IOException, InterruptedException {
             System.out.println("\n=======================================");
             System.out.println("🚀 STARTING PROSODY ANALYSIS");
             System.out.println("   Audio URL: " + audioUrl);
@@ -575,17 +576,17 @@
                 if (i >= wordInfoList.size()) break; // safety
                 WordInfo info = wordInfoList.get(i);
                 // Bỏ qua từ không phải chữ cái (ví dụ số, ký tự đặc biệt)
-                if (!detected.word.matches("^[a-zA-Z]+$")) continue;
-                Integer standardPosition = getStandardStressPosition(detected.word);
+                if (!detected.getWord().matches("^[a-zA-Z]+$")) continue;
+                Integer standardPosition = getStandardStressPosition(detected.getWord());
                 if (standardPosition == null) continue; // Bỏ qua nếu không có trong từ điển
-                if (!standardPosition.equals(detected.detectedPosition)) {
+                if (!standardPosition.equals(detected.getDetectedPosition())) {
                     Map<String, Object> detail = new HashMap<>();
-                    detail.put("word", detected.word);
-                    detail.put("detectedPosition", detected.detectedPosition);
+                    detail.put("word", detected.getWord());
+                    detail.put("detectedPosition", detected.getDetectedPosition());
                     detail.put("standardPosition", standardPosition);
-                    detail.put("start", info.start);
-                    detail.put("end", info.end);
-                    detail.put("index", info.index);
+                    detail.put("start", info.getStart());
+                    detail.put("end", info.getEnd());
+                    detail.put("index", info.getIndex());
                     stressMismatchesDetailed.add(detail);
                 }
             }
@@ -700,7 +701,8 @@
                         result.getStressMismatchesDetailed(),
                         importantWords.stream().map(IntonationSentence::getText).collect(Collectors.toList()),
                         missingEmphasis.stream().map(IntonationSentence::getText).collect(Collectors.toList()),
-                        azureResult != null ? azureResult.getJsonResult() : null
+                        azureResult != null ? azureResult.getJsonResult() : null,
+                        partNumber
                 );
                 result.setScore(feedback.getScore());
                 result.setComment(feedback.getComment());
@@ -736,29 +738,6 @@
             return result;
         }
 
-        // Helper class for word info
-        private static class WordInfo {
-            String word;
-            double start;
-            double end;
-            int index;
-            WordInfo(String word, double start, double end, int index) {
-                this.word = word;
-                this.start = start;
-                this.end = end;
-                this.index = index;
-            }
-        }
-        // Helper class for detected stress word
-        private static class DetectedStressWord {
-            String word;
-            int detectedPosition;
-            DetectedStressWord(String word, int detectedPosition) {
-                this.word = word;
-                this.detectedPosition = detectedPosition;
-            }
-        }
-        // Helper: like parseStressOutput but fills detectedStressWords list in order
         private String parseStressOutputWithList(File textGridFile, List<DetectedStressWord> detectedStressWords) throws IOException, InterruptedException {
             File outputFile = new File(textGridFile.getParent(),
                     "stress_output_" + Instant.now().toEpochMilli() + ".txt");
@@ -797,7 +776,7 @@
                         } catch (NumberFormatException ignored) {}
                         // Lưu theo thứ tự từ xuất hiện
                         if (wordIdx < detectedStressWords.size()) {
-                            wordSyllableCountMap.put(detectedStressWords.get(wordIdx).word, syllableCount);
+                            wordSyllableCountMap.put(detectedStressWords.get(wordIdx).getWord(), syllableCount);
                         }
                         wordIdx++;
                     }
@@ -831,7 +810,7 @@
             // So sánh với CMU Dictionary, truyền map syllable count
             Map<String, Integer> detectedStressMap = new HashMap<>();
             for (DetectedStressWord dsw : detectedStressWords) {
-                detectedStressMap.put(dsw.word, dsw.detectedPosition);
+                detectedStressMap.put(dsw.getWord(), dsw.getDetectedPosition());
             }
             return resultBuilder.toString();
         }

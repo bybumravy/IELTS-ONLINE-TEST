@@ -6,7 +6,7 @@ export default function SoftProtectedLayout({ children, allowRoles }: { children
 
     useEffect(() => {
         if (user && !allowRoles.includes(user.role)) {
-            window.alert("Bạn không có quyền truy cập trang này");
+            window.alert("You do not have permission to access this page");
         }
     }, [user, allowRoles]);
 

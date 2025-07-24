@@ -7,7 +7,7 @@ export function StaffHeader() {
     return null;
   }
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-emerald-200 bg-white/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200 shadow-sm bg-white/90 backdrop-blur-md">
       <StaffNavigationMenu role={user.role} onLogout={logout} />
     </header>
   );

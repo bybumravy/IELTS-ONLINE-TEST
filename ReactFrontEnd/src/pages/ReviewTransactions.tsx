@@ -186,12 +186,12 @@ export default function TransactionHistory() {
 
   const exportToPDF = () => {
     // Mock export functionality
-    alert("Xuất PDF thành công!")
+    alert("PDF exported successfully!")
   }
 
   const printTransaction = (transaction: any) => {
     // Mock print functionality
-    alert(`In phiếu giao dịch ${transaction.transactionId}`)
+    alert(`Print transaction slip ${transaction.transactionId}`)
   }
 
   return (

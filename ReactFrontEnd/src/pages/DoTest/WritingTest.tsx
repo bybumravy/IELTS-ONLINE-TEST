@@ -50,7 +50,7 @@ export default function WritingTest() {
     const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
     const toggleHighlightMode = () => setIsHighlightMode((prev) => !prev);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [isGrading, setIsGrading] = useState(false); // Thêm state loading overlay
+    const [isGrading, setIsGrading] = useState(false); // Add loading overlay state
 
 
     useEffect(() => {
@@ -152,12 +152,11 @@ export default function WritingTest() {
                     navigate(`/test/speaking/${testId}?testAnswerId=${testAnswerId}&mode=fulltest`);
                 } else {
                     navigate(`/writing-result/${result.id}`);
-                    alert("Bài viết đã được chấm bằng AI! Your essay has been submitted successfully!");
+                    alert("The test has been graded by AI! Your essay has been submitted successfully!");
                 }
             } else {
-                setIsGrading(false);
-                alert("Bài viết đã gửi đến giáo viên. Bạn sẽ nhận kết quả trong vòng 3-5 ngày tới.");
-                navigate("/");
+                alert("Your essay has been sent to the teacher. You will receive the result within 3-5 days.");
+                navigate(`/test/speaking/${testId}?testAnswerId=${testAnswerId}&mode=fulltest`);
             }
         } catch (error) {
             console.error("Error submitting writing:", error);
@@ -238,9 +237,9 @@ export default function WritingTest() {
             <Dialog open={showGradingDialog} onOpenChange={setShowGradingDialog}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Chọn phương thức chấm bài</DialogTitle>
+                        <DialogTitle>Select grading method</DialogTitle>
                         <DialogDescription>
-                            Vui lòng chọn cách bạn muốn bài viết của mình được chấm điểm
+                            Please choose how you want your essay to be graded
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -250,20 +249,20 @@ export default function WritingTest() {
                         >
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="ai" id="ai" />
-                                <Label htmlFor="ai">Chấm bằng AI (Nhanh chóng)</Label>
+                                <Label htmlFor="ai">Grade by AI (Fast)</Label>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="human" id="human" />
-                                <Label htmlFor="human">Chấm bởi giáo viên (Chính xác hơn)</Label>
+                                <Label htmlFor="human">Grade by teacher (More accurate)</Label>
                             </div>
                         </RadioGroup>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowGradingDialog(false)}>
-                            Hủy
+                            Cancel
                         </Button>
                         <Button type="submit" onClick={handleSubmit} disabled={isSubmitting}>
-                            {isSubmitting ? "Đang gửi..." : "Xác nhận"}
+                            {isSubmitting ? "Submitting..." : "Confirm"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
