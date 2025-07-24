@@ -7,13 +7,14 @@ interface WritingAnswer {
     testId: string;
     band: number;
     gradingMethod: string;
+    submittedAt?: string; // Thêm trường thời gian nộp bài
 }
 
 function ManagerTeacherScoreList() {
     const [writingAnswers, setWritingAnswers] = useState<WritingAnswer[]>([]);
     const API_URL = import.meta.env.VITE_API_URL;
     useEffect(() => {
-        fetch(`${API_URL}/api/verify/listwriting`, {
+        fetch(`${API_URL}/verify/listwriting`, {
             credentials: "include",
         })
             .then((res) => res.json())
@@ -33,6 +34,7 @@ function ManagerTeacherScoreList() {
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Username</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Test ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Thời gian nộp bài</th>
                             <th className="px-6 py-3 text-right text-xs font-medium text-emerald-700 uppercase tracking-wider">Chấm bài</th>
                         </tr>
                     </thead>
@@ -41,6 +43,9 @@ function ManagerTeacherScoreList() {
                             <tr key={answer.id} className="hover:bg-emerald-50/60 transition-colors">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{answer.username}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{answer.testId}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                                    {answer.submittedAt ? new Date(answer.submittedAt).toLocaleString("vi-VN", { hour12: false }) : "-"}
+                                </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right">
                                     <Link to={`/teacher-scoring/${answer.id}`}>
                                         <Button className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-lg shadow transition-all">Chấm bài</Button>

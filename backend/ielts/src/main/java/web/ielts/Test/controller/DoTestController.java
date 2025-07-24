@@ -86,6 +86,7 @@ public class DoTestController {
 
     @PostMapping("/writing/submit")
     public ResponseEntity<WritingAnswer> saveWritingAnswer(@RequestBody WritingAnswer answer, @RequestParam(required = false) String testAnswerId) {
+        answer.setSubmittedAt(java.time.LocalDateTime.now()); // Set submission time
         WritingAnswer saved = doTestService.saveWritingAnswer(answer);
         if (testAnswerId != null && !testAnswerId.isEmpty()) {
             testAnswerService.updateWritingAnswer(testAnswerId, saved.getId());
