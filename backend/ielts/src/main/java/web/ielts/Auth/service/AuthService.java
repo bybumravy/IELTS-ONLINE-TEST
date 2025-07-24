@@ -268,5 +268,9 @@ public class AuthService {
     }
 
 
-
+    public boolean updatePrenium(String email) {
+        User user = authRepository.findByEmail(email);
+        user.setPremium(true);
+        return user.isPremium();
+    }
 }

@@ -9,12 +9,12 @@ export default function VnPayResultPage() {
 
     useEffect(() => {
         const responseCode = searchParams.get("vnp_ResponseCode");
-        const transactionId = searchParams.get("vnp_TransactionNo"); // 👈 Lấy transactionId
+        const transactionId = searchParams.get("vnp_TransactionNo");
 
         if (responseCode === "00") {
             setStatus("Success");
 
-            // Gọi nâng cấp Premium
+            // Gọi API nâng cấp Premium
             fetch("http://localhost:8080/api/user/upgrade-premium", {
                 method: "POST",
                 credentials: "include",
@@ -23,10 +23,27 @@ export default function VnPayResultPage() {
                     if (!res.ok) throw new Error("Failed to upgrade premium");
                     return res.text();
                 })
-                .then(msg => console.log(msg))
-                .catch(err => console.error(err));
+                .then(msg => {
+                    console.log("Upgrade:", msg);
 
-            // ✅ Lấy selectedPlan từ localStorage
+                    // ✅ Gọi API /api/user/me để lấy user mới
+                    return fetch("http://localhost:8080/api/update-info", {
+                        method: "GET",
+                        credentials: "include",
+                    });
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error("Failed to fetch user info");
+                    return res.json();
+                })
+                .then(updatedUser => {
+                    console.log("Updated user info:", updatedUser);
+                    // 👉 Cập nhật user context hoặc localStorage nếu cần
+                    // Ví dụ: setUser(updatedUser); hoặc localStorage.setItem('user', JSON.stringify(updatedUser));
+                })
+                .catch(err => console.error("Error:", err));
+
+            // Lấy selectedPlan từ localStorage
             const stored = localStorage.getItem("selectedPlan");
             const selectedPlan = stored ? JSON.parse(stored) : null;
 
@@ -36,7 +53,7 @@ export default function VnPayResultPage() {
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
                     body: JSON.stringify({
-                        type: selectedPlan.duration,              // ví dụ: "1 tháng"
+                        type: selectedPlan.duration,
                         amount: selectedPlan.price,
                         paymentMethod: "VNPay",
                         status: "Success",
@@ -46,10 +63,9 @@ export default function VnPayResultPage() {
                 });
             }
 
-            // ✅ Dọn sạch sau khi xài xong
             localStorage.removeItem("selectedPlan");
 
-            // Chuyển trang
+            // Chuyển trang sau 3s
             setTimeout(() => {
                 window.location.href = "/";
             }, 3000);
