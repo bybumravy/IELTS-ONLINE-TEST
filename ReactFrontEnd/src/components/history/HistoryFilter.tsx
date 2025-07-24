@@ -1,10 +1,10 @@
 import React from 'react';
-import { 
+import {
   Headphones as ListeningIcon,
   MenuBook as ReadingIcon,
   Edit as WritingIcon,
   Mic as SpeakingIcon,
-  Apps as AllIcon
+  Apps as AllIcon,
 } from '@mui/icons-material';
 
 interface HistoryFilterProps {
@@ -12,75 +12,36 @@ interface HistoryFilterProps {
   onSkillChange: (skill: string) => void;
 }
 
-const HistoryFilter: React.FC<HistoryFilterProps> = ({ selectedSkill, onSkillChange }) => {
-  const handleSkillChange = (_event: React.MouseEvent<HTMLElement>, newSkill: string | null) => {
-    if (newSkill !== null) {
-      onSkillChange(newSkill);
-    }
-  };
+const skills = [
+  { key: 'all', label: 'All Tests', icon: <AllIcon fontSize="large" />, color: 'bg-green-100', border: 'border-green-400' },
+  { key: 'listening', label: 'Listening', icon: <ListeningIcon fontSize="large" />, color: 'bg-green-100', border: 'border-green-400' },
+  { key: 'reading', label: 'Reading', icon: <ReadingIcon fontSize="large" />, color: 'bg-green-100', border: 'border-green-400' },
+  { key: 'writing', label: 'Writing', icon: <WritingIcon fontSize="large" />, color: 'bg-green-100', border: 'border-green-400' },
+  { key: 'speaking', label: 'Speaking', icon: <SpeakingIcon fontSize="large" />, color: 'bg-green-100', border: 'border-green-400' },
+];
 
+const HistoryFilter: React.FC<HistoryFilterProps> = ({ selectedSkill, onSkillChange }) => {
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h2 className="text-lg font-semibold mb-4">Filter by Skill</h2>
-      <div className="flex flex-col space-y-2">
-        <button
-          className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-            selectedSkill === 'all' 
-              ? 'bg-blue-100 text-blue-700' 
-              : 'hover:bg-gray-100'
-          }`}
-          onClick={(e) => handleSkillChange(e, 'all')}
-        >
-          <AllIcon className="mr-2" />
-          All Tests
-        </button>
-        <button
-          className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-            selectedSkill === 'listening' 
-              ? 'bg-blue-100 text-blue-700' 
-              : 'hover:bg-gray-100'
-          }`}
-          onClick={(e) => handleSkillChange(e, 'listening')}
-        >
-          <ListeningIcon className="mr-2" />
-          Listening
-        </button>
-        <button
-          className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-            selectedSkill === 'reading' 
-              ? 'bg-blue-100 text-blue-700' 
-              : 'hover:bg-gray-100'
-          }`}
-          onClick={(e) => handleSkillChange(e, 'reading')}
-        >
-          <ReadingIcon className="mr-2" />
-          Reading
-        </button>
-        <button
-          className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-            selectedSkill === 'writing' 
-              ? 'bg-blue-100 text-blue-700' 
-              : 'hover:bg-gray-100'
-          }`}
-          onClick={(e) => handleSkillChange(e, 'writing')}
-        >
-          <WritingIcon className="mr-2" />
-          Writing
-        </button>
-        <button
-          className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-            selectedSkill === 'speaking' 
-              ? 'bg-blue-100 text-blue-700' 
-              : 'hover:bg-gray-100'
-          }`}
-          onClick={(e) => handleSkillChange(e, 'speaking')}
-        >
-          <SpeakingIcon className="mr-2" />
-          Speaking
-        </button>
+      <div className="rounded-xl bg-white shadow-md p-6">
+        <h2 className="text-xl font-semibold text-green-700 mb-4">Filter by Skill</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {skills.map((skill) => (
+              <button
+                  key={skill.key}
+                  onClick={() => onSkillChange(skill.key)}
+                  className={`flex flex-col items-center p-4 border-2 rounded-xl transition-all duration-200 ${
+                      selectedSkill === skill.key
+                          ? 'bg-green-100 border-green-600 shadow-lg scale-105'
+                          : 'hover:bg-green-50 hover:border-green-400 border-transparent'
+                  }`}
+              >
+                <div className="text-green-600 mb-1">{skill.icon}</div>
+                <span className="text-base font-medium text-gray-700">{skill.label}</span>
+              </button>
+          ))}
+        </div>
       </div>
-    </div>
   );
 };
 
-export default HistoryFilter; 
+export default HistoryFilter;

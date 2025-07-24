@@ -3,7 +3,7 @@ package web.ielts.Test.model;
 
 import java.util.List;
 
-class Question {
+public class Question {
     private String question;
     private String answer;
     private List<String> options;
