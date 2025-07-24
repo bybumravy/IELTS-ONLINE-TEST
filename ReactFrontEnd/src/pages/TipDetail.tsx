@@ -22,7 +22,7 @@ function TipDetail() {
 
     useEffect(() => {
         if (!id) return;
-
+        window.scrollTo(0, 0);
         const data = fetch(`${API_URL}/api/${skill}/${id}`)
             .then((res) => res.json())
             .then((data: TipDetail) => {

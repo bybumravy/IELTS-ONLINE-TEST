@@ -25,7 +25,7 @@ const RegisterPage = () => {
         try {
 
             await register(email, password);
-            alert("Hay check duong link trong gmail")
+            alert("Click the link in your email to continue.")
 
         } catch (error: any) {
             alert(error.message || "");

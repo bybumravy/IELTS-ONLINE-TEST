@@ -15,6 +15,7 @@ const HistoryPage: React.FC = () => {
   const { user } = useAuth();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchHistory = async () => {
       try {
         setLoading(true);

@@ -52,7 +52,7 @@ export default function VnPayResultPage() {
             // Chuyển trang
             setTimeout(() => {
                 window.location.href = "/";
-            }, 3000);
+            }, 1000);
         } else {
             setStatus("Failed");
         }
