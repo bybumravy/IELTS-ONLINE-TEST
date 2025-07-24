@@ -315,8 +315,8 @@ export default function ListeningTest() {
 
                         return (
                             <div key={sectionIdx} className="mb-10">
-                                <h2 className="text-base font-semibold text-teal-600 mb-2 dark:text-teal-300">
-                                    Questions {startId}{startId !== endId ? `-${endId}` : ""}
+                                <h2 className="text-base font-semibold text-teal-600 mb-4 dark:text-teal-300">
+                                  Questions {startId}{startId !== endId ? `-${endId}` : ""}: {section.introduction}
                                 </h2>
                                 {section.imageUrl && (
                                     <div className="mb-4 flex justify-center">
@@ -329,26 +329,47 @@ export default function ListeningTest() {
                                             {col.map((q, idx) => {
                                                 const question = q as QuestionWithStudentAnswer;
                                                 const qId = question.questionId!;
+                                                // Kiểm tra loại section
+                                                const isSelectType = section.type === "map-labeling" || section.type === "dropdown";
                                                 return (
                                                     <React.Fragment key={qId}>
                                                         <div className="mb-6">
                                                             <p className="mb-2 text-sm">
                                                                 {qId}. {question.question}
                                                             </p>
-                                                            {question.options?.length ? (
+                                                            {isSelectType ? (
+                                                                <select
+                                                                    className="w-full border p-2 rounded text-sm"
+                                                                    value={answers[qId] || ""}
+                                                                    onChange={e => handleAnswerChange(qId, e.target.value)}
+                                                                >
+                                                                    <option value="" disabled>Chọn đáp án</option>
+                                                                    {question.options?.map((opt, i) => {
+                                                                        // Nếu option có dạng "A. Education", lấy ký tự đầu tiên trước dấu chấm
+                                                                        const value = /^[A-Z]\./.test(opt) ? opt.split(".")[0] : opt;
+                                                                        return (
+                                                                            <option key={i} value={value}>{opt}</option>
+                                                                        );
+                                                                    })}
+                                                                </select>
+                                                            ) : question.options?.length ? (
                                                                 <div className="space-y-2 text-sm">
-                                                                    {question.options.map((opt, i) => (
-                                                                        <label key={i} className="flex items-center gap-2">
-                                                                            <input
-                                                                                type="radio"
-                                                                                name={`q-${qId}`}
-                                                                                value={opt}
-                                                                                checked={answers[qId] === opt}
-                                                                                onChange={() => handleAnswerChange(qId, opt)}
-                                                                            />
-                                                                            {opt}
-                                                                        </label>
-                                                                    ))}
+                                                                    {question.options.map((opt, i) => {
+                                                                        // Nếu option có dạng "A. Education", lấy ký tự đầu tiên trước dấu chấm
+                                                                        const value = /^[A-Z]\./.test(opt) ? opt.split(".")[0] : opt;
+                                                                        return (
+                                                                            <label key={i} className="flex items-center gap-2">
+                                                                                <input
+                                                                                    type="radio"
+                                                                                    name={`q-${qId}`}
+                                                                                    value={value}
+                                                                                    checked={answers[qId] === value}
+                                                                                    onChange={() => handleAnswerChange(qId, value)}
+                                                                                />
+                                                                                {opt}
+                                                                            </label>
+                                                                        );
+                                                                    })}
                                                                 </div>
                                                             ) : (
                                                                 <input

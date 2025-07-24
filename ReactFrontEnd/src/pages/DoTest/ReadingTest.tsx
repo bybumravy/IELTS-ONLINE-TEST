@@ -432,35 +432,41 @@ export default function ReadingTest() {
                                                     {questionNumber}. {q.question}
                                                 </p>
                                                 {/* Đã loại bỏ hiển thị ảnh ở từng câu hỏi */}
-                                                {section.type === "True/False/Not Given" || section.type === "Yes/No/Not Given" || section.type === "dropdown" ? (
+                                                {section.type === "True/False/Not Given" || section.type === "Yes/No/Not Given"  || section.type === "map-labeling" || section.type === "dropdown" ? (
                                                     <select
                                                         value={currentAnswer}
                                                         onChange={(e) => handleAnswerChange(questionId, e.target.value)}
                                                         className="border border-gray-300 rounded p-2 min-w-[150px] dark:bg-[#202124] dark:border-gray-600"
                                                     >
                                                         <option value="">Select</option>
-                                                        {q.options?.map((option, optIdx) => (
-                                                            <option key={optIdx} value={option}>
-                                                                {option}
-                                                            </option>
-                                                        ))}
+                                                        {q.options?.map((option, optIdx) => {
+                                                            const answerKey = option.split(".")[0].trim();
+                                                            return (
+                                                                <option key={optIdx} value={answerKey}>
+                                                                    {option}
+                                                                </option>
+                                                            );
+                                                        })}
                                                     </select>
                                                 ) : q.options?.length ? (
                                                     <div className="space-y-2 mb-3">
-                                                        {q.options.map((option, optIdx) => (
-                                                            <div key={optIdx} className="flex items-center">
-                                                                <input
-                                                                    type="radio"
-                                                                    id={`q${questionId}-opt${optIdx}`}
-                                                                    name={`q${questionId}`}
-                                                                    value={option}
-                                                                    checked={currentAnswer === option}
-                                                                    onChange={(e) => handleAnswerChange(questionId, e.target.value)}
-                                                                    className="mr-2"
-                                                                />
-                                                                <label htmlFor={`q${questionId}-opt${optIdx}`}>{option}</label>
-                                                            </div>
-                                                        ))}
+                                                        {q.options && q.options.map((option, optIdx) => {
+                                                            const answerKey = option.split(".")[0].trim();
+                                                            return (
+                                                                <div key={optIdx} className="flex items-center">
+                                                                    <input
+                                                                        type="radio"
+                                                                        id={`q${questionId}-opt${optIdx}`}
+                                                                        name={`q${questionId}`}
+                                                                        value={answerKey}
+                                                                        checked={currentAnswer === answerKey}
+                                                                        onChange={(e) => handleAnswerChange(questionId, e.target.value)}
+                                                                        className="mr-2"
+                                                                    />
+                                                                    <label htmlFor={`q${questionId}-opt${optIdx}`}>{option}</label>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 ) : (
                                                     <input
