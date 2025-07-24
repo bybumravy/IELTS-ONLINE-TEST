@@ -29,7 +29,7 @@ interface WritingAnswer {
     testId: string;
     task1: WritingTask;
     task2: WritingTask;
-    _class: string; // lớp Java backend map
+    _class: string; // Java backend class mapping
 }
 interface WritingTask {
     type: "Task 1" | "Task 2";
@@ -347,7 +347,7 @@ export default function TeacherScoringPage() {
             runningIndex += sentenceWords.length;
         }
 
-        console.warn("⚠️ Không tìm thấy câu chứa từ index", wordIndex);
+        console.warn("⚠️ Could not find sentence containing word index", wordIndex);
         return "";
     };
     const addError = (wordIndex: number, word: string) => {
@@ -360,7 +360,7 @@ export default function TeacherScoringPage() {
             original: word,
             correction: newError.correction,
             comment: newError.comment,
-            sentenceContext // ✅ GÁN vào đây
+            sentenceContext // ✅ ASSIGN here
         };
 
         const currentErrors = allErrors[selectedTask] || [];
@@ -463,7 +463,7 @@ export default function TeacherScoringPage() {
         const task2SentenceImprovements = allSentenceCorrections.task2.map(convertSentenceCorrection);
 
         // Task 1
-        dataSubmit.task1.score = calculateOverallScoreByTask("task1"); // nếu bạn dùng điểm tổng
+        dataSubmit.task1.score = calculateOverallScoreByTask("task1"); // if you use total score
         dataSubmit.task1.feedback = {
             errorCorrections: task1ErrorCorrections,
             sentenceImprovements: task1SentenceImprovements,
@@ -492,7 +492,7 @@ export default function TeacherScoringPage() {
 
 
         // Task 2
-        dataSubmit.task2.score = calculateOverallScoreByTask("task2"); // ✅ tính đúng cho task2
+        dataSubmit.task2.score = calculateOverallScoreByTask("task2"); // ✅ correct calculation for task2
         dataSubmit.task2.feedback = {
             errorCorrections: task2ErrorCorrections,
             sentenceImprovements: task2SentenceImprovements,
@@ -527,15 +527,15 @@ export default function TeacherScoringPage() {
                 body: JSON.stringify(dataSubmit),
             });
 
-            if (!response.ok) throw new Error("Gửi thất bại");
+            if (!response.ok) throw new Error("Submission failed");
 
             const result = await response.json();
-            console.log("Gửi thành công:", result);
-            // Hiển thị thông báo thành công
-            alert("Đã gửi kết quả và thông báo cho học sinh thành công!");
+            console.log("Submission successful:", result);
+            // Display success message
+            alert("Result sent and student notified successfully!");
             navigate("/teacher-scored-list");
         } catch (error) {
-            console.error("Lỗi khi gửi:", error);
+            console.error("Error submitting:", error);
         }
         console.log(JSON.stringify(dataSubmit, null, 2));
 

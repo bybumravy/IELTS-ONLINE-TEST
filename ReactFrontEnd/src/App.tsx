@@ -139,12 +139,12 @@ export default function App() {
                             </ProtectedLayout>
                         } />
                         <Route path="/test/writing/:testId" element={
-                            <ProtectedLayout allowRoles={["student"]} requirePremium={true}>
+                            <ProtectedLayout allowRoles={["student"]}>
                                 <WritingTest />
                             </ProtectedLayout>
                         } />
                         <Route path="/test/speaking/:testId" element={
-                            <ProtectedLayout allowRoles={["student"]} requirePremium={true}>
+                            <ProtectedLayout allowRoles={["student"]}>
                                 <SpeakingTest />
                             </ProtectedLayout>
                         } />

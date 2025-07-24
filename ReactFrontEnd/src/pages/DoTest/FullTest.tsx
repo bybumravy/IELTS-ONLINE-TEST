@@ -49,7 +49,7 @@ export default function FullTest() {
 
     const handleConfirmStart = async () => {
         if (!user?.username) {
-            alert("Bạn cần đăng nhập để làm bài test.");
+            alert("You need to log in to take the test.");
             return;
         }
         try {
@@ -63,7 +63,7 @@ export default function FullTest() {
             if (!testAnswerId) throw new Error("Không nhận được testAnswerId");
             navigate(`/test/listening/${testId}?testAnswerId=${testAnswerId}&mode=fulltest`);
         } catch (err) {
-            alert("Lỗi khi bắt đầu test: " + err);
+            alert("Error starting test: " + err);
         }
     };
 

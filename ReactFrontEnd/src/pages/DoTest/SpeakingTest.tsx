@@ -95,6 +95,23 @@ const SpeakingTest = () => {
         part3: 1,
     }
 
+    // Thêm hàm đếm số câu part1 đã ghi âm
+    const countAnsweredPart1 = () => {
+        if (!speaking) return 0;
+        return speaking.part1.questions.reduce((count, _q, i) => {
+            const key = `part1-${i + 1}`;
+            return audioUrls[key] ? count + 1 : count;
+        }, 0);
+    };
+    // Thêm hàm đếm số câu part3 đã ghi âm
+    const countAnsweredPart3 = () => {
+        if (!speaking) return 0;
+        return speaking.part3.questions.reduce((count, _q, i) => {
+            const key = `part3-${i + 1}`;
+            return audioUrls[key] ? count + 1 : count;
+        }, 0);
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -151,24 +168,53 @@ const SpeakingTest = () => {
     }, [loading, speaking, currentPart, showConfirmNextPart])
 
     useEffect(() => {
-        if (partStarted && testTimerRef.current === null) {
+        // Đảm bảo chỉ có 1 interval duy nhất
+        if (partStarted) {
+            if (testTimerRef.current) {
+                clearInterval(testTimerRef.current);
+                testTimerRef.current = null;
+            }
             testTimerRef.current = window.setInterval(() => {
                 setTestTimeLeft((prev) => {
                     if (prev <= 1) {
-                        clearInterval(testTimerRef.current as number)
-                        testTimerRef.current = null
+                        if (testTimerRef.current) {
+                            clearInterval(testTimerRef.current);
+                            testTimerRef.current = null;
+                        }
                         setIsSubmitting(true)
                         setTimeUp(true)
-                        return 0
+                        // Kiểm tra điều kiện tối thiểu khi hết giờ
+                        const answeredPart1 = countAnsweredPart1();
+                        const answeredPart2 = audioUrls["part2"] ? 1 : 0;
+                        const answeredPart3 = countAnsweredPart3();
+                        if (
+                            answeredPart1 < 2 ||
+                            answeredPart2 < 1 ||
+                            answeredPart3 < 3 ||
+                            totalRecordingTime.part1 < MIN_RECORDING_TIMES.part1 ||
+                            totalRecordingTime.part2 < MIN_RECORDING_TIMES.part2 ||
+                            totalRecordingTime.part3 < MIN_RECORDING_TIMES.part3
+                        ) {
+                            alert("You have not completed the minimum number of answers in each part. Your test will not be saved. You will be redirected to the homepage.");
+                            navigate("/", { replace: true });
+                            return 0;
+                        } else {
+                            // Đủ điều kiện, tự động nộp bài
+                            handleSubmitClick();
+                            return 0;
+                        }
                     }
-                    return prev - 1
-                })
-            }, 1000)
+                    return prev - 1;
+                });
+            }, 1000);
         }
         return () => {
-            if (testTimerRef.current) clearInterval(testTimerRef.current)
-        }
-    }, [partStarted])
+            if (testTimerRef.current) {
+                clearInterval(testTimerRef.current);
+                testTimerRef.current = null;
+            }
+        };
+    }, [partStarted]);
 
     const startTimer = () => {
         if (testTimerRef.current) return
@@ -255,7 +301,7 @@ const SpeakingTest = () => {
             mediaRecorder.start()
         } catch (error) {
             console.error("Error accessing microphone:", error)
-            alert("Không thể truy cập microphone. Vui lòng kiểm tra trình duyệt hoặc cấp quyền micro.")
+            alert("Cannot access microphone. Please check your browser or allow microphone access.")
         }
     }
 
@@ -300,6 +346,30 @@ const SpeakingTest = () => {
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex((prev) => prev + 1)
         } else {
+            // BẮT BUỘC PART1 PHẢI TRẢ LỜI ÍT NHẤT 2 CÂU HỎI
+            if (currentPart === "part1") {
+                const answered = countAnsweredPart1();
+                if (answered < 2) {
+                    setMinRecordingWarningMsg(
+                        `You must answer (record) at least 2 questions in PART1 before continuing. You have answered ${answered} question(s).`
+                    );
+                    setShowMinRecordingWarning(true);
+                    setCurrentQuestionIndex(0);
+                    return;
+                }
+            }
+            // BẮT BUỘC PART3 PHẢI TRẢ LỜI ÍT NHẤT 3 CÂU HỎI
+            if (currentPart === "part3") {
+                const answered = countAnsweredPart3();
+                if (answered < 3) {
+                    setMinRecordingWarningMsg(
+                        `Bạn cần trả lời (ghi âm) ít nhất 3 câu hỏi ở PART3 trước khi nộp bài. Hiện tại bạn mới trả lời ${answered} câu.`
+                    );
+                    setShowMinRecordingWarning(true);
+                    setCurrentQuestionIndex(0);
+                    return;
+                }
+            }
             const currentTotal = totalRecordingTime[currentPart]
             if (currentTotal >= MIN_RECORDING_TIMES[currentPart]) {
                 if (currentPart === "part3") {
@@ -363,6 +433,8 @@ const SpeakingTest = () => {
             clearInterval(testTimerRef.current);
             testTimerRef.current = null;
         }
+        setPartStarted(false); // Ngăn timer tự động chạy lại
+        setTimeUp(true); // Đánh dấu đã hết giờ để chặn mọi submit tiếp theo
         if (recordingKey) {
             stopRecording()
             await new Promise((resolve) => {
@@ -382,6 +454,15 @@ const SpeakingTest = () => {
             setShowMinRecordingWarning(true);
             return; // Dừng lại nếu không đủ điều kiện
         }
+        // BẮT BUỘC PART3 PHẢI TRẢ LỜI ÍT NHẤT 3 CÂU HỎI
+        const answeredPart3 = countAnsweredPart3();
+        if (answeredPart3 < 3) {
+            setMinRecordingWarningMsg(
+                `Bạn cần trả lời (ghi âm) ít nhất 3 câu hỏi ở PART3 trước khi nộp bài. Hiện tại bạn mới trả lời ${answeredPart3} câu.`
+            );
+            setShowMinRecordingWarning(true);
+            return;
+        }
 
         // Gọi submit trực tiếp (không hiển thị dialog)
         handleSubmit();
@@ -393,6 +474,8 @@ const SpeakingTest = () => {
             clearInterval(testTimerRef.current);
             testTimerRef.current = null;
         }
+        setPartStarted(false); // Ngăn timer tự động chạy lại
+        setTimeUp(true); // Đánh dấu đã hết giờ để chặn mọi submit tiếp theo
         setIsSubmitting(true); // Bây giờ mới set submitting
         setIsGrading(true); // Bắt đầu overlay loading
         const submissionData = prepareSubmissionData()
@@ -428,14 +511,13 @@ const SpeakingTest = () => {
                 navigate(`/test/fulltest-result/${testAnswerId}`);
             } else {
                 navigate(`/speaking-result/${result.id}`);
-                alert("Bài viết đã được chấm bằng AI!.Your essay has been submitted successfully!");
+                alert("Your essay has been graded by AI! Your essay has been submitted successfully!");
             }
-            if (!res.ok) throw new Error("Lỗi khi gửi bài!")
-            alert("✅ Bài đã được nộp!")
+            if (!res.ok) throw new Error("Fail to submit!")
         } catch (err) {
             console.error(err)
             setIsGrading(false); // Tắt overlay nếu lỗi
-            alert("❌ Gửi bài thất bại!")
+            alert("Submission failed!")
         }
         setIsSubmitting(false)
     }
@@ -833,6 +915,14 @@ const SpeakingTest = () => {
                         {currentPart !== "part3" && (
                             <Button
                                 onClick={() => {
+                                    // BẮT BUỘC PART1 PHẢI TRẢ LỜI ÍT NHẤT 2 CÂU HỎI
+                                    if (currentPart === "part1") {
+                                        const answered = countAnsweredPart1();
+                                        if (answered < 2) {
+                                            alert(`You must answer (record) at least 2 questions in PART1 before continuing. You have answered ${answered} question(s).`);
+                                            return;
+                                        }
+                                    }
                                     if (totalRecordingTime[currentPart] >= MIN_RECORDING_TIMES[currentPart]) {
                                         setShowConfirmNextPart(true)
                                     } else {

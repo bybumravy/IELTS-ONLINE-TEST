@@ -29,7 +29,7 @@ function TipDetail() {
                 setDetail(data);
             })
             .catch((error) => {
-                console.error("Lỗi khi gọi API chi tiết tip:", error);
+                console.error("Error calling tip detail API:", error);
                 setDetail(null);
             });
         console.log("Data ne:" + data);
@@ -38,7 +38,7 @@ function TipDetail() {
     if (!detail) {
         return (
             <div className="min-h-screen flex items-center justify-center text-red-500">
-                {/*Không tìm thấy dữ liệu.*/}
+                {/*No data found.*/}
             </div>
         );
     }

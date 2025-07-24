@@ -59,11 +59,11 @@ export default function AcceptTestPage() {
 
       const result = await response.text();
       console.log('Accept test result:', result);
-      alert("Duyệt thành công!");
+      alert("Approved successfully!");
       setTests(tests.filter((test) => test.testId !== testId));
     } catch (err: any) {
       console.error('Error accepting test:', err);
-      alert(`Duyệt thất bại: ${err.message}`);
+      alert(`Approval failed: ${err.message}`);
     }
   };
 

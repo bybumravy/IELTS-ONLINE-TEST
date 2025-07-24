@@ -332,14 +332,12 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             String questions,
             JsonNode transcript,
             FleCohAnswer basicFluent,
-            double FluenScore
+            double FluentScore
 
     ) {
-//        System.out.println("hello");
-//        String praatResults = (String) analyzeVoice.get("prosodyFeatures");
-//
-//        System.out.println(praatResults);
 
+        FluentScore = 1.0 + (FluentScore / 100.0) * 8.0;
+        System.out.println("diem fluecny"+FluentScore);
         String speakingPart1 =
                 "You must return response strictly in JSON format.\n" +
                         "Even for simple factual questions (e.g., “What is your name?”), if the response contains fewer than 2 full sentences, you must still limit the score to a **maximum of Band 6.0** in all categories. This ensures minimum development is required.\n+"+
@@ -348,7 +346,9 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "  Do NOT mark answers down due to missing or incorrect punctuation." +
                         "  Do NOT suggest corrections just to add commas or punctuation"+
                         "For all other issues (Lexical Resource, Grammatical), ONLY include the smallest possible incorrect unit (usually a word or short phrase) in 'originalText'. Do NOT include full sentences for these error types.\""+
-//                        "For Fluency and Coherence, feedback must be given only after evaluating the entire response. Fluency must be based on +"+analyzeVoice +"metrics, while Coherence should be evaluated based on the overall content of the answer."+
+                        "Fluency has already been scored separately with a value of " + FluentScore + ". " +
+                        "Please evaluate Coherence separately"+
+                        "For Fluency and Coherence, feedback must be given only after evaluating the entire response. Fluency must be based on +"+basicFluent +"metrics, while Coherence should be evaluated based on the overall content of the answer."+
                         "Fluency and Coherence score is calculated as the average of the two criteria (Fluency and Coherence), rounded to one decimal place"+
                         "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
                         "\n" +
@@ -379,9 +379,9 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
                         IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
-                        "Fluency and Coherence 25%"+
-//                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
-                        IELTS_STRICT_FLUENCY_ONLY+
+//                        "Fluency and Coherence 25%"+
+////                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
+//                        IELTS_STRICT_FLUENCY_ONLY+
                         "Coherence  "+
                         "→ Deduct 0.5 point in total for that error type (only once) for Coherence based on"+errorTypeCOHERENCE+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
@@ -392,6 +392,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "RESPONSE FORMAT:\n" +
                         "- transcript: string ( transcript of the original answer)\n" +
                         "- question (string)"+
+
                         ""+
                         "\n" +
                         "IMPORTANT RULES:\n" +
@@ -406,7 +407,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
                         +errorType+
 
-                       "- grammarAnswer (object) with:\n" +
+                        "- grammarAnswer (object) with:\n" +
                         "    - score (double)\n" +
                         "    - errorText (string)\n" +
                         "    - correctText (string)\n" +
@@ -432,15 +433,18 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "- **Logical progression of ideas**: Did the candidate present ideas in a logical and connected manner?\n" +
                         "- **Use of cohesive devices**: Were linking words (e.g., however, because, so) used correctly and naturally?\n" +
                         "- **Overall clarity**: Was the response easy to follow and understand?"+
+
                         "- fluencyCohAnswer (object) with:\n" +
-                        "    - score (double)"+
-                        "    - comment (string)"
-                +
-                        "Question:\n" + questions + "\n" +
+
+                        "    - score (double) // average of fluency and coherence" +
+                        "    - comment (string) // detailed explanation\n" +
+
+                        "Question:\n" + questions + "\n"+
                         "Original Answer:\n" + transcript;
 
         return speakingPart1;
     }
+
 
 
     public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards,FleCohAnswer basicFluent, double FluenScore){

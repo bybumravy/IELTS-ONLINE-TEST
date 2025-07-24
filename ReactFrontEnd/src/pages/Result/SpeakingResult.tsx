@@ -591,8 +591,17 @@ export default function SpeakingResult() {
             )
         } else {
             // part1 or part3: chỉ hiển thị 1 câu hỏi, có thanh chọn câu hỏi
-            const questions = (part as SpeakingAnswerPart13).questions ?? [];
-            const question = questions[currentQuestionIdx];
+            // Lọc chỉ lấy các câu có audioAnswer
+            const allQuestions = (part as SpeakingAnswerPart13).questions ?? [];
+            const questions = allQuestions.filter(q => q.audioAnswer && q.audioAnswer.trim() !== "");
+            // Nếu không còn câu nào có audio, trả về thông báo
+            if (questions.length === 0) {
+                return <div className="p-6 text-red-500">No answered questions with audio available.</div>;
+            }
+            // Đảm bảo currentQuestionIdx không vượt quá số lượng câu hỏi
+            const safeIdx = Math.min(currentQuestionIdx, questions.length - 1);
+            const question = questions[safeIdx];
+            if (safeIdx !== currentQuestionIdx) setCurrentQuestionIdx(safeIdx);
             return (
                 <div className="space-y-6">
                     {/* Thanh chọn câu hỏi */}
@@ -601,7 +610,7 @@ export default function SpeakingResult() {
                             <button
                                 key={idx}
                                 onClick={() => setCurrentQuestionIdx(idx)}
-                                className={`px-4 py-2 rounded-lg border text-sm font-semibold transition-all ${currentQuestionIdx === idx ? 'bg-green-600 text-white border-green-600 shadow' : 'bg-white text-green-700 border-green-200 hover:bg-green-50'}`}
+                                className={`px-4 py-2 rounded-lg border text-sm font-semibold transition-all ${safeIdx === idx ? 'bg-green-600 text-white border-green-600 shadow' : 'bg-white text-green-700 border-green-200 hover:bg-green-50'}`}
                             >
                                 Question {idx + 1}
                             </button>

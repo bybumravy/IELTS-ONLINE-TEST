@@ -210,7 +210,7 @@ export default function ReadingTest() {
             if (!response.ok) throw new Error("Submit failed");
             const result = await response.json();
             console.log("Saved:", result);
-            alert("🎉 Submitted successfully!");
+            alert("Submitted successfully!");
             if (mode === "fulltest") {
                 navigate(`/test/writing/${testId}?testAnswerId=${testAnswerId}&mode=fulltest`);
             } else {
@@ -218,7 +218,7 @@ export default function ReadingTest() {
             }
         } catch (error) {
             console.error(error);
-            alert("❌ Error submitting");
+            alert("Error submitting");
         } finally {
             setIsSubmitted(false);
         }
@@ -245,7 +245,6 @@ export default function ReadingTest() {
         if (text && selection && paragraphRef.current?.contains(selection.anchorNode)) {
             const range = selection.getRangeAt(0).cloneRange();
 
-            // 👉 Normalize range
             normalizeRange(range);
 
             const rect = range.getBoundingClientRect();

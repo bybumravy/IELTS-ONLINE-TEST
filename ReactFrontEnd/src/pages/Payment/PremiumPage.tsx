@@ -132,11 +132,11 @@ export default function PremiumPage() {
 
                 window.location.href = payUrl;
             } else {
-                alert("Không nhận được URL thanh toán từ server.");
+                alert("Did not receive payment URL from server.");
             }
         } catch (error) {
             console.error("Lỗi tạo thanh toán:", error);
-            alert("Tạo thanh toán thất bại.");
+            alert("Failed to create payment.");
         } finally {
             setLoading(false);
         }
