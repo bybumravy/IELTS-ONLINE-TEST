@@ -2,9 +2,12 @@ package web.ielts.Payment.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-    @Document(collection = "paymentTransactions")
+@Document(collection = "paymentTransactions")
     public class PaymentTransactions {
+
+
         @Id
         private String id;
         private String email;
@@ -12,14 +15,14 @@ import java.time.LocalDate;
         private long amount;
         private String paymentMethod;
         private String status;
-        private LocalDate createdAt;
+        private LocalDateTime createdAt;
         private String message;
         private String transactionId;
 
         public PaymentTransactions() {
         }
 
-        public PaymentTransactions(String id, String email, String type, long amount, String paymentMethod, String status, LocalDate createdAt, String message, String transactionId) {
+        public PaymentTransactions(String id, String email, String type, long amount, String paymentMethod, String status, LocalDateTime createdAt, String message, String transactionId) {
             this.id = id;
             this.email = email;
             this.type = type;
@@ -79,11 +82,11 @@ import java.time.LocalDate;
             this.status = status;
         }
 
-        public LocalDate getCreatedAt() {
+        public LocalDateTime getCreatedAt() {
             return createdAt;
         }
 
-        public void setCreatedAt(LocalDate createdAt) {
+        public void setCreatedAt(LocalDateTime createdAt) {
             this.createdAt = createdAt;
         }
 
@@ -101,5 +104,19 @@ import java.time.LocalDate;
 
         public void setTransactionId(String transactionId) {
             this.transactionId = transactionId;
+        }
+        @Override
+        public String toString() {
+            return "PaymentTransactions{" +
+                    "id='" + id + '\'' +
+                    ", email='" + email + '\'' +
+                    ", type='" + type + '\'' +
+                    ", amount=" + amount +
+                    ", paymentMethod='" + paymentMethod + '\'' +
+                    ", status='" + status + '\'' +
+                    ", createdAt=" + createdAt +
+                    ", message='" + message + '\'' +
+                    ", transactionId='" + transactionId + '\'' +
+                    '}';
         }
     }

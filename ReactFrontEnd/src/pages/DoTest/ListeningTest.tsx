@@ -245,7 +245,7 @@ export default function ListeningTest() {
         <div ref={containerRef} className={isDarkMode ? "dark" : ""}>
             <div
                 className="listening-test-container flex flex-col min-h-screen
-          bg-white text-gray-900
+          bg-white text-gray-900 text-sm
           dark:bg-[#202124] dark:text-gray-100
           transition-colors duration-300"
             >
@@ -283,7 +283,7 @@ export default function ListeningTest() {
                                 onChange={handleSeek}
                                 className="w-full"
                             />
-                            <div className="text-xs mt-1">
+                            <div className="text-[10px] mt-1">
                                 {formatTime(currentTime)} / {formatTime(duration)}
                             </div>
                         </div>
@@ -300,51 +300,97 @@ export default function ListeningTest() {
                 </div>
 
                 <main className="flex-1 p-6 w-full">
-                    <h1 className="text-2xl font-bold text-blue-900 mb-6 dark:text-blue-300">
+                    <h1 className="text-lg font-bold text-blue-900 mb-6 dark:text-blue-300">
                         Part {currentTask.taskNumber}: {currentTask.title}
                     </h1>
-                    {currentTask.sections.map((section, sectionIdx) => (
-                        <div key={sectionIdx} className="mb-10">
-                            <h2 className="text-xl font-semibold text-teal-600 mb-2 dark:text-teal-300">
-                                Questions {sectionIdx + 1}
-                            </h2>
-                            {section.questions.map((q) => {
-                                const question = q as QuestionWithStudentAnswer;
-                                const qId = question.questionId!;
-                                return (
-                                    <div key={qId} className="mb-6">
-                                        <p className="mb-2">
-                                            {qId}. {question.question}
-                                        </p>
-                                        {question.options?.length ? (
-                                            <div className="space-y-2">
-                                                {question.options.map((opt, i) => (
-                                                    <label key={i} className="flex items-center gap-2">
-                                                        <input
-                                                            type="radio"
-                                                            name={`q-${qId}`}
-                                                            value={opt}
-                                                            checked={answers[qId] === opt}
-                                                            onChange={() => handleAnswerChange(qId, opt)}
-                                                        />
-                                                        {opt}
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <input
-                                                type="text"
-                                                value={answers[qId] || ""}
-                                                onChange={(e) => handleAnswerChange(qId, e.target.value)}
-                                                placeholder="Your answer"
-                                                className="w-full border p-2 rounded"
-                                            />
-                                        )}
+                    {currentTask.sections.map((section, sectionIdx) => {
+                        // Lấy questionId đầu và cuối
+                        const firstQ = section.questions[0] as QuestionWithStudentAnswer;
+                        const lastQ = section.questions[section.questions.length - 1] as QuestionWithStudentAnswer;
+                        const startId = firstQ.questionId!;
+                        const endId = lastQ.questionId!;
+                        // Chia câu hỏi thành 2 cột
+                        const mid = Math.ceil(section.questions.length / 2);
+                        const col1 = section.questions.slice(0, mid);
+                        const col2 = section.questions.slice(mid);
+
+                        return (
+                            <div key={sectionIdx} className="mb-10">
+                                <h2 className="text-base font-semibold text-teal-600 mb-4 dark:text-teal-300">
+                                  Questions {startId}{startId !== endId ? `-${endId}` : ""}: {section.introduction}
+                                </h2>
+                                {section.imageUrl && (
+                                    <div className="mb-4 flex justify-center">
+                                        <img src={section.imageUrl} alt="Section related" className="max-h-60 rounded shadow" />
                                     </div>
-                                );
-                            })}
-                        </div>
-                    ))}
+                                )}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {[col1, col2].map((col, colIdx) => (
+                                        <div key={colIdx}>
+                                            {col.map((q, _idx) => {
+                                                const question = q as QuestionWithStudentAnswer;
+                                                const qId = question.questionId!;
+                                                // Kiểm tra loại section
+                                                const isSelectType = section.type === "map-labeling" || section.type === "dropdown";
+                                                return (
+                                                    <React.Fragment key={qId}>
+                                                        <div className="mb-6">
+                                                            <p className="mb-2 text-sm">
+                                                                {qId}. {question.question}
+                                                            </p>
+                                                            {isSelectType ? (
+                                                                <select
+                                                                    className="w-full border p-2 rounded text-sm"
+                                                                    value={answers[qId] || ""}
+                                                                    onChange={e => handleAnswerChange(qId, e.target.value)}
+                                                                >
+                                                                    <option value="" disabled>Chọn đáp án</option>
+                                                                    {question.options?.map((opt, i) => {
+                                                                        // Nếu option có dạng "A. Education", lấy ký tự đầu tiên trước dấu chấm
+                                                                        const value = /^[A-Z]\./.test(opt) ? opt.split(".")[0] : opt;
+                                                                        return (
+                                                                            <option key={i} value={value}>{opt}</option>
+                                                                        );
+                                                                    })}
+                                                                </select>
+                                                            ) : question.options?.length ? (
+                                                                <div className="space-y-2 text-sm">
+                                                                    {question.options.map((opt, i) => {
+                                                                        // Nếu option có dạng "A. Education", lấy ký tự đầu tiên trước dấu chấm
+                                                                        const value = /^[A-Z]\./.test(opt) ? opt.split(".")[0] : opt;
+                                                                        return (
+                                                                            <label key={i} className="flex items-center gap-2">
+                                                                                <input
+                                                                                    type="radio"
+                                                                                    name={`q-${qId}`}
+                                                                                    value={value}
+                                                                                    checked={answers[qId] === value}
+                                                                                    onChange={() => handleAnswerChange(qId, value)}
+                                                                                />
+                                                                                {opt}
+                                                                            </label>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            ) : (
+                                                                <input
+                                                                    type="text"
+                                                                    value={answers[qId] || ""}
+                                                                    onChange={(e) => handleAnswerChange(qId, e.target.value)}
+                                                                    placeholder="Your answer"
+                                                                    className="w-full border p-2 rounded text-sm"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    </React.Fragment>
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
                 </main>
 
                 <div className="sticky bottom-0 bg-white dark:bg-[#303134] border-t border-gray-200 dark:border-gray-600 p-4">
@@ -355,7 +401,7 @@ export default function ListeningTest() {
                                 <div
                                     key={task.taskNumber}
                                     onClick={() => setCurrentPart(task.taskNumber)}
-                                    className={`border rounded p-4 text-center cursor-pointer transition ${
+                                    className={`border rounded p-4 text-center cursor-pointer transition text-sm ${
                                         isActive
                                             ? "border-teal-500 bg-teal-50 dark:bg-teal-900 text-teal-300"
                                             : "border-gray-300 dark:border-gray-600 bg-white dark:bg-[#303134] hover:bg-gray-100 dark:hover:bg-[#3c4043]"

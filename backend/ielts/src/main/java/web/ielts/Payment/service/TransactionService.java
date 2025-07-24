@@ -6,6 +6,7 @@ import web.ielts.Payment.model.PaymentTransactions;
 import web.ielts.Payment.repository.TransactionRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +37,7 @@ public class TransactionService {
         tx.setStatus(status);
         tx.setMessage(message);
         tx.setTransactionId(transactionId);
-        tx.setCreatedAt(LocalDate.now(ZoneOffset.UTC));
+        tx.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
         repository.save(tx);
     }
 

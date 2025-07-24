@@ -15,7 +15,8 @@ public class EmailConfig {
 
     public void sendVerificationEmail(String toEmail, String token) {
         String subject = "Xác thực Email đăng ký tài khoản";
-        String verificationUrl = "https://www.languages.io.vn/verify-email?token=" + token;
+        String verificationUrl = "http://localhost:5173/verify-email?token=" + token;
+        //https://www.languages.io.vn/verify-email?token=
         String htmlContent = "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +

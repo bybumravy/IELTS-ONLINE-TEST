@@ -21,8 +21,7 @@ public class JwtToken {
     private static final String SECRET = "a-string-secret-at-least-256-bits-long";
     private static final Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
 
-    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 3;
-    private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 ngày
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 5;
 
     // Hàm private dùng chung để tạo token
     private static String generateToken(String email, String role, long expirationTime,boolean isPremium) {

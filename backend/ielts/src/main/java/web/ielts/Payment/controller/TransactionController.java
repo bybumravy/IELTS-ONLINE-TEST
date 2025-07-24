@@ -11,6 +11,7 @@ import web.ielts.Payment.service.TransactionService;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
@@ -86,8 +87,8 @@ public class TransactionController {
     @GetMapping("/payment/transactions/statistics")
     public List<Stat> getStatistics(
             @RequestParam(defaultValue = "month") String type,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDate
     ) {
         List<PaymentTransactions> all = service.getAll();
         if (startDate != null) {
@@ -102,7 +103,7 @@ public class TransactionController {
         for (PaymentTransactions tx : all) {
             if (tx.getCreatedAt() == null) continue;
 
-            LocalDate date = tx.getCreatedAt();
+            LocalDateTime date = tx.getCreatedAt();
             String key;
 
             switch (type) {

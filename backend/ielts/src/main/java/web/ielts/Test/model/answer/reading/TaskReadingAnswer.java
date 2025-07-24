@@ -8,9 +8,6 @@ public class TaskReadingAnswer {
     private String paragraph;
     private List<SectionReadingAnswer> sections;
 
-    public TaskReadingAnswer() {
-    }
-
     public TaskReadingAnswer(int taskNumber, String title, String paragraph, List<SectionReadingAnswer> sections) {
         this.taskNumber = taskNumber;
         this.title = title;
@@ -20,6 +17,9 @@ public class TaskReadingAnswer {
 
     public int getTaskNumber() {
         return taskNumber;
+    }
+
+    public TaskReadingAnswer() {
     }
 
     public void setTaskNumber(int taskNumber) {

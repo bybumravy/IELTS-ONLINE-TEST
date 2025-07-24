@@ -110,7 +110,7 @@ public class DoTestService {
         int totalQuestions = 0;
         int correctAnswers = 0;
 
-        for (var task : answer.getTaskReadingAnswers()) {
+        for (var task : answer.getTaskReadingAnswer()) {
             for (var section : task.getSections()) {
                 String type = section.getType();
                 for (var q : section.getQuestions()) {

@@ -11,6 +11,7 @@ export interface Question {
 }
 
 export interface Section {
+    imageUrl?: string; // sửa lại từ String -> string
     sectionNumber: number;
     type: string;
     introduction: string;
@@ -25,15 +26,19 @@ export interface Task {
 }
 
 export interface ReadingTest {
+    submittedAt: any;
+    idReading: string;
     testId: string;
     tasks: Task[];
     username: string;
     skill: string;
+    
 }
 
 interface QuestionWithStudentAnswer extends Question {
-    studentAnswer?: string | null;
-    questionId?: number;
+
+    studentAnswer: string | null;
+    questionId: number;
 }
 
 export default function ReadingTest() {
@@ -47,8 +52,8 @@ export default function ReadingTest() {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const paragraphRef = useRef<HTMLDivElement | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const paragraphRef = useRef<HTMLDivElement>(null);
 
     const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
     const [isHighlightMode, setIsHighlightMode] = useState(false);
@@ -90,7 +95,9 @@ export default function ReadingTest() {
                 };
 
                 setReadingTest(updatedData);
+
                 setTasks(updatedData.tasks);
+           
             } catch (err) {
                 console.error("Failed to load reading test:", err);
             }
@@ -140,8 +147,9 @@ export default function ReadingTest() {
         };
     }, [showColorPicker]);
     const handleFullscreen = () => {
+        if (!containerRef.current) return;
         if (!document.fullscreenElement) {
-            containerRef.current?.requestFullscreen().catch((err) => console.error(err));
+            containerRef.current.requestFullscreen().catch((err) => console.error(err));
         } else {
             document.exitFullscreen();
         }
@@ -150,27 +158,31 @@ export default function ReadingTest() {
     const handleSubmit = async () => {
         if (!readingTest) return;
 
-        const dataToSend = structuredClone(readingTest);
+        const dataToSend = structuredClone(readingTest); // clone gốc để không thay đổi state
         if (user?.username) dataToSend.username = user.username;
         dataToSend.skill = "reading";
-
-        dataToSend.tasks.forEach((task: Task) => {
+        dataToSend.submittedAt = new Date().toISOString();
+        dataToSend.tasks.forEach((task) => {
             delete (task as any).title;
 
-            task.sections.forEach((section: Section) => {
+            task.sections.forEach((section) => {
                 delete (section as any).introduction;
                 delete (section as any).imageUrl;
 
-                section.questions.forEach((q:QuestionWithStudentAnswer) => {
+                section.questions.forEach((q) => {
                     const question = q as QuestionWithStudentAnswer;
-                    const qid = question.questionId!;
-                    question.studentAnswer = answers[qid] || null;
+                    question.studentAnswer = question.studentAnswer || null;
 
                     delete (question as any).explanation;
                     delete (question as any).options;
                 });
             });
         });
+
+
+        // ✅ In ra dữ liệu JSON để kiểm tra trước khi submit
+        console.log("✅ Data to be submitted:");
+        console.log(JSON.stringify(dataToSend, null, 2));
 
         setIsSubmitted(true);
 
@@ -182,12 +194,14 @@ export default function ReadingTest() {
                 body: JSON.stringify(dataToSend),
             });
 
+            if (!response.ok) throw new Error("Submit failed");
+
             const result = await response.json();
-            console.log("Saved:", result);
+            console.log("✅ Saved to backend:", result);
             alert("🎉 Submitted successfully!");
             navigate(`/reading-result/${result.id}`);
         } catch (error) {
-            console.error(error);
+            console.error("❌ Error submitting:", error);
             alert("❌ Error submitting");
         } finally {
             setIsSubmitted(false);
@@ -395,48 +409,64 @@ export default function ReadingTest() {
                                     {section.introduction && (
                                         <p className="text-gray-700 italic mb-4 dark:text-gray-400">{section.introduction}</p>
                                     )}
+                                    {section.imageUrl && (
+                                        <img
+                                            src={section.imageUrl}
+                                            alt="Section related"
+                                            className="my-2 rounded-md max-w-full md:max-w-md"
+                                        />
+                                    )}
 
-                                    {section.questions.map((question, qIdx) => {
+                                    {section.questions.map((question, _qIdx) => {
                                         if (!question.question) return null;
                                         const q = question as QuestionWithStudentAnswer;
                                         const questionId = q.questionId!;
                                         const currentAnswer = answers[questionId] || "";
 
+                                        // Tính số thứ tự câu hỏi đúng tổng thể
+                                        let questionNumber = questionId;
+
                                         return (
                                             <div key={questionId} className="mb-6">
                                                 <p className="text-gray-800 font-medium mb-3 dark:text-gray-200">
-                                                    {qIdx + 1}. {q.question}
+                                                    {questionNumber}. {q.question}
                                                 </p>
-
-                                                {section.type === "True/False/Not Given" || section.type === "Yes/No/Not Given" ? (
+                                                {/* Đã loại bỏ hiển thị ảnh ở từng câu hỏi */}
+                                                {section.type === "True/False/Not Given" || section.type === "Yes/No/Not Given"  || section.type === "map-labeling" || section.type === "dropdown" || section.type === "matching-heading" ? (
                                                     <select
                                                         value={currentAnswer}
                                                         onChange={(e) => handleAnswerChange(questionId, e.target.value)}
                                                         className="border border-gray-300 rounded p-2 min-w-[150px] dark:bg-[#202124] dark:border-gray-600"
                                                     >
                                                         <option value="">Select</option>
-                                                        {q.options?.map((option, optIdx) => (
-                                                            <option key={optIdx} value={option}>
-                                                                {option}
-                                                            </option>
-                                                        ))}
+                                                        {q.options?.map((option, optIdx) => {
+                                                            const answerKey = option.split(".")[0].trim();
+                                                            return (
+                                                                <option key={optIdx} value={answerKey}>
+                                                                    {option}
+                                                                </option>
+                                                            );
+                                                        })}
                                                     </select>
                                                 ) : q.options?.length ? (
                                                     <div className="space-y-2 mb-3">
-                                                        {q.options.map((option, optIdx) => (
-                                                            <div key={optIdx} className="flex items-center">
-                                                                <input
-                                                                    type="radio"
-                                                                    id={`q${questionId}-opt${optIdx}`}
-                                                                    name={`q${questionId}`}
-                                                                    value={option}
-                                                                    checked={currentAnswer === option}
-                                                                    onChange={(e) => handleAnswerChange(questionId, e.target.value)}
-                                                                    className="mr-2"
-                                                                />
-                                                                <label htmlFor={`q${questionId}-opt${optIdx}`}>{option}</label>
-                                                            </div>
-                                                        ))}
+                                                        {q.options && q.options.map((option, optIdx) => {
+                                                            const answerKey = option.split(".")[0].trim();
+                                                            return (
+                                                                <div key={optIdx} className="flex items-center">
+                                                                    <input
+                                                                        type="radio"
+                                                                        id={`q${questionId}-opt${optIdx}`}
+                                                                        name={`q${questionId}`}
+                                                                        value={answerKey}
+                                                                        checked={currentAnswer === answerKey}
+                                                                        onChange={(e) => handleAnswerChange(questionId, e.target.value)}
+                                                                        className="mr-2"
+                                                                    />
+                                                                    <label htmlFor={`q${questionId}-opt${optIdx}`}>{option}</label>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 ) : (
                                                     <input

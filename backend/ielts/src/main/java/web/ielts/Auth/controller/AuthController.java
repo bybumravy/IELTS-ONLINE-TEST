@@ -72,11 +72,33 @@ public class AuthController {
             String username = authservice.getUsernameFromToken(token);
             String role = authservice.getRoleFromToken(token);
             boolean isPremium = authservice.isPremium(token);
+
             return ResponseEntity.ok(Map.of(
                     "username", username,
                     "role", role,
                        "isPremium",isPremium
             ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
+        }
+    }
+    @GetMapping("/update-info")
+    public ResponseEntity<?> getUserUpdateInfo(@CookieValue(value = "jwt_token", required = false) String token) {
+        try {
+            String username = authservice.getUsernameFromToken(token);
+            String role = authservice.getRoleFromToken(token);
+            boolean isPremium = authservice.updatePrenium(username);
+
+            // Tạo lại JWT mới với trạng thái premium mới nhất
+            ResponseCookie newJwtCookie = authservice.createJwtCookie(username, role, isPremium);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, newJwtCookie.toString())
+                    .body(Map.of(
+                            "username", username,
+                            "role", role,
+                            "isPremium", isPremium
+                    ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
         }

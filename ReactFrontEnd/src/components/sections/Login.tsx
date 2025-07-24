@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,6 @@ const LoginPage = () => {
   const [role, setRole] = useState("student");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const location = useLocation();
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -115,7 +114,7 @@ const LoginPage = () => {
                   transition: "transform 0.35s cubic-bezier(.4,1.2,.4,1), background 0.3s",
                 }}
               ></div>
-              {roleList.map((item, idx) => {
+              {roleList.map((item, _idx) => {
                 const isActive = role === item.value;
                 return (
                   <button
