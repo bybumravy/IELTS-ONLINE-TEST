@@ -458,7 +458,7 @@ const SpeakingTest = () => {
         const answeredPart3 = countAnsweredPart3();
         if (answeredPart3 < 3) {
             setMinRecordingWarningMsg(
-                `You need to answer (record) at least 3 questions in PART 3 before submitting. You have currently answered ${answeredPart3} question(s)`
+                `You need to answer (record) at least 3 questions in PART 3 before submitting. You have currently answered ${answeredPart3} question(s).`
             );
             setShowMinRecordingWarning(true);
             return;

@@ -9,7 +9,7 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 via-white to-orange-50">
+    <div className="min-h-screen flex flex-col">
       <AdminHeader />
       <main className="flex-grow">
         {children}

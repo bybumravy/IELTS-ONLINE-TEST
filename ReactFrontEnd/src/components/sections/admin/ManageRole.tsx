@@ -130,17 +130,17 @@ export default function ManageRole({ role }: { role: RoleType }) {
     );
 
     return (
-        <div className="max-w-5xl mx-auto py-10 px-4 min-h-[80vh]">
+        <div className="max-w-5xl mx-auto py-2 px-4">
             <h1 className="text-3xl font-bold text-emerald-700 mb-2 text-center">User Management</h1>
             <p className="text-gray-500 text-center mb-8">Manage users and roles with professional tools</p>
             <Card className="mb-8 p-6">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <Input
                         type="text"
                         value={searchEmail}
                         onChange={e => setSearchEmail(e.target.value)}
                         placeholder="Search by email..."
-                        className="w-full md:w-80 border-emerald-200 focus:border-emerald-400"
+                        className="w-full border-black-200"
                     />
                 </div>
                 <div className="overflow-x-auto rounded-lg border border-emerald-100 bg-emerald-50 transition-all duration-500">
