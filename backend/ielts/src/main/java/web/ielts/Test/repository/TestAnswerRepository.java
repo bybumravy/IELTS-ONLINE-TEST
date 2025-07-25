@@ -11,4 +11,5 @@ import java.util.List;
 public interface TestAnswerRepository extends MongoRepository<TestAnswer, String> {
     Optional<TestAnswer> findByTestIdAndUsername(String testId, String username);
     List<TestAnswer> findAllByTestIdAndUsername(String testId, String username);
+    List<TestAnswer> findAllByUsername(String username);
 } 

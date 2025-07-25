@@ -3,7 +3,7 @@ import axios from 'axios';
 export interface TestHistory {
   testID: string;
   username: string;
-  skill: 'listening' | 'reading' | 'writing' | 'speaking';
+  skill: 'listening' | 'reading' | 'writing' | 'speaking' | 'fulltest';
   submittedAt: string;
   band: number;
 }

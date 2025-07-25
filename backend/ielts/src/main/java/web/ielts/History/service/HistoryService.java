@@ -11,6 +11,8 @@ import web.ielts.Test.repository.answer.ListeningAnswerRepository;
 import web.ielts.Test.repository.answer.ReadingAnswerRepository;
 import web.ielts.Test.repository.answer.SpeakingAnswerRepository;
 import web.ielts.Test.repository.answer.WritingAnswerRepository;
+import web.ielts.Test.service.TestAnswerService;
+import web.ielts.Test.model.TestAnswer;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +31,8 @@ public class HistoryService {
     
     @Autowired
     private SpeakingAnswerRepository speakingAnswerRepository;
+    @Autowired
+    private TestAnswerService testAnswerService;
 
     public List<HistoryTest> getListeningByUsername(String username) {
         System.out.println("DEBUG: Searching listening answers for username: " + username);
@@ -95,6 +99,26 @@ public class HistoryService {
             history.setSubmittedAt(answer.getSubmittedAt());
             return history;
         }).collect(Collectors.toList());
+        return historyTests;
+    }
+
+    public List<HistoryTest> getFullTestByUsername(String username) {
+        List<TestAnswer> answers = testAnswerService.getAllByUsername(username);
+        List<HistoryTest> historyTests = answers.stream().map(answer -> {
+            HistoryTest history = new HistoryTest();
+            history.setUsername(answer.getUsername());
+            history.setSkill("fulltest");
+            history.setTestID(answer.getId());
+            // Band: lấy trung bình cộng các band của từng kỹ năng nếu có
+            double totalBand = 0;
+            int count = 0;
+            // Giả sử có thể lấy band từ các answerId (nếu null thì bỏ qua)
+            // Bạn có thể tối ưu lại đoạn này nếu có service lấy band theo answerId
+            // Ở đây chỉ demo, cần bổ sung lấy band thực tế
+            history.setBand(0); // TODO: Tính band thực tế
+            history.setSubmittedAt(answer.getSubmittedAt());
+            return history;
+        }).collect(java.util.stream.Collectors.toList());
         return historyTests;
     }
 }

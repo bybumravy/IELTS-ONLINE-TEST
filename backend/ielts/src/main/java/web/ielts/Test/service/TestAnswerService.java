@@ -51,4 +51,8 @@ public class TestAnswerService {
         testAnswer.setSubmittedAt(LocalDateTime.now());
         testAnswerRepository.save(testAnswer);
     }
+
+    public java.util.List<TestAnswer> getAllByUsername(String username) {
+        return testAnswerRepository.findAllByUsername(username);
+    }
 } 

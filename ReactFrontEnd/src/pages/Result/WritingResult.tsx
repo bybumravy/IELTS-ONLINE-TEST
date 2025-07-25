@@ -66,6 +66,7 @@ export default function WritingResult() {
     const [data, setData] = useState<WritingAnswer | null>(null);
     const [loading, setLoading] = useState(true);
     const [activeTask, setActiveTask] = useState<"task1" | "task2">("task1")
+    const navigate = useNavigate()
     const [openSections, setOpenSections] = useState<{
         question: boolean
         review: boolean
@@ -114,7 +115,6 @@ export default function WritingResult() {
             </div>
         )
     }
-    const navigate = useNavigate()
 
     const getScoreColor = (score: string) => {
         const numScore = Number.parseFloat(score)

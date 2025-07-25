@@ -156,7 +156,11 @@ export default function WritingTest() {
                 }
             } else {
                 alert("Your essay has been sent to the teacher. You will receive the result within 3-5 days.");
-                navigate(`/test/speaking/${testId}?testAnswerId=${testAnswerId}&mode=fulltest`);
+                if (mode === "fulltest") {
+                    navigate(`/test/speaking/${testId}?testAnswerId=${testAnswerId}&mode=fulltest`);
+                } else {
+                    navigate(`/`);
+                }
             }
         } catch (error) {
             console.error("Error submitting writing:", error);

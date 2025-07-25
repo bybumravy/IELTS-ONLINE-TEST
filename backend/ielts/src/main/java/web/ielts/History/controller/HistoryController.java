@@ -37,6 +37,8 @@ public class HistoryController {
                     return historyService.getWritingByUsername(username);
                 case "speaking":
                     return historyService.getSpeakingByUsername(username);
+                case "fulltest":
+                    return historyService.getFullTestByUsername(username);
                 default:
                     return new ArrayList<>();
             }

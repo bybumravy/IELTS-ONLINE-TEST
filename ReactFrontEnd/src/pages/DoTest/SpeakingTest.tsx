@@ -429,12 +429,6 @@ const SpeakingTest = () => {
 
     const handleSubmitClick = async () => {
         // Dừng timer khi bắt đầu submit
-        if (testTimerRef.current) {
-            clearInterval(testTimerRef.current);
-            testTimerRef.current = null;
-        }
-        setPartStarted(false); // Ngăn timer tự động chạy lại
-        setTimeUp(true); // Đánh dấu đã hết giờ để chặn mọi submit tiếp theo
         if (recordingKey) {
             stopRecording()
             await new Promise((resolve) => {
@@ -470,14 +464,9 @@ const SpeakingTest = () => {
 
     const handleSubmit = async () => {
         // Dừng timer khi thực sự submit (phòng trường hợp gọi trực tiếp)
-        if (testTimerRef.current) {
-            clearInterval(testTimerRef.current);
-            testTimerRef.current = null;
-        }
-        setPartStarted(false); // Ngăn timer tự động chạy lại
-        setTimeUp(true); // Đánh dấu đã hết giờ để chặn mọi submit tiếp theo
+        setIsGrading(true);
         setIsSubmitting(true); // Bây giờ mới set submitting
-        setIsGrading(true); // Bắt đầu overlay loading
+        // setIsGrading(true); // Bắt đầu overlay loading
         const submissionData = prepareSubmissionData()
         if (!submissionData) return
         const formData = new FormData()

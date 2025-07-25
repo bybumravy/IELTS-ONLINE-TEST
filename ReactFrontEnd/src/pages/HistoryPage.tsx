@@ -20,7 +20,7 @@ const HistoryPage: React.FC = () => {
       try {
         setLoading(true);
         if (!user?.username) {
-          setError('Bạn chưa đăng nhập.');
+          setError('You are not logged in.');
           return;
         }
 
@@ -32,7 +32,7 @@ const HistoryPage: React.FC = () => {
         setFilteredHistory(sorted);
       } catch (err) {
         console.error('Lỗi khi tải lịch sử:', err);
-        setError('Không thể tải lịch sử. Vui lòng thử lại sau.');
+        setError('Unable to load history. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -42,8 +42,9 @@ const HistoryPage: React.FC = () => {
   }, [user]);
 
   useEffect(() => {
+    // Only show FullTest attempts when 'all' is selected
     const filtered = selectedSkill === 'all'
-        ? testHistory
+        ? testHistory.filter(item => item.skill === 'fulltest')
         : testHistory.filter(item => item.skill === selectedSkill);
 
     setFilteredHistory(
@@ -62,14 +63,14 @@ const HistoryPage: React.FC = () => {
   if (error) {
     return (
         <div className="container mx-auto px-4 py-8 text-center">
-          <h1 className="text-3xl font-bold text-green-700 mb-6">Lịch sử làm bài</h1>
+          <h1 className="text-3xl font-bold text-green-700 mb-6">Test History</h1>
           <div className="bg-red-100 border border-red-300 text-red-700 rounded-lg p-6">
             <p>{error}</p>
             <button
                 onClick={() => window.location.reload()}
                 className="mt-4 px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
             >
-              Thử lại
+              Retry
             </button>
           </div>
         </div>
@@ -78,7 +79,7 @@ const HistoryPage: React.FC = () => {
 
   return (
       <div className="container mx-auto px-4 py-8 animate-fade-in">
-        <h1 className="text-3xl font-bold text-green-700 mb-6">Lịch sử làm bài</h1>
+        <h1 className="text-3xl font-bold text-green-700 mb-6">Test History</h1>
 
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="lg:w-1/4">
@@ -95,15 +96,15 @@ const HistoryPage: React.FC = () => {
                   <div className="text-center py-8 text-gray-600">
                     <p className="mb-4">
                       {testHistory.length === 0
-                          ? 'Bạn chưa thực hiện bài test nào.'
-                          : 'Không có bài test nào cho kỹ năng này.'}
+                          ? 'You have not taken any tests yet.'
+                          : 'No tests found for this skill.'}
                     </p>
                     {testHistory.length === 0 && (
                         <button
                             onClick={() => (window.location.href = '/list-test')}
                             className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                         >
-                          Bắt đầu ngay
+                          Start now
                         </button>
                     )}
                   </div>
