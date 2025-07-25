@@ -8,16 +8,18 @@ public class HistoryTest {
     private String skill;
     private LocalDateTime submittedAt;
     private double band;
+    private String objectId;
 
     public HistoryTest() {
     }
 
-    public HistoryTest(String testID, String username, String skill, LocalDateTime submittedAt, double band) {
+    public HistoryTest(String testID, String username, String skill, LocalDateTime submittedAt, double band, String objectId) {
         this.testID = testID;
         this.username = username;
         this.skill = skill;
         this.submittedAt = submittedAt;
         this.band = band;
+        this.objectId = objectId;
     }
 
     public String getTestID() {
@@ -58,5 +60,13 @@ public class HistoryTest {
 
     public void setBand(double band) {
         this.band = band;
+    }
+
+    public String getObjectId() {
+        return objectId;
+    }
+
+    public void setObjectId(String objectId) {
+        this.objectId = objectId;
     }
 }

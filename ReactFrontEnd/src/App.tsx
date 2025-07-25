@@ -98,7 +98,7 @@ export default function App() {
 
                         {/* ========== Public Routes (No login required) ========== */}
                         <Route path="/" element={
-                            // <SoftProtectedLayout allowRoles={["student"]}>
+                            <SoftProtectedLayout allowRoles={["student"]}>
                                 <MainLayout><HomePage /></MainLayout>
                             //</SoftProtectedLayout>
                         } />

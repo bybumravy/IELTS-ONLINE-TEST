@@ -22,22 +22,22 @@ const skillMap: Record<
 > = {
   listening: {
     icon: <ListeningIcon className="text-green-600" />,
-    label: 'Nghe',
+    label: 'Listening',
     color: 'bg-green-100 text-green-700',
   },
   reading: {
     icon: <ReadingIcon className="text-green-600" />,
-    label: 'Đọc',
+    label: 'Reading',
     color: 'bg-green-100 text-green-700',
   },
   writing: {
     icon: <WritingIcon className="text-green-600" />,
-    label: 'Viết',
+    label: 'Writing',
     color: 'bg-green-100 text-green-700',
   },
   speaking: {
     icon: <SpeakingIcon className="text-green-600" />,
-    label: 'Nói',
+    label: 'Speaking',
     color: 'bg-green-100 text-green-700',
   },
 };
@@ -47,11 +47,51 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item }) => {
   const navigate = useNavigate();
 
   const handleRedoTest = () => {
-    navigate(`/do-test/${item.skill}/${item.testID}`);
+    let path = '';
+    switch (item.skill) {
+      case 'listening':
+        path = `/test/listening/${item.testID}`;
+        break;
+      case 'reading':
+        path = `/test/reading/${item.testID}`;
+        break;
+      case 'writing':
+        path = `/test/writing/${item.testID}`;
+        break;
+      case 'speaking':
+        path = `/test/speaking/${item.testID}`;
+        break;
+      case 'fulltest':
+        path = `/test/full/${item.testID}`;
+        break;
+      default:
+        path = '/test-history';
+    }
+    navigate(path);
   };
 
   const handleViewHistory = () => {
-    navigate(`/history/${item.testID}`);
+    let path = '';
+    switch (item.skill) {
+      case 'listening':
+        path = `/listening-result/${item.objectId}`;
+        break;
+      case 'reading':
+        path = `/reading-result/${item.objectId}`;
+        break;
+      case 'writing':
+        path = `/writing-result/${item.objectId}`;
+        break;
+      case 'speaking':
+        path = `/speaking-result/${item.objectId}`;
+        break;
+      case 'fulltest':
+        path = `/test/fulltest-result/${item.objectId}`;
+        break;
+      default:
+        path = `/test-history`;
+    }
+    navigate(path);
   };
 
   const skill = skillMap[item.skill] || {
@@ -62,10 +102,10 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item }) => {
 
   const getBandFeedback = () => {
     if (item.band >= 7.0)
-      return { text: 'Tốt', color: 'text-green-600', bar: 'from-green-300 to-green-500' };
+      return { text: 'Good', color: 'text-green-600', bar: 'from-green-300 to-green-500' };
     if (item.band >= 5.5)
-      return { text: 'Ổn', color: 'text-blue-600', bar: 'from-blue-300 to-blue-500' };
-    return { text: 'Cần cải thiện', color: 'text-red-600', bar: 'from-red-300 to-red-500' };
+      return { text: 'Fair', color: 'text-blue-600', bar: 'from-blue-300 to-blue-500' };
+    return { text: 'Needs Improvement', color: 'text-red-600', bar: 'from-red-300 to-red-500' };
   };
 
   const feedback = getBandFeedback();
@@ -136,14 +176,14 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item }) => {
                       <strong>Username:</strong> {item.username}
                     </p>
                     <p>
-                      <strong>Kỹ năng:</strong> {skill.label}
+                      <strong>Skill:</strong> {skill.label}
                     </p>
                     <p>
                       <strong>Band Score:</strong> {item.band.toFixed(1)}
                     </p>
                     <p>
-                      <strong>Thời gian nộp:</strong>{' '}
-                      {format(new Date(item.submittedAt), 'dd/MM/yyyy HH:mm:ss', { locale: vi })}
+                      <strong>Submitted At:</strong>{' '}
+                      {format(new Date(item.submittedAt), 'dd/MM/yyyy HH:mm:ss')}
                     </p>
                   </div>
                   <div className="flex flex-col md:flex-row gap-2 mt-20">
@@ -153,7 +193,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item }) => {
                         onClick={handleRedoTest}
                         className="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs shadow transition"
                     >
-                      Làm lại bài thi
+                      Retake Test
                     </motion.button>
                     <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -161,7 +201,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item }) => {
                         onClick={handleViewHistory}
                         className="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs shadow transition"
                     >
-                      Lịch sử làm bài
+                      View Result
                     </motion.button>
                   </div>
 

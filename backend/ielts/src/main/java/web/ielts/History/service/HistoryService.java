@@ -46,6 +46,7 @@ public class HistoryService {
             history.setTestID(answer.getTestId());
             history.setBand(answer.getBand());
             history.setSubmittedAt(answer.getSubmittedAt());
+            history.setObjectId(answer.getId());
             return history;
         }).collect(Collectors.toList());
         return historyTests;
@@ -63,6 +64,7 @@ public class HistoryService {
             history.setTestID(answer.getTestId());
             history.setBand(answer.getBand());
             history.setSubmittedAt(answer.getSubmittedAt());
+            history.setObjectId(answer.getId());
             return history;
         }).collect(Collectors.toList());
         return historyTests;
@@ -80,6 +82,7 @@ public class HistoryService {
             history.setTestID(answer.getTestId());
             history.setBand(answer.getBand());
             history.setSubmittedAt(answer.getSubmittedAt());
+            history.setObjectId(answer.getId());
             return history;
         }).collect(Collectors.toList());
         return historyTests;
@@ -97,6 +100,7 @@ public class HistoryService {
             history.setTestID(answer.getTestId());
             history.setBand(answer.getBand());
             history.setSubmittedAt(answer.getSubmittedAt());
+            history.setObjectId(answer.getId());
             return history;
         }).collect(Collectors.toList());
         return historyTests;
@@ -108,7 +112,8 @@ public class HistoryService {
             HistoryTest history = new HistoryTest();
             history.setUsername(answer.getUsername());
             history.setSkill("fulltest");
-            history.setTestID(answer.getId());
+            history.setTestID(answer.getTestId());
+            history.setObjectId(answer.getId());
             // Band: lấy trung bình cộng các band của từng kỹ năng nếu có
             double totalBand = 0;
             int count = 0;

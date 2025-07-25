@@ -23,6 +23,7 @@ interface WritingAnswer {
     testId: string;
     task1: TaskWritingAnswer;
     task2: TaskWritingAnswer;
+    band: number; // Added band to WritingAnswer
 }
 interface ErrorCorrection {
     originalText: string;
@@ -123,35 +124,8 @@ export default function WritingResult() {
         return "text-red-600 bg-red-100"
     }
 
-    const calculateOverallScore = () => {
-        const task1Score = data.task1 && data.task1.score ? Number.parseFloat(data.task1.score) : 0;
-        const task2Score = data.task2 && data.task2.score ? Number.parseFloat(data.task2.score) : 0;
-        // Nếu cả hai task đều không có thì trả về "_"
-        if (!data.task1 && !data.task2) return "_";
-        // Nếu chỉ có 1 task thì lấy điểm task đó
-        if (!data.task1) return roundIeltsScore(task2Score);
-        if (!data.task2) return roundIeltsScore(task1Score);
-        // Nếu có cả hai thì tính bình thường
-        const avg = (task1Score + task2Score * 2) / 3;
-        return roundIeltsScore(avg);
-    }
-
-    // Quy tắc làm tròn điểm IELTS
-    function roundIeltsScore(score: number) {
-        const decimal = score - Math.floor(score);
-        let rounded;
-        if (decimal < 0.25) {
-            rounded = Math.floor(score);
-        } else if (decimal < 0.75) {
-            rounded = Math.floor(score) + 0.5;
-        } else {
-            rounded = Math.ceil(score);
-        }
-        // Đảm bảo luôn có 1 số thập phân
-        return rounded.toFixed(1);
-    }
-
-    const overallScore = calculateOverallScore();
+    // const overallScore = calculateOverallScore();
+    const overallScore = data.band !== undefined && data.band !== null ? data.band : "_";
     // Highlight errors by matching originalText only in the correct sentenceContext
     const renderTextWithCorrectionsBySentenceContext = (answer: string, corrections: ErrorCorrection[]) => {
         if (!corrections || corrections.length === 0) {

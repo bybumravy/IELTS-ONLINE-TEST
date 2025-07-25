@@ -94,6 +94,20 @@ interface SentenceCorrection {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// IELTS band rounding function
+function roundIeltsScore(score: number): number {
+  const decimal = score - Math.floor(score);
+  let rounded;
+  if (decimal < 0.25) {
+    rounded = Math.floor(score);
+  } else if (decimal < 0.75) {
+    rounded = Math.floor(score) + 0.5;
+  } else {
+    rounded = Math.ceil(score);
+  }
+  return Math.round(rounded * 10) / 10;
+}
+
 export default function TeacherScoringPage() {
 
     const navigate = useNavigate();
@@ -237,6 +251,8 @@ export default function TeacherScoringPage() {
         comment: "",
     })
 
+    const [isScoring, setIsScoring] = useState(false);
+
     const calculateOverallScoreByTask = (taskKey: "task1" | "task2") => {
         const taskScores = allScores[taskKey];
         if (!taskScores) return "N/A";
@@ -347,7 +363,7 @@ export default function TeacherScoringPage() {
             runningIndex += sentenceWords.length;
         }
 
-        console.warn("⚠️ Could not find sentence containing word index", wordIndex);
+        console.warn("⚠️ Không tìm thấy câu chứa từ index", wordIndex);
         return "";
     };
     const addError = (wordIndex: number, word: string) => {
@@ -360,7 +376,7 @@ export default function TeacherScoringPage() {
             original: word,
             correction: newError.correction,
             comment: newError.comment,
-            sentenceContext // ✅ ASSIGN here
+            sentenceContext // ✅ GÁN vào đây
         };
 
         const currentErrors = allErrors[selectedTask] || [];
@@ -454,6 +470,7 @@ export default function TeacherScoringPage() {
         }
     };
     const handleSubmit = async () => {
+        setIsScoring(true);
         const dataSubmit = JSON.parse(JSON.stringify(taskData));
 
         // Convert annotations & corrections
@@ -463,7 +480,7 @@ export default function TeacherScoringPage() {
         const task2SentenceImprovements = allSentenceCorrections.task2.map(convertSentenceCorrection);
 
         // Task 1
-        dataSubmit.task1.score = calculateOverallScoreByTask("task1"); // if you use total score
+        dataSubmit.task1.score = calculateOverallScoreByTask("task1"); // nếu bạn dùng điểm tổng
         dataSubmit.task1.feedback = {
             errorCorrections: task1ErrorCorrections,
             sentenceImprovements: task1SentenceImprovements,
@@ -492,7 +509,7 @@ export default function TeacherScoringPage() {
 
 
         // Task 2
-        dataSubmit.task2.score = calculateOverallScoreByTask("task2"); // ✅ correct calculation for task2
+        dataSubmit.task2.score = calculateOverallScoreByTask("task2"); // ✅ tính đúng cho task2
         dataSubmit.task2.feedback = {
             errorCorrections: task2ErrorCorrections,
             sentenceImprovements: task2SentenceImprovements,
@@ -517,7 +534,7 @@ export default function TeacherScoringPage() {
                 reviewEva: allComments.task2.grammaticalRange,
             }
         };
-        dataSubmit.band = (parseFloat(calculateOverallScoreByTask("task1"))+ parseFloat(calculateOverallScoreByTask("task2")))/2
+        dataSubmit.band = roundIeltsScore((parseFloat(calculateOverallScoreByTask("task1"))+ parseFloat(calculateOverallScoreByTask("task2")))/2);
         try {
             const response = await fetch(`${API_URL}/verify/writingteachersubmit`, {
                 method: "POST",
@@ -527,15 +544,17 @@ export default function TeacherScoringPage() {
                 body: JSON.stringify(dataSubmit),
             });
 
-            if (!response.ok) throw new Error("Submission failed");
+            if (!response.ok) throw new Error("Gửi thất bại");
 
             const result = await response.json();
-            console.log("Submission successful:", result);
-            // Display success message
+            console.log("Gửi thành công:", result);
+            // Hiển thị thông báo thành công
             alert("Result sent and student notified successfully!");
             navigate("/teacher-scored-list");
         } catch (error) {
-            console.error("Error submitting:", error);
+            console.error("Lỗi khi gửi:", error);
+        } finally {
+            setIsScoring(false);
         }
         console.log(JSON.stringify(dataSubmit, null, 2));
 
@@ -1247,7 +1266,7 @@ export default function TeacherScoringPage() {
 
                         {/* Action Buttons */}
                         <div className="flex gap-3">
-                            <Button className="flex-1" onClick={handleSubmit}>
+                            <Button className="flex-1" onClick={handleSubmit} disabled={isScoring}>
                                 <Send className="mr-2 h-4 w-4" />
                                 Submitted
                             </Button>
@@ -1276,6 +1295,26 @@ export default function TeacherScoringPage() {
                     </div>
                 </div>
             </div>
+            {isScoring && (
+  <div style={{
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    zIndex: 50,
+    background: "rgba(0,0,0,0.4)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }}>
+    <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald-200 border-t-emerald-600 mb-6"></div>
+      <div className="text-xl font-bold text-emerald-700 mb-2">Scoring...</div>
+      <div className="text-gray-600">Sending result and notifying student, please wait...</div>
+    </div>
+  </div>
+)}
         </div>
     )
 }

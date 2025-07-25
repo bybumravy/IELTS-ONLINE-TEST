@@ -122,23 +122,95 @@ public class EmailConfig {
         }
     }
     public void sendNotificationToStudent(String studentEmail, String testId, double bandScore) {
-
+        String subject = "Kết quả bài Writing IELTS của bạn đã có";
+//        String languageUrl = "https://www.languages.io.vn/";
         String languageUrl = "http://localhost:5173/";
-        // Gửi email thông báo
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(studentEmail);
-        message.setSubject("Kết quả bài Writing IELTS của bạn đã có");
-        message.setText(String.format(
-                "Bài Writing IELTS của bạn (ID: %s) đã được chấm điểm.\n\n" +
-                        "Điểm tổng: %.1f\n\n" +
-                        "Vui lòng đăng nhập vào hệ thống để xem chi tiết.\n\n" +
-                        languageUrl,
 
-                testId, bandScore
-        ));
+        // HTML content định dạng đẹp, chuyên nghiệp
+        String htmlContent = String.format("""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {
+                    background-color: #f2f4f7;
+                    font-family: 'Segoe UI', sans-serif;
+                    margin: 0; padding: 30px;
+                }
+                .email-container {
+                    max-width: 600px;
+                    margin: auto;
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                    overflow: hidden;
+                }
+                .header {
+                    background-color: #2c3e50;
+                    padding: 20px;
+                    color: #ffffff;
+                    text-align: center;
+                }
+                .content {
+                    padding: 30px;
+                    color: #333;
+                    line-height: 1.6;
+                }
+                .button {
+                    display: inline-block;
+                    background-color: #2980b9;
+                    color: #fff;
+                    padding: 12px 24px;
+                    border-radius: 6px;
+                    text-decoration: none;
+                    font-weight: bold;
+                    margin: 30px 0;
+                }
+                .footer {
+                    background-color: #ecf0f1;
+                    padding: 15px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #7f8c8d;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="email-container">
+                <div class="header">
+                    <h2>Kết quả bài viết IELTS</h2>
+                </div>
+                <div class="content">
+                    <p>Xin chào,</p>
+                    <p>Bài Writing IELTS của bạn đã được chấm điểm.</p>
+                    <p><strong>ID Bài test:</strong> %s</p>
+                    <p><strong>Band Score:</strong> <span style="font-size: 20px; color: #27ae60;">%.1f</span></p>
+                    <p>Vui lòng đăng nhập vào hệ thống để xem chi tiết:</p>
+                    <div style="text-align: center;">
+                        <a href="%s" class="button">Truy cập hệ thống</a>
+                    </div>
+                    <p style="font-size: 13px; color: #999;">Nếu bạn không thực hiện bài kiểm tra này, vui lòng bỏ qua email này.</p>
+                </div>
+                <div class="footer">
+                    © 2025 IELTS Smart System
+                </div>
+</div>
+        </body>
+        </html>
+        """, testId, bandScore, languageUrl);
 
-        mailSender.send(message);
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        // Có thể thêm gửi thông báo trong hệ thống ở đây nếu cần
+            helper.setTo(studentEmail);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true); // true = gửi dưới dạng HTML
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace(); // hoặc dùng logger nếu có
+        }
     }
 }

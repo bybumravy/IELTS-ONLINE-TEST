@@ -6,6 +6,7 @@ export interface TestHistory {
   skill: 'listening' | 'reading' | 'writing' | 'speaking' | 'fulltest';
   submittedAt: string;
   band: number;
+  objectId: string;
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'VITE_API_URL=http://api.languages.io.vn:8080';

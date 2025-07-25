@@ -27,11 +27,11 @@ const HistoryPage: React.FC = () => {
         const data = await getStudentTestHistory(user.username, selectedSkill);
         console.log(data)
 
-        // const sorted = data.sort(
-        //     (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
-        // );
+        const sorted = data.sort(
+            (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+        );
         setTestHistory(data);
-        setFilteredHistory(data);
+        setFilteredHistory(sorted);
       } catch (err) {
         console.error('Lỗi khi tải lịch sử:', err);
         setError('Unable to load history. Please try again later.');

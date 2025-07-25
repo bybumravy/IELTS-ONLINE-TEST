@@ -277,8 +277,43 @@ public class DoTestService {
                     System.out.println("Error evaluating Task 2: " + e.getMessage());
                 }
             }
+
+            // ==== TÍNH TOÁN OVERALL BAND SCORE ====
+            double task1Score = 0.0;
+            double task2Score = 0.0;
+            if (task1 != null && task1.getScore() != null) {
+                try { task1Score = Double.parseDouble(task1.getScore()); } catch (Exception ignored) {}
+            }
+            if (task2 != null && task2.getScore() != null) {
+                try { task2Score = Double.parseDouble(task2.getScore()); } catch (Exception ignored) {}
+            }
+            double overallBand = 0.0;
+            if (task1 == null && task2 == null) {
+                overallBand = 0.0;
+            } else if (task1 == null) {
+                overallBand = roundIeltsScore(task2Score);
+            } else if (task2 == null) {
+                overallBand = roundIeltsScore(task1Score);
+            } else {
+                overallBand = roundIeltsScore((task1Score + task2Score * 2) / 3.0);
+            }
+            savedAnswer.setBand(overallBand);
         }
         return writingAnswerRepository.save(savedAnswer);
+    }
+
+    // Quy tắc làm tròn điểm IELTS
+    private double roundIeltsScore(double score) {
+        double decimal = score - Math.floor(score);
+        double rounded;
+        if (decimal < 0.25) {
+            rounded = Math.floor(score);
+        } else if (decimal < 0.75) {
+            rounded = Math.floor(score) + 0.5;
+        } else {
+            rounded = Math.ceil(score);
+        }
+        return Math.round(rounded * 10.0) / 10.0;
     }
 
     public void updateAnswerUrls(SpeakingAnswer speakingAnswer, Map<String, String> fileUrlMap) {

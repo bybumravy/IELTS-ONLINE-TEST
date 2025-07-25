@@ -116,7 +116,11 @@ export default function ReadingTest() {
             task.sections.forEach((section) => {
                 section.questions.forEach((question) => {
                     const q = question as QuestionWithStudentAnswer;
-                    q.studentAnswer = answers[q.questionId] ?? null;
+                    if (typeof q.questionId === "number") {
+                        q.studentAnswer = answers[q.questionId] ?? null;
+                    } else {
+                        q.studentAnswer = null;
+                    }
                 });
             });
         });
@@ -174,9 +178,12 @@ export default function ReadingTest() {
                 section.questions.forEach((q) => {
                     const question = q as QuestionWithStudentAnswer;
                     question.studentAnswer = question.studentAnswer || null;
-                    const qid = question.questionId!;
-                    question.studentAnswer = answers[qid] || null;
-
+                    const qid = question.questionId;
+                    if (typeof qid === "number") {
+                        question.studentAnswer = answers[qid] || null;
+                    } else {
+                        question.studentAnswer = null;
+                    }
                     delete (question as any).explanation;
                     delete (question as any).options;
                 });
@@ -193,6 +200,9 @@ export default function ReadingTest() {
         try {
             const dataToSendFinal = {
                 ...readingTest,
+                username: user?.username || readingTest.username || "",
+                skill: "reading",
+        
                 tasks: readingTest.tasks.map((task) => ({
                     ...task,
                     sections: task.sections.map((section) => ({
@@ -246,7 +256,10 @@ export default function ReadingTest() {
 
     const getSectionQuestionRange = (task: Task | null, sectionIndex: number) => {
         if (!task) return { start: 0, end: 0 };
-        const questionIds = task.sections[sectionIndex].questions.map((q) => (q as QuestionWithStudentAnswer).questionId);
+        const questionIds = task.sections[sectionIndex].questions
+            .map((q) => (q as QuestionWithStudentAnswer).questionId)
+            .filter((id): id is number => typeof id === "number");
+        if (questionIds.length === 0) return { start: 0, end: 0 };
         return { start: Math.min(...questionIds), end: Math.max(...questionIds) };
     };
 
