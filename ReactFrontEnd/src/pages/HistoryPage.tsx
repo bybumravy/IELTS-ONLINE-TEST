@@ -9,7 +9,7 @@ import HistoryStats from '../components/history/HistoryStats';
 const HistoryPage: React.FC = () => {
   const [testHistory, setTestHistory] = useState<TestHistory[]>([]);
   const [filteredHistory, setFilteredHistory] = useState<TestHistory[]>([]);
-  const [selectedSkill, setSelectedSkill] = useState('all');
+  const [selectedSkill, setSelectedSkill] = useState('fulltest');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -23,13 +23,15 @@ const HistoryPage: React.FC = () => {
           setError('You are not logged in.');
           return;
         }
+        console.log(selectedSkill)
+        const data = await getStudentTestHistory(user.username, selectedSkill);
+        console.log(data)
 
-        const data = await getStudentTestHistory(user.username);
-        const sorted = data.sort(
-            (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
-        );
-        setTestHistory(sorted);
-        setFilteredHistory(sorted);
+        // const sorted = data.sort(
+        //     (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+        // );
+        setTestHistory(data);
+        setFilteredHistory(data);
       } catch (err) {
         console.error('Lỗi khi tải lịch sử:', err);
         setError('Unable to load history. Please try again later.');
@@ -39,11 +41,11 @@ const HistoryPage: React.FC = () => {
     };
 
     fetchHistory();
-  }, [user]);
+  }, [user,selectedSkill]);
 
   useEffect(() => {
     // Only show FullTest attempts when 'all' is selected
-    const filtered = selectedSkill === 'all'
+    const filtered = selectedSkill === 'fulltest'
         ? testHistory.filter(item => item.skill === 'fulltest')
         : testHistory.filter(item => item.skill === selectedSkill);
 

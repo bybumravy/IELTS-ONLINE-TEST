@@ -52,6 +52,13 @@ public class TestAnswerService {
         testAnswerRepository.save(testAnswer);
     }
 
+    public void updateScore(String testAnswerId, double score) {
+        TestAnswer testAnswer = testAnswerRepository.findById(testAnswerId)
+            .orElseThrow(() -> new RuntimeException("TestAnswer not found"));
+        testAnswer.setScore(score);
+        testAnswerRepository.save(testAnswer);
+    }
+
     public java.util.List<TestAnswer> getAllByUsername(String username) {
         return testAnswerRepository.findAllByUsername(username);
     }

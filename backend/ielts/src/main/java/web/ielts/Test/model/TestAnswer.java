@@ -16,6 +16,7 @@ public class TestAnswer {
     private String speakingAnswerId;
     private LocalDateTime createdAt;
     private LocalDateTime submittedAt;
+    private double score;
 
     public TestAnswer() {}
 
@@ -43,4 +44,6 @@ public class TestAnswer {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getSubmittedAt() { return submittedAt; }
     public void setSubmittedAt(LocalDateTime submittedAt) { this.submittedAt = submittedAt; }
+    public double getScore() { return score; }
+    public void setScore(double score) { this.score = score; }
 } 

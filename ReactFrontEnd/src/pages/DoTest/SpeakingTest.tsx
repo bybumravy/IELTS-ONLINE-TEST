@@ -361,7 +361,7 @@ const SpeakingTest = () => {
             // BẮT BUỘC PART3 PHẢI TRẢ LỜI ÍT NHẤT 3 CÂU HỎI
             if (currentPart === "part3") {
                 const answered = countAnsweredPart3();
-                if (answered < 3) {
+                if (answered < 1) {
                     setMinRecordingWarningMsg(
                         `Bạn cần trả lời (ghi âm) ít nhất 3 câu hỏi ở PART3 trước khi nộp bài. Hiện tại bạn mới trả lời ${answered} câu.`
                     );
@@ -450,7 +450,7 @@ const SpeakingTest = () => {
         }
         // BẮT BUỘC PART3 PHẢI TRẢ LỜI ÍT NHẤT 3 CÂU HỎI
         const answeredPart3 = countAnsweredPart3();
-        if (answeredPart3 < 3) {
+        if (answeredPart3 < 1) {
             setMinRecordingWarningMsg(
                 `You need to answer (record) at least 3 questions in PART 3 before submitting. You have currently answered ${answeredPart3} question(s).`
             );

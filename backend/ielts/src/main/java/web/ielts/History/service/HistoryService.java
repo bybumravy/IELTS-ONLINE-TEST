@@ -115,7 +115,7 @@ public class HistoryService {
             // Giả sử có thể lấy band từ các answerId (nếu null thì bỏ qua)
             // Bạn có thể tối ưu lại đoạn này nếu có service lấy band theo answerId
             // Ở đây chỉ demo, cần bổ sung lấy band thực tế
-            history.setBand(0); // TODO: Tính band thực tế
+            history.setBand(answer.getScore());
             history.setSubmittedAt(answer.getSubmittedAt());
             return history;
         }).collect(java.util.stream.Collectors.toList());

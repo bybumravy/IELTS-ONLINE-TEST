@@ -13,7 +13,7 @@ interface HistoryFilterProps {
 }
 
 const skills = [
-  { key: 'all', label: 'All Tests', icon: <AllIcon fontSize="large" />, color: 'bg-green-100', border: 'border-green-400' },
+  { key: 'fulltest', label: 'FullTest', icon: <AllIcon fontSize="large" />, color: 'bg-green-100', border: 'border-green-400' },
   { key: 'listening', label: 'Listening', icon: <ListeningIcon fontSize="large" />, color: 'bg-green-100', border: 'border-green-400' },
   { key: 'reading', label: 'Reading', icon: <ReadingIcon fontSize="large" />, color: 'bg-green-100', border: 'border-green-400' },
   { key: 'writing', label: 'Writing', icon: <WritingIcon fontSize="large" />, color: 'bg-green-100', border: 'border-green-400' },

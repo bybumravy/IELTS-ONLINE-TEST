@@ -96,6 +96,9 @@ export default function FullTestResult() {
     return Math.round(average * 2) / 2
   }
 
+  // Use backend-provided overallBand if available
+  const overallBand = results.overallBand !== undefined ? results.overallBand : calculateOverallBand();
+
 
   if (loading)
     return (
@@ -152,7 +155,7 @@ export default function FullTestResult() {
                 Comprehensive analysis of your IELTS test performance across all four skills
               </p>
               {/* Overall Score Card - Đã di chuyển vào đây */}
-              {calculateOverallBand() !== null && (
+              {overallBand !== null && (
                   <Card className="mx-auto bg-gradient-to-r from-green-200 to-green-100 text-gray-600 border-0 shadow-2xl">
                     <CardContent className="p-8 text-center">
                       <div className="flex items-center justify-center gap-4 mb-4">
@@ -161,7 +164,7 @@ export default function FullTestResult() {
                           <h2 className="text-2xl font-bold">Overall Band Score</h2>
                         </div>
                       </div>
-                      <div className="text-7xl font-extrabold mb-2 leading-none">{calculateOverallBand()} / 9.0</div>
+                      <div className="text-7xl font-extrabold mb-2 leading-none">{overallBand} / 9.0</div>
                     </CardContent>
                   </Card>
               )}

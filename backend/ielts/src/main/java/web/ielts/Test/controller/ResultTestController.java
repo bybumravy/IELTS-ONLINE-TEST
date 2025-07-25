@@ -81,18 +81,32 @@ public class ResultTestController {
         // Lấy từng answer nếu có
         Map<String, Object> result = new java.util.HashMap<>();
         result.put("testAnswerId", testAnswer.getId());
+        double totalBand = 0;
+        int count = 0;
         if (testAnswer.getListeningAnswerId() != null) {
-            result.put("listening", resultService.findListeningById(testAnswer.getListeningAnswerId()).orElse(null));
+            ListeningAnswer listening = resultService.findListeningById(testAnswer.getListeningAnswerId()).orElse(null);
+            result.put("listening", listening);
+            if (listening != null) { totalBand += listening.getBand(); count++; }
         }
         if (testAnswer.getReadingAnswerId() != null) {
-            result.put("reading", resultService.findReadingById(testAnswer.getReadingAnswerId()).orElse(null));
+            ReadingAnswer reading = resultService.findReadingById(testAnswer.getReadingAnswerId()).orElse(null);
+            result.put("reading", reading);
+            if (reading != null) { totalBand += reading.getBand(); count++; }
         }
         if (testAnswer.getWritingAnswerId() != null) {
-            result.put("writing", writingAnswerRepository.findById(testAnswer.getWritingAnswerId()).orElse(null));
+            WritingAnswer writing = writingAnswerRepository.findById(testAnswer.getWritingAnswerId()).orElse(null);
+            result.put("writing", writing);
+            if (writing != null) { totalBand += writing.getBand(); count++; }
         }
         if (testAnswer.getSpeakingAnswerId() != null) {
-            result.put("speaking", resultService.findSpeakingById(testAnswer.getSpeakingAnswerId()).orElse(null));
+            SpeakingAnswer speaking = resultService.findSpeakingById(testAnswer.getSpeakingAnswerId()).orElse(null);
+            result.put("speaking", speaking);
+            if (speaking != null) { totalBand += speaking.getBand(); count++; }
         }
+        double avgBand = count > 0 ? Math.round((totalBand / count) * 2) / 2.0 : 0;
+        result.put("overallBand", avgBand);
+        // Lưu score vào TestAnswer
+        testAnswerService.updateScore(testAnswer.getId(), avgBand);
         return ResponseEntity.ok(result);
     }
 
