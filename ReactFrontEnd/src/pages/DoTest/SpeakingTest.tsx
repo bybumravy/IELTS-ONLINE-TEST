@@ -55,7 +55,7 @@ const SpeakingTest = () => {
     const testAnswerId = searchParams.get("testAnswerId");
     const mode = searchParams.get("mode");
     const { user } = useAuth()
-    const TOTAL_TEST_TIME = 600 // 10 phút (600 giây)
+    const TOTAL_TEST_TIME = 1600
     const [speaking, setSpeaking] = useState<Speaking | null>(null)
     const [loading, setLoading] = useState(true)
     const [currentPart, setCurrentPart] = useState<Part>("part1")
