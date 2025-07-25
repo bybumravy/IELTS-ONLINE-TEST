@@ -29,11 +29,11 @@
     @Service
     public class ProsodyService {
 
-        private final String PRAAT_PATH = "C:\\Users\\VinhNQ\\Downloads\\praat6439_win-intel64\\Praat.exe";
+        private final String PRAAT_PATH = "D:\\archive\\praat6438_win-intel64";
         private final String PRAAT_SCRIPT_PATH = "D:\\Code\\SWP_SE1934_Group3-main\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script.praat"; // Script Praat
         private final String STRESS_ANALYSIS_SCRIPT_PATH = "D:\\Code\\SWP_SE1934_Group3-main\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\stressAnalysis.praat";
         private final String INTONATION_SCRIPT_PATH = "D:\\Code\\SWP_SE1934_Group3-main\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\script_intonation.praat";
-        private final String CMU_DICT_PATH = "C:\\Users\\VinhNQ\\Downloads\\archive\\cmudict-0.7b.txt";
+        private final String CMU_DICT_PATH = "D:\\archive\\cmudict-0.7b.txt";
         private final String GET_DURATION = "D:\\Code\\SWP_SE1934_Group3-main\\backend\\ielts\\src\\main\\java\\web\\ielts\\Test\\getDuration.praat";
         @Value("${openai.api.key}")
         private String openaiApiKey;

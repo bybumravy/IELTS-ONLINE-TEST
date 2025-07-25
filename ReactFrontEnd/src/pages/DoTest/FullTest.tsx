@@ -88,7 +88,13 @@ export default function FullTest() {
                     }
                 }}
             >
-                <DialogContent className="max-w-lg w-full mx-auto bg-white rounded-3xl p-8 shadow-2xl border-0">
+                <DialogContent
+                    className="max-w-lg w-full mx-auto bg-white rounded-3xl p-8 shadow-2xl border-0"
+                    aria-describedby="fulltest-dialog-desc"
+                >
+                    <div id="fulltest-dialog-desc" className="sr-only">
+                        This dialog allows you to start the full IELTS test simulation. Confirm to begin the test.
+                    </div>
                     <VisuallyHidden>
                         <DialogTitle>{test?.title ?? "Full Test"}</DialogTitle>
                     </VisuallyHidden>

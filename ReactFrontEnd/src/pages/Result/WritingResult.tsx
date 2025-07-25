@@ -78,8 +78,8 @@ export default function WritingResult() {
         sample: false,
     })
     const { resultId } = useParams  <{ resultId: string }>();
-
     const [feedbackView, setFeedbackView] = useState<"errors" | "improvements">("errors")
+    const navigate = useNavigate()
     useEffect(() => {
         fetch(`${API_URL}/api/result/${resultId}`)
             .then(res => {
@@ -114,7 +114,6 @@ export default function WritingResult() {
             </div>
         )
     }
-    const navigate = useNavigate()
 
     const getScoreColor = (score: string) => {
         const numScore = Number.parseFloat(score)
@@ -347,11 +346,11 @@ export default function WritingResult() {
                     {feedback.errorCorrections.length > 0 ? (
                         renderTextWithCorrectionsBySentenceContext(originalText, feedback.errorCorrections)
                     ) : (
-                        <div className="bg-green-50 p-6 rounded-xl border border-green-200 text-center">
-                            <div className="text-green-600 mb-2">
+                        <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-200 text-center">
+                            <div className="text-emerald-600 mb-2">
                                 <Target className="h-8 w-8 mx-auto mb-2" />
                             </div>
-                            <p className="text-green-700 font-medium">✓ No errors found</p>
+                            <p className="text-emerald-700 font-medium">✓ No errors found</p>
                         </div>
                     )}
                 </div>
@@ -377,9 +376,9 @@ export default function WritingResult() {
                                                         <p className="text-sm font-medium text-slate-600 mb-1">Original:</p>
                                                         <p className="text-sm text-slate-800">{item.originalSentence}</p>
                                                     </div>
-                                                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                                                        <p className="text-sm font-medium text-green-700 mb-1">Improved:</p>
-                                                        <p className="text-sm text-green-800">{item.improvedSentence}</p>
+                                                    <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                                                        <p className="text-sm font-medium text-emerald-700 mb-1">Improved:</p>
+                                                        <p className="text-sm text-emerald-800">{item.improvedSentence}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-wrap gap-1">
@@ -396,11 +395,11 @@ export default function WritingResult() {
                             </div>
                         </>
                     ) : (
-                        <div className="bg-green-50 p-6 rounded-xl border border-green-200 text-center">
-                            <div className="text-green-600 mb-2">
+                        <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-200 text-center">
+                            <div className="text-emerald-600 mb-2">
                                 <Zap className="h-8 w-8 mx-auto mb-2" />
                             </div>
-                            <p className="text-green-700 font-medium">No improvement suggestions</p>
+                            <p className="text-emerald-700 font-medium">No improvement suggestions</p>
                         </div>
                     )}
                 </div>
@@ -593,7 +592,7 @@ export default function WritingResult() {
                 <Button
                     onClick={() => navigate(-1)}
                     variant="outline"
-                    className="mb-4 border-green-600 text-green-600 hover:bg-green-50 bg-transparent"
+                    className="mb-4 border-emerald-600 text-emerald-600 hover:bg-emerald-50 bg-transparent"
                 >
                     ← Back to Full Test
                 </Button>
@@ -612,7 +611,7 @@ export default function WritingResult() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Card className="bg-lime-50 border-white/20">
+                            <Card className="bg-emerald-50 border-white/20">
                                 <CardContent className="p-6 text-center">
                                     <div className="text-sm text-emerald-600 mb-2">Overall Score</div>
                                     <div className="text-5xl font-bold text-emerald-900 mb-2">{overallScore || "_"}</div>
@@ -620,7 +619,7 @@ export default function WritingResult() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-lime-50 border-white/20">
+                            <Card className="bg-emerald-50 border-white/20">
                                 <CardContent className="p-6 text-center">
                                     <div className="text-sm text-emerald-600 mb-2">Task 1</div>
                                     <div className="text-5xl font-bold text-emerald-900 mb-2">{data.task1 && data.task1.score ? data.task1.score : "_"}</div>
@@ -628,7 +627,7 @@ export default function WritingResult() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-lime-50 border-white/20">
+                            <Card className="bg-emerald-50 border-white/20">
                                 <CardContent className="p-6 text-center">
                                     <div className="text-sm text-emerald-600 mb-2">Task 2</div>
                                     <div className="text-5xl font-bold text-emerald-900 mb-2">{data.task2 && data.task2.score ? data.task2.score : "_"}</div>
