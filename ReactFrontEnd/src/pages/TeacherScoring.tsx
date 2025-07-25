@@ -163,7 +163,7 @@ export default function TeacherScoringPage() {
         const input = e.target.value;
         const charCount = input.length;
 
-        if (charCount <= 10) {
+        if (charCount <= 1000) {
             setAllComments(prev => ({
                 ...prev,
                 [selectedTask]: {
@@ -460,7 +460,7 @@ export default function TeacherScoringPage() {
     const handleLimitedCharacterChange = (
         key: keyof typeof newSentenceCorrection,
         value: string,
-        maxLength = 100
+        maxLength = 1000
     ) => {
         if (value.length <= maxLength) {
             setNewSentenceCorrection(prev => ({
@@ -891,7 +891,7 @@ export default function TeacherScoringPage() {
                                                                                     value={newError.correction}
                                                                                     onChange={(e) => {
                                                                                         const input = e.target.value;
-                                                                                        if (input.length <= 100) {
+                                                                                        if (input.length <= 1000) {
                                                                                             setNewError({ ...newError, correction: input });
                                                                                         }
                                                                                     }}
@@ -907,7 +907,7 @@ export default function TeacherScoringPage() {
                                                                                     value={newError.comment}
                                                                                     onChange={(e) => {
                                                                                         const input = e.target.value;
-                                                                                        if (input.length <= 100) {
+                                                                                        if (input.length <= 1000) {
                                                                                             setNewError({ ...newError, comment: input });
                                                                                         }
                                                                                     }}
@@ -1088,7 +1088,7 @@ export default function TeacherScoringPage() {
                                     <Textarea
                                         placeholder="Comments on TaskResponse..."
 
-                                        maxLength={100}
+                                        maxLength={1000}
                                         value={comments.taskResponse}
                                         onChange={(e) => handleLimitedTextareaChange(e, "taskResponse")}
                                         className="min-h-[80px]"

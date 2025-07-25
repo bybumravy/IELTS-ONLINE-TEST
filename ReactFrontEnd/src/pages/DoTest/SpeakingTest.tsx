@@ -578,6 +578,8 @@ const SpeakingTest = () => {
                                     {speaking && speaking.part2 && speaking.part2.cueCards && (
                                         <Card className="max-w-lg mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
                                             <CardContent className="p-4">
+                                                {/* Hiển thị câu hỏi chính */}
+                                                <div className="font-bold text-base text-blue-900 mb-2 text-center">{speaking.part2.question}</div>
                                                 <h4 className="font-semibold mb-3 text-gray-800 text-sm">You should talk about:</h4>
                                                 <ul className="space-y-2 text-left">
                                                     {speaking.part2.cueCards.map((card, index) => (
@@ -729,6 +731,21 @@ const SpeakingTest = () => {
 
                                     <h2 className="text-xl font-bold text-gray-900 leading-tight text-center">{getCurrentQuestion()}</h2>
 
+                                    {/* Hiển thị cue cards khi đang ở part 2 */}
+                                    {currentPart === "part2" && speaking && speaking.part2.cueCards && (
+                                        <div className="w-full max-w-lg mx-auto mt-4 flex flex-col items-center justify-center text-center">
+                                            <div className="font-semibold mb-2 text-gray-800 text-sm">You should talk about:</div>
+                                            <ul className="space-y-2 text-center">
+                                                {speaking.part2.cueCards.map((card, index) => (
+                                                    <li key={index} className="flex items-center gap-2 justify-center">
+                                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></div>
+                                                        <span className="text-gray-700 text-sm">{card}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
                                     {/* Compact Microphone Button */}
                                     <div className="py-2 w-full flex justify-center items-center">
                                         <div className="relative">
@@ -775,7 +792,7 @@ const SpeakingTest = () => {
                                         ) : recordingKey === getCurrentQuestionKey() ? (
                                             <p className="text-red-600 font-semibold animate-pulse">🎙️ Recording... Click to stop</p>
                                         ) : (
-                                            <p className="text-gray-600">⏱️ You have {formatTime(testTimeLeft)} minutes to speak</p>
+                                            <p className="text-gray-600">Click here to speak</p>
                                         )}
 
                                     </div>

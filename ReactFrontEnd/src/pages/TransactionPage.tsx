@@ -130,12 +130,6 @@ export default function TransactionPage() {
                 <option value="day">Day</option>
               </select>
             </div>
-            <div className="flex gap-2 items-center">
-              <span className="font-semibold text-emerald-700">From:</span>
-              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="border border-emerald-200 rounded px-2 py-1" />
-              <span className="font-semibold text-emerald-700">To:</span>
-              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="border border-emerald-200 rounded px-2 py-1" />
-            </div>
           </div>
           <div className="w-full h-72">
             <ResponsiveContainer width="100%" height="100%">

@@ -71,7 +71,7 @@ export default function ReadingResult() {
 
     const isAnswerCorrect = (q: any, type: string) => {
         if (!q.studentAnswer || !q.answer) return false
-        const isSpecialType = type === "multiple-choice" || type === "dropdown"
+        const isSpecialType = type === "multiple-choice" || type === "dropdown" || type === "map-labeling"
         const extractFirstLetters = (ans: string) => {
             return ans
                 .split(",")
@@ -255,67 +255,99 @@ export default function ReadingResult() {
                         </h3>
 
                         <div className="space-y-4 max-h-96 overflow-y-auto">
-                            {result.tasks?.[currentTaskIdx]?.sections?.flatMap((section: any) =>
-                                section.questions?.map((q: any, idx: number) => {
-                                    const correct = isAnswerCorrect(q, section.type)
-                                    return (
-                                        <div key={idx} className="bg-white border border-gray-200 rounded-2xl p-6">
-                                            <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-                                                <div
-                                                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                                        correct ? "bg-emerald-100" : "bg-red-100"
-                                                    }`}
-                                                >
-                                                    {correct ? (
-                                                        <CheckCircle className="h-5 w-5 text-emerald-600" />
-                                                    ) : (
-                                                        <XCircle className="h-5 w-5 text-red-600" />
-                                                    )}
-                                                </div>
-                                                <span className="font-bold text-lg text-gray-800">Question {idx + 1}</span>
-                                                <span
-                                                    className={`px-3 py-1 rounded-full text-xs font-medium ml-auto
-                                                     ${correct ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}
-                                                >
-                                                      {correct ? "Correct" : "Incorrect"}
-                                                    </span>
-                                            </div>
+                            {(() => {
+                                // Tính tổng số câu hỏi từ các task trước
+                                const questionCounterOffset = result.tasks
+                                    ?.slice(0, currentTaskIdx)
+                                    ?.reduce((total: number, task: any) => {
+                                        const count = task.sections?.reduce(
+                                            (sum: number, sec: any) => sum + (sec.questions?.length || 0),
+                                            0
+                                        )
+                                        return total + count
+                                    }, 0) || 0
 
-                                            <div className="space-y-4 mt-4">
-                                                <div>
-                                                    <h4 className="font-medium text-gray-900 mb-2">Question:</h4>
-                                                    <p className="text-gray-700 bg-gray-50 rounded-xl p-4">{q.question}</p>
-                                                </div>
+                                let questionCounter = questionCounterOffset + 1
 
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div className="bg-gray-50 rounded-xl p-4">
-                                                        <p className="text-sm font-medium text-gray-600 mb-2">Your answer:</p>
-                                                        <p className={`font-medium ${correct ? "text-emerald-600" : "text-red-600"}`}>
-                                                            {q.studentAnswer || <span className="italic text-gray-400">(Not answered)</span>}
-                                                        </p>
-                                                    </div>
-                                                    <div className="bg-emerald-50 rounded-xl p-4">
-                                                        <p className="text-sm font-medium text-gray-600 mb-2">Correct answer:</p>
-                                                        <p className="font-medium text-emerald-600">{q.answer}</p>
-                                                    </div>
-                                                </div>
+                                return result.tasks?.[currentTaskIdx]?.sections?.flatMap((section: any) =>
+                                        section.questions?.map((q: any) => {
+                                            const correct = isAnswerCorrect(q, section.type)
+                                            const currentQuestionNumber = questionCounter++
 
-                                                {q.explanation && (
-                                                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                                                        <p className="text-sm font-medium text-blue-800 mb-2">Explanation:</p>
+                                            return (
+                                                <div key={currentQuestionNumber} className="bg-white border border-gray-200 rounded-2xl p-6">
+                                                    {/* Header */}
+                                                    <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
                                                         <div
-                                                            className="text-sm text-gray-800"
-                                                            dangerouslySetInnerHTML={{ __html: q.explanation }}
-                                                        />
+                                                            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                                                correct ? "bg-emerald-100" : "bg-red-100"
+                                                            }`}
+                                                        >
+                                                            {correct ? (
+                                                                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                                                            ) : (
+                                                                <XCircle className="h-5 w-5 text-red-600" />
+                                                            )}
+                                                        </div>
+                                                        <span className="font-bold text-lg text-gray-800">
+                                    Question {currentQuestionNumber}
+                                </span>
+                                                        <span
+                                                            className={`px-3 py-1 rounded-full text-xs font-medium ml-auto ${
+                                                                correct ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
+                                                            }`}
+                                                        >
+                                    {correct ? "Correct" : "Incorrect"}
+                                </span>
                                                     </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )
-                                }),
-                            )}
+
+                                                    {/* Question Content */}
+                                                    <div className="space-y-4 mt-4">
+                                                        <div>
+                                                            <h4 className="font-medium text-gray-900 mb-2">Question:</h4>
+                                                            <p className="text-gray-700 bg-gray-50 rounded-xl p-4">{q.question}</p>
+                                                        </div>
+
+                                                        {/* Answer and Correct Answer */}
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div className="bg-gray-50 rounded-xl p-4">
+                                                                <p className="text-sm font-medium text-gray-600 mb-2">Your answer:</p>
+                                                                <p
+                                                                    className={`font-medium ${
+                                                                        correct ? "text-emerald-600" : "text-red-600"
+                                                                    }`}
+                                                                >
+                                                                    {q.studentAnswer || (
+                                                                        <span className="italic text-gray-400">(Not answered)</span>
+                                                                    )}
+                                                                </p>
+                                                            </div>
+                                                            <div className="bg-emerald-50 rounded-xl p-4">
+                                                                <p className="text-sm font-medium text-gray-600 mb-2">Correct answer:</p>
+                                                                <p className="font-medium text-emerald-600">{q.answer}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Explanation */}
+                                                        {q.explanation && (
+                                                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                                                <p className="text-sm font-medium text-blue-800 mb-2">Explanation:</p>
+                                                                <div
+                                                                    className="text-sm text-gray-800"
+                                                                    dangerouslySetInnerHTML={{ __html: q.explanation }}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )
+                                        })
+                                )
+                            })()}
                         </div>
                     </div>
+
+
                 </div>
 
                 {/* Action Buttons */}

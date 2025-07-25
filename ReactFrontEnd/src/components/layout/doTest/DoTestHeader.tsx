@@ -10,8 +10,6 @@ interface DoTestHeaderProps {
     isDarkMode: boolean;
     toggleDarkMode: () => void;
     onFullscreenToggle?: () => void;
-    isHighlightMode: boolean;
-    toggleHighlightMode: () => void;
 }
 
 export function DoTestHeader({
@@ -20,8 +18,6 @@ export function DoTestHeader({
                                  isDarkMode,
                                  toggleDarkMode,
                                  onFullscreenToggle,
-                                 isHighlightMode,
-                                 toggleHighlightMode,
                              }: DoTestHeaderProps) {
     const [timeRemaining, setTimeRemaining] = useState(initialTime);
 
@@ -60,7 +56,7 @@ export function DoTestHeader({
                         <BookOpen className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                        IELTS Master
+                        IELTS LANGUAGES
                     </span>
                 </Link>
 
@@ -104,20 +100,6 @@ export function DoTestHeader({
                         ) : (
                             <Moon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                         )}
-                    </Button>
-
-                    {/* Highlight Mode */}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={toggleHighlightMode}
-                        className={`transition-colors ${
-                            isHighlightMode
-                                ? "bg-emerald-600 rounded"
-                                : "hover:bg-emerald-500 "
-                        }`}
-                    >
-                        <span className="ml-1 text-sm">Highlight</span>
                     </Button>
 
                     {/* Submit */}

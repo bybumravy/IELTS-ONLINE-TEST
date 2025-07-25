@@ -115,20 +115,20 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             System.out.println("==== VERIFYING IMAGE ACCESSIBILITY ====");
 
             String requestBody = """
-        {
-          "model": "gpt-4o",
-          "messages": [
-            {
-              "role": "user",
-              "content": [
-                { "type": "text", "text": %s },
-                { "type": "image_url", "image_url": { "url": %s } }
-              ]
-            }
-          ],
-          "temperature": 0.2
-        }
-        """.formatted(
+       {
+         "model": "gpt-4o",
+         "messages": [
+           {
+             "role": "user",
+             "content": [
+               { "type": "text", "text": %s },
+               { "type": "image_url", "image_url": { "url": %s } }
+             ]
+           }
+         ],
+         "temperature": 0.2
+       }
+       """.formatted(
                     objectMapper.writeValueAsString(promptText),
                     objectMapper.writeValueAsString(imageUrl)
             );
@@ -169,18 +169,18 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
         }
     }
 
-//    Call AIP co anh
+    //    Call AIP co anh
     private String callOpenAITask2(String prompt) {
         try {
             String requestBody = """
-            {
-              "model": "gpt-4o",
-              "messages": [
-                { "role": "user", "content": %s }
-              ],
-              "temperature": 0.1
-            }
-            """.formatted(objectMapper.writeValueAsString(prompt));
+           {
+             "model": "gpt-4o",
+             "messages": [
+               { "role": "user", "content": %s }
+             ],
+             "temperature": 0.1
+           }
+           """.formatted(objectMapper.writeValueAsString(prompt));
 
             String response = webClient.post()
                     .uri("/chat/completions")
@@ -244,7 +244,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                     "    • Band 3: Resource limited to simple vocabulary used primarily to convey personal information. Vocabulary inadequate for unfamiliar topics.\n" +
                     "    • Band 2: Very limited resource. Utterances consist of isolated words or memorised utterances. Little communication possible without the support of mime or gesture.\n" +
                     "    • Band 1: No resource bar a few isolated words. No communication possible.\n"
-                                       ;
+            ;
 
     private static final String IELTS_PUBLIC_DESCRIPTORS_GRAMMAR =
             "- IELTS Public Descriptors:\n" +
@@ -319,25 +319,25 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
             "- Coherence: off-topic response\n" +
             "- Coherence: ideas not fully developed\n" +
             "- Coherence: poor paragraph structure or sequencing\n";
-            ;
-            private static final String errorTypeCOHERENCE = "• Coherence-related:\n" +
-                    "- Coherence: unclear progression of ideas\n" +
-                    "- Coherence: lack of logical connectors\n" +
-                    "- Coherence: abrupt transitions\n" +
-                    "- Coherence: off-topic response\n" +
-                    "- Coherence: ideas not fully developed\n" +
-                    "- Coherence: poor paragraph structure or sequencing\n";
+    ;
+    private static final String errorTypeCOHERENCE = "• Coherence-related:\n" +
+            "- Coherence: unclear progression of ideas\n" +
+            "- Coherence: lack of logical connectors\n" +
+            "- Coherence: abrupt transitions\n" +
+            "- Coherence: off-topic response\n" +
+            "- Coherence: ideas not fully developed\n" +
+            "- Coherence: poor paragraph structure or sequencing\n";
 
     public String buildSpeakingPart1Prompt(
             String questions,
             JsonNode transcript,
             FleCohAnswer basicFluent,
-            double FluentScore
+            double fluentScore
 
     ) {
 
-        FluentScore = 1.0 + (FluentScore / 100.0) * 8.0;
-        System.out.println("diem fluecny"+FluentScore);
+        fluentScore = 1.0 + (fluentScore / 100.0) * 8.0;
+        System.out.println("diem fluecny"+fluentScore);
         String speakingPart1 =
                 "You must return response strictly in JSON format.\n" +
                         "Even for simple factual questions (e.g., “What is your name?”), if the response contains fewer than 2 full sentences, you must still limit the score to a **maximum of Band 6.0** in all categories. This ensures minimum development is required.\n+"+
@@ -346,7 +346,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "  Do NOT mark answers down due to missing or incorrect punctuation." +
                         "  Do NOT suggest corrections just to add commas or punctuation"+
                         "For all other issues (Lexical Resource, Grammatical), ONLY include the smallest possible incorrect unit (usually a word or short phrase) in 'originalText'. Do NOT include full sentences for these error types.\""+
-                        "Fluency has already been scored separately with a value of " + FluentScore + ". " +
+                        "Fluency has already been scored separately with a value of " + fluentScore + ". " +
                         "Please evaluate Coherence separately"+
                         "For Fluency and Coherence, feedback must be given only after evaluating the entire response. Fluency must be based on +"+basicFluent +"metrics, while Coherence should be evaluated based on the overall content of the answer."+
                         "Fluency and Coherence score is calculated as the average of the two criteria (Fluency and Coherence), rounded to one decimal place"+
@@ -447,7 +447,9 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
 
 
 
-    public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards,FleCohAnswer basicFluent, double FluenScore){
+    public String buildSpeakingPart2Prompt(String question,JsonNode transcipt,List<String> cueCards,FleCohAnswer basicFluent, double fluentScore){
+        fluentScore = 1.0 + (fluentScore / 100.0) * 8.0;
+        System.out.println("diem fluecny"+fluentScore);
         String speakingPart2 =
                 "You must return response strictly in JSON format.\n" +
                         "You are an official IELTS Speaking examiner. You are evaluating a real IELTS Part 2 speaking response. Extremely strict grading.\n" +
@@ -456,7 +458,9 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "  Do NOT mark answers down due to missing or incorrect punctuation." +
                         "  Do NOT suggest corrections just to add commas or punctuation"+
                         "For all other issues (Lexical Resource, Grammatical), ONLY include the smallest possible incorrect unit (usually a word or short phrase) in 'originalText'. Do NOT include full sentences for these error types.\""+
-//                        "For Fluency and Coherence, feedback must be given only after evaluating the entire response. Fluency must be based on +"+analyzeVoice +"metrics, while Coherence should be evaluated based on the overall content of the answer."+
+                        "Fluency has already been scored separately with a value of " + fluentScore + ". " +
+                        "Please evaluate Coherence separately"+
+                        "For Fluency and Coherence, feedback must be given only after evaluating the entire response. Fluency must be based on +"+basicFluent +"metrics, while Coherence should be evaluated based on the overall content of the answer."+
                         "Fluency and Coherence score is calculated as the average of the two criteria (Fluency and Coherence), rounded to one decimal place"+
                         "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
                         "However, if the answer is short but still directly addresses the question  \n" +
@@ -466,8 +470,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "2. The full transcript of the user's response (content, grammar, vocabulary)\n" +
                         "3. You must evaluate whether the response is relevant to the question and does not go off-topic.\n" +
                         "4. Scores must be assigned separately for each criterion, e.g., Lexical Resource = 5.0, Grammar = 6.0."+
-                        "5. Do not assign a score of 7.5 or higher if the response is relevant but lacks development.\n" +
-                        "If the response is very short (e.g., fewer than 5 sentences), even if it answers the question correctly and fluently, you must treat it as underdeveloped and assign no more than Band 7.0 in any category.\n" +
+                        "5. Do not assign a score of 7.0 or higher if the response is relevant but lacks development.\n" +
                         " For **each bullet point that is ignored or insufficiently developed**, deduct **0.5 Band** from **Fluency & Coherence**.\n" +
                         " 6 You must also check whether the response answers **all bullet points** in the cue card"+cueCards+ "For **each missing or ignored point**, deduct **0.5 Band** from Fluency & Coherence.\n"+
                         "7. If the response **lacks a clear structure** — including **an introduction, body, and conclusion**, deduct **1.0 Band** from the Fluency & Coherence score.1 \n"+
@@ -478,11 +481,11 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         " If any single errorType occurs more than 2 times,\n" +
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
-                      IELTS_PUBLIC_DESCRIPTORSLexicalResource+
+                        IELTS_PUBLIC_DESCRIPTORSLexicalResource+
                         "• Grammatical Range and Accuracy (25%):\n" +
                         "→ Deduct 0.5 point in total for that error type (only once)"+
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:" +
-                      IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
+                        IELTS_PUBLIC_DESCRIPTORS_GRAMMAR+
                         "Fluency and Coherence 25%"+
 //                        "Fluency features based on acoustic analysis: {meanIntensity}, {speechRate}, {pauseCount} in\n" + analyzeVoice.getMeanIntensity()+" "+analyzeVoice.getSpeechRate()+analyzeVoice.getPauseCount()+
                         IELTS_STRICT_FLUENCY_ONLY+
@@ -533,7 +536,6 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "- **Number and nature of pauses**: Were there frequent unnatural pauses or hesitations?\n" +
                         "- **Logical progression of ideas**: Did the candidate present ideas in a logical and connected manner?\n" +
                         "- **Use of cohesive devices**: Were linking words (e.g., however, because, so) used correctly and naturally?\n" +
-                        "- **- **Cue Card Coverage**: Did the response fully address all the bullet points given on the cue card?"+
                         "- **Overall clarity**: Was the response easy to follow and understand?"+
                         "- fluencyCohAnswer (object) with:\n" +
                         "    - score (double)"+
@@ -543,19 +545,22 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "Original Answer:\n" + transcipt;
         return speakingPart2;
     }
-    public String buildSpeakingPart3Prompt(String questions, JsonNode transcipt,FleCohAnswer basicFluent, double FluenScore) {
+    public String buildSpeakingPart3Prompt(String questions, JsonNode transcipt,FleCohAnswer basicFluent, double fluentScore) {
+        fluentScore = 1.0 + (fluentScore / 100.0) * 8.0;
+        System.out.println("diem fluecny"+fluentScore);
         String speakingPart3 =
                 "You must return response strictly in JSON format only — do not include any explanation or extra text.\n\n" +
 
                         "You are an IELTS Speaking examiner evaluating a real IELTS Part 3 response. Grade fairly but generously, based on IELTS Band Descriptors.and evaluation below\n" +
 
-                        "Even for simple factual questions (e.g., “What is your name?”), if the response contains fewer than 4 full sentences, you must still limit the score to a **maximum of Band 6.0** in all categories. This ensures minimum development is required.\n+"+
-
+                        "In IELTS Speaking Part 3, if the candidate gives a response with fewer than **3 full sentences**, the response must be treated as **underdeveloped**. The score for each category should be limited to a **maximum of Band 5.0**, unless there is significant quality in pronunciation or vocabulary that justifies a higher band.\n+"+
                         "Note: Spoken responses do not contain punctuation. You must IGNORE all punctuation marks such as commas, periods, question marks, or missing capital letters. \\n\" +\n" +
                         "  Do NOT mark answers down due to missing or incorrect punctuation." +
                         "  Do NOT suggest corrections just to add commas or punctuation"+
                         "For all other issues (Lexical Resource, Grammatical), ONLY include the smallest possible incorrect unit (usually a word or short phrase) in 'originalText'. Do NOT include full sentences for these error types.\""+
-//                        "For Fluency and Coherence, feedback must be given only after evaluating the entire response. Fluency must be based on +"+analyzeVoice +"metrics, while Coherence should be evaluated based on the overall content of the answer."+
+                        "Fluency has already been scored separately with a value of " + fluentScore + ". " +
+                        "Please evaluate Coherence separately"+
+                        "For Fluency and Coherence, feedback must be given only after evaluating the entire response. Fluency must be based on +"+basicFluent +"metrics, while Coherence should be evaluated based on the overall content of the answer."+
                         "Fluency and Coherence score is calculated as the average of the two criteria (Fluency and Coherence), rounded to one decimal place"+
                         "If the response is completely off-topic, you must give Band 3.0 for fluency and coherence\n" +
                         "\n" +
@@ -603,20 +608,16 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "RESPONSE FORMAT:\n" +
                         "- transcript: string ( transcript of the original answer)\n" +
                         "- question (string)"+
-                       "IMPORTANT RULES:\n" +
+                        "IMPORTANT RULES:\n" +
                         "- Only provide feedback **when there is an actual error** in the evaluated category.\n" +
                         "- When evaluating **Grammar**, only identify and comment on **grammar-related errors**.\n" +
                         "- When evaluating **Lexical Resource**, only identify and comment on **vocabulary-related errors**.\n" +
                         "- Do **not** cross over between categories (e.g., do not mention vocabulary issues when scoring grammar).\n" +
                         "- Always include a score in both grammarAnswer and lexicalAnswer, even if there are no errors.\n" +
                         "- If there are no errors in a category, do not provide errorText, correctText, explanation, or sentenceContext—only the score"+
-                        "\n" +
-                        "For lexical and grammar evaluations:\n" +
-                        "✅ `errorText` must contain **only the incorrect word or phrase** (not the full sentence).(1–5 words maximum)  \n" +
-                        "✅ `correctText` must contain **only the corrected word or phrase**. (1–5 words maximum) \n" +
-                        "❌ Do NOT include full sentence rewrites.  \n" +
-                        "✅ Provide the full sentence in `sentenceContext` so the error can be understood in context.\n" +
-                        "\n" +
+
+
+
                         "You must only select errorType from the following list. Do not invent or rephrase. Do not include any punctuation-related error types."
                         +errorType+
                         "- grammarAnswer (object) with:\n" +
@@ -640,6 +641,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "Your feedback must explicitly mention and evaluate the following:\n" +
                         "\n" +
                         "meanIntensity"+
+                        "- **Mean Intensity**:  Comment on whether the volume was loud, soft, or appropriately consistent throughout?.n"+
                         "- **Speech rate**: Was the candidate’s speech fast, slow, or appropriately paced?\n" +
                         "- **Number and nature of pauses**: Were there frequent unnatural pauses or hesitations?\n" +
                         "- **Logical progression of ideas**: Did the candidate present ideas in a logical and connected manner?\n" +
@@ -658,14 +660,14 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
     private String buildTask1Prompt(String question, String answer) {
         String promptBuilder1 =
                 "You must return response strictly in JSON format.\n" +
-                "You are an IELTS examiner analyzing Writing Task 1 based on visual data. Extremely strict grading " +
-                "1. DATA VERIFICATION:\n" +
-                "   - Cross-check ALL data points/trends between image and student's answer\n" +
-                "   - Flag ANY discrepancies\n" +
-                "   - Verify ALL numerical values/percentages against visual data (tolerance: 0% error)\n" +
+                        "You are an IELTS examiner analyzing Writing Task 1 based on visual data. Extremely strict grading " +
+                        "1. DATA VERIFICATION:\n" +
+                        "   - Cross-check ALL data points/trends between image and student's answer\n" +
+                        "   - Flag ANY discrepancies\n" +
+                        "   - Verify ALL numerical values/percentages against visual data (tolerance: 0% error)\n" +
 
-                "\n" +
-                "2. EVALUATION (Official IELTS Criteria):\n" +
+                        "\n" +
+                        "2. EVALUATION (Official IELTS Criteria):\n" +
                         "• Task Achievement (25%):\n" +
                         "- [MUST HAVE] Each main idea must be clearly extended with explanation and/or example. \n" +
                         "  (If ideas are presented without development, cap maximum Band 6.)\n" +
@@ -720,46 +722,46 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         "     • Band 6: Mix of simple/complex forms. Some errors but rarely reduce communication.\n" +
                         "     • Band 5: Limited range. Frequent grammatical and punctuation errors. Errors can cause difficulty for the reader."+
                         "\n" +
-                "3. SCORING SYSTEM:\n" +
-                "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
-                "   - Deduct 0.5 band per 2 major errors\n" +
-                "   - Automatic caps: No overview → max 5.0 | Data errors → max 6.5"+
+                        "3. SCORING SYSTEM:\n" +
+                        "   9.0 = Expert | 7.5-8.5 = Good | 6.0-7.0 = Competent | 5.5 = Limited | ≤5.0 = Problematic\n" +
+                        "   - Deduct 0.5 band per 2 major errors\n" +
+                        "   - Automatic caps: No overview → max 5.0 | Data errors → max 6.5"+
 
-                "RESPONSE FORMAT:\n" +
-                "- score: decimal (overall band score, e.g. 6.5)\n" +
-                "- feedback: {\n" +
-                "    (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)\n" +
-                "    errorCorrections: [{\n" +
-                "      originalText: string,  // EXACT match required\n" +
-                "      correctedText: string,\n" +
-                "      errorType: string,\n" +
-                "      explanation: string,\n" +
-                "      sentenceContext: string // the full sentence from the answer that contains the originalText; must match exactly as in the answer\n" +
-                "    }],\n" +
-                "    (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)\n" +
-                "    sentenceImprovements: [{\n" +
-                "      originalSentence: string,\n" +
-                "      improvedSentence: string,\n" +
-                "      techniquesUsed: [string],\n" +
-                "      bandBoost: string (6 -> 6.5)\n" +
-                "    }],\n" +
-                "    overallComment: string\n" +
-                "}\n" +
-                "- evaluation: {\n" +
-                "    TaskAchievement: {scoreEva: string, reviewEva: string},\n" +
-                "    CoherenceCohesion: {scoreEva: string, reviewEva: string},\n" +
-                "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
-                "    Grammar: {scoreEva: string, reviewEva: string}\n" +
-                "  }\n" +
-                "sampleAnswer: string (Optional band 9 model)"+
-                "Question:\n" + question + "\n" +
-                "Original Answer:\n" + answer;
+                        "RESPONSE FORMAT:\n" +
+                        "- score: decimal (overall band score, e.g. 6.5)\n" +
+                        "- feedback: {\n" +
+                        "    (In errorCorrections only vocabulary (word choice) mistakes should be corrected in this section, and each correction must be for a single word only.)\n" +
+                        "    errorCorrections: [{\n" +
+                        "      originalText: string,  // EXACT match required\n" +
+                        "      correctedText: string,\n" +
+                        "      errorType: string,\n" +
+                        "      explanation: string,\n" +
+                        "      sentenceContext: string // the full sentence from the answer that contains the originalText; must match exactly as in the answer\n" +
+                        "    }],\n" +
+                        "    (sentenceImprovements section should improve entire sentences by enhancing academic vocabulary, sentence structure, or clarity, aiming to raise the band score.)\n" +
+                        "    sentenceImprovements: [{\n" +
+                        "      originalSentence: string,\n" +
+                        "      improvedSentence: string,\n" +
+                        "      techniquesUsed: [string],\n" +
+                        "      bandBoost: string (6 -> 6.5)\n" +
+                        "    }],\n" +
+                        "    overallComment: string\n" +
+                        "}\n" +
+                        "- evaluation: {\n" +
+                        "    TaskAchievement: {scoreEva: string, reviewEva: string},\n" +
+                        "    CoherenceCohesion: {scoreEva: string, reviewEva: string},\n" +
+                        "    LexicalResource: {scoreEva: string, reviewEva: string},\n" +
+                        "    Grammar: {scoreEva: string, reviewEva: string}\n" +
+                        "  }\n" +
+                        "sampleAnswer: string (Optional band 9 model)"+
+                        "Question:\n" + question + "\n" +
+                        "Original Answer:\n" + answer;
 
         return promptBuilder1;
     }
     private static final String IELTS_PUBLIC_DESCRIPTORSLexicalResourceWrtingTask2 =
             "  - IELTS Public Descriptors:\n" +
-                     "• Band 9: Full flexibility and precise use are widely evident. A wide range of vocabulary is used accurately and appropriately with very natural and sophisticated control of lexical features. Minor errors in spelling and word formation are extremely rare and have minimal impact on communication.\n" +
+                    "• Band 9: Full flexibility and precise use are widely evident. A wide range of vocabulary is used accurately and appropriately with very natural and sophisticated control of lexical features. Minor errors in spelling and word formation are extremely rare and have minimal impact on communication.\n" +
                     "\n" +
                     "• Band 8: A wide resource is fluently and flexibly used to convey precise meanings. There is skilful use of uncommon and/or idiomatic items when appropriate, despite occasional inaccuracies in word choice and collocation. Occasional errors in spelling and/or word formation may occur, but have minimal impact on communication.\n" +
                     "\n" +
@@ -914,7 +916,7 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
                         " Moreover, apply the following criteria to ensure a more accurate and appropriate evaluation:\" +"+
                         IELTS_PUBLIC_DESCRIPTORSLexicalResourceWrtingTask2+
                         "• Grammar (25%):\n" +
-                       " +0.25 point\n" +
+                        " +0.25 point\n" +
                         "The candidate demonstrates a wide range of complex grammatical structures (e.g., conditionals, inversion, cleft sentences, relative clauses…) with high accuracy, and the remaining errors do not affect meaning.\n" +
                         "→ Apply this if the candidate is around Band 6–7 but shows strong evidence of reaching Band 8:\n" +
                         "Several complex or uncommon structures are used\n" +
@@ -1026,3 +1028,4 @@ You are an official IELTS Speaking examiner. You MUST follow all deduction rules
         }
     }
 }
+

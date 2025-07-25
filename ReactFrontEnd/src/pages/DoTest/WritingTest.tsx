@@ -46,9 +46,6 @@ export default function WritingTest() {
     const [showGradingDialog, setShowGradingDialog] = useState(false);
     const navigate = useNavigate();
     const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
-    const [isHighlightMode, setIsHighlightMode] = useState(false);
-    const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
-    const toggleHighlightMode = () => setIsHighlightMode((prev) => !prev);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isGrading, setIsGrading] = useState(false); // Add loading overlay state
 
@@ -233,10 +230,8 @@ export default function WritingTest() {
             <DoTestHeader initialTime={60 * 60}
                           onSubmit={handleSubmitClick}
                           isDarkMode={isDarkMode}
-                          toggleDarkMode={toggleDarkMode}
-                          onFullscreenToggle={handleFullscreen}
-                          isHighlightMode={isHighlightMode}
-                          toggleHighlightMode={toggleHighlightMode} />
+                          toggleDarkMode={() => setIsDarkMode((prev) => !prev)}
+                          onFullscreenToggle={handleFullscreen} />
 
             <Dialog open={showGradingDialog} onOpenChange={setShowGradingDialog}>
                 <DialogContent className="sm:max-w-[425px]">

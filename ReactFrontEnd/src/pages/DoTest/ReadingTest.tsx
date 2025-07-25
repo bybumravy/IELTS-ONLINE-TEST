@@ -58,15 +58,12 @@ export default function ReadingTest() {
     const paragraphRef = useRef<HTMLDivElement>(null);
 
     const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
-    const [isHighlightMode, setIsHighlightMode] = useState(false);
-    const [showColorPicker, setShowColorPicker] = useState(false);
-    const [_selectedText, setSelectedText] = useState<string>("");
-    const [selectedRange, setSelectedRange] = useState<Range | null>(null);
+    
 
     const currentTask = tasks.find((task) => Number(task.taskNumber) === currentPart) || null;
 
     const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
-    const toggleHighlightMode = () => setIsHighlightMode((prev) => !prev);
+
 
     useEffect(() => {
         localStorage.setItem("darkMode", isDarkMode ? "true" : "false");
@@ -127,31 +124,7 @@ export default function ReadingTest() {
 
         setReadingTest(updatedData);
     }, [answers]);
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            const popup = document.getElementById("color-picker-popup");
 
-            if (showColorPicker) {
-                const isClickInPopup = popup && popup.contains(event.target as Node);
-
-                if (!isClickInPopup) {
-                    // Nếu click ở đâu cũng được — kể cả trong paragraph — đều đóng popup
-                    setShowColorPicker(false);
-                    setSelectedRange(null);
-                    setSelectedText("");
-
-                    const selection = window.getSelection();
-                    selection?.removeAllRanges();
-                }
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [showColorPicker]);
     const handleFullscreen = () => {
         if (!containerRef.current) return;
         if (!document.fullscreenElement) {
@@ -263,101 +236,7 @@ export default function ReadingTest() {
         return { start: Math.min(...questionIds), end: Math.max(...questionIds) };
     };
 
-    const handleTextSelection = () => {
-        if (!isHighlightMode) return;
-
-        const selection = window.getSelection();
-        const text = selection?.toString().trim();
-
-        if (text && selection && paragraphRef.current?.contains(selection.anchorNode)) {
-            const range = selection.getRangeAt(0).cloneRange();
-
-            normalizeRange(range);
-
-            const rect = range.getBoundingClientRect();
-
-            setSelectedText(range.toString().trim());
-            setSelectedRange(range);
-
-            setPopupPosition({
-                x: rect.left + window.scrollX,
-                y: rect.top + window.scrollY,
-            });
-            setShowColorPicker(true);
-        } else {
-            setSelectedRange(null);
-            setSelectedText("");
-            setPopupPosition(null);
-            setShowColorPicker(false);
-        }
-    };
-
-    const normalizeRange = (range: Range) => {
-        // Normalize start
-        if (range.startContainer.nodeType === 3) {
-            const text = range.startContainer.textContent || "";
-            while (range.startOffset > 0 && !/\s/.test(text[range.startOffset - 1])) {
-                range.setStart(range.startContainer, range.startOffset - 1);
-            }
-        }
-
-        // Normalize end
-        if (range.endContainer.nodeType === 3) {
-            const text = range.endContainer.textContent || "";
-            while (range.endOffset < text.length && !/\s/.test(text[range.endOffset])) {
-                range.setEnd(range.endContainer, range.endOffset + 1);
-            }
-        }
-    };
-
-    const applyHighlight = (color: string, bold = false) => {
-        if (!selectedRange) {
-            setShowColorPicker(false);
-            return;
-        }
-
-        try {
-            const range = selectedRange.cloneRange();
-
-            // Lấy tất cả text node trong vùng chọn
-            const walker = document.createTreeWalker(
-                range.commonAncestorContainer,
-                NodeFilter.SHOW_TEXT,
-                {
-                    acceptNode: (node) =>
-                        range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
-                }
-            );
-
-            const nodes: Text[] = [];
-            while (walker.nextNode()) {
-                nodes.push(walker.currentNode as Text);
-            }
-
-            nodes.forEach((textNode) => {
-                if (!textNode.parentNode) return;
-
-                const span = document.createElement("span");
-                span.style.backgroundColor = color;
-                if (bold) span.style.fontWeight = "bold";
-                span.style.borderRadius = "3px";
-                span.style.padding = "1px 2px";
-
-                const newNode = textNode.splitText(0); // full clone
-                span.textContent = newNode.textContent!;
-                textNode.parentNode.replaceChild(span, newNode);
-            });
-        } catch (error) {
-            console.error("Highlight error:", error);
-        }
-
-        // Reset state
-        setSelectedRange(null);
-        setSelectedText("");
-        setShowColorPicker(false);
-        window.getSelection()?.removeAllRanges();
-    };
-
+    // Removed handleTextSelection, normalizeRange, and applyHighlight functions
 
 
     return (
@@ -370,8 +249,9 @@ export default function ReadingTest() {
                         isDarkMode={isDarkMode}
                         toggleDarkMode={toggleDarkMode}
                         onFullscreenToggle={handleFullscreen}
-                        isHighlightMode={isHighlightMode}
-                        toggleHighlightMode={toggleHighlightMode}
+                        // Removed highlight mode props
+                        // isHighlightMode={isHighlightMode}
+                        // toggleHighlightMode={toggleHighlightMode}
                     />
                 </div>
 
@@ -380,7 +260,8 @@ export default function ReadingTest() {
                     <div
                         ref={paragraphRef}
                         className="w-1/2 p-6 border-r overflow-y-auto h-[calc(100vh-148px)] bg-gray-50 dark:bg-[#303134]"
-                        onMouseUp={handleTextSelection}
+                        // Removed onMouseUp handler for highlight
+                        // onMouseUp={handleTextSelection}
                     >
                         {currentTask && (
                             <>
@@ -388,48 +269,11 @@ export default function ReadingTest() {
                                     Part {currentTask.taskNumber}: {currentTask.title}
                                 </h1>
                                 <div
-                                    className={`whitespace-pre-line text-gray-800 leading-relaxed dark:text-gray-300 ${
-                                        isHighlightMode ? "cursor-text" : ""
-                                    }`}
+                                    className={`whitespace-pre-line text-gray-800 leading-relaxed dark:text-gray-300`}
                                 >
                                     {currentTask.paragraph}
                                 </div>
-
-                                {showColorPicker && popupPosition && (
-                                    <div
-                                        id="color-picker-popup"
-                                        style={{
-                                            position: "absolute",
-                                            top: popupPosition.y + 10 + "px",
-                                            left: popupPosition.x + 10 + "px",
-                                            zIndex: 9999,
-                                            padding: "6px 8px",
-                                            backgroundColor: isDarkMode ? "#2d2f31" : "#fff",
-                                            border: "1px solid #ccc",
-                                            borderRadius: "8px",
-                                            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-                                            display: "flex",
-                                            gap: "8px",
-                                        }}
-                                    >
-                                        <button
-                                            onClick={() => applyHighlight("yellow")}
-                                            style={{
-                                                width: "20px",
-                                                height: "20px",
-                                                borderRadius: "50%",
-                                                border: "1px solid #aaa",
-                                                backgroundColor: "yellow",
-                                                cursor: "pointer",
-                                                transition: "transform 0.1s ease",
-                                            }}
-                                            onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
-                                            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                                            aria-label="Highlight yellow"
-                                        />
-                                    </div>
-                                )}
-
+                                {/* Removed color picker popup */}
                             </>
                         )}
                     </div>

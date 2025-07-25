@@ -56,16 +56,12 @@ export default function ListeningTest() {
     const mode = searchParams.get("mode");
     const navigate = useNavigate();
     const { user } = useAuth();
-    const [isHighlightMode, setIsHighlightMode] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     // Khởi tạo dark mode từ localStorage
     const [isDarkMode, setIsDarkMode] = useState(() => {
         return localStorage.getItem("darkMode") === "true";
     });
-    const toggleHighlightMode = () => {
-        setIsHighlightMode((prev) => !prev);
-    };
     useEffect(() => {
         localStorage.setItem("darkMode", isDarkMode ? "true" : "false");
     }, [isDarkMode]);
@@ -116,6 +112,20 @@ export default function ListeningTest() {
             audio.removeEventListener("loadedmetadata", loaded);
         };
     }, [listeningTest]);
+
+    // State để biết đang ở fullscreen không
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            const isFull = document.fullscreenElement === containerRef.current;
+            setIsFullscreen(isFull);
+        };
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
+        return () => {
+            document.removeEventListener("fullscreenchange", handleFullscreenChange);
+        };
+    }, []);
 
     const handleFullscreen = () => {
         if (!containerRef.current) return;
@@ -242,7 +252,14 @@ export default function ListeningTest() {
     if (!listeningTest || !currentTask) return null;
 
     return (
-        <div ref={containerRef} className={isDarkMode ? "dark" : ""}>
+        <div
+            ref={containerRef}
+            className={
+                (isDarkMode ? "dark " : "") +
+                (isFullscreen ? " listening-fullscreen " : "")
+            }
+            style={isFullscreen ? { height: "100vh", overflow: "auto" } : {}}
+        >
             <div
                 className="listening-test-container flex flex-col min-h-screen
           bg-white text-gray-900 text-sm
@@ -257,8 +274,6 @@ export default function ListeningTest() {
                         isDarkMode={isDarkMode}
                         toggleDarkMode={toggleDarkMode}
                         onFullscreenToggle={handleFullscreen} // pass fullscreen handler
-                        isHighlightMode={isHighlightMode}
-                        toggleHighlightMode={toggleHighlightMode}
                     />
                     <div className="flex items-center gap-3 px-4 py-3">
                         <Button variant="outline" size="icon" onClick={resetAudio}>

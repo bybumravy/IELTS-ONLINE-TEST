@@ -26,7 +26,7 @@ type Plan = {
 const API_URL = import.meta.env.VITE_API_URL;
 
 function formatPremiumRemainingTime(premiumExpiry: string | null): string {
-    if (!premiumExpiry) return "Premium đã hết hạn";
+    if (!premiumExpiry) return "Your premium has expired.";
 
     const expiryDateUtc = new Date(premiumExpiry);
     const expiryDateVN = new Date(expiryDateUtc.getTime() + 7 * 60 * 60 * 1000);
@@ -34,17 +34,17 @@ function formatPremiumRemainingTime(premiumExpiry: string | null): string {
     const now = new Date();
     const diffMs = expiryDateVN.getTime() - now.getTime();
 
-    if (diffMs <= 0) return "Premium đã hết hạn";
+    if (diffMs <= 0) return "Your premium has expired.";
 
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     const days = Math.floor(diffMinutes / 1440);
     const hours = Math.floor((diffMinutes % 1440) / 60);
     const minutes = diffMinutes % 60;
 
-    let result = "Còn lại ";
-    if (days > 0) result += `${days} ngày `;
-    if (hours > 0) result += `${hours} giờ `;
-    if (days === 0 && hours === 0 && minutes > 0) result += `${minutes} phút`;
+    let result = "Remaining ";
+    if (days > 0) result += `${days} days `;
+    if (hours > 0) result += `${hours} hours `;
+    if (days === 0 && hours === 0 && minutes > 0) result += `${minutes} minutes`;
 
     return result.trim();
 }
@@ -71,11 +71,11 @@ export default function PremiumPage() {
                     price: c.price,
                     originalPrice: c.originalPrice,
                     description: c.description.split("|"),
-                    duration: `${c.duration} tháng`,
+                    duration: `${c.duration} month`,
                 }))
                 setPlans(fetched)
             } catch (error) {
-                console.error("Lỗi tải gói học:", error)
+                console.error("Error to load the course:", error)
             }
         }
         fetchPlans()
@@ -99,7 +99,7 @@ export default function PremiumPage() {
                 }
             })
             .catch((err) => {
-                console.error("Lỗi khi lấy thông tin user:", err);
+                console.error(" Error to take information of user:", err);
                 setPremiumExpiry(null);
             });
     }, []);
@@ -115,7 +115,7 @@ export default function PremiumPage() {
                 },
                 body: JSON.stringify({
                     amount: selectedPlan.price,
-                    orderInfo: `Thanh toán gói ${selectedPlan.name}`,
+                    orderInfo: `Pay for package ${selectedPlan.name}`,
                 }),
             });
 
@@ -135,7 +135,7 @@ export default function PremiumPage() {
                 alert("Did not receive payment URL from server.");
             }
         } catch (error) {
-            console.error("Lỗi tạo thanh toán:", error);
+            console.error("Error to create transaction:", error);
             alert("Failed to create payment.");
         } finally {
             setLoading(false);
@@ -147,9 +147,9 @@ export default function PremiumPage() {
         <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-green-50">
             <header className="container mx-auto px-4 py-8 text-center">
                 <Badge className="mb-4 bg-orange-100 text-orange-800 hover:bg-orange-200">
-                    🚀 Ra mắt AI Chấm Bài IELTS
+                    🚀 Introducing AI IELTS Grading
                 </Badge>
-                {/* Thêm badge hiển thị thời hạn Premium */}
+                {/* Add badge show time of Premium */}
                 {premiumExpiry && (
                     <div className="mb-2">
                         <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
@@ -161,12 +161,12 @@ export default function PremiumPage() {
                     IELTS Premium AI
                 </h1>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-                    Nâng cao band điểm IELTS với công nghệ AI tiên tiến. Chấm bài Speaking & Writing chính xác như giám khảo thật, phản hồi tức thì 24/7.
+                    Boost your IELTS band score with advanced AI technology. Get accurate Speaking & Writing evaluations — just like a real examiner — with instant feedback, available 24/7.
                 </p>
             </header>
 
             <section className="container mx-auto px-4 py-16">
-                <h2 className="text-3xl font-bold text-center mb-12">Chọn Gói Học Phù Hợp</h2>
+                <h2 className="text-3xl font-bold text-center mb-12">Select Your Learning Plan</h2>
                 <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                     {plans.map((plan) => (
                         <Card
@@ -200,11 +200,11 @@ export default function PremiumPage() {
                 <div className="text-center mt-12">
                     <Button
                         size="lg"
-                        className="bg-pink-600 text-white"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
                         onClick={handlePay}
                         disabled={!selectedPlan || loading}
                     >
-                        {loading ? "Đang xử lý..." : "Thanh toán với VNPay"}
+                        {loading ? "Processing..." : "Pay with VNPay"}
                     </Button>
                 </div>
             </section>

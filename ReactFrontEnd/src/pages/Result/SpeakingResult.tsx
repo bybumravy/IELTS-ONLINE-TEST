@@ -189,14 +189,6 @@ export default function SpeakingResult() {
         return <div className="text-red-500 text-center mt-10">Không tìm thấy kết quả Speaking hoặc đã có lỗi xảy ra.</div>
     }
 
-    // const calculateOverallScore = () => {
-    //     if (!data) return 0
-    //     const scores = [data.part1?.averageScore ?? 0, data.part2?.score ?? 0, data.part3?.averageScore ?? 0]
-    //     const validScores = scores.filter((s) => typeof s === "number" && !isNaN(s))
-    //     if (validScores.length === 0) return 0
-    //     const avg = validScores.reduce((a, b) => a + b, 0) / validScores.length
-    //     return Math.round(avg * 10) / 10
-    // }
 
     const playAudio = (audioUrl: string) => {
         // Nếu đang phát audio này, thì pause

@@ -213,6 +213,7 @@ public class DoTestService {
 
         switch (type.toLowerCase()) {
             case "multiple-choice":
+            case "map-labeling":
             case "dropdown":
                 // So sánh ký tự đầu tiên của đáp án
                 return correctAnswer.charAt(0) == studentAnswer.charAt(0);
@@ -543,8 +544,7 @@ public class DoTestService {
 
 
         }
-        double band = part1Score + part2Score + part3Score;
-        double avgBand = Math.round((band / 3.0) * 2) / 2.0;
+        double avgBand = roundIeltsScore((part1Score + part2Score + part3Score) / 3.0);
         speakingAnswer.setBand(avgBand);
     }
     private String extractFileName(String blobUrl) {

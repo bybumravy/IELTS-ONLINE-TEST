@@ -67,35 +67,28 @@ const DashboardPage = () => {
 
     const areaData = top10.map((s, index) => ({ index, band: s.averageBand || 0 }));
 
-    // const barBySkillData = Object.entries(top3BySkill).flatMap(([skill, students]) =>
-    //     students.map((student, index) => ({
-    //         skill,
-    //         name: `${index + 1}. ${student.username}`,
-    //         band: student.band || 0,
-    //     }))
-    // );
 
     return (
         <div className="p-10 bg-emerald-50 min-h-screen text-gray-800">
-            <h1 className="text-4xl font-bold mb-10 text-green-700"> Thống Kê Tổng Quan</h1>
+            <h1 className="text-4xl font-bold mb-10 text-green-700">Dashboard Overview</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
                 {/* Tổng Quan Kết Quả */}
                 <div className="bg-white rounded-xl shadow-lg p-6 border border-green-200">
                     <h2 className="text-xl font-semibold text-green-700 mb-4 flex items-center gap-2">
-                        <UserRound className="text-green-600" /> Tổng Quan Kết Quả
+                        <UserRound className="text-green-600" /> Result Overview
                     </h2>
                     <ul className="space-y-2 text-green-700">
-                        <li> Số lượng bài test: <strong>{overviewData.totalTests}</strong></li>
-                        <li> Band trung bình: <strong>{overviewData.averageBand}</strong></li>
-                        <li> Band cao nhất: <strong>{overviewData.highestBand}</strong></li>
+                        <li> Number of tests: <strong>{overviewData.totalTests}</strong></li>
+                        <li> Average band: <strong>{overviewData.averageBand}</strong></li>
+                        <li> Highest band: <strong>{overviewData.highestBand}</strong></li>
                     </ul>
                 </div>
 
                 {/* Radar Chart */}
                 <div className="bg-white rounded-xl shadow-lg p-6 border border-green-200">
                     <h2 className="text-lg font-semibold text-green-700 mb-4 flex items-center gap-2">
-                        <RadarIcon className="text-green-600" /> Tổng Quan Theo Kỹ Năng
+                        <RadarIcon className="text-green-600" /> Skill Overview
                     </h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <RadarChart data={radarData} outerRadius={90}>
@@ -112,7 +105,7 @@ const DashboardPage = () => {
             {/* Biểu đồ vùng */}
             <div className="bg-white rounded-xl shadow-lg p-6 mb-12 border border-green-200">
                 <h2 className="text-lg font-semibold text-green-700 mb-4 flex items-center gap-2">
-                    <AreaChartIcon className="text-green-600" /> Phân Bố Band Trung Bình
+                    <AreaChartIcon className="text-green-600" /> Average Band Distribution
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={areaData}>
@@ -133,7 +126,7 @@ const DashboardPage = () => {
             {/* Bảng xếp hạng top 10 */}
             <div className="bg-white rounded-xl shadow-lg p-6 mb-12 border border-green-200">
                 <h2 className="text-xl font-semibold text-green-700 mb-4 flex items-center gap-2">
-                    <BarChart2 className="text-green-600" /> Bảng Xếp Hạng Top 10 Trung Bình Band
+                    <BarChart2 className="text-green-600" /> Top 10 Average Band Leaderboard
                 </h2>
                 <table className="w-full text-sm text-left text-gray-700">
                     <thead className="text-xs uppercase bg-green-100 text-green-700">
@@ -166,12 +159,12 @@ const DashboardPage = () => {
 
             {/* Top 3 theo kỹ năng */}
             <h2 className="text-2xl font-bold mb-6 text-green-800 flex items-center gap-2">
-                <ActivitySquare className="text-green-600" /> Top 3 Theo Kỹ Năng
+                <ActivitySquare className="text-green-600" /> Top 3 by Skill
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {['reading', 'listening', 'speaking', 'writing'].map((skill) => (
                     <div key={skill} className="bg-white border rounded-xl shadow p-5 hover:shadow-lg transition">
-                        <h3 className="text-lg font-semibold text-green-700 mb-3 capitalize border-b pb-2">{skill}</h3>
+                        <h3 className="text-lg font-semibold text-green-700 mb-3 capitalize border-b pb-2">{skill.charAt(0).toUpperCase() + skill.slice(1)}</h3>
                         <ul className="space-y-2 text-gray-700">
                             {(top3BySkill[skill] || []).map((student, index) => (
                                 <li key={student.username}>
@@ -192,13 +185,13 @@ const DashboardPage = () => {
             {/* Biểu đồ cột theo kỹ năng */}
             <div className="bg-white rounded-xl shadow-lg p-6 border border-green-200">
                 <h2 className="text-lg font-semibold text-green-700 mb-4 flex items-center gap-2">
-                    <BarChart2 className="text-green-600" /> Biểu Đồ Cột Top 3 Theo Kỹ Năng
+                    <BarChart2 className="text-green-600" /> Top 3 by Skill Bar Chart
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {['reading', 'listening', 'speaking', 'writing'].map((skill) => (
                         <div key={skill} className="bg-green-50 p-4 rounded-xl shadow-sm hover:shadow-md transition">
-                            <h3 className="text-md font-semibold text-green-800 mb-2 capitalize">{skill}</h3>
+                            <h3 className="text-md font-semibold text-green-800 mb-2 capitalize">{skill.charAt(0).toUpperCase() + skill.slice(1)}</h3>
                             <ResponsiveContainer width="100%" height={250}>
                                 <BarChart
                                     data={(top3BySkill[skill] || []).map((s, i) => ({

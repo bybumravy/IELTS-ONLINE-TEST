@@ -98,9 +98,9 @@ export default function App() {
 
                         {/* ========== Public Routes (No login required) ========== */}
                         <Route path="/" element={
-                            <SoftProtectedLayout allowRoles={["student"]}>
-                                <MainLayout><HomePage /></MainLayout>
-                            //</SoftProtectedLayout>
+                            // <SoftProtectedLayout allowRoles={["student"]}>
+                            <MainLayout><HomePage/></MainLayout>
+                            //</SoftProtectedLayout>*/}
                         } />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<RegisterPage />} />
@@ -155,12 +155,12 @@ export default function App() {
                             </ProtectedLayout>
                         } />
                         <Route path="/test/writing/:testId" element={
-                            <ProtectedLayout allowRoles={["student"]}>
+                            <ProtectedLayout allowRoles={["student"]} requirePremium={true}>
                                 <WritingTest />
                             </ProtectedLayout>
                         } />
                         <Route path="/test/speaking/:testId" element={
-                            <ProtectedLayout allowRoles={["student"]}>
+                            <ProtectedLayout allowRoles={["student"]}  requirePremium={true}>
                                 <SpeakingTest />
                             </ProtectedLayout>
                         } />
@@ -170,7 +170,7 @@ export default function App() {
                             </ProtectedLayout>
                         } />
                         <Route path="/test/full/:testId" element={
-                            <ProtectedLayout allowRoles={["student"]}>
+                            <ProtectedLayout allowRoles={["student"]} requirePremium={true}>
                                 <FulllTest />
                             </ProtectedLayout>
                         } />
