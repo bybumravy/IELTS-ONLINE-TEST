@@ -182,6 +182,12 @@ export default function SpeakingResult() {
             .finally(() => setLoading(false));
     }, [resultId]);
 
+    if (loading) {
+        return <div>Đang tải kết quả...</div>
+    }
+    if (!data) {
+        return <div className="text-red-500 text-center mt-10">Không tìm thấy kết quả Speaking hoặc đã có lỗi xảy ra.</div>
+    }
 
     // const calculateOverallScore = () => {
     //     if (!data) return 0
@@ -456,21 +462,21 @@ export default function SpeakingResult() {
                     {/* Question Section */}
                     <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-2">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                <BookOpen className="h-5 w-5 text-green-600" />
+                            <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                                <BookOpen className="h-5 w-5 text-emerald-600" />
                             </div>
                             <div className="flex items-center gap-2">
                                 <h3 className="text-lg font-bold text-gray-800">Question</h3>
                                 <Button
                                     onClick={() => playAudio(currentQuestion.audioAnswer)}
-                                    className="ml-2 bg-green-600 hover:bg-green-700 w-9 h-9 rounded-full shadow"
+                                    className="ml-2 bg-emerald-600 hover:bg-emerald-700 w-9 h-9 rounded-full shadow"
                                     size="icon"
                                 >
                                     {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                                 </Button>
                             </div>
                         </div>
-                        <div className="bg-green-50 border-l-4 border-l-green-500 rounded-r-xl p-4 mb-2">
+                        <div className="bg-emerald-50 border-l-4 border-l-emerald-500 rounded-r-xl p-4 mb-2">
                             <p className="text-gray-800 leading-relaxed font-medium text-base">{currentQuestion.question}</p>
                         </div>
                         {currentQuestion.cueCards && (
@@ -610,7 +616,7 @@ export default function SpeakingResult() {
                             <button
                                 key={idx}
                                 onClick={() => setCurrentQuestionIdx(idx)}
-                                className={`px-4 py-2 rounded-lg border text-sm font-semibold transition-all ${safeIdx === idx ? 'bg-green-600 text-white border-green-600 shadow' : 'bg-white text-green-700 border-green-200 hover:bg-green-50'}`}
+                                className={`px-4 py-2 rounded-lg border text-sm font-semibold transition-all ${safeIdx === idx ? 'bg-emerald-600 text-white border-emerald-600 shadow' : 'bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50'}`}
                             >
                                 Question {idx + 1}
                             </button>
@@ -619,21 +625,21 @@ export default function SpeakingResult() {
                     {/* Question Section + Audio + Transcript */}
                     <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-2">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                <BookOpen className="h-5 w-5 text-green-600" />
+                            <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                                <BookOpen className="h-5 w-5 text-emerald-600" />
                             </div>
                             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                                 Question {currentQuestionIdx + 1}
                                 <Button
                                     onClick={() => playAudio(question.audioAnswer)}
-                                    className="ml-2 bg-green-600 hover:bg-green-700 w-9 h-9 rounded-full shadow"
+                                    className="ml-2 bg-emerald-600 hover:bg-emerald-700 w-9 h-9 rounded-full shadow"
                                     size="icon"
                                 >
                                     {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                                 </Button>
                             </h3>
                         </div>
-                        <div className="bg-green-50 border-l-4 border-l-green-500 rounded-r-xl p-4 mb-2">
+                        <div className="bg-emerald-50 border-l-4 border-l-emerald-500 rounded-r-xl p-4 mb-2">
                             <p className="text-gray-800 leading-relaxed font-medium text-base">{question.question}</p>
                         </div>
                         {/* Your Response ngay dưới câu hỏi */}
@@ -774,20 +780,20 @@ export default function SpeakingResult() {
                 <Button
                     onClick={() => navigate(-1)}
                     variant="outline"
-                    className="mb-4 border-green-600 text-green-600 hover:bg-green-50 bg-transparent"
+                    className="mb-4 border-emerald-600 text-emerald-600 hover:bg-emerald-50 bg-transparent"
                 >
                     ← Back to Full Test
                 </Button>
                 {/* Header Section - Matching the design */}
-                <div className="bg-green-600 rounded-2xl p-4 mb-6 text-white">
+                <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-2xl p-4 mb-6 text-white">
                     <div className="text-center mb-4">
-                        <p className="text-green-100 text-xs font-medium mb-1 uppercase tracking-wide">FINAL SCORE</p>
+                        <p className="text-emerald-100 text-xs font-medium mb-1 uppercase tracking-wide">FINAL SCORE</p>
                         <h1 className="text-2xl font-bold mb-4">AI Examiner Evaluation</h1>
                     </div>
                     <div className="flex justify-center">
-                        <div className="bg-green-50 rounded-2xl p-3 text-center w-32">
-                            <p className="text-green-600 text-xs font-medium mb-1">Overall Score</p>
-                            <div className="text-3xl font-bold text-green-800 mb-1">{overallScore}</div>
+                        <div className="bg-emerald-50 rounded-2xl p-3 text-center w-32">
+                            <p className="text-emerald-600 text-xs font-medium mb-1">Overall Score</p>
+                            <div className="text-3xl font-bold text-emerald-800 mb-1">{overallScore}</div>
                         </div>
                     </div>
                 </div>
@@ -797,58 +803,58 @@ export default function SpeakingResult() {
                     <button
                         onClick={() => setActivePart("part1")}
                         className={`bg-white rounded-2xl p-3 text-left border-2 transition-all text-xs ${
-                            activePart === "part1" ? "border-green-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
+                            activePart === "part1" ? "border-emerald-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
                         }`}
                     >
                         <div className="flex items-center gap-2 mb-1">
-                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                                <FileText className="h-3 w-3 text-green-600" />
+                            <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                                <FileText className="h-3 w-3 text-emerald-600" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-green-600 text-xs">Part 1</h3>
+                                <h3 className="font-bold text-emerald-600 text-xs">Part 1</h3>
                                 <p className="text-gray-600 text-[10px]">Introduction & Interview</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className="text-lg font-bold text-green-600">{data.part1.averageScore}</span>
+                            <span className="text-lg font-bold text-emerald-600">{data.part1.averageScore.toFixed(1)}</span>
                         </div>
                     </button>
                     <button
                         onClick={() => setActivePart("part2")}
                         className={`bg-white rounded-2xl p-3 text-left border-2 transition-all text-xs ${
-                            activePart === "part2" ? "border-green-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
+                            activePart === "part2" ? "border-emerald-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
                         }`}
                     >
                         <div className="flex items-center gap-2 mb-1">
-                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                                <FileText className="h-3 w-3 text-green-600" />
+                            <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                                <FileText className="h-3 w-3 text-emerald-600" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-green-600 text-xs">Part 2</h3>
+                                <h3 className="font-bold text-emerald-600 text-xs">Part 2</h3>
                                 <p className="text-gray-600 text-[10px]">Long Turn</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className="text-lg font-bold text-green-600">{data.part2.score}</span>
+                            <span className="text-lg font-bold text-emerald-600">{data.part2.score.toFixed(1)}</span>
                         </div>
                     </button>
                     <button
                         onClick={() => setActivePart("part3")}
                         className={`bg-white rounded-2xl p-3 text-left border-2 transition-all text-xs ${
-                            activePart === "part3" ? "border-green-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
+                            activePart === "part3" ? "border-emerald-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
                         }`}
                     >
                         <div className="flex items-center gap-2 mb-1">
-                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                                <FileText className="h-3 w-3 text-green-600" />
+                            <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                                <FileText className="h-3 w-3 text-emerald-600" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-green-600 text-xs">Part 3</h3>
+                                <h3 className="font-bold text-emerald-600 text-xs">Part 3</h3>
                                 <p className="text-gray-600 text-[10px]">Two-way Discussion</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className="text-lg font-bold text-green-600">{data.part3.averageScore}</span>
+                            <span className="text-lg font-bold text-emerald-600">{data.part3.averageScore.toFixed(1)}</span>
                         </div>
                     </button>
                 </div>

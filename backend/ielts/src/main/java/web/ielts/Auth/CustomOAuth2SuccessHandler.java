@@ -69,16 +69,16 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler{
 
         switch (roleFromQuery.toUpperCase()) {
             case "STUDENT":
-                redirectUrl = "https://www.languages.io.vn/";
+                redirectUrl = "http://localhost:5173/";
                 break;
             case "ADMIN":
-                redirectUrl = "https://www.languages.io.vn/admin-page";
+                redirectUrl = "http://localhost:5173/admin-page";
                 break;
             case "TEACHER":
-                redirectUrl = "https://www.languages.io.vn/staff-page";
+                redirectUrl = "http://localhost:5173/staff-page";
                 break;
             default:
-                redirectUrl = "https://www.languages.io.vn/staff-page";
+                redirectUrl = "http://localhost:5173/staff-page";
                 break;
         }
 

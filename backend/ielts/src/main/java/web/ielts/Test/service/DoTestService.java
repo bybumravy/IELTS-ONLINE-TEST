@@ -121,20 +121,11 @@ public class DoTestService {
                 }
             }
         }
+
         answer.setTotalQuestions(totalQuestions);
         answer.setTotalCorrect(correctAnswers);
 
-        double percent = totalQuestions == 0 ? 0.0 : (double) correctAnswers / totalQuestions;
-
-        double band;
-        if (percent >= 0.9) band = 9;
-        else if (percent >= 0.85) band = 8;
-        else if (percent >= 0.8) band = 7.5;
-        else if (percent >= 0.7) band = 7;
-        else if (percent >= 0.6) band = 6;
-        else if (percent >= 0.5) band = 5;
-        else band = 4;
-
+        double band = calculateReadingBand(correctAnswers);
         answer.setBand(band);
 
         if (answer.getSubmittedAt() == null) {
@@ -144,6 +135,26 @@ public class DoTestService {
         return readingAnswerRepository.save(answer);
     }
 
+    // Giống band Listening – hoặc bạn tự điều chỉnh theo chuẩn Academic/General
+    private double calculateReadingBand(int correctAnswers) {
+        if (correctAnswers >= 39) return 9.0;
+        if (correctAnswers >= 37) return 8.5;
+        if (correctAnswers >= 35) return 8.0;
+        if (correctAnswers >= 33) return 7.5;
+        if (correctAnswers >= 30) return 7.0;
+        if (correctAnswers >= 27) return 6.5;
+        if (correctAnswers >= 23) return 6.0;
+        if (correctAnswers >= 20) return 5.5;
+        if (correctAnswers >= 16) return 5.0;
+        if (correctAnswers >= 13) return 4.5;
+        if (correctAnswers >= 10) return 4.0;
+        if (correctAnswers >= 7) return 3.5;
+        if (correctAnswers >= 5) return 3.0;
+        if (correctAnswers >= 3) return 2.5;
+        return 1.0;
+    }
+
+
     public ListeningAnswer saveListeningAnswer(ListeningAnswer answer) {
 
         int totalQuestions = 0;
@@ -151,7 +162,7 @@ public class DoTestService {
 
         for (var task : answer.getTasks()) {
             for (var section : task.getSections()) {
-                String type = section.getType(); // lấy type trước
+                String type = section.getType();
                 for (var q : section.getQuestions()) {
                     totalQuestions++;
                     if (isAnswerCorrect(type, q.getAnswer(), q.getStudentAnswer())) {
@@ -160,20 +171,11 @@ public class DoTestService {
                 }
             }
         }
+
         answer.setTotalQuestions(totalQuestions);
         answer.setTotalCorrect(correctAnswers);
 
-        double percent = totalQuestions == 0 ? 0.0 : (double) correctAnswers / totalQuestions;
-
-        double band;
-        if (percent >= 0.9) band = 9;
-        else if (percent >= 0.85) band = 8;
-        else if (percent >= 0.8) band = 7.5;
-        else if (percent >= 0.7) band = 7;
-        else if (percent >= 0.6) band = 6;
-        else if (percent >= 0.5) band = 5;
-        else band = 4;
-
+        double band = calculateListeningBand(correctAnswers);
         answer.setBand(band);
 
         if (answer.getSubmittedAt() == null) {
@@ -182,6 +184,26 @@ public class DoTestService {
 
         return listeningAnswerRepository.save(answer);
     }
+
+    // Band scale theo số câu đúng
+    private double calculateListeningBand(int correctAnswers) {
+        if (correctAnswers >= 39) return 9.0;
+        if (correctAnswers >= 37) return 8.5;
+        if (correctAnswers >= 35) return 8.0;
+        if (correctAnswers >= 33) return 7.5;
+        if (correctAnswers >= 30) return 7.0;
+        if (correctAnswers >= 27) return 6.5;
+        if (correctAnswers >= 23) return 6.0;
+        if (correctAnswers >= 20) return 5.5;
+        if (correctAnswers >= 16) return 5.0;
+        if (correctAnswers >= 13) return 4.5;
+        if (correctAnswers >= 10) return 4.0;
+        if (correctAnswers >= 7) return 3.5;
+        if (correctAnswers >= 5) return 3.0;
+        if (correctAnswers >= 3) return 2.5;
+        return 1.0;
+    }
+
 
     private boolean isAnswerCorrect(String type, String correctAnswer, String studentAnswer) {
         if (correctAnswer == null || studentAnswer == null) return false;

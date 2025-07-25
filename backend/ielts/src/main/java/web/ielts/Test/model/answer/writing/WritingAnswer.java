@@ -103,7 +103,7 @@ public class WritingAnswer {
     }
 
     public double getBand() {
-        return band;
+        return Double.parseDouble(String.format("%.1f", band));
     }
 
     public void setBand(double band) {

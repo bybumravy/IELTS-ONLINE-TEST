@@ -24,6 +24,7 @@ export default function ListeningResult() {
             })
             .then((data) => {
                 setResult(data)
+                data.band = calculateListeningBand(data.totalCorrect)
                 setLoading(false)
             })
             .catch((e) => {
@@ -41,12 +42,22 @@ export default function ListeningResult() {
 
     // Calculate when ensure result is not null
     const stats = result ? calcStats(result) : { totalQuestions: 0, totalCorrect: 0, percentage: 0 }
-
-    const getBandColor = (band: number) => {
-        if (band >= 8.0) return "text-green-700"
-        if (band >= 6.5) return "text-green-600"
-        if (band >= 5.5) return "text-yellow-600"
-        return "text-red-600"
+    const calculateListeningBand = (correctAnswers: number) => {
+        if (correctAnswers >= 39) return 9.0
+        if (correctAnswers >= 37) return 8.5
+        if (correctAnswers >= 35) return 8.0
+        if (correctAnswers >= 33) return 7.5
+        if (correctAnswers >= 30) return 7.0
+        if (correctAnswers >= 27) return 6.5
+        if (correctAnswers >= 23) return 6.0
+        if (correctAnswers >= 20) return 5.5
+        if (correctAnswers >= 16) return 5.0
+        if (correctAnswers >= 13) return 4.5
+        if (correctAnswers >= 10) return 4.0
+        if (correctAnswers >= 7) return 3.5
+        if (correctAnswers >= 5) return 3.0
+        if (correctAnswers >= 3) return 2.5
+        return 1.0
     }
 
     const getBandDescription = (band: number) => {
@@ -113,22 +124,22 @@ export default function ListeningResult() {
                 <Button
                     onClick={() => navigate(-1)}
                     variant="outline"
-                    className="mb-4 border-green-600 text-green-600 hover:bg-green-50 bg-transparent"
+                    className="mb-4 border-emerald-600 text-emerald-600 hover:bg-emerald-50 bg-transparent"
                 >
                     ← Back to Full Test
                 </Button>
 
                 {/* Header Section - Matching SpeakingResult design */}
-                <div className="bg-green-600 rounded-2xl p-4 mb-6 text-white">
+                <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-2xl p-4 mb-6 text-white">
                     <div className="text-center mb-4">
-                        <p className="text-green-100 text-xs font-medium mb-1 uppercase tracking-wide">FINAL SCORE</p>
+                        <p className="text-emerald-100 text-xs font-medium mb-1 uppercase tracking-wide">FINAL SCORE</p>
                         <h1 className="text-2xl font-bold mb-4">IELTS Listening Result</h1>
                     </div>
                     <div className="flex justify-center">
-                        <div className="bg-green-50 rounded-2xl p-3 text-center w-32">
-                            <p className="text-green-600 text-xs font-medium mb-1">Band Score</p>
-                            <div className="text-3xl font-bold text-green-800 mb-1">{result.band}</div>
-                            <p className="text-green-600 text-xs">/9.0</p>
+                        <div className="bg-emerald-50 rounded-2xl p-3 text-center w-32">
+                            <p className="text-emerald-600 text-xs font-medium mb-1">Band Score</p>
+                            <div className="text-3xl font-bold text-emerald-800 mb-1">{result.band.toFixed(1)}</div>
+                            <p className="text-emerald-600 text-xs">/9.0</p>
                         </div>
                     </div>
                 </div>
@@ -137,31 +148,31 @@ export default function ListeningResult() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-6">
                     <div className="bg-white rounded-2xl p-3 text-left border-2 border-gray-200">
                         <div className="flex items-center gap-2 mb-1">
-                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                                <Target className="h-3 w-3 text-green-600" />
+                            <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                                <Target className="h-3 w-3 text-emerald-600" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-green-600 text-xs">Accuracy</h3>
+                                <h3 className="font-bold text-emerald-600 text-xs">Accuracy</h3>
                                 <p className="text-gray-600 text-[10px]">{getBandDescription(result.band)}</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className="text-lg font-bold text-green-600">{stats.percentage}%</span>
+                            <span className="text-lg font-bold text-emerald-600">{stats.percentage}%</span>
                         </div>
                     </div>
 
                     <div className="bg-white rounded-2xl p-3 text-left border-2 border-gray-200">
                         <div className="flex items-center gap-2 mb-1">
-                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                                <CheckCircle className="h-3 w-3 text-green-600" />
+                            <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                                <CheckCircle className="h-3 w-3 text-emerald-600" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-green-600 text-xs">Correct</h3>
+                                <h3 className="font-bold text-emerald-600 text-xs">Correct</h3>
                                 <p className="text-gray-600 text-[10px]">Questions answered correctly</p>
                             </div>
                         </div>
                         <div className="text-right">
-                          <span className="text-lg font-bold text-green-600">
+                          <span className="text-lg font-bold text-emerald-600">
                             {result.totalCorrect}/{result.totalQuestions}
                           </span>
                         </div>
@@ -169,16 +180,16 @@ export default function ListeningResult() {
 
                     <div className="bg-white rounded-2xl p-3 text-left border-2 border-gray-200">
                         <div className="flex items-center gap-2 mb-1">
-                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                                <Clock className="h-3 w-3 text-green-600" />
+                            <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                                <Clock className="h-3 w-3 text-emerald-600" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-green-600 text-xs">Duration</h3>
+                                <h3 className="font-bold text-emerald-600 text-xs">Duration</h3>
                                 <p className="text-gray-600 text-[10px]">Test completion time</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className="text-lg font-bold text-green-600">60 min</span>
+                            <span className="text-lg font-bold text-emerald-600">60 min</span>
                         </div>
                     </div>
                 </div>
@@ -191,8 +202,8 @@ export default function ListeningResult() {
                             onClick={() => setCurrentTaskIdx(idx)}
                             className={`px-4 py-2 rounded-lg border text-sm font-semibold transition-all ${
                                 currentTaskIdx === idx
-                                    ? "bg-green-600 text-white border-green-600 shadow"
-                                    : "bg-white text-green-700 border-green-200 hover:bg-green-50"}`}>
+                                    ? "bg-emerald-600 text-white border-emerald-600 shadow"
+                                    : "bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50"}`}>
                             Part {task.taskNumber}
                         </button>
                     ))}
@@ -204,7 +215,7 @@ export default function ListeningResult() {
                     {result.tasks && result.tasks[currentTaskIdx] && (
                         <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <Target className="h-5 w-5 text-green-600" />
+                                <Target className="h-5 w-5 text-emerald-600" />
                                 Part {result.tasks[currentTaskIdx].taskNumber} - Performance Overview
                             </h3>
 
@@ -221,13 +232,13 @@ export default function ListeningResult() {
                                                     <h5 className="font-medium text-gray-800">Section {section.sectionNumber}</h5>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="text-xl font-bold text-green-600">
+                                                    <p className="text-xl font-bold text-emerald-600">
                                                         {correct}/{total}
                                                     </p>
                                                     <p className="text-sm text-gray-600">{percent}%</p>
                                                 </div>
                                             </div>
-                                            <Progress value={percent} className="[&>div]:bg-green-600" />
+                                            <Progress value={percent} className="[&>div]:bg-emerald-600" />
                                         </div>
                                     )
                                 })}
@@ -238,7 +249,7 @@ export default function ListeningResult() {
                     {/* Detailed Questions */}
                     <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                         <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                            <BookOpen className="h-5 w-5 text-green-600" />
+                            <BookOpen className="h-5 w-5 text-emerald-600" />
                             Part {result.tasks?.[currentTaskIdx]?.taskNumber} - Question Details
                         </h3>
 
@@ -251,11 +262,11 @@ export default function ListeningResult() {
                                                 <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
                                                     <div
                                                         className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                                            correct ? "bg-green-100" : "bg-red-100"
+                                                            correct ? "bg-emerald-100" : "bg-red-100"
                                                         }`}
                                                     >
                                                         {correct ? (
-                                                            <CheckCircle className="h-5 w-5 text-green-600" />
+                                                            <CheckCircle className="h-5 w-5 text-emerald-600" />
                                                         ) : (
                                                             <XCircle className="h-5 w-5 text-red-600" />
                                                         )}
@@ -263,7 +274,7 @@ export default function ListeningResult() {
                                                     <span className="font-bold text-lg text-gray-800">Question {idx + 1}</span>
                                                     <span
                                                         className={`px-3 py-1 rounded-full text-xs font-medium ml-auto
-                                                     ${correct ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                                                     ${correct ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}
                                                                                 >
                                                       {correct ? "Correct" : "Incorrect"}
                                                     </span>
@@ -278,13 +289,13 @@ export default function ListeningResult() {
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <div className="bg-gray-50 rounded-xl p-4">
                                                             <p className="text-sm font-medium text-gray-600 mb-2">Your answer:</p>
-                                                            <p className={`font-medium ${correct ? "text-green-600" : "text-red-600"}`}>
+                                                            <p className={`font-medium ${correct ? "text-emerald-600" : "text-red-600"}`}>
                                                                 {q.studentAnswer || <span className="italic text-gray-400">(Not answered)</span>}
                                                             </p>
                                                         </div>
-                                                        <div className="bg-green-50 rounded-xl p-4">
+                                                        <div className="bg-emerald-50 rounded-xl p-4">
                                                             <p className="text-sm font-medium text-gray-600 mb-2">Correct answer:</p>
-                                                            <p className="font-medium text-green-600">{q.answer}</p>
+                                                            <p className="font-medium text-emerald-600">{q.answer}</p>
                                                         </div>
                                                     </div>
 
@@ -308,11 +319,11 @@ export default function ListeningResult() {
 
                 {/* Action Buttons */}
                 <div className="flex justify-center gap-4">
-                    <Button className="bg-green-600 hover:bg-green-700" onClick={() => navigate(`/tips/Listening`)}>
+                    <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => navigate(`/tips/Listening`)}>
                         <BookOpen className="h-4 w-4 mr-2" />
                         Do practice
                     </Button>
-                    <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50" onClick={() => navigate("/test-history")}>
+                    <Button variant="outline" className="border-emerald-600 text-emerald-600 hover:bg-emerald-50" onClick={() => navigate("/test-history")}>
                         <Clock className="h-4 w-4 mr-2" />
                         View test history
                     </Button>

@@ -22,10 +22,10 @@ public class ReadingAnswer {
     private double band;
     private LocalDateTime submittedAt;
 
-    public ReadingAnswer(String id, String testId, List<TaskReadingAnswer> taskReadingAnswers, String username, String skill, int totalQuestions, int totalCorrect, double band, LocalDateTime submittedAt) {
+    public ReadingAnswer(String id, String testId, List<TaskReadingAnswer> taskReadingAnswer, String username, String skill, int totalQuestions, int totalCorrect, double band, LocalDateTime submittedAt) {
         this.id = id;
         this.testId = testId;
-        this.taskReadingAnswer = taskReadingAnswers;
+        this.taskReadingAnswer = taskReadingAnswer;
         this.username = username;
         this.skill = skill;
         this.totalQuestions = totalQuestions;
@@ -108,7 +108,7 @@ public class ReadingAnswer {
     }
 
     public double getBand() {
-        return band;
+        return Double.parseDouble(String.format("%.1f", band));
     }
 
     public void setBand(double band) {

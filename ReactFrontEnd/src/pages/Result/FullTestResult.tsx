@@ -103,7 +103,7 @@ export default function FullTestResult() {
   if (loading)
     return (
         <MainLayout>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+          <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-indigo-50 flex items-center justify-center">
             <div className="text-center space-y-6">
               <div className="relative">
                 <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
@@ -144,20 +144,10 @@ export default function FullTestResult() {
           <div className="container mx-auto px-4 py-8 max-w-6xl">
             {/* Header Section */}
             <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg mb-6 border border-white/20">
-                <Trophy className="w-5 h-5 text-yellow-500" />
-                <span className="font-medium text-gray-700">IELTS Test Results</span>
-              </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-green-800 to-purple-800 bg-clip-text text-transparent mb-4">
-                Your Performance Report
-              </h1>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
-                Comprehensive analysis of your IELTS test performance across all four skills
-              </p>
-              {/* Overall Score Card - Đã di chuyển vào đây */}
+              {/* Overall Score Card*/}
               {overallBand !== null && (
-                  <Card className="mx-auto bg-gradient-to-r from-green-200 to-green-100 text-gray-600 border-0 shadow-2xl">
-                    <CardContent className="p-8 text-center">
+                  <Card className="mx-auto bg-gradient-to-r from-blue-200 to-blue-100 text-gray-600 border-0 shadow-2xl">
+                    <CardContent className="p-2 text-center">
                       <div className="flex items-center justify-center gap-4 mb-4">
                         <Trophy className="w-8 h-8 text-yellow-300" />
                         <div>
@@ -183,7 +173,7 @@ export default function FullTestResult() {
                       className={`group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl border-0 ${getBandBgGradient(skill.key)}`}
                       onClick={() => setActiveTab(skill.key as any)}
                   >
-                    <CardContent className="p-6 text-center relative overflow-hidden">
+                    <CardContent className="p-2 text-center relative overflow-hidden">
                       <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
                       <div className="relative z-10">
                         <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-white/30 transition-colors">
@@ -198,7 +188,7 @@ export default function FullTestResult() {
                                 {skill.result.band || skill.result.score || "-"}
                               </div>
                               <Badge className="bg-white/80 text-gray-700 border-0 shadow-sm">
-                                Band {skill.result.band || skill.result.score || "-"}/9
+                                Band {skill.result.band || skill.result.score || "-"}/9.0
                               </Badge>
                             </>
                         ) : (
@@ -229,41 +219,10 @@ export default function FullTestResult() {
                 </div>
 
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
-                  <TabsList className="grid grid-cols-4 gap-2 mb-8 bg-gray-100/80 rounded-xl p-2 h-auto">
-                    <TabsTrigger
-                        value="listening"
-                        className="flex items-center gap-2 py-3 px-4 data-[state=active]:bg-white data-[state=active]:shadow-md"
-                    >
-                      <Volume2 className="w-4 h-4" />
-                      <span className="hidden sm:inline font-medium">Listening</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="reading"
-                        className="flex items-center gap-2 py-3 px-4 data-[state=active]:bg-white data-[state=active]:shadow-md"
-                    >
-                      <BookOpen className="w-4 h-4" />
-                      <span className="hidden sm:inline font-medium">Reading</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="writing"
-                        className="flex items-center gap-2 py-3 px-4 data-[state=active]:bg-white data-[state=active]:shadow-md"
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span className="hidden sm:inline font-medium">Writing</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="speaking"
-                        className="flex items-center gap-2 py-3 px-4 data-[state=active]:bg-white data-[state=active]:shadow-md"
-                    >
-                      <Mic className="w-4 h-4" />
-                      <span className="hidden sm:inline font-medium">Speaking</span>
-                    </TabsTrigger>
-                  </TabsList>
-
                   <TabsContent value="listening">
                     {results.listening ? (
                         <Card className={`border-0 shadow-lg ${getBandBgGradient("listening")}`}>
-                          <CardContent className="p-8">
+                          <CardContent className="p-4">
                             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                               <div className="space-y-4">
                                 <div className="flex items-center gap-3">
@@ -276,17 +235,17 @@ export default function FullTestResult() {
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                  <div className="text-5xl font-bold text-emerald-700">{results.listening.band}/9</div>
+                                  <div className="text-5xl font-bold text-emerald-700">{results.listening.band}/9.0</div>
                                   <div className="space-y-2">
                                     <Badge className="bg-emerald-600 text-white border-0 shadow-lg">
                                       Band {results.listening.band}
                                     </Badge>
                                     <div className="text-sm text-emerald-700 font-medium">
-                                      {results.listening.band >= 7
+                                      {results.listening.band >= 7.0
                                           ? "Excellent Performance"
-                                          : results.listening.band >= 6
+                                          : results.listening.band >= 6.0
                                               ? "Good Performance"
-                                              : results.listening.band >= 5
+                                              : results.listening.band >= 5.0
                                                   ? "Fair Performance"
                                                   : "Needs Improvement"}
                                     </div>
@@ -315,7 +274,7 @@ export default function FullTestResult() {
                   <TabsContent value="reading">
                     {results.reading ? (
                         <Card className={`border-0 shadow-lg ${getBandBgGradient("reading")}`}>
-                          <CardContent className="p-8">
+                          <CardContent className="p-4">
                             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                               <div className="space-y-4">
                                 <div className="flex items-center gap-3">
@@ -328,17 +287,17 @@ export default function FullTestResult() {
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                  <div className="text-5xl font-bold text-blue-700">{results.reading.band}/9</div>
+                                  <div className="text-5xl font-bold text-blue-700">{results.reading.band}/9.0</div>
                                   <div className="space-y-2">
                                     <Badge className="bg-blue-600 text-white border-0 shadow-lg">
                                       Band {results.reading.band}
                                     </Badge>
                                     <div className="text-sm text-blue-700 font-medium">
-                                      {results.reading.band >= 7
+                                      {results.reading.band >= 7.0
                                           ? "Excellent Performance"
-                                          : results.reading.band >= 6
+                                          : results.reading.band >= 6.0
                                               ? "Good Performance"
-                                              : results.reading.band >= 5
+                                              : results.reading.band >= 5.0
                                                   ? "Fair Performance"
                                                   : "Needs Improvement"}
                                     </div>
@@ -367,7 +326,7 @@ export default function FullTestResult() {
                   <TabsContent value="writing">
                     {results.writing ? (
                         <Card className={`border-0 shadow-lg ${getBandBgGradient("writing")}`}>
-                          <CardContent className="p-8">
+                          <CardContent className="p-4">
                             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                               <div className="space-y-4">
                                 <div className="flex items-center gap-3">
@@ -381,18 +340,18 @@ export default function FullTestResult() {
                                 </div>
                                 <div className="flex items-center gap-4">
                                   <div className="text-5xl font-bold text-orange-700">
-                                    {results.writing.band || results.writing.score || "-"}/9
+                                    {results.writing.band || results.writing.score || "-"}/9.0
                                   </div>
                                   <div className="space-y-2">
                                     <Badge className="bg-orange-600 text-white border-0 shadow-lg">
                                       Band {results.writing.band || results.writing.score || "-"}
                                     </Badge>
                                     <div className="text-sm text-orange-700 font-medium">
-                                      {(results.writing.band || results.writing.score) >= 7
+                                      {(results.writing.band || results.writing.score) >= 7.0
                                           ? "Excellent Performance"
-                                          : (results.writing.band || results.writing.score) >= 6
+                                          : (results.writing.band || results.writing.score) >= 6.0
                                               ? "Good Performance"
-                                              : (results.writing.band || results.writing.score) >= 5
+                                              : (results.writing.band || results.writing.score) >= 5.0
                                                   ? "Fair Performance"
                                                   : "Needs Improvement"}
                                     </div>
@@ -421,7 +380,7 @@ export default function FullTestResult() {
                   <TabsContent value="speaking">
                     {results.speaking ? (
                         <Card className={`border-0 shadow-lg ${getBandBgGradient("speaking")}`}>
-                          <CardContent className="p-8">
+                          <CardContent className="p-4">
                             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                               <div className="space-y-4">
                                 <div className="flex items-center gap-3">
@@ -434,17 +393,17 @@ export default function FullTestResult() {
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                  <div className="text-5xl font-bold text-purple-700">{results.speaking.band}/9</div>
+                                  <div className="text-5xl font-bold text-purple-700">{results.speaking.band}/9.0</div>
                                   <div className="space-y-2">
                                     <Badge className="bg-purple-600 text-white border-0 shadow-lg">
                                       Band {results.speaking.band}
                                     </Badge>
                                     <div className="text-sm text-purple-700 font-medium">
-                                      {results.speaking.band >= 7
+                                      {results.speaking.band >= 7.0
                                           ? "Excellent Performance"
-                                          : results.speaking.band >= 6
+                                          : results.speaking.band >= 6.0
                                               ? "Good Performance"
-                                              : results.speaking.band >= 5
+                                              : results.speaking.band >= 5.0
                                                   ? "Fair Performance"
                                                   : "Needs Improvement"}
                                     </div>
