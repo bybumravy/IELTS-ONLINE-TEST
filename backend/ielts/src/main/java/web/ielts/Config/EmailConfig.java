@@ -16,7 +16,7 @@ public class EmailConfig {
 
     public void sendVerificationEmail(String toEmail, String token) {
         String subject = "Xác thực Email đăng ký tài khoản";
-        String verificationUrl = "http://localhost:5173/verify-email?token=" + token;
+        String verificationUrl = "https://www.languages.io.vn/verify-email?token=" + token;
         //https://www.languages.io.vn/verify-email?token=
         String htmlContent = "<!DOCTYPE html>" +
                 "<html>" +
@@ -123,8 +123,8 @@ public class EmailConfig {
     }
     public void sendNotificationToStudent(String studentEmail, String testId, double bandScore) {
         String subject = "Kết quả bài Writing IELTS của bạn đã có";
-//        String languageUrl = "https://www.languages.io.vn/";
-        String languageUrl = "http://localhost:5173/";
+        String languageUrl = "https://www.languages.io.vn/";
+//        String languageUrl = "http://localhost:5173/";
 
         // HTML content định dạng đẹp, chuyên nghiệp
         String htmlContent = String.format("""

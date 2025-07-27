@@ -477,7 +477,7 @@ public class DoTestService {
         if (part3 != null && part3.getQuestions() != null) {
 
             double totalScore = 0;
-            int validQuestionCount = part3.getQuestions().size();
+            int validQuestionCount = 0;
 
             for (SpeakingAnswerQuestion qa : part3.getQuestions()) {
                 String blob = qa.getAudioAnswer();
@@ -558,6 +558,9 @@ public class DoTestService {
 
 
     public SpeakingAnswer saveSubmission(SpeakingAnswer submission) {
+        if (submission.getSubmittedAt() == null) {
+            submission.setSubmittedAt(java.time.LocalDateTime.now());
+        }
         return speakingAnswerRepository.save(submission);
     }
     public String uploadFile(MultipartFile file, String key) throws IOException {
