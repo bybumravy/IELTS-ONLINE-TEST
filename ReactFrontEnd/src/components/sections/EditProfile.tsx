@@ -10,7 +10,6 @@ import { customFetch } from "@/components/sections/customFetch"
 import { useAuth } from "@/contexts/AuthContext"
 import { User, Calendar, Phone, Users, Save, Loader2 } from "lucide-react"
 import * as React from "react";
-import { validateWordLimit } from "@/lib/utils";
 
 interface EditProfileProps {
     isOpen: boolean

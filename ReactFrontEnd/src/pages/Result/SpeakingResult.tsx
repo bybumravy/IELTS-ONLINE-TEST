@@ -7,10 +7,8 @@ import {
     Target,
     Zap,
     Mic,
-    Volume2,
     Play,
     Pause,
-    Clock,
     AlertCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"

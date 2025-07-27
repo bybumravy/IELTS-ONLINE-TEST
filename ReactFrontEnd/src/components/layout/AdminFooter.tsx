@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Shield, Mail, Phone, Clock } from "lucide-react";
 
 export function AdminFooter() {

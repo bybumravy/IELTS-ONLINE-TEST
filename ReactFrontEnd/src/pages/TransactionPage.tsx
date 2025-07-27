@@ -32,8 +32,8 @@ export default function TransactionPage() {
   const [_loading, setLoading] = useState(true);
   const [chartType, setChartType] = useState<ChartType>("bar");
   const [statType, setStatType] = useState<StatType>("month");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
+  const [startDate, _setStartDate] = useState<string>("");
+  const [endDate, _setEndDate] = useState<string>("");
   const API_URL = import.meta.env.VITE_API_URL;
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;

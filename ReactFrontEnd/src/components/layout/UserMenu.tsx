@@ -1,4 +1,4 @@
-import {User, LogOut, Settings, Crown, History, AlertCircle} from "lucide-react";
+import {User, LogOut, Crown, History, AlertCircle} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {

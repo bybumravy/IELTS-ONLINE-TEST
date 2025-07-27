@@ -1,17 +1,16 @@
 import {useEffect, useState} from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import {Search, Filter, Eye, MessageSquare, Download, CalendarIcon, FileText, BarChart3, PieChart} from "lucide-react"
+import {Search, Filter, Eye, CalendarIcon, FileText, BarChart3, PieChart} from "lucide-react"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 
@@ -45,8 +44,6 @@ export default function ReviewReport() {
     const [typeFilter, setTypeFilter] = useState("all")
     const [dateFrom, setDateFrom] = useState<Date | null>(null)
     const [dateTo, setDateTo] = useState<Date | null>(null)
-    const [newNote, setNewNote] = useState("")
-    const [responseMessage, setResponseMessage] = useState("")
     const [dailyStats, setDailyStats] = useState<{ date: string; count: number }[]>([])
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 3
@@ -77,11 +74,11 @@ export default function ReviewReport() {
 
 
     // Add note to report
-    const addNoteToReport = (reportId: string, note: string) => {
-        setReports((prev) =>
-            prev.map((report) => (report.id === reportId ? { ...report, notes: [...report.notes, note] } : report)),
-        )
-    }
+    // const addNoteToReport = (reportId: string, note: string) => {
+    //     setReports((prev) =>
+    //         prev.map((report) => (report.id === reportId ? { ...report, notes: [...report.notes, note] } : report)),
+    //     )
+    // }
 
     const groupReportsByDate = (reports: Report[]) => {
         const result: Record<string, number> = {}

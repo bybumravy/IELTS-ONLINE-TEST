@@ -50,7 +50,6 @@ export default function ReadingTest() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [answers, setAnswers] = useState<Record<number, string>>({});
     const [_isSubmitted, setIsSubmitted] = useState(false);
-    const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
     const { user } = useAuth();
     const navigate = useNavigate();
 

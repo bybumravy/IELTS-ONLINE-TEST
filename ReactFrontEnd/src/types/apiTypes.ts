@@ -58,7 +58,7 @@ export interface User {
 
 export interface AuthContextType {
     user: User | null;
-    login: (email: string, password: string, role : string) => Promise<LoginResponse>;
+    login: (email: string, password: string, role? : string) => Promise<LoginResponse>;
     logout: () => void;
     register: (email: string, password: string, role?: string) => Promise<void>;
     isLoading: boolean;

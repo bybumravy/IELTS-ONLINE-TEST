@@ -9,16 +9,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 import { customFetch } from "@/components/sections/customFetch"
 import { DoTestSpeakingHeader } from "@/components/layout/doTest/DoTestSpeakingHeader"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "@/components/ui/dialog";
-import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
-import {Label} from "@/components/ui/label";
+
 
 const API_URL = import.meta.env.VITE_API_URL || 'VITE_API_URL=http://api.languages.io.vn:8080';
 
@@ -66,7 +57,7 @@ const SpeakingTest = () => {
     const [thinkingTime, setThinkingTime] = useState(0)
     const [partStarted, setPartStarted] = useState(false)
     const [showConfirmNextPart, setShowConfirmNextPart] = useState(false)
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [_isSubmitting, setIsSubmitting] = useState(false)
     const [timeUp, setTimeUp] = useState(false)
     const navigate = useNavigate()
     const timerRef = useRef<number | null>(null)
@@ -511,11 +502,11 @@ const SpeakingTest = () => {
         setIsSubmitting(false)
     }
 
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60)
-        const secs = seconds % 60
-        return `${mins}:${secs.toString().padStart(2, "0")}`
-    }
+    // const formatTime = (seconds: number) => {
+    //     const mins = Math.floor(seconds / 60)
+    //     const secs = seconds % 60
+    //     return `${mins}:${secs.toString().padStart(2, "0")}`
+    // }
 
     const getCurrentQuestionKey = () => {
         if (currentPart === "part1") return `part1-${currentQuestionIndex + 1}`

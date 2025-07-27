@@ -181,7 +181,7 @@ export default function WritingTest() {
 
     const handleEssayTask1Change = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
-      const { valid, wordCount, error } = validateWordLimit(value, MAX_WORDS_TASK1);
+      const { valid, error } = validateWordLimit(value, MAX_WORDS_TASK1);
 
       if (!valid) {
         // Có thể alert, hoặc setError để hiển thị ra UI
@@ -196,7 +196,7 @@ export default function WritingTest() {
 
     const handleEssayTask2Change = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
-      const { valid, wordCount, error } = validateWordLimit(value, MAX_WORDS_TASK2);
+      const { valid, error } = validateWordLimit(value, MAX_WORDS_TASK2);
 
       if (!valid) {
         alert(error);

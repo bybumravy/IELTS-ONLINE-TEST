@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {Search, Download, Eye, MoreHorizontal, FileText, Users, TrendingUp, Calendar, RefreshCw} from "lucide-react"
+import {Search, FileText, TrendingUp, Calendar, RefreshCw} from "lucide-react"
 import {Label} from "@/components/ui/label.tsx";
 import {format} from "date-fns";
 
@@ -66,11 +66,11 @@ export default function TeacherScoredList() {
         handleFilter()
     }, [searchTerm])
 
-    const handleViewDetails = (id: string) => {
-        // Route or show modal
-        console.log("Viewing details for:", id)
-        // router.push(`/teacher/writing/${id}`)
-    }
+    // const handleViewDetails = (id: string) => {
+    //     // Route or show modal
+    //     console.log("Viewing details for:", id)
+    //     // router.push(`/teacher/writing/${id}`)
+    // }
     const paginatedData = filteredData.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage

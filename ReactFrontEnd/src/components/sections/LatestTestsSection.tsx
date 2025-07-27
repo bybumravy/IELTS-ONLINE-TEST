@@ -27,7 +27,7 @@ export function LatestTestsSection({ tests }: LatestTestsSectionProps) {
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {tests.map((test) => (
-                        <Card key={test.id} className="hover:shadow-lg transition-shadow">
+                        <Card key={test.testId} className="hover:shadow-lg transition-shadow">
                             <CardHeader>
                                 {/* Hiển thị tags dưới dạng Badge */}
                                 <div className="flex flex-wrap gap-2 mb-2">
